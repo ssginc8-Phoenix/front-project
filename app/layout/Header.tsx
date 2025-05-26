@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 import Profile from '~/common/Profile';
+import { Outlet } from 'react-router';
 
-const Header = styled.header`
+const HeaderBar = styled.header`
   padding: 1rem 2rem;
   border-bottom: 1px solid #eee;
   display: flex;
@@ -24,16 +25,16 @@ const Notification = styled.div`
   font-size: 1.5rem;
 `;
 
-const HeaderLayout = () => {
+const Header = () => {
   return (
-    <Header>
+    <HeaderBar>
       <Logo src="/logo.png" alt="logo" />
       <RightGroup>
         <Profile />
         <Notification>🔔</Notification>
       </RightGroup>
-    </Header>
+    </HeaderBar>
   );
 };
 
-export default HeaderLayout;
+export default Header;

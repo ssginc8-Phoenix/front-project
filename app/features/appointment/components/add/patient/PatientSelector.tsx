@@ -1,8 +1,9 @@
 import styled from 'styled-components';
-import PatientCard from '~/features/appointment/components/PatientCard';
+import PatientCard from '~/features/appointment/components/add/patient/PatientCard';
 import { useState } from 'react';
 import LoadingIndicator from '~/components/common/LoadingIndicator';
 import ErrorMessage from '~/components/common/ErrorMessage';
+import { usePatientList } from '~/features/patient/hooks/usePatientList';
 
 const Wrapper = styled.div`
   display: flex;
@@ -35,21 +36,21 @@ const CardList = styled.div`
 // 환자 더미 데이터
 const dummyPatients = [
   {
-    id: 1,
+    patientId: 1,
     name: '홍길동',
-    birth: '1980-01-01',
+    residentRegistrationNumber: '800101-1******',
     imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
   },
   {
-    id: 2,
+    patientId: 2,
     name: '김철수',
-    birth: '1990-05-23',
+    residentRegistrationNumber: '900523-1******',
     imageUrl: 'https://randomuser.me/api/portraits/men/2.jpg',
   },
   {
-    id: 3,
+    patientId: 3,
     name: '이영희',
-    birth: '1985-12-12',
+    residentRegistrationNumber: '851212-2******',
     imageUrl: 'https://randomuser.me/api/portraits/women/3.jpg',
   },
 ];
@@ -57,7 +58,6 @@ const dummyPatients = [
 const PatientSelector = () => {
   // const { data: patients, loading, error } = usePatientList();
 
-  /* 디자인을 위해 더미데이터 넣은것들 나중에 여기 삭제하고 위에 주석 풀면됨 */
   const patients = dummyPatients;
   const loading = false;
   const error = null;
@@ -77,12 +77,12 @@ const PatientSelector = () => {
       <CardList>
         {patients.map((patient) => (
           <PatientCard
-            key={patient.id}
+            key={patient.patientId}
             name={patient.name}
-            birth={patient.birth}
+            residentRegistrationNumber={patient.residentRegistrationNumber}
             imageUrl={patient.imageUrl}
-            isSelected={selectedId === patient.id}
-            onSelect={() => setSelectedId(patient.id)}
+            isSelected={selectedId === patient.patientId}
+            onSelect={() => setSelectedId(patient.patientId)}
           />
         ))}
       </CardList>

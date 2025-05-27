@@ -2,14 +2,15 @@ import styled from 'styled-components';
 
 interface PatientCardProps {
   name: string;
-  birth: string;
+  residentRegistrationNumber: string;
   imageUrl: string;
   isSelected: boolean;
   onSelect: () => void;
 }
 
-// 🔸 styled-components 정의
 const CardWrapper = styled.div<{ isSelected: boolean }>`
+  flex: calc(50% - 0.5rem);
+  min-width: 280px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -17,6 +18,11 @@ const CardWrapper = styled.div<{ isSelected: boolean }>`
   border-radius: 1rem;
   border: 1px solid ${({ isSelected }) => (isSelected ? '#3b82f6' : '#e5e7eb')};
   background-color: ${({ isSelected }) => (isSelected ? '#dbeafe' : '#ffffff')};
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    flex: 1 1 100%; /* 모바일에선 1개씩 */
+  }
 `;
 
 const InfoWrapper = styled.div`
@@ -35,7 +41,7 @@ const NameText = styled.div`
   font-weight: 600;
 `;
 
-const BirthText = styled.div`
+const RrsText = styled.div`
   font-size: 0.875rem;
   color: #6b7280;
 `;
@@ -54,7 +60,13 @@ const SelectButton = styled.button<{ isSelected: boolean }>`
   }
 `;
 
-const PatientCard = ({ name, birth, imageUrl, isSelected, onSelect }: PatientCardProps) => {
+const PatientCard = ({
+  name,
+  residentRegistrationNumber,
+  imageUrl,
+  isSelected,
+  onSelect,
+}: PatientCardProps) => {
   return (
     <CardWrapper isSelected={isSelected}>
       <InfoWrapper>
@@ -66,7 +78,7 @@ const PatientCard = ({ name, birth, imageUrl, isSelected, onSelect }: PatientCar
 
         <div>
           <NameText>{name}</NameText>
-          <BirthText>{birth}</BirthText>
+          <RrsText>{residentRegistrationNumber}</RrsText>
         </div>
       </InfoWrapper>
       <SelectButton isSelected={isSelected} disabled={isSelected} onClick={onSelect}>

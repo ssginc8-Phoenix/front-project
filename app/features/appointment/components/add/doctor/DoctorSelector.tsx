@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { useState } from 'react';
 import LoadingIndicator from '~/components/common/LoadingIndicator';
 import ErrorMessage from '~/components/common/ErrorMessage';
-import DoctorCard from '~/features/appointment/components/DoctorCard';
+import DoctorCard from '~/features/appointment/components/add/doctor/DoctorCard';
 import { useDoctorList } from '~/features/doctor/hooks/useDoctorList';
 
 const Wrapper = styled.div`
@@ -27,31 +27,12 @@ const CardList = styled.div`
   gap: 1rem;
 `;
 
-// 의사 더미 데이터
-const dummyDoctors = [
-  {
-    id: 1,
-    name: '홍길동',
-    imageUrl: 'https://randomuser.me/api/portraits/men/4.jpg',
-  },
-  {
-    id: 2,
-    name: '김철수',
-    imageUrl: 'https://randomuser.me/api/portraits/men/5.jpg',
-  },
-];
-
 interface DoctorSelectorProps {
   hospitalId: number;
 }
 
 const DoctorSelector = ({ hospitalId }: DoctorSelectorProps) => {
   const { data: doctors, loading, error } = useDoctorList(hospitalId);
-
-  /* 디자인을 위해 더미데이터 넣은것들 나중에 여기 삭제하고 위에 주석 풀면됨 */
-  // const doctors = dummyDoctors;
-  // const loading = false;
-  // const error = null;
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -67,11 +48,12 @@ const DoctorSelector = ({ hospitalId }: DoctorSelectorProps) => {
       <CardList>
         {doctors.map((doctor) => (
           <DoctorCard
-            key={doctor.id}
-            name={doctor.name}
+            key={doctor.doctorId}
+            username={doctor.username}
+            specialization={doctor.specialization}
             imageUrl={doctor.imageUrl}
-            isSelected={selectedId === doctor.id}
-            onSelect={() => setSelectedId(doctor.id)}
+            isSelected={selectedId === doctor.doctorId}
+            onSelect={() => setSelectedId(doctor.doctorId)}
           />
         ))}
       </CardList>

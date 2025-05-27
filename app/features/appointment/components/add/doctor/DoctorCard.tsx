@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 
 interface DoctorCardProps {
-  name: string;
+  username: string;
+  specialization: string;
   imageUrl: string;
   isSelected: boolean;
   onSelect: () => void;
@@ -34,6 +35,11 @@ const NameText = styled.div`
   font-weight: 600;
 `;
 
+const SpecializationText = styled.div`
+  font-size: 0.875rem;
+  color: #6b7280;
+`;
+
 const SelectButton = styled.button<{ isSelected: boolean }>`
   font-size: 0.875rem;
   padding: 0.25rem 1rem;
@@ -48,18 +54,25 @@ const SelectButton = styled.button<{ isSelected: boolean }>`
   }
 `;
 
-const DoctorCard = ({ name, imageUrl, isSelected, onSelect }: DoctorCardProps) => {
+const DoctorCard = ({
+  username,
+  specialization,
+  imageUrl,
+  isSelected,
+  onSelect,
+}: DoctorCardProps) => {
   return (
     <CardWrapper isSelected={isSelected}>
       <InfoWrapper>
         <Avatar
           src={imageUrl || '/img.png'}
-          alt={name}
+          alt={username}
           onError={(e) => (e.currentTarget.src = '/img.png')}
         />
 
         <div>
-          <NameText>{name}</NameText>
+          <NameText>{username}</NameText>
+          <SpecializationText>{specialization}</SpecializationText>
         </div>
       </InfoWrapper>
       <SelectButton isSelected={isSelected} disabled={isSelected} onClick={onSelect}>

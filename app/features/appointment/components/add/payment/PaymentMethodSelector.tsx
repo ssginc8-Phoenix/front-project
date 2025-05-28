@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import PaymentMethodCard from '~/features/appointment/components/add/payment/PaymentMethodCard';
 import { useState } from 'react';
 import { FaCreditCard, FaStore } from 'react-icons/fa';
+import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 
 const Wrapper = styled.div`
   display: flex;
@@ -45,7 +46,7 @@ const PAYMENT_OPTIONS = [
 ] as const;
 
 const PaymentMethodSelector = () => {
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  const { paymentMethod, setPaymentMethod } = useAppointmentStore();
 
   return (
     <Wrapper>
@@ -61,8 +62,12 @@ const PaymentMethodSelector = () => {
               key={option.method}
               label={option.label}
               icon={option.icon}
-              isSelected={selectedMethod === option.method}
-              onSelect={() => setSelectedMethod(option.method)}
+              isSelected={paymentMethod === option.method}
+              onSelect={() => {
+                if (paymentMethod !== option.method) {
+                  setPaymentMethod(option.method);
+                }
+              }}
             />
           );
         })}

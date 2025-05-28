@@ -1,9 +1,10 @@
 import styled from 'styled-components';
 import PatientCard from '~/features/appointment/components/add/patient/PatientCard';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import LoadingIndicator from '~/components/common/LoadingIndicator';
 import ErrorMessage from '~/components/common/ErrorMessage';
-import { usePatientList } from '~/features/patient/hooks/usePatientList';
+import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
+import { usePatientListByGuardian } from '~/features/guardian/hooks/usePatientListByGuardian';
 
 const Wrapper = styled.div`
   display: flex;
@@ -33,36 +34,15 @@ const CardList = styled.div`
   gap: 1rem;
 `;
 
-// 환자 더미 데이터
-const dummyPatients = [
-  {
-    patientId: 1,
-    name: '홍길동',
-    residentRegistrationNumber: '800101-1******',
-    imageUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
-  },
-  {
-    patientId: 2,
-    name: '김철수',
-    residentRegistrationNumber: '900523-1******',
-    imageUrl: 'https://randomuser.me/api/portraits/men/2.jpg',
-  },
-  {
-    patientId: 3,
-    name: '이영희',
-    residentRegistrationNumber: '851212-2******',
-    imageUrl: 'https://randomuser.me/api/portraits/women/3.jpg',
-  },
-];
-
 const PatientSelector = () => {
-  // const { data: patients, loading, error } = usePatientList();
+  const { data: patients, loading, error } = usePatientListByGuardian();
 
-  const patients = dummyPatients;
-  const loading = false;
-  const error = null;
+  const { patientId, setPatientId } = useAppointmentStore();
 
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  /* 디버깅용 코드 추후 삭제 예정 */
+  useEffect(() => {
+    console.log('현재 선택된 환자 ID: ', patientId);
+  }, [patientId]);
 
   return (
     <Wrapper>
@@ -75,14 +55,14 @@ const PatientSelector = () => {
       {error && <ErrorMessage message={error} />}
 
       <CardList>
-        {patients.map((patient) => (
+        {patients?.map((patient) => (
           <PatientCard
             key={patient.patientId}
             name={patient.name}
             residentRegistrationNumber={patient.residentRegistrationNumber}
             imageUrl={patient.imageUrl}
-            isSelected={selectedId === patient.patientId}
-            onSelect={() => setSelectedId(patient.patientId)}
+            isSelected={patientId === patient.patientId}
+            onSelect={() => setPatientId(patient.patientId)}
           />
         ))}
       </CardList>

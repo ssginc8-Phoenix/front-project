@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { useState } from 'react';
 import SymptomCheckboxList from '~/features/appointment/components/add/symptom/SymptomCheckboxList';
 import Textarea from '~/components/Textarea';
+import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 
 const Wrapper = styled.div`
   display: flex;
@@ -26,8 +26,8 @@ const Description = styled.p`
 `;
 
 const SymptomSelector = () => {
-  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
-  const [extraInput, setExtraInput] = useState('');
+  const { selectedSymptoms, setSelectedSymptoms, extraSymptom, setExtraSymptom } =
+    useAppointmentStore();
 
   const hasExtraInput = selectedSymptoms.includes('직접 입력');
 
@@ -43,8 +43,8 @@ const SymptomSelector = () => {
       {hasExtraInput && (
         <Textarea
           placeholder="직접 입력"
-          value={extraInput}
-          onChange={(e) => setExtraInput(e.target.value)}
+          value={extraSymptom}
+          onChange={(e) => setExtraSymptom(e.target.value)}
         />
       )}
     </Wrapper>

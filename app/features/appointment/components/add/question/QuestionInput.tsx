@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import Textarea from '~/components/Textarea';
-import { useState } from 'react';
+import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 
 const Wrapper = styled.div`
   display: flex;
@@ -19,7 +19,7 @@ const Title = styled.h2`
 `;
 
 const QuestionInput = () => {
-  const [input, setInput] = useState('');
+  const { question, setQuestion } = useAppointmentStore();
 
   return (
     <Wrapper>
@@ -29,8 +29,8 @@ const QuestionInput = () => {
 
       <Textarea
         placeholder="원장님께 질문사항이 있으면 입력해주세요."
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
       />
     </Wrapper>
   );

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const CardWrapper = styled.div<{ isSelected: boolean }>`
-  flex: calc(50% - 0.5rem);
+  flex: 1 1 calc(50% - 0.5rem);
   min-width: 280px;
   display: flex;
   justify-content: space-between;

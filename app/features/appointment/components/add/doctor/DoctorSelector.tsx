@@ -1,9 +1,10 @@
 import styled from 'styled-components';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import LoadingIndicator from '~/components/common/LoadingIndicator';
 import ErrorMessage from '~/components/common/ErrorMessage';
 import DoctorCard from '~/features/appointment/components/add/doctor/DoctorCard';
 import { useDoctorList } from '~/features/doctor/hooks/useDoctorList';
+import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 
 const Wrapper = styled.div`
   display: flex;
@@ -34,7 +35,12 @@ interface DoctorSelectorProps {
 const DoctorSelector = ({ hospitalId }: DoctorSelectorProps) => {
   const { data: doctors, loading, error } = useDoctorList(hospitalId);
 
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const { doctorId, setDoctorId } = useAppointmentStore();
+
+  /* 디버깅용 코드 추후 삭제 예정 */
+  useEffect(() => {
+    console.log('현재 선택된 의사 ID: ', doctorId);
+  }, [doctorId]);
 
   return (
     <Wrapper>
@@ -46,14 +52,16 @@ const DoctorSelector = ({ hospitalId }: DoctorSelectorProps) => {
       {error && <ErrorMessage message={error} />}
 
       <CardList>
-        {doctors.map((doctor) => (
+        {doctors?.map((doctor) => (
           <DoctorCard
             key={doctor.doctorId}
             username={doctor.username}
             specialization={doctor.specialization}
             imageUrl={doctor.imageUrl}
-            isSelected={selectedId === doctor.doctorId}
-            onSelect={() => setSelectedId(doctor.doctorId)}
+            isSelected={doctorId === doctor.doctorId}
+            onSelect={() => {
+              setDoctorId(doctor.doctorId);
+            }}
           />
         ))}
       </CardList>

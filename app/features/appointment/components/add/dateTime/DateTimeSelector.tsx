@@ -1,9 +1,9 @@
-import { useState } from 'react';
 import styled from 'styled-components';
 import { useDoctorSchedule } from '~/features/doctor/hooks/useDoctorSchedule';
 import dayjs from 'dayjs';
 import { useTimeSlots } from '~/features/appointment/hooks/useTimeSlots';
 import Calendar from 'react-calendar';
+import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 
 const Wrapper = styled.div`
   display: flex;
@@ -58,16 +58,15 @@ interface DateTimeSelectorProps {
 }
 
 const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string>('');
+  const { date, setDate, time, setTime } = useAppointmentStore();
 
   const { data: schedules, loading } = useDoctorSchedule(doctorId);
 
-  const selectedDay = selectedDate ? weekdayMap[dayjs(selectedDate).format('dddd')] : null;
+  const selectedDay = date ? weekdayMap[dayjs(date).format('dddd')] : null;
   console.log('selectedDay: ', selectedDay);
 
   const timeSlots = useTimeSlots({
-    schedules,
+    schedules: schedules ?? [],
     dayOfWeek: selectedDay ?? '',
   });
 
@@ -89,27 +88,23 @@ const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
         <SectionTitle>날짜 선택</SectionTitle>
         <Calendar
           onChange={(date) => {
-            setSelectedDate(date as Date);
-            setSelectedTime('');
+            setDate(date as Date);
+            setTime('');
           }}
-          value={selectedDate}
+          value={date}
           minDate={new Date()}
           calendarType="gregory"
-          tileClassName={({ date, view }) => {
-            if (view === 'month') {
-              if (selectedDate && isSameWeek(date, selectedDate)) {
-                return 'highlight-week';
-              }
-              if (dayjs(date).isSame(selectedDate, 'day')) {
-                return 'selected-day';
-              }
+          tileClassName={({ date: d, view }) => {
+            if (view === 'month' && date) {
+              if (dayjs(d).isSame(date, 'day')) return 'selected-day';
+              if (isSameWeek(d, date)) return 'highlight-week';
             }
             return '';
           }}
         />
       </div>
 
-      {selectedDate && (
+      {date && (
         <div>
           <SectionTitle>시간 선택</SectionTitle>
           {loading ? (
@@ -121,10 +116,10 @@ const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
               {timeSlots.map((slot) => (
                 <TimeButton
                   key={slot.start}
-                  selected={selectedTime === slot.start}
-                  onClick={() => setSelectedTime(slot.start)}
+                  selected={time === slot.start}
+                  onClick={() => setTime(slot.start)}
                 >
-                  {slot.start}
+                  {dayjs(slot.start, 'HH:mm').format('A hh:mm')}
                 </TimeButton>
               ))}
             </TimeGrid>
@@ -132,12 +127,12 @@ const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
         </div>
       )}
 
-      {selectedDate && selectedTime && (
+      {date && time && (
         <div>
           <p>
             선택된 예약:{' '}
             <strong>
-              {dayjs(selectedDate).format('YYYY.MM.DD')} {selectedTime}
+              {dayjs(date).format('YYYY.MM.DD')} {time}
             </strong>
           </p>
         </div>

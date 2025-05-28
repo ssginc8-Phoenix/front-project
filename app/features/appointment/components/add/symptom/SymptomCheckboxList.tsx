@@ -18,6 +18,7 @@ const Label = styled.label.withConfig({
   cursor: pointer;
   font-weight: 500;
   transition: 0.2s;
+  user-select: none;
 
   &:hover {
     background-color: ${({ isChecked }) => (isChecked ? '#bfdbfe' : '#f3f4f6')};

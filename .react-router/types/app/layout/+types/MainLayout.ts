@@ -11,7 +11,7 @@ export type Info = {
   parents: [Parent0],
   id: "layout/MainLayout"
   file: "layout/MainLayout.tsx"
-  path: "/appointment"
+  path: "/appointments"
   params: {} & { [key: string]: string | undefined }
   module: Module
   loaderData: T.CreateLoaderData<Module>

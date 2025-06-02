@@ -4,7 +4,7 @@ import SymptomSelector from '~/features/appointment/components/add/symptom/Sympt
 import DateTimeSelector from '~/features/appointment/components/add/dateTime/DateTimeSelector';
 import QuestionInput from '~/features/appointment/components/add/question/QuestionInput';
 import PaymentMethodSelector from '~/features/appointment/components/add/payment/PaymentMethodSelector';
-import Button from '~/components/Button';
+import Button from '~/components/styled/Button';
 import styled from 'styled-components';
 import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 import { createAppointment } from '~/features/appointment/api/appointmentAPI';
@@ -94,10 +94,10 @@ const AppointmentPage = ({ hospitalId }: AppointmentPageProps) => {
       <PaymentMethodSelector />
 
       <ButtonGroup>
-        <Button variant={'secondary'} onClick={() => console.log('취소')}>
+        <Button $variant={'secondary'} onClick={() => console.log('취소')}>
           취소
         </Button>
-        <Button variant="primary" onClick={handlePreSubmit}>
+        <Button $variant="primary" onClick={handlePreSubmit}>
           접수
         </Button>
       </ButtonGroup>

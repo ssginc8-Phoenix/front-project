@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import SymptomCheckboxList from '~/features/appointment/components/add/symptom/SymptomCheckboxList';
-import Textarea from '~/components/Textarea';
+import Textarea from '~/components/styled/Textarea';
 import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 
 const Wrapper = styled.div`

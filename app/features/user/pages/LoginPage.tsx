@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import Header from '~/layout/Header';
-import LoginForm from '~/features/user/components/LoginForm';
-import SocialLoginButtons from '~/features/user/components/SocialLoginButtons';
-import Divider from '~/features/user/components/Divider';
+import LoginForm from '~/features/user/components/login/LoginForm';
+import SocialLoginButtons from '~/features/user/components/login/SocialLoginButtons';
+import Divider from '~/features/user/components/login/Divider';
 
 const Wrapper = styled.div`
   display: flex;

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import type { ProfileProps } from '~/types/user';
 
 const UserProfile = styled.div`
   display: flex;
@@ -21,16 +21,7 @@ const UserNameToggle = styled.div`
   gap: 0.25rem;
 `;
 
-const Profile = () => {
-  const [imageUrl, setImageUrl] = useState('/img.png');
-  const [name, setName] = useState('홍길동');
-
-  useEffect(() => {
-    /* 토큰 꺼내서 userId 꺼낸 다음, 이미지 불러오는 기능 추가
-     * setImageUrl(`이미지 부르는 방법`);
-     */
-  }, []);
-
+const Profile = ({ name, imageUrl }: ProfileProps) => {
   return (
     <UserProfile>
       <UserImage src={imageUrl} alt="userImg" />

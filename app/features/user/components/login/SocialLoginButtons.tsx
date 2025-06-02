@@ -23,12 +23,16 @@ const IconButton = styled.button`
 `;
 
 const SocialLoginButtons = () => {
+  const handleLogin = (provider: 'kakao' | 'naver') => {
+    window.location.href = `http://localhost:8080/api/v1/auth/login/${provider}`;
+  };
+
   return (
     <ButtonGroup>
-      <IconButton>
+      <IconButton onClick={() => handleLogin('kakao')}>
         <img src="/kakaoLogin.png" alt="카카오 로그인" />
       </IconButton>
-      <IconButton>
+      <IconButton onClick={() => handleLogin('naver')}>
         <img src="/naverLogin.png" alt="네이버 로그인" />
       </IconButton>
     </ButtonGroup>

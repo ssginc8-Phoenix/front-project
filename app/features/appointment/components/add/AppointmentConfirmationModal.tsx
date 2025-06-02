@@ -1,4 +1,5 @@
-import Button from '~/components/Button';
+import Button from '~/components/styled/Button';
+import styled from 'styled-components';
 
 const Overlay = styled.div`
   position: fixed;
@@ -120,10 +121,10 @@ const AppointmentConfirmationModal = ({
         </InfoBox>
 
         <ButtonGroup>
-          <Button variant="secondary" onClick={onClose}>
+          <Button $variant="secondary" onClick={onClose}>
             취소
           </Button>
-          <Button variant="primary" onClick={onConfirm}>
+          <Button $variant="primary" onClick={onConfirm}>
             예약접수 신청
           </Button>
         </ButtonGroup>

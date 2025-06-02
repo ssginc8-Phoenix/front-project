@@ -8,8 +8,8 @@ const StyledButton = styled.button<ButtonProps>`
   cursor: pointer;
   transition: background-color 0.2s;
 
-  ${({ variant = 'primary' }) =>
-    variant === 'primary'
+  ${({ $variant = 'primary' }) =>
+    $variant === 'primary'
       ? css`
           background-color: #3b82f6;
           color: white;
@@ -41,16 +41,16 @@ const StyledButton = styled.button<ButtonProps>`
 `;
 
 interface ButtonProps {
-  variant?: 'primary' | 'secondary';
+  $variant?: 'primary' | 'secondary';
   children: React.ReactNode;
   onClick?: () => void;
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
 }
 
-const Button = ({ variant = 'primary', children, ...props }: ButtonProps) => {
+const Button = ({ $variant = 'primary', children, ...props }: ButtonProps) => {
   return (
-    <StyledButton variant={variant} {...props}>
+    <StyledButton $variant={$variant} {...props}>
       {children}
     </StyledButton>
   );

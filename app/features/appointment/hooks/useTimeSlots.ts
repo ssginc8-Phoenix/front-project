@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { DoctorSchedule } from '~/features/doctor/types/doctor';
+import type { DoctorSchedule } from '~/types/doctor';
 import dayjs from 'dayjs';
 
 interface TimeSlot {

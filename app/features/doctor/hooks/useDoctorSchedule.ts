@@ -1,6 +1,6 @@
 import { useAsync } from '~/hooks/useAsync';
 import { getDoctorSchedules } from '~/features/doctor/api/doctorAPI';
-import type { DoctorSchedule } from '~/features/doctor/types/doctor';
+import type { DoctorSchedule } from '~/types/doctor';
 
 export const useDoctorSchedule = (doctorId: number) => {
   const { data, loading, error } = useAsync<DoctorSchedule[]>(

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { PatientRequest, UserRequest } from '~/types/user';
+import type { AddDoctorListRequest, PatientRequest, UserRequest } from '~/types/user';
 
 const HOST = 'http://localhost:8080/api/v1';
 
@@ -66,6 +66,19 @@ export const submitSocialSignup = async (data: FormData) => {
  */
 export const submitPatientInfo = async (data: PatientRequest) => {
   const res = await axios.post(`${HOST}/patients`, data, {
+    withCredentials: true,
+  });
+
+  console.log(res.data);
+
+  return res.data;
+};
+
+/**
+ * 의사 등록
+ */
+export const submitDoctorsInfo = async (data: AddDoctorListRequest) => {
+  const res = await axios.post(`${HOST}/users/doctors`, data, {
     withCredentials: true,
   });
 

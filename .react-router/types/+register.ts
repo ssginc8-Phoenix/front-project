@@ -15,4 +15,5 @@ type Params = {
   "/login": {};
   "/signup": {};
   "/signup/social-form": {};
+  "/register-doctors": {};
 };

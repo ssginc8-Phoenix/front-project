@@ -52,7 +52,7 @@ const SignUpPage = () => {
           <RoleCard
             imageSrc="/hospital.png"
             label="병원 관리자"
-            onClick={() => navigate('/signup/social-form?role=' + 'HOSPITAL')}
+            onClick={() => navigate('/signup/social-form?role=' + 'HOSPITAL_ADMIN')}
           />
         </CardGroup>
       </Wrapper>

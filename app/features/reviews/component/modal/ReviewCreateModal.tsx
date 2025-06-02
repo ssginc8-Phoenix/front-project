@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useReviewForm } from '~/features/reviews/hooks/useReviewForm';
+import { Button } from '~/features/reviews/component/common/Button';
 
 const Overlay = styled.div`
   position: fixed;
@@ -148,19 +149,6 @@ const Textarea = styled.textarea`
   }
 `;
 
-const SubmitButton = styled.button`
-  padding: 0.5rem 1.5rem;
-  color: #ffffff;
-  font-weight: 500;
-  border-radius: 9999px;
-  background-color: #00499e;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #003974;
-  }
-`;
-
 interface ReviewCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -193,7 +181,7 @@ export default function ReviewCreateModal({
     setContents,
     isValid,
   } = useReviewForm({ userId, hospitalId: 123, doctorId, appointmentId });
-  // hospitalId: 123은 더미값
+  // hospitalId: 123은 더미값입니다. 실제 값으로 바꿔주세요.
 
   const handleSubmit = () => {
     if (!isValid()) {
@@ -279,7 +267,9 @@ export default function ReviewCreateModal({
         </div>
 
         <div style={{ textAlign: 'center', paddingBottom: '2rem' }}>
-          <SubmitButton onClick={handleSubmit}>완료</SubmitButton>
+          <Button onClick={handleSubmit} disabled={!isValid()}>
+            완료
+          </Button>
         </div>
       </Container>
     </Overlay>

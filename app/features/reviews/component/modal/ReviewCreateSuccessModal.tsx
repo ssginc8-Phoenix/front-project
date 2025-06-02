@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Button } from '~/features/reviews/component/common/Button';
 
 interface ReviewSuccessModalProps {
   isOpen: boolean;
@@ -35,22 +36,6 @@ const Title = styled.h2`
   text-align: center;
 `;
 
-const ConfirmButton = styled.button`
-  margin-top: 0.5rem; /* mt-2 */
-  padding: 0.5rem 1.5rem; /* px-6 py-2 */
-  background-color: #00499e;
-  color: #ffffff;
-  font-weight: 500; /* font-medium */
-  border: none;
-  border-radius: 9999px; /* rounded-full */
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #003974;
-  }
-`;
-
 export const ReviewSuccessModal: React.FC<ReviewSuccessModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
@@ -58,7 +43,7 @@ export const ReviewSuccessModal: React.FC<ReviewSuccessModalProps> = ({ isOpen, 
     <Overlay onClick={onClose}>
       <ModalContainer onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
         <Title>리뷰가 생성되었습니다!</Title>
-        <ConfirmButton onClick={onClose}>확인</ConfirmButton>
+        <Button onClick={onClose}>확인</Button>
       </ModalContainer>
     </Overlay>
   );

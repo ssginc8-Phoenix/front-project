@@ -39,7 +39,7 @@ const PatientSelector = () => {
 
   const { patientId, setPatientId } = useAppointmentStore();
 
-  /* 디버깅용 코드 추후 삭제 예정 */
+  /** 디버깅용 코드 추후 삭제 예정 */
   useEffect(() => {
     console.log('현재 선택된 환자 ID: ', patientId);
   }, [patientId]);

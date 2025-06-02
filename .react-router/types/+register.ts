@@ -12,4 +12,8 @@ declare module "react-router" {
 
 type Params = {
   "/": {};
+  "/login": {};
+  "/signup": {};
+  "/signup/social-form": {};
+  "/register-doctors": {};
 };

@@ -17,6 +17,5 @@ export const getDoctorList = async (hospitalId: number) => {
  */
 export const getDoctorSchedules = async (doctorId: number) => {
   const res = await axios.get(`${HOST}/${doctorId}/schedules`);
-  console.log(res.data);
   return res.data;
 };

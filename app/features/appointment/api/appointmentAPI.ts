@@ -22,3 +22,14 @@ export const getAppointment = async (appointmentId: number) => {
   const res = await axios.get(`${HOST}/${appointmentId}`);
   return res.data;
 };
+
+/**
+ * 예약 리스트 조회 (로그인한 유저의)
+ */
+export const getAppointmentList = async (page: number, size: number) => {
+  const res = await axios.get(`http://localhost:8080/api/v1/users/me/appointments`, {
+    withCredentials: true,
+    params: { page, size },
+  });
+  return res.data;
+};

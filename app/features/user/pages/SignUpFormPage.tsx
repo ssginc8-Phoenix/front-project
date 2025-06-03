@@ -2,8 +2,8 @@ import styled from 'styled-components';
 import { useEffect, useState } from 'react';
 import Header from '~/layout/Header';
 import { getProviderId } from '~/features/user/api/UserAPI';
-import { useNavigate } from 'react-router';
 import SocialSignupForm from '~/features/user/components/signUp/SocialSignupForm';
+import UserSignupForm from '~/features/user/components/signUp/UserSignupForm';
 
 const Wrapper = styled.div`
   display: flex;
@@ -12,9 +12,8 @@ const Wrapper = styled.div`
   padding-top: 100px;
 `;
 
-const SocialSignUpFormPage = () => {
-  const navigate = useNavigate();
-  const [providerId, setProviderId] = useState<string | null>(null);
+const SignUpFormPage = () => {
+  const [providerId, setProviderId] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
     const fetchProviderId = async () => {
@@ -23,7 +22,7 @@ const SocialSignUpFormPage = () => {
         setProviderId(id);
       } catch (error) {
         console.error('providerId 조회 실패:', error);
-        navigate('/login');
+        setProviderId(null);
       }
     };
 
@@ -34,10 +33,14 @@ const SocialSignUpFormPage = () => {
     <>
       <Header />
       <Wrapper>
-        <SocialSignupForm providerId={providerId} />
+        {providerId === undefined ? (
+          <UserSignupForm />
+        ) : (
+          <SocialSignupForm providerId={providerId} />
+        )}
       </Wrapper>
     </>
   );
 };
 
-export default SocialSignUpFormPage;
+export default SignUpFormPage;

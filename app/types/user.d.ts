@@ -28,3 +28,8 @@ interface DoctorInfo {
 interface AddDoctorListRequest {
   doctorInfos: DoctorInfo[];
 }
+
+interface FindEmailRequest {
+  name: string;
+  phone: string;
+}

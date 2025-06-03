@@ -5,6 +5,10 @@ interface Props {
   doctor: DoctorInfo;
   index: number;
   onChange: (index: number, field: keyof DoctorInfo, value: string) => void;
+  onCheckEmail: (index: number, email: string) => void;
+  onRemove: (index: number) => void;
+  emailCheckMessage?: string;
+  emailCheckSuccess?: boolean;
 }
 
 const FieldGroup = styled.div`
@@ -38,16 +42,67 @@ const FormBlock = styled.div`
   background-color: #f9f9f9;
 `;
 
-const DoctorForm = ({ doctor, index, onChange }: Props) => {
+const ButtonRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+`;
+
+const EmailGroup = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
+const EmailCheckMessage = styled.div<{ success: boolean }>`
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  color: ${(props) => (props.success ? '#007bff' : 'red')};
+`;
+
+const Button = styled.button`
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  &:hover {
+    background-color: #005fcc;
+  }
+`;
+
+const RemoveButton = styled(Button)`
+  background-color: #dc3545;
+  &:hover {
+    background-color: #c82333;
+  }
+`;
+
+const DoctorForm = ({
+  doctor,
+  index,
+  onChange,
+  onCheckEmail,
+  onRemove,
+  emailCheckMessage = '',
+  emailCheckSuccess = false,
+}: Props) => {
   return (
     <FormBlock>
       <FieldGroup>
         <Label>이메일</Label>
-        <Input
-          type="email"
-          value={doctor.email}
-          onChange={(e) => onChange(index, 'email', e.target.value)}
-        />
+        <EmailGroup>
+          <Input
+            type="email"
+            value={doctor.email}
+            onChange={(e) => onChange(index, 'email', e.target.value)}
+          />
+          <Button type="button" onClick={() => onCheckEmail(index, doctor.email)}>
+            중복 확인
+          </Button>
+        </EmailGroup>
+        <EmailCheckMessage success={emailCheckSuccess}>{emailCheckMessage}</EmailCheckMessage>
       </FieldGroup>
       <FieldGroup>
         <Label>비밀번호</Label>
@@ -73,6 +128,11 @@ const DoctorForm = ({ doctor, index, onChange }: Props) => {
           onChange={(e) => onChange(index, 'phone', e.target.value)}
         />
       </FieldGroup>
+      <ButtonRow>
+        <RemoveButton type="button" onClick={() => onRemove(index)}>
+          삭제하기
+        </RemoveButton>
+      </ButtonRow>
     </FormBlock>
   );
 };

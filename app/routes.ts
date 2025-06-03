@@ -4,6 +4,7 @@ export default [
   index('routes/home.tsx'),
   route('/login', 'routes/login.tsx'),
   route('/signup', 'routes/signup.tsx'),
-  route('/signup/social-form', 'routes/socialSignupForm.tsx'),
+  route('/signup/form', 'routes/SignupForm.tsx'),
   route('/register-doctors', 'routes/doctorForm.tsx'),
+  route('/find-email', 'routes/findEmail.tsx'),
 ] satisfies RouteConfig;

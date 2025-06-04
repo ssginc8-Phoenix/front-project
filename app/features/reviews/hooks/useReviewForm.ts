@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { ReviewCreateRequest } from '~/features/reviews/types/review';
-import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/types/ReviewKeywords';
+import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
 
 interface UseReviewFormParams {
   userId: number;

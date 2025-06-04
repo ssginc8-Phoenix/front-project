@@ -1,0 +1,151 @@
+import React, { useEffect, useState } from 'react';
+import * as S from '~/features/reviews/component/common/ReviewModal.styles';
+import { Button } from '~/features/reviews/component/common/Button';
+import { editReview } from '~/features/reviews/api/reviewAPI';
+import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
+
+interface ReviewEditModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  hospitalName: string;
+  doctorName: string;
+  userId: number;
+  doctorId?: number;
+  appointmentId?: number;
+  reviewId: number;
+  initialGood: string[];
+  initialBad: string[];
+  initialContents: string;
+  onSaved: () => void;
+}
+
+export default function ReviewEditModal({
+  isOpen,
+  onClose,
+  hospitalName,
+  doctorName,
+  reviewId,
+  initialGood,
+  initialBad,
+  initialContents,
+  onSaved,
+}: ReviewEditModalProps) {
+  const [goodKeywords, setGoodKeywords] = useState<string[]>([]);
+  const [badKeywords, setBadKeywords] = useState<string[]>([]);
+  const [contents, setContents] = useState<string>('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setGoodKeywords(initialGood);
+      setBadKeywords(initialBad);
+      setContents(initialContents);
+    }
+  }, [isOpen, initialGood, initialBad, initialContents]);
+
+  const toggleGoodKeyword = (value: string) =>
+    setGoodKeywords((prev) =>
+      prev.includes(value) ? prev.filter((x) => x !== value) : [...prev, value],
+    );
+  const toggleBadKeyword = (value: string) =>
+    setBadKeywords((prev) =>
+      prev.includes(value) ? prev.filter((x) => x !== value) : [...prev, value],
+    );
+
+  const isValid = () => {
+    const total = goodKeywords.length + badKeywords.length;
+    return total >= 3 && total <= 8 && contents.trim().length > 0;
+  };
+
+  const handleSave = async () => {
+    if (!isValid()) {
+      alert('키워드를 3개 이상, 8개 이하로 선택하고 리뷰 내용을 입력해주세요.');
+      return;
+    }
+    const keywords = [...goodKeywords, ...badKeywords];
+    try {
+      await editReview(reviewId, { contents, keywords });
+      onSaved();
+      onClose();
+    } catch {
+      alert('리뷰 수정 중 오류가 발생했습니다.');
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <S.Overlay onClick={onClose}>
+      <S.Container onClick={(e) => e.stopPropagation()}>
+        <S.CloseButton onClick={onClose}>✕</S.CloseButton>
+
+        <S.HeaderWrapper>
+          <S.HospitalName>{hospitalName}</S.HospitalName>
+          <S.DoctorName>{doctorName} 원장</S.DoctorName>
+          <S.PromptText>진료 리뷰를 수정해주세요!</S.PromptText>
+        </S.HeaderWrapper>
+
+        <S.KeywordsSection>
+          <S.SectionContainer>
+            <S.SectionTitle>좋은 점</S.SectionTitle>
+            <S.KeywordsWrapper>
+              {GOOD_OPTIONS.map((opt) => {
+                const selected = goodKeywords.includes(opt.value);
+                return (
+                  <S.GoodKeywordButton
+                    key={opt.value}
+                    selected={selected}
+                    onClick={() => toggleGoodKeyword(opt.value)}
+                  >
+                    {opt.label}
+                  </S.GoodKeywordButton>
+                );
+              })}
+            </S.KeywordsWrapper>
+          </S.SectionContainer>
+
+          <S.SectionContainer>
+            <S.SectionTitle>아쉬운 점</S.SectionTitle>
+            <S.KeywordsWrapper>
+              {BAD_OPTIONS.map((opt) => {
+                const selected = badKeywords.includes(opt.value);
+                return (
+                  <S.BadKeywordButton
+                    key={opt.value}
+                    selected={selected}
+                    onClick={() => toggleBadKeyword(opt.value)}
+                  >
+                    {opt.label}
+                  </S.BadKeywordButton>
+                );
+              })}
+            </S.KeywordsWrapper>
+          </S.SectionContainer>
+        </S.KeywordsSection>
+
+        <S.SectionContainer style={{ padding: '0 2rem', marginBottom: '1rem' }}>
+          <label
+            style={{
+              display: 'block',
+              marginBottom: '0.25rem',
+              fontWeight: 500,
+              color: '#374151',
+            }}
+          >
+            리뷰 내용
+          </label>
+          <S.Textarea
+            placeholder="리뷰 내용을 수정해주세요."
+            value={contents}
+            onChange={(e) => setContents(e.target.value)}
+          />
+        </S.SectionContainer>
+
+        <S.ButtonGroup>
+          <Button onClick={handleSave} disabled={!isValid()}>
+            수정하기
+          </Button>
+        </S.ButtonGroup>
+      </S.Container>
+    </S.Overlay>
+  );
+}

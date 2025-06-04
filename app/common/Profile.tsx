@@ -22,6 +22,7 @@ const UserNameToggle = styled.div`
 `;
 
 const Profile = ({ name, imageUrl }: ProfileProps) => {
+  
   return (
     <UserProfile>
       <UserImage src={imageUrl} alt="userImg" />

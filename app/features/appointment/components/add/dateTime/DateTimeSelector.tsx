@@ -30,17 +30,19 @@ const TimeGrid = styled.div`
   gap: 0.5rem;
 `;
 
-const TimeButton = styled.button<{ selected: boolean }>`
+const TimeButton = styled.button<{ selected: boolean; disabled: boolean }>`
   padding: 0.5rem;
   border-radius: 0.5rem;
   border: 1px solid #d1d5db;
-  background-color: ${({ selected }) => (selected ? '#3b82f6' : '#f9fafb')};
-  color: ${({ selected }) => (selected ? '#fff' : '#1f2937')};
-  cursor: pointer;
+  background-color: ${({ selected, disabled }) =>
+    disabled ? '#e5e7eb' : selected ? '#3b82f6' : '#f9fafb'};
+  color: ${({ selected, disabled }) => (disabled ? '#9ca3af' : selected ? '#fff' : '#1f2937')};
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   transition: 0.2s;
 
   &:hover {
-    background-color: ${({ selected }) => (selected ? '#2563eb' : '#e5e7eb')};
+    background-color: ${({ selected, disabled }) =>
+      disabled ? '#e5e7eb' : selected ? '#2563eb' : '#e5e7eb'};
   }
 `;
 
@@ -56,6 +58,8 @@ const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
 
   // useTimeSlots 훅으로 가능한 시간대 불러오기
   const { list: timeSlots, loading, error } = useTimeSlots(doctorId, dateString);
+
+  console.log(timeSlots);
 
   return (
     <Wrapper>
@@ -92,15 +96,27 @@ const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
             <p>해당 날짜에 예약 가능한 시간이 없습니다.</p>
           ) : (
             <TimeGrid>
-              {timeSlots.map((slot) => (
-                <TimeButton
-                  key={slot.start}
-                  selected={time === slot.start}
-                  onClick={() => setTime(slot.start)}
-                >
-                  {slot.start}
-                </TimeButton>
-              ))}
+              {timeSlots.map((slot) => {
+                const isSelected = time === slot.start;
+                const isDisabled = !slot.available;
+
+                // 날짜가 있는 문자열로 dayjs 생성
+                const dateTime = dayjs(`${dateString} ${slot.start}`, 'YYYY-MM-DD HH:mm:ss');
+                const formattedTime = dateTime.isValid() ? dateTime.format('HH:mm') : slot.start;
+
+                return (
+                  <TimeButton
+                    key={slot.start}
+                    selected={isSelected}
+                    disabled={isDisabled}
+                    onClick={() => {
+                      if (!isDisabled) setTime(slot.start);
+                    }}
+                  >
+                    {formattedTime}
+                  </TimeButton>
+                );
+              })}
             </TimeGrid>
           )}
         </div>
@@ -111,7 +127,10 @@ const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
           <p>
             선택된 예약:{' '}
             <strong>
-              {dayjs(date).format('YYYY.MM.DD')} {time}
+              {dayjs(date).format('YYYY.MM.DD')}{' '}
+              {dayjs(`${dateString} ${time}`, 'YYYY-MM-DD HH:mm:ss').isValid()
+                ? dayjs(`${dateString} ${time}`, 'YYYY-MM-DD HH:mm:ss').format('HH:mm')
+                : time}
             </strong>
           </p>
         </div>

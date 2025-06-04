@@ -36,7 +36,7 @@ const DoctorCard = ({
           <SpecializationText>{specialization}</SpecializationText>
         </div>
       </InfoWrapper>
-      <SelectButton isSelected={isSelected} disabled={isSelected} onClick={onSelect}>
+      <SelectButton isSelected={isSelected} onClick={onSelect}>
         {isSelected ? '선택됨' : '선택'}
       </SelectButton>
     </Card>

@@ -10,6 +10,8 @@ import useAppointmentStore from '~/features/appointment/state/useAppointmentStor
 import { createAppointment } from '~/features/appointment/api/appointmentAPI';
 import AppointmentConfirmationModal from '~/features/appointment/components/add/AppointmentConfirmationModal';
 import { useState } from 'react';
+import dayjs from 'dayjs';
+import 'dayjs/locale/ko';
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -25,7 +27,10 @@ interface AppointmentPageProps {
 const AppointmentPage = ({ hospitalId }: AppointmentPageProps) => {
   const {
     patientId,
+    patientName,
+    rrn,
     doctorId,
+    doctorName,
     date,
     time,
     selectedSymptoms,
@@ -38,6 +43,13 @@ const AppointmentPage = ({ hospitalId }: AppointmentPageProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fullSymptom = [...selectedSymptoms, extraSymptom].filter(Boolean).join(', ');
+
+  const formatDateTime = (date: Date | null, time: string) => {
+    if (!date || !time) return '';
+    return `${dayjs(date).locale('ko').format('YYYY.MM.DD (ddd)')} ${time}`;
+  };
+
+  const dateTime = formatDateTime(date, time);
 
   const handlePreSubmit = () => {
     if (!patientId || !doctorId || !date || !time || !paymentMethod) {
@@ -54,9 +66,13 @@ const AppointmentPage = ({ hospitalId }: AppointmentPageProps) => {
   };
 
   const handleSubmit = async () => {
-    const appointmentTime = new Date(
-      new Date(date!).toISOString().split('T')[0] + 'T' + time,
-    ).toISOString(); // ISO 포맷으로 변환
+    const localDateTime = dayjs(date)
+      .hour(Number(time.split(':')[0]))
+      .minute(Number(time.split(':')[1]))
+      .second(0)
+      .millisecond(0);
+
+    const appointmentTime = localDateTime.format('YYYY-MM-DDTHH:mm:ss');
 
     const payload = {
       userId: 2 /* 추후 실제 로그인 유저 ID로 교체 필요 */,
@@ -89,12 +105,12 @@ const AppointmentPage = ({ hospitalId }: AppointmentPageProps) => {
       <PatientSelector />
       <DoctorSelector hospitalId={1} />
       <SymptomSelector />
-      <DateTimeSelector doctorId={doctorId ?? 0} />
+      <DateTimeSelector doctorId={doctorId} />
       <QuestionInput />
       <PaymentMethodSelector />
 
       <ButtonGroup>
-        <Button $variant={'secondary'} onClick={() => console.log('취소')}>
+        <Button $variant={'secondary'} onClick={() => reset()}>
           취소
         </Button>
         <Button $variant="primary" onClick={handlePreSubmit}>
@@ -106,11 +122,11 @@ const AppointmentPage = ({ hospitalId }: AppointmentPageProps) => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleSubmit}
-        dateTime={`${date?.toLocaleDateString()} ${time}`}
+        dateTime={dateTime ?? ''}
         hospitalName="신세계병원"
-        doctorName="박재성"
-        patientName="홍길동"
-        residentRegistrationNumber="681221 - 121212" // TODO: 마스킹 처리 필요
+        doctorName={doctorName ?? ''}
+        patientName={patientName ?? ''}
+        residentRegistrationNumber={rrn ?? ''} // TODO: 마스킹 처리 필요
         appointmentType="SCHEDULED"
         symptoms={fullSymptom}
         paymentMethod={paymentMethod}

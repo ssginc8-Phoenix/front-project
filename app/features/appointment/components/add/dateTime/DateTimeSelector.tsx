@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import { useTimeSlots } from '~/features/appointment/hooks/useTimeSlots';
 import Calendar from 'react-calendar';
 import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
+import { StyledCalendarWrapper } from '~/components/styled/StyledCalendarWrapper';
 
 const Wrapper = styled.div`
   display: flex;
@@ -54,61 +55,51 @@ const weekdayMap: Record<string, string> = {
 };
 
 interface DateTimeSelectorProps {
-  doctorId: number;
+  doctorId: number | null;
 }
 
 const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
   const { date, setDate, time, setTime } = useAppointmentStore();
 
-  const { data: schedules, loading } = useDoctorSchedule(doctorId);
+  const { data: schedules = [], isLoading, isError, error } = useDoctorSchedule(doctorId ?? null);
 
   const selectedDay = date ? weekdayMap[dayjs(date).format('dddd')] : null;
-  console.log('selectedDay: ', selectedDay);
 
   const timeSlots = useTimeSlots({
-    schedules: schedules ?? [],
+    schedules,
     dayOfWeek: selectedDay ?? '',
   });
-
-  const getWeekRange = (date: Date) => {
-    const start = dayjs(date).startOf('week');
-    const end = dayjs(date).endOf('week');
-    return { start, end };
-  };
-
-  const isSameWeek = (date: Date, selected: Date) => {
-    const { start, end } = getWeekRange(selected);
-    return dayjs(date).isAfter(start.subtract(1, 'day')) && dayjs(date).isBefore(end.add(1, 'day'));
-  };
-
   return (
     <Wrapper>
       <div>
         <Title>일정 선택</Title>
         <SectionTitle>날짜 선택</SectionTitle>
-        <Calendar
-          onChange={(date) => {
-            setDate(date as Date);
-            setTime('');
-          }}
-          value={date}
-          minDate={new Date()}
-          calendarType="gregory"
-          tileClassName={({ date: d, view }) => {
-            if (view === 'month' && date) {
-              if (dayjs(d).isSame(date, 'day')) return 'selected-day';
-              if (isSameWeek(d, date)) return 'highlight-week';
-            }
-            return '';
-          }}
-        />
+        <StyledCalendarWrapper>
+          <Calendar
+            onChange={(date) => {
+              setDate(date as Date);
+              setTime('');
+            }}
+            value={date}
+            minDate={new Date()}
+            calendarType="gregory"
+            tileClassName={({ date: d, view }) => {
+              if (view === 'month' && date) {
+                if (dayjs(d).isSame(date, 'day')) return 'selected-day';
+              }
+              return '';
+            }}
+          />
+        </StyledCalendarWrapper>
       </div>
 
       {date && (
         <div>
           <SectionTitle>시간 선택</SectionTitle>
-          {loading ? (
+          {isLoading ? (
             <p>시간 정보를 불러오는 중...</p>
+          ) : isError ? (
+            <p>오류가 발생했습니다: {(error as Error).message}</p>
           ) : timeSlots.length === 0 ? (
             <p>해당 날짜에 예약 가능한 시간이 없습니다.</p>
           ) : (
@@ -119,7 +110,7 @@ const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
                   selected={time === slot.start}
                   onClick={() => setTime(slot.start)}
                 >
-                  {dayjs(slot.start, 'HH:mm').format('A hh:mm')}
+                  {slot.start}
                 </TimeButton>
               ))}
             </TimeGrid>

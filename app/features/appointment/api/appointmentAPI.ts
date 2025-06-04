@@ -7,11 +7,15 @@ const HOST = 'http://localhost:8080/api/v1/appointments';
  * 예약 요청
  */
 export const createAppointment = async (data: AppointmentRequest) => {
+  /** 디버깅*/ console.log(data);
+
   const res = await axios.post(HOST, data, {
     headers: {
       'Content-Type': 'application/json',
     },
+    withCredentials: true,
   });
+
   return res.data;
 };
 
@@ -19,7 +23,9 @@ export const createAppointment = async (data: AppointmentRequest) => {
  * 예약 단건 조회
  */
 export const getAppointment = async (appointmentId: number) => {
-  const res = await axios.get(`${HOST}/${appointmentId}`);
+  const res = await axios.get(`${HOST}/${appointmentId}`, {
+    withCredentials: true,
+  });
   return res.data;
 };
 

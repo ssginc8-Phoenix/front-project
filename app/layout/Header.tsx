@@ -25,7 +25,7 @@ const Notification = styled.div`
   font-size: 1.5rem;
 `;
 
-const AuthButton = styled.a`
+  const AuthButton = styled.a`
   padding: 8px 16px;
   border-radius: 6px;
   border: 1px solid #007bff;
@@ -41,7 +41,7 @@ const AuthButton = styled.a`
     color: #fff;
   }
 `;
-
+  
 const Header = () => {
   const user = useLoginStore((state) => state.user);
 

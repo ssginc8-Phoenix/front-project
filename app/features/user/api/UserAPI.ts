@@ -1,5 +1,13 @@
 import axios from 'axios';
-import type { AddDoctorListRequest, PatientRequest, UserRequest } from '~/types/user';
+import type {
+  AddDoctorListRequest,
+  ConfirmVerifyCode,
+  FindEmailRequest,
+  PatientRequest,
+  ResetPassword,
+  SendVerifyCode,
+  UserRequest,
+} from '~/types/user';
 
 const HOST = 'http://localhost:8080/api/v1';
 
@@ -83,6 +91,81 @@ export const submitDoctorsInfo = async (data: AddDoctorListRequest) => {
   });
 
   console.log(res.data);
+
+  return res.data;
+};
+
+/**
+ * 이메일 중복 검사
+ */
+export const checkEmailDuplicate = async (email: string) => {
+  const res = await axios.get(`${HOST}/users/check-email`, {
+    params: { email },
+    withCredentials: true,
+  });
+
+  console.log(res.data);
+
+  return res.data;
+};
+
+/**
+ * 회원가입 요청
+ */
+export const submitEmailSignup = async (data: FormData) => {
+  const res = await axios.post(`${HOST}/users/register`, data, {
+    withCredentials: true,
+  });
+
+  console.log(res.data);
+
+  return res.data;
+};
+
+/**
+ * 이메일 찾기
+ */
+export const findEmail = async (data: FindEmailRequest) => {
+  const res = await axios.post(`${HOST}/users/email/find`, data, {
+    headers: { 'Content-Type': 'application/json' },
+    withCredentials: true,
+  });
+
+  return res.data;
+};
+
+/**
+ * 인증코드 발송
+ */
+export const sendVerifyCode = async (data: SendVerifyCode) => {
+  const res = await axios.post(`${HOST}/users/email/verify-code/send`, data, {
+    headers: { 'Content-Type': 'application/json' },
+    withCredentials: true,
+  });
+
+  return res.data;
+};
+
+/**
+ * 인증코드 확인
+ */
+export const confirmVerifyCode = async (data: ConfirmVerifyCode) => {
+  const res = await axios.post(`${HOST}/users/email/verify-code/confirm`, data, {
+    headers: { 'Content-Type': 'application/json' },
+    withCredentials: true,
+  });
+
+  return res.data;
+};
+
+/**
+ * 인증코드 확인
+ */
+export const resetPassword = async (data: ResetPassword) => {
+  const res = await axios.post(`${HOST}/users/password-reset`, data, {
+    headers: { 'Content-Type': 'application/json' },
+    withCredentials: true,
+  });
 
   return res.data;
 };

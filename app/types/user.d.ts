@@ -28,3 +28,22 @@ interface DoctorInfo {
 interface AddDoctorListRequest {
   doctorInfos: DoctorInfo[];
 }
+
+interface FindEmailRequest {
+  name: string;
+  phone: string;
+}
+
+interface SendVerifyCode {
+  email: string;
+}
+
+interface ConfirmVerifyCode {
+  email: string;
+  code: string;
+}
+
+interface ResetPassword {
+  email: string;
+  password: string;
+}

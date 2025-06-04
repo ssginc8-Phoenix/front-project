@@ -3,6 +3,7 @@ import Header from '~/layout/Header';
 import LoginForm from '~/features/user/components/login/LoginForm';
 import SocialLoginButtons from '~/features/user/components/login/SocialLoginButtons';
 import Divider from '~/features/user/components/login/Divider';
+import LoginHelperLinks from '~/features/user/components/login/LoginHelperLinks';
 
 const Wrapper = styled.div`
   display: flex;
@@ -17,6 +18,7 @@ const LoginPage = () => {
       <Header />
       <Wrapper>
         <LoginForm />
+        <LoginHelperLinks />
         <Divider />
         <SocialLoginButtons />
       </Wrapper>

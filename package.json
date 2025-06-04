@@ -17,6 +17,7 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "isbot": "^5.1.27",
+    "lucide-react": "^0.511.0",
     "react": "^19.1.0",
     "react-calendar": "^5.1.0",
     "react-cookie": "^8.0.1",

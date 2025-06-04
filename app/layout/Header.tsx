@@ -57,7 +57,7 @@ const Header = () => {
         ) : (
           <>
             <AuthButton href="/login">로그인</AuthButton>
-            <AuthButton href="/register">회원가입</AuthButton>
+            <AuthButton href="/signup">회원가입</AuthButton>
           </>
         )}
       </RightGroup>

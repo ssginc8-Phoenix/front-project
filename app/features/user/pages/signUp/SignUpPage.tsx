@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import RoleCard from '../components/signUp/RoleCard';
+import RoleCard from '../../components/signUp/RoleCard';
 import { useNavigate } from 'react-router-dom';
 import Header from '~/layout/Header';
 
@@ -42,17 +42,17 @@ const SignUpPage = () => {
           <RoleCard
             imageSrc="/patient.png"
             label="환자"
-            onClick={() => navigate('/signup/social-form?role=' + 'PATIENT')}
+            onClick={() => navigate('/signup/form?role=' + 'PATIENT')}
           />
           <RoleCard
             imageSrc="/guardian.png"
             label="보호자"
-            onClick={() => navigate('/signup/social-form?role=' + 'GUARDIAN')}
+            onClick={() => navigate('/signup/form?role=' + 'GUARDIAN')}
           />
           <RoleCard
             imageSrc="/hospital.png"
             label="병원 관리자"
-            onClick={() => navigate('/signup/social-form?role=' + 'HOSPITAL_ADMIN')}
+            onClick={() => navigate('/signup/form?role=' + 'HOSPITAL_ADMIN')}
           />
         </CardGroup>
       </Wrapper>

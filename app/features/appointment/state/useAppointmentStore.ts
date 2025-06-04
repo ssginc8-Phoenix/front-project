@@ -1,12 +1,17 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 interface AppointmentState {
   patientId: number | null;
-  setPatientId: (patientId: number) => void;
+  setPatientId: (patientId: number | null) => void;
+  patientName: string | null;
+  setPatientName: (patientName: string | null) => void;
+  rrn: string | null;
+  setRrn: (rrn: string | null) => void;
 
   doctorId: number | null;
-  setDoctorId: (doctorId: number) => void;
+  setDoctorId: (doctorId: number | null) => void;
+  doctorName: string | null;
+  setDoctorName: (doctorName: string | null) => void;
 
   selectedSymptoms: string[];
   setSelectedSymptoms: (symptoms: string[]) => void;
@@ -29,53 +34,49 @@ interface AppointmentState {
   reset: () => void;
 }
 
-/* 일단 영속성 설정을 위해 Local Storage에 저장하는 걸로 함 */
+const useAppointmentStore = create<AppointmentState>((set) => ({
+  patientId: null,
+  setPatientId: (id: number | null) => set({ patientId: id }),
+  patientName: null,
+  setPatientName: (name: string | null) => set({ patientName: name }),
+  rrn: null,
+  setRrn: (rrn: string | null) => set({ rrn: rrn }),
 
-const useAppointmentStore = create(
-  persist<AppointmentState>(
-    (set) => ({
+  doctorId: null,
+  setDoctorId: (id: number | null) => set({ doctorId: id }),
+  doctorName: null,
+  setDoctorName: (name: string | null) => set({ doctorName: name }),
+
+  selectedSymptoms: [],
+  setSelectedSymptoms: (symptoms) => set({ selectedSymptoms: symptoms }),
+
+  extraSymptom: '',
+  setExtraSymptom: (text) => set({ extraSymptom: text }),
+
+  question: '',
+  setQuestion: (text) => set({ question: text }),
+
+  date: null,
+  setDate: (date) => set({ date }),
+
+  time: '',
+  setTime: (time) => set({ time }),
+
+  paymentMethod: '',
+  setPaymentMethod: (method) => set({ paymentMethod: method }),
+
+  reset: () =>
+    set({
       patientId: null,
-      setPatientId: (id: number) => set({ patientId: id }),
-
+      patientName: null,
       doctorId: null,
-      setDoctorId: (id: number) => set({ doctorId: id }),
-
       selectedSymptoms: [],
-      setSelectedSymptoms: (symptoms) => set({ selectedSymptoms: symptoms }),
-
       extraSymptom: '',
-      setExtraSymptom: (text) => set({ extraSymptom: text }),
-
       question: '',
-      setQuestion: (text) => set({ question: text }),
-
       date: null,
-      setDate: (date) => set({ date: date }),
-
       time: '',
-      setTime: (time) => set({ time: time }),
-
       paymentMethod: '',
-      setPaymentMethod: (method) => set({ paymentMethod: method }),
-
-      reset: () => {
-        localStorage.removeItem('appointment-storage');
-        set({
-          patientId: null,
-          doctorId: null,
-          selectedSymptoms: [],
-          extraSymptom: '',
-          question: '',
-          date: null,
-          time: '',
-          paymentMethod: '',
-        });
-      },
     }),
-    {
-      name: 'appointment-storage', // localStorage key 이름
-    },
-  ),
-);
+}));
 
 export default useAppointmentStore;

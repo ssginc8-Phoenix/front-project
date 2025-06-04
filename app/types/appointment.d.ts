@@ -47,3 +47,9 @@ export interface AppointmentList {
 }
 
 export type AppointmentListPage = Page<AppointmentList>;
+
+export interface TimeSlot {
+  start: string;
+  end: string;
+  available: boolean;
+}

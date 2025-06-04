@@ -37,11 +37,14 @@ const CardList = styled.div`
 const PatientSelector = () => {
   const { data: patients, loading, error } = usePatientListByGuardian();
 
-  const { patientId, setPatientId } = useAppointmentStore();
+  const { patientId, setPatientId, patientName, setPatientName, rrn, setRrn } =
+    useAppointmentStore();
 
   /** 디버깅용 코드 추후 삭제 예정 */
   useEffect(() => {
     console.log('현재 선택된 환자 ID: ', patientId);
+    console.log('현재 선택된 환자 이름: ', patientName);
+    console.log('현재 선택된 주민등록번호: ', rrn);
   }, [patientId]);
 
   return (
@@ -62,7 +65,17 @@ const PatientSelector = () => {
             residentRegistrationNumber={patient.residentRegistrationNumber}
             imageUrl={patient.imageUrl}
             isSelected={patientId === patient.patientId}
-            onSelect={() => setPatientId(patient.patientId)}
+            onSelect={() => {
+              if (patientId === patient.patientId) {
+                setPatientId(null);
+                setPatientName(null);
+                setRrn(null);
+              } else {
+                setPatientId(patient.patientId);
+                setPatientName(patient.name);
+                setRrn(patient.residentRegistrationNumber);
+              }
+            }}
           />
         ))}
       </CardList>

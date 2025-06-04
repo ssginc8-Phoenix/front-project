@@ -1,5 +1,6 @@
 import type { AppointmentList } from '~/types/appointment';
 import styled from 'styled-components';
+import { StatusBadge } from '~/components/styled/StatusBadge';
 
 const Card = styled.div`
   border: 1px solid #e0e0e0;
@@ -21,16 +22,6 @@ const TopRow = styled.div`
 const HospitalName = styled.h2`
   font-size: 1.1rem;
   font-weight: 600;
-`;
-
-const StatusBadge = styled.span<{ status: string }>`
-  font-size: 0.75rem;
-  padding: 4px 8px;
-  border-radius: 8px;
-  background-color: ${({ status }) =>
-    status === '예약중' ? '#fef3c7' : status === '완료진료' ? '#dbeafe' : '#f3f4f6'};
-  color: ${({ status }) =>
-    status === '예약중' ? '#b45309' : status === '완료진료' ? '#1d4ed8' : '#4b5563'};
 `;
 
 const InfoText = styled.div`
@@ -55,6 +46,16 @@ interface AppointmentCardProps {
   onClick: () => void;
 }
 
+const formatAppointmentTime = (isoString: string) => {
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  const hours = `${date.getHours()}`.padStart(2, '0');
+  const minutes = `${date.getMinutes()}`.padStart(2, '0');
+  return `${year}.${month}.${day} ${hours}시 ${minutes}분`;
+};
+
 const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
   const statusKorean = (() => {
     switch (appointment.status) {
@@ -75,10 +76,10 @@ const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
     <Card onClick={onClick}>
       <TopRow>
         <HospitalName> {appointment.hospitalName} </HospitalName>
-        <StatusBadge status={statusKorean}> {statusKorean} </StatusBadge>
+        <StatusBadge status={appointment.status}> {statusKorean} </StatusBadge>
       </TopRow>
       <InfoText> {appointment.doctorName} </InfoText>
-      <InfoText> {appointment.appointmentTime} </InfoText>
+      <InfoText> {formatAppointmentTime(appointment.appointmentTime)} </InfoText>
       <InfoText> {appointment.patientName} </InfoText>
 
       {/** 나중에 리뷰버튼 onClick 수정 */}

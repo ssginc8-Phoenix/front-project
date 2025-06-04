@@ -5,11 +5,15 @@ export default [
   
   route('/login', 'routes/login.tsx'),
   route('/signup', 'routes/signup.tsx'),
-  route('/signup/form', 'routes/SignupForm.tsx'),
+  route('/signup/social-form', 'routes/socialSignupForm.tsx'),
   route('/register-doctors', 'routes/doctorForm.tsx'),
   route('/find-email', 'routes/findEmail.tsx'),
   route('/reset-password', 'routes/passwordResetVerify.tsx'),
   route('/reset-password/set', 'routes/resetPassword.tsx'),
+
+  route('appointments', 'layout/MainLayout.tsx', [
+    route('', 'routes/appointmentRequest.tsx'),
+    route('list', 'routes/appointmentList.tsx'),
 
   route('/reviews', 'layout/ReviewLayout.tsx', [
     route('me/*', 'features/reviews/pages/ReviewMyListPage.tsx', [

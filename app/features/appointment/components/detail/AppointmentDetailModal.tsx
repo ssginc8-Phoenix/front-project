@@ -3,8 +3,8 @@ import LoadingIndicator from '~/components/common/LoadingIndicator';
 import ErrorMessage from '~/components/common/ErrorMessage';
 import styled from 'styled-components';
 import Button from '~/components/styled/Button';
-import { format } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import { RefreshButton } from '~/components/styled/RefreshButton';
+import { FiRefreshCw } from 'react-icons/fi';
 
 const Overlay = styled.div`
   position: fixed;
@@ -26,6 +26,12 @@ const Modal = styled.div`
 
 const Header = styled.div`
   margin-bottom: 1rem;
+`;
+
+const TitleRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const Title = styled.h2`
@@ -88,24 +94,36 @@ const AppointmentDetailModal = ({
   isOpen,
   onClose,
 }: AppointmentDetailModalProps) => {
-  const { data: appointment, loading, error } = useAppointmentDetail(appointmentId);
+  const {
+    data: appointment,
+    isLoading,
+    error,
+    refetch,
+    isRefetching,
+  } = useAppointmentDetail(appointmentId);
 
   return (
     <Overlay>
       <Modal>
-        {loading && <LoadingIndicator />}
-        {error && <ErrorMessage message={error} />}
+        {isLoading && <LoadingIndicator />}
+        {error && <ErrorMessage message={error.message} />}
 
         {appointment && (
           <>
             <Header>
-              <Title>
-                {new Date(appointment.appointmentTime).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}{' '}
-                진료예약
-              </Title>
+              <TitleRow>
+                <Title>
+                  {new Date(appointment.appointmentTime).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}{' '}
+                  진료예약
+                </Title>
+                <RefreshButton onClick={() => refetch()} disabled={isRefetching} title="새로고침">
+                  <FiRefreshCw size={20} />
+                </RefreshButton>
+              </TitleRow>
+
               <HospitalName> {appointment.hospitalName} </HospitalName>
               <SubInfo>
                 {appointment.doctorName} 원장 <br />
@@ -129,7 +147,12 @@ const AppointmentDetailModal = ({
 
             <Section>
               <SectionTitle>진료 항목</SectionTitle>
-              <InfoText>{appointment.appointmentType}</InfoText>
+              <InfoText>
+                {appointment.appointmentType === 'SCHEDULED' ||
+                appointment.appointmentType === 'IMMEDIATE'
+                  ? '일반 진료'
+                  : appointment.appointmentType}
+              </InfoText>
             </Section>
 
             <Section>

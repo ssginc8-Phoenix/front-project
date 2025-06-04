@@ -11,7 +11,9 @@ export const createAppointment = async (data: AppointmentRequest) => {
     headers: {
       'Content-Type': 'application/json',
     },
+    withCredentials: true,
   });
+
   return res.data;
 };
 
@@ -19,7 +21,9 @@ export const createAppointment = async (data: AppointmentRequest) => {
  * 예약 단건 조회
  */
 export const getAppointment = async (appointmentId: number) => {
-  const res = await axios.get(`${HOST}/${appointmentId}`);
+  const res = await axios.get(`${HOST}/${appointmentId}`, {
+    withCredentials: true,
+  });
   return res.data;
 };
 
@@ -31,5 +35,18 @@ export const getAppointmentList = async (page: number, size: number) => {
     withCredentials: true,
     params: { page, size },
   });
+
+  return res.data;
+};
+
+/**
+ * 예약 가능한 시간 슬롯 리스트 조회 (로그인한 유저의)
+ */
+export const getAvailableTimeSlots = async (doctorId: number, date: string) => {
+  const res = await axios.get(`${HOST}/available-time-slots`, {
+    params: { doctorId, date },
+    withCredentials: true,
+  });
+
   return res.data;
 };

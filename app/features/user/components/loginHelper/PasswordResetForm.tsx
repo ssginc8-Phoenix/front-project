@@ -57,27 +57,32 @@ interface Props {
   onSubmit: (password: string) => void;
   error: string;
   setError: React.Dispatch<React.SetStateAction<string>>;
+  validatePassword: (password: string) => string;
 }
 
-const PasswordResetForm = ({ onSubmit, error, setError }: Props) => {
+const PasswordResetForm = ({ onSubmit, error, setError, validatePassword }: Props) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [localValidationError, setLocalValidationError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const ruleCheck = validatePassword(password);
+    if (ruleCheck) {
+      setLocalValidationError(ruleCheck);
+      return;
+    } else {
+      setLocalValidationError('');
+    }
+
     if (password !== confirmPassword) {
       setError('비밀번호가 일치하지 않습니다.');
       return;
     }
+
     setError('');
-    try {
-      onSubmit(password);
-    } catch (err: any) {
-      console.log('문제발생..');
-      const errorMessage = err.response?.data?.message || '알 수 없는 오류가 발생했습니다.';
-      console.log(errorMessage);
-      setError(errorMessage);
-    }
+    onSubmit(password);
   };
 
   return (
@@ -91,6 +96,7 @@ const PasswordResetForm = ({ onSubmit, error, setError }: Props) => {
           placeholder="비밀번호를 입력하세요"
           required
         />
+        {localValidationError && <ErrorMessage>{localValidationError}</ErrorMessage>}
       </FieldGroup>
 
       <FieldGroup>

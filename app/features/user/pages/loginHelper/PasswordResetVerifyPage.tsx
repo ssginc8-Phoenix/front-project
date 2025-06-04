@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { sendVerifyCode, confirmVerifyCode } from '~/features/user/api/UserAPI';
-import PasswordResetForm from '~/features/user/components/loginHelper/PasswordResetForm';
+import PasswordResetVerifyForm from '~/features/user/components/loginHelper/PasswordResetVerifyForm';
+import Header from '~/layout/Header';
 
 const Wrapper = styled.div`
   max-width: 500px;
@@ -26,7 +27,7 @@ const Description = styled.p`
   color: #555;
 `;
 
-const PasswordResetPage = () => {
+const PasswordResetVerifyPage = () => {
   const navigate = useNavigate();
 
   const handleSendCode = async (email: string) => {
@@ -47,16 +48,19 @@ const PasswordResetPage = () => {
   };
 
   return (
-    <Wrapper>
-      <Title>비밀번호찾기</Title>
-      <Description>비밀번호를 찾기 위해 이메일을 입력해주세요.</Description>
-      <PasswordResetForm
-        onSendCode={handleSendCode}
-        onVerifyCode={handleVerifyCode}
-        onSuccess={(email) => handleSuccess(email)}
-      />
-    </Wrapper>
+    <>
+      <Header />
+      <Wrapper>
+        <Title>비밀번호찾기</Title>
+        <Description>비밀번호를 찾기 위해 이메일을 입력해주세요.</Description>
+        <PasswordResetVerifyForm
+          onSendCode={handleSendCode}
+          onVerifyCode={handleVerifyCode}
+          onSuccess={(email) => handleSuccess(email)}
+        />
+      </Wrapper>
+    </>
   );
 };
 
-export default PasswordResetPage;
+export default PasswordResetVerifyPage;

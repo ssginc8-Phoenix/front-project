@@ -18,4 +18,5 @@ type Params = {
   "/register-doctors": {};
   "/find-email": {};
   "/reset-password": {};
+  "/reset-password/set": {};
 };

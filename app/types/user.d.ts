@@ -42,3 +42,8 @@ interface ConfirmVerifyCode {
   email: string;
   code: string;
 }
+
+interface ResetPassword {
+  email: string;
+  password: string;
+}

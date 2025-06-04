@@ -4,6 +4,7 @@ import type {
   ConfirmVerifyCode,
   FindEmailRequest,
   PatientRequest,
+  ResetPassword,
   SendVerifyCode,
   UserRequest,
 } from '~/types/user';
@@ -150,6 +151,18 @@ export const sendVerifyCode = async (data: SendVerifyCode) => {
  */
 export const confirmVerifyCode = async (data: ConfirmVerifyCode) => {
   const res = await axios.post(`${HOST}/users/email/verify-code/confirm`, data, {
+    headers: { 'Content-Type': 'application/json' },
+    withCredentials: true,
+  });
+
+  return res.data;
+};
+
+/**
+ * 인증코드 확인
+ */
+export const resetPassword = async (data: ResetPassword) => {
+  const res = await axios.post(`${HOST}/users/password-reset`, data, {
     headers: { 'Content-Type': 'application/json' },
     withCredentials: true,
   });

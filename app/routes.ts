@@ -7,5 +7,6 @@ export default [
   route('/signup/form', 'routes/SignupForm.tsx'),
   route('/register-doctors', 'routes/doctorForm.tsx'),
   route('/find-email', 'routes/findEmail.tsx'),
-  route('/reset-password', 'routes/passwordReset.tsx'),
+  route('/reset-password', 'routes/passwordResetVerify.tsx'),
+  route('/reset-password/set', 'routes/resetPassword.tsx'),
 ] satisfies RouteConfig;

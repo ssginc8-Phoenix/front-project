@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 
 const Form = styled.form`
@@ -33,16 +33,12 @@ const Input = styled.input`
   }
 `;
 
-const ButtonRow = styled.div`
-  display: flex;
-  gap: 0.5rem;
-`;
-
 const Button = styled.button`
   padding: 0.75rem 1rem;
   background-color: #007bff;
   color: white;
   font-weight: 600;
+  font-size: 1rem;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -54,90 +50,62 @@ const Button = styled.button`
 const ErrorMessage = styled.p`
   font-size: 0.85rem;
   color: red;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  margin-top: 0.5rem;
 `;
 
 interface Props {
-  onSendCode: (email: string) => void;
-  onVerifyCode: (email: string, code: string) => Promise<boolean>;
-  onSuccess: (email: string) => void;
+  onSubmit: (password: string) => void;
+  error: string;
+  setError: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const PasswordResetForm = ({ onSendCode, onVerifyCode, onSuccess }: Props) => {
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [error, setError] = useState('');
-  const [timer, setTimer] = useState(300); // 5 minutes
-  const [isCodeSent, setIsCodeSent] = useState(false);
+const PasswordResetForm = ({ onSubmit, error, setError }: Props) => {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isCodeSent && timer > 0) {
-      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isCodeSent, timer]);
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, '0');
-    const s = (seconds % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  };
-
-  const handleSendCode = () => {
-    if (!email) return;
-    onSendCode(email);
-    setIsCodeSent(true);
-    setTimer(300);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const valid = await onVerifyCode(email, code);
-    if (!valid) {
-      setError('인증 코드가 올바르지 않습니다.');
-    } else {
-      setError('');
-      onSuccess(email);
+    if (password !== confirmPassword) {
+      setError('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    setError('');
+    try {
+      onSubmit(password);
+    } catch (err: any) {
+      console.log('문제발생..');
+      const errorMessage = err.response?.data?.message || '알 수 없는 오류가 발생했습니다.';
+      console.log(errorMessage);
+      setError(errorMessage);
     }
   };
 
   return (
     <Form onSubmit={handleSubmit}>
       <FieldGroup>
-        <Label>이메일</Label>
-        <ButtonRow>
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="example@example.com"
-            required
-          />
-          <Button type="button" onClick={handleSendCode} disabled={timer > 0 && isCodeSent}>
-            {isCodeSent ? `재전송 (${formatTime(timer)})` : '인증 코드 전송'}
-          </Button>
-        </ButtonRow>
+        <Label>새 비밀번호</Label>
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="비밀번호를 입력하세요"
+          required
+        />
       </FieldGroup>
 
-      {isCodeSent && (
-        <FieldGroup>
-          <Label>인증 코드</Label>
-          <Input
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="6자리 숫자 코드 입력"
-            required
-          />
-          {error && <ErrorMessage>{error}</ErrorMessage>}
-        </FieldGroup>
-      )}
+      <FieldGroup>
+        <Label>새 비밀번호 확인</Label>
+        <Input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="비밀번호를 다시 입력하세요"
+          required
+        />
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+      </FieldGroup>
 
-      <Button type="submit">비밀번호 재설정 페이지로 이동</Button>
+      <Button type="submit">변경하기</Button>
     </Form>
   );
 };

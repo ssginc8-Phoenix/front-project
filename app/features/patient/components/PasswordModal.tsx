@@ -1,7 +1,7 @@
-// src/features/patient/components/PasswordModal.tsx
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import ReusableModal from './ReusableModal';
+import { verifyPassword } from '~/features/patient/api/userAPI';
 
 interface PasswordModalProps {
   open: boolean;
@@ -47,13 +47,14 @@ export const PasswordModal: React.FC<PasswordModalProps> = ({ open, onClose, onS
   const [pw, setPw] = useState('');
   const [error, setError] = useState('');
 
-  const handleConfirm = () => {
-    // TODO: 나중에 API 요청으로 교체
-    if (pw === '1234') {
+  const handleConfirm = async () => {
+    try {
+      // 🔥 서버에 비밀번호 검증 요청
+      await verifyPassword(pw);
       setError('');
       onSuccess();
       setPw('');
-    } else {
+    } catch {
       setError('비밀번호가 올바르지 않습니다.');
     }
   };

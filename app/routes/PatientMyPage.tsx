@@ -2,15 +2,10 @@ import styled from 'styled-components';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PasswordModal } from '~/features/patient/components/PasswordModal';
-import { getAllUsers } from '~/features/patient/api/userAPI';
+import useLoginStore from '~/features/user/stores/LoginStore';
+import Header from '~/layout/Header';
 
-// // 🔥 나중에 서버 데이터로 바꿔야 함
-// const dummyUser = {
-//   name: '김순자',
-//   birth: '1945.03.28',
-//   age: 80,
-// };
-
+// --- 대시보드 아이템
 const dashboardItems = [
   { label: '보호자 관리', icon: '🧑‍🤝‍🧑', key: 'guardian' },
   { label: '캘린더 관리', icon: '🗓️', key: 'calendar' },
@@ -20,7 +15,7 @@ const dashboardItems = [
   { label: '예약 관리', icon: '📋', key: 'reservation' },
 ];
 
-// --- 스타일 정의 ---
+// --- 스타일 정의
 const Main = styled.main`
   max-width: 900px;
   margin: 0 auto;
@@ -58,11 +53,6 @@ const ProfileName = styled.div`
   font-weight: bold;
   margin-bottom: 8px;
   color: #222;
-`;
-
-const ProfileBirth = styled.div`
-  color: #8a8a8a;
-  font-size: 1.18rem;
 `;
 
 const Divider = styled.hr`
@@ -145,48 +135,15 @@ const CenterButton = styled.button`
   }
 `;
 
-// --- 컴포넌트 정의 ---
-// --- 컴포넌트 정의 ---
+// --- 컴포넌트
 export const PatientMyPage = () => {
   const navigate = useNavigate();
+  const { user, fetchMyInfo } = useLoginStore();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-  const [user, setUser] = useState<{
-    name: string;
-    birth: string;
-    age: number;
-  } | null>(null);
-
-  const calculateAge = (birthDate: string) => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const users = await getAllUsers();
-        if (users.length > 0) {
-          const user = users[0]; // 첫 번째 유저
-          setUser({
-            name: user.name,
-            birth: user.birthDate || '1945-03-28', // 데이터 없으면 기본값
-            age: calculateAge(user.birthDate || '1945-03-28'),
-          });
-        }
-      } catch (error) {
-        console.error('유저 정보를 가져오는데 실패했습니다.', error);
-      }
-    };
-
-    fetchUsers();
-  }, []);
+    fetchMyInfo();
+  }, [fetchMyInfo]);
 
   const handleDashboardClick = (key: string) => {
     if (key === 'info') {
@@ -202,49 +159,49 @@ export const PatientMyPage = () => {
   };
 
   return (
-    <Main>
-      {/* 프로필 */}
-      <ProfileRow>
-        <ProfileEmoji role="img" aria-label="profile">
-          👵
-        </ProfileEmoji>
-        <ProfileInfoCol>
-          <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
-          <ProfileBirth>
-            {user?.birth} (만 {user?.age}세)
-          </ProfileBirth>
-        </ProfileInfoCol>
-      </ProfileRow>
+    <>
+      <Header></Header>
+      <Main>
+        {/* 프로필 */}
+        <ProfileRow>
+          <ProfileEmoji role="img" aria-label="profile">
+            👵
+          </ProfileEmoji>
+          <ProfileInfoCol>
+            <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
+          </ProfileInfoCol>
+        </ProfileRow>
 
-      <Divider />
+        <Divider />
 
-      {/* 대시보드 */}
-      <DashboardSection>
-        <DashboardGrid>
-          {dashboardItems.map((item) => (
-            <DashboardButton key={item.key} onClick={() => handleDashboardClick(item.key)}>
-              <span>{item.icon}</span>
-              {item.label}
-            </DashboardButton>
-          ))}
-        </DashboardGrid>
-      </DashboardSection>
+        {/* 대시보드 */}
+        <DashboardSection>
+          <DashboardGrid>
+            {dashboardItems.map((item) => (
+              <DashboardButton key={item.key} onClick={() => handleDashboardClick(item.key)}>
+                <span>{item.icon}</span>
+                {item.label}
+              </DashboardButton>
+            ))}
+          </DashboardGrid>
+        </DashboardSection>
 
-      {/* 고객센터 */}
-      <CenterSection>
-        <CenterButton type="button" onClick={() => alert('고객센터 연결(테스트용)')}>
-          <span style={{ fontSize: '1.35rem' }}>💬</span>
-          실시간 고객센터 연결
-        </CenterButton>
-      </CenterSection>
+        {/* 고객센터 */}
+        <CenterSection>
+          <CenterButton type="button" onClick={() => alert('고객센터 연결(테스트용)')}>
+            <span style={{ fontSize: '1.35rem' }}>💬</span>
+            실시간 고객센터 연결
+          </CenterButton>
+        </CenterSection>
 
-      {/* 비밀번호 모달 */}
-      <PasswordModal
-        open={showPasswordModal}
-        onClose={() => setShowPasswordModal(false)}
-        onSuccess={handlePasswordSuccess}
-      />
-    </Main>
+        {/* 비밀번호 모달 */}
+        <PasswordModal
+          open={showPasswordModal}
+          onClose={() => setShowPasswordModal(false)}
+          onSuccess={handlePasswordSuccess}
+        />
+      </Main>
+    </>
   );
 };
 

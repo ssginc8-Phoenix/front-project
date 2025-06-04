@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router';
 import GuardianCard from '~/features/patient/components/Guardian/GuardianCard';
 import SidebarMenu from '~/features/patient/components/SidebarMenu';
 import { patientSidebarItems } from '~/features/patient/constants/sidebarItems';
-import GuardianModal from '~/features/patient/components/GuardianModal';
-import GuardianAssignModal from '~/features/patient/components/Guardian/GuardianAssignModal';
-import { getGuardians, type Guardian } from '~/features/patient/api/guardianAPI';
-import { getAllUsers } from '~/features/patient/api/userAPI';
+import { getGuardians, type Guardian, inviteGuardian } from '~/features/patient/api/guardianAPI';
+import useLoginStore from '~/features/user/stores/LoginStore';
+import Header from '~/layout/Header';
+import ReusableModal from '~/features/patient/components/ReusableModal';
 
 // --- 스타일 정의 ---
 const PageWrapper = styled.div`
@@ -108,28 +108,15 @@ const GuardianPage = () => {
   const [selectedGuardian, setSelectedGuardian] = useState<string | null>(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showGuardianModal, setShowGuardianModal] = useState(false);
-  const [patient, setPatient] = useState<{
-    name: string;
-    emoji: string;
-    role: string;
-  } | null>(null); // ✅ 유저 정보 저장
-
+  const [newGuardianEmail, setNewGuardianEmail] = useState(''); // 🔥 추가
+  const { user, fetchMyInfo } = useLoginStore();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [userData, guardianData] = await Promise.all([getAllUsers(), getGuardians()]);
-
-        if (userData.length > 0) {
-          const user = userData[0]; // 첫 번째 유저
-          setPatient({
-            name: user.name,
-            emoji: '👵', // 이모지는 기본값
-            role: '환자',
-          });
-        }
-
+        await fetchMyInfo();
+        const guardianData = await getGuardians();
         const mappedGuardians = guardianData.map((item: Guardian) => ({
           name: item.name,
         }));
@@ -162,55 +149,105 @@ const GuardianPage = () => {
 
   const closeGuardianModal = () => {
     setShowGuardianModal(false);
-  };
-
-  const closeAssignModal = () => {
-    setShowAssignModal(false);
+    setNewGuardianEmail(''); // 모달 닫을 때 초기화
   };
 
   const handleEditGuardian = (guardianName: string) => {
     alert(`${guardianName} 수정 모달 열기 (추후 구현)`);
   };
 
+  // 🔥 보호자 초대 (Guardian 초대 API 호출)
+  const handleInviteGuardian = async () => {
+    if (!newGuardianEmail) return;
+    try {
+      // patientId 임시: 1 (너 DB 확인해서 현재 환자 ID로 바꿔줘야 해)
+      const patientId = 1;
+      await inviteGuardian(patientId, newGuardianEmail);
+      alert('보호자 초대 성공!');
+      closeGuardianModal();
+
+      // 초대 후 목록 새로고침
+      const guardianData = await getGuardians();
+      const mappedGuardians = guardianData.map((item: Guardian) => ({
+        name: item.name,
+      }));
+      setGuardians(mappedGuardians);
+    } catch (error) {
+      console.error('보호자 초대 실패', error);
+      alert('보호자 초대에 실패했습니다.');
+    }
+  };
+
   return (
-    <PageWrapper>
-      <SidebarBox>
-        <ProfileSection>
-          <ProfileEmoji>{patient?.emoji}</ProfileEmoji>
-          <ProfileName>{patient?.name} 님</ProfileName>
-          <ProfileRole>{patient?.role}</ProfileRole>
-        </ProfileSection>
+    <>
+      <Header />
+      <PageWrapper>
+        <SidebarBox>
+          <ProfileSection>
+            <ProfileEmoji>👵</ProfileEmoji>
+            <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
+            <ProfileRole>환자</ProfileRole>
+          </ProfileSection>
 
-        <SidebarMenu
-          items={patientSidebarItems}
-          activeKey="guardian"
-          onChange={handleSidebarChange}
-        />
-      </SidebarBox>
+          <SidebarMenu
+            items={patientSidebarItems}
+            activeKey="guardian"
+            onChange={handleSidebarChange}
+          />
+        </SidebarBox>
 
-      <MainSection>
-        <Title>🧑‍🤝‍🧑 보호자 관리</Title>
-        <ListWrapper>
-          {guardians.slice(0, 2).map((guardian) => (
-            <GuardianCard
-              key={guardian.name}
-              name={guardian.name}
-              onEdit={() => handleEditGuardian(guardian.name)}
-              onClick={() => handleGuardianClick(guardian.name)}
+        <MainSection>
+          <Title>🧑‍🤝‍🧑 보호자 관리</Title>
+          <ListWrapper>
+            {guardians.slice(0, 2).map((guardian) => (
+              <GuardianCard
+                key={guardian.name}
+                name={guardian.name}
+                onEdit={() => handleEditGuardian(guardian.name)}
+                onClick={() => handleGuardianClick(guardian.name)}
+              />
+            ))}
+            <AddCard onClick={openGuardianModal}>＋</AddCard>
+          </ListWrapper>
+        </MainSection>
+
+        {/* --- 보호자 초대 모달 --- */}
+        <ReusableModal open={showGuardianModal} onClose={closeGuardianModal}>
+          <div style={{ padding: 20 }}>
+            <h2 style={{ marginBottom: 20 }}>보호자 초대</h2>
+            <input
+              type="email"
+              value={newGuardianEmail}
+              onChange={(e) => setNewGuardianEmail(e.target.value)}
+              placeholder="보호자 이메일 입력"
+              style={{
+                width: '100%',
+                padding: 12,
+                marginBottom: 20,
+                fontSize: '1.05rem',
+                borderRadius: 8,
+                border: '1.5px solid #ddd',
+              }}
             />
-          ))}
-          <AddCard onClick={openGuardianModal}>＋</AddCard>
-        </ListWrapper>
-      </MainSection>
-
-      <GuardianModal open={showGuardianModal} onClose={closeGuardianModal} />
-      <GuardianAssignModal
-        open={showAssignModal}
-        onClose={closeAssignModal}
-        guardianName={selectedGuardian ?? ''}
-        onAssign={handleAssign}
-      />
-    </PageWrapper>
+            <button
+              onClick={handleInviteGuardian}
+              style={{
+                width: '100%',
+                padding: 12,
+                backgroundColor: '#00499e',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: '1.05rem',
+                cursor: 'pointer',
+              }}
+            >
+              초대하기
+            </button>
+          </div>
+        </ReusableModal>
+      </PageWrapper>
+    </>
   );
 };
 

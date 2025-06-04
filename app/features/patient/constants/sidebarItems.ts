@@ -1,6 +1,6 @@
 export interface SidebarItem {
   label: string;
-  icon: string;
+  icon: React.ReactNode; // 👈 ReactNode 타입!
   key: string;
 }
 

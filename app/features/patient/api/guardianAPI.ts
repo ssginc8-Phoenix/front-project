@@ -15,6 +15,17 @@ interface Page<T> {
 
 const BASE_URL = 'http://localhost:8080';
 
+export const inviteGuardian = async (patientId: number, guardianEmail: string) => {
+  const response = await axios.post(
+    `http://localhost:8080/api/v1/guardians/${patientId}/invite`,
+    {
+      guardianEmail,
+    },
+    { withCredentials: true },
+  );
+  return response.data;
+};
+
 export const getGuardians = async (): Promise<Guardian[]> => {
   const response = await axios.get<Page<Guardian>>(`${BASE_URL}/api/v1/admin/users`, {
     params: {

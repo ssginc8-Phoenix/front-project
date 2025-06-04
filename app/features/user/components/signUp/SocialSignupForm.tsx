@@ -5,7 +5,6 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { submitPatientInfo, submitSocialSignup } from '~/features/user/api/UserAPI';
 import CommonModal from '~/components/common/CommonModal';
 
-// 회원가입 페이지 레이아웃
 const Wrapper = styled.div`
   max-width: 480px;
   margin: 80px auto;
@@ -16,7 +15,6 @@ const Wrapper = styled.div`
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 `;
 
-// 페이지 제목
 const Title = styled.h1`
   font-size: 1.8rem;
   font-weight: 700;
@@ -75,51 +73,12 @@ const Button = styled.button`
   }
 `;
 
-const AddressButton = styled.button`
-  padding: 0.6rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  background-color: #333;
-  color: white;
-  border: none;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #5593ff;
-  }
-`;
-
-const AddressInputGroup = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-`;
-
-const ModalBackground = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 999;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-`;
-
-const ModalWrapper = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  z-index: 1000;
-  transform: translate(-50%, -50%);
-`;
-
 const SocialSignupForm = ({ providerId }: { providerId: string | null }) => {
   const [phone, setPhone] = useState('');
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [address, setAddress] = useState('');
   const [detailAddress, setDetailAddress] = useState('');
   const [residentRegistrationNumber, setResidentRegistrationNumber] = useState('');
-  const [showModal, setShowModal] = useState(false);
   const [isSignupComplete, setIsSignupComplete] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -150,11 +109,6 @@ const SocialSignupForm = ({ providerId }: { providerId: string | null }) => {
     }
   };
 
-  const handleAddressSelect = (addr: string) => {
-    setAddress(addr);
-    setShowModal(false);
-  };
-
   return (
     <Wrapper>
       <Title>회원가입</Title>
@@ -179,12 +133,7 @@ const SocialSignupForm = ({ providerId }: { providerId: string | null }) => {
 
         <FieldGroup>
           <Label>주소</Label>
-          <AddressInputGroup>
-            <Input type="text" value={address} readOnly style={{ flex: 1 }} />
-            <AddressButton type="button" onClick={() => setShowModal(true)}>
-              주소 검색
-            </AddressButton>
-          </AddressInputGroup>
+          <DaumPost address={address} setAddress={setAddress} />
         </FieldGroup>
 
         <FieldGroup>
@@ -211,15 +160,6 @@ const SocialSignupForm = ({ providerId }: { providerId: string | null }) => {
 
         <Button type="submit">다음</Button>
       </Form>
-
-      {showModal && (
-        <>
-          <ModalBackground onClick={() => setShowModal(false)} />
-          <ModalWrapper>
-            <DaumPost setAddress={handleAddressSelect} />
-          </ModalWrapper>
-        </>
-      )}
 
       {isSignupComplete && (
         <CommonModal

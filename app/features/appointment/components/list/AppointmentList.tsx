@@ -6,7 +6,6 @@ import AppointmentCard from '~/features/appointment/components/list/AppointmentC
 import Pagination from '~/components/common/Pagination';
 import { useState } from 'react';
 import type { AppointmentList } from '~/types/appointment';
-import AppointmentDetailModal from '~/features/appointment/components/detail/AppointmentDetailModal';
 
 const Wrapper = styled.div`
   padding: 2rem;
@@ -34,9 +33,12 @@ const PaginationWrapper = styled.div`
   justify-content: center;
 `;
 
-const AppointmentList = () => {
+interface AppointmentListProps {
+  onSelectAppointment: (appointmentId: number) => void;
+}
+
+const AppointmentListComponent = ({ onSelectAppointment }: AppointmentListProps) => {
   const [page, setPage] = useState(0);
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
 
   const { list, pagination, loading, error } = useAppointmentList(page, 5);
 
@@ -52,7 +54,7 @@ const AppointmentList = () => {
           <AppointmentCard
             key={appointment.appointmentId}
             appointment={appointment}
-            onClick={() => setSelectedAppointmentId(appointment.appointmentId)}
+            onClick={() => onSelectAppointment(appointment.appointmentId)}
           />
         ))}
       </Grid>
@@ -64,17 +66,8 @@ const AppointmentList = () => {
           onPageChange={setPage}
         />
       </PaginationWrapper>
-
-      {/** 모달 조건부 렌더링*/}
-      {selectedAppointmentId !== null && (
-        <AppointmentDetailModal
-          appointmentId={selectedAppointmentId}
-          isOpen={true}
-          onClose={() => setSelectedAppointmentId(null)}
-        />
-      )}
     </Wrapper>
   );
 };
 
-export default AppointmentList;
+export default AppointmentListComponent;

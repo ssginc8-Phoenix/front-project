@@ -24,7 +24,7 @@ interface AppointmentPageProps {
   hospitalId: number;
 }
 
-const AppointmentPage = ({ hospitalId }: AppointmentPageProps) => {
+const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
   const {
     patientId,
     patientName,
@@ -136,4 +136,4 @@ const AppointmentPage = ({ hospitalId }: AppointmentPageProps) => {
   );
 };
 
-export default AppointmentPage;
+export default AppointmentRequestPage;

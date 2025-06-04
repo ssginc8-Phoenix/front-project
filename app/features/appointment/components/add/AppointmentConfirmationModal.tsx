@@ -104,7 +104,9 @@ const AppointmentConfirmationModal = ({
           {residentRegistrationNumber}
 
           <SectionTitle>진료 항목</SectionTitle>
-          {appointmentType}
+          {appointmentType === 'SCHEDULED' || appointmentType === 'IMMEDIATE'
+            ? '일반 진료'
+            : appointmentType}
 
           <SectionTitle>진료 정보</SectionTitle>
           {symptoms}

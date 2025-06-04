@@ -4,7 +4,7 @@ export default [
   index('routes/home.tsx'),
   route('/login', 'routes/login.tsx'),
   route('/signup', 'routes/signup.tsx'),
-  route('/signup/form', 'routes/SignupForm.tsx'),
+  route('/signup/form', 'routes/signupForm.tsx'),
   route('/register-doctors', 'routes/doctorForm.tsx'),
   route('/find-email', 'routes/findEmail.tsx'),
   route('/reset-password', 'routes/passwordResetVerify.tsx'),

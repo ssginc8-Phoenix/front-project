@@ -35,11 +35,12 @@ interface DoctorSelectorProps {
 const DoctorSelector = ({ hospitalId }: DoctorSelectorProps) => {
   const { data: doctors, loading, error } = useDoctorList(hospitalId);
 
-  const { doctorId, setDoctorId } = useAppointmentStore();
+  const { doctorId, setDoctorId, doctorName, setDoctorName } = useAppointmentStore();
 
   /* 디버깅용 코드 추후 삭제 예정 */
   useEffect(() => {
     console.log('현재 선택된 의사 ID: ', doctorId);
+    console.log('현재 선택된 의사 이름: ', doctorName);
   }, [doctorId]);
 
   return (
@@ -60,7 +61,13 @@ const DoctorSelector = ({ hospitalId }: DoctorSelectorProps) => {
             imageUrl={doctor.imageUrl}
             isSelected={doctorId === doctor.doctorId}
             onSelect={() => {
-              setDoctorId(doctor.doctorId);
+              if (doctorId === doctor.doctorId) {
+                setDoctorId(null);
+                setDoctorName(null);
+              } else {
+                setDoctorId(doctor.doctorId);
+                setDoctorName(doctor.username);
+              }
             }}
           />
         ))}

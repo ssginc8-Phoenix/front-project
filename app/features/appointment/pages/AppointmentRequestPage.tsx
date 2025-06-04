@@ -44,6 +44,8 @@ const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
 
   const fullSymptom = [...selectedSymptoms, extraSymptom].filter(Boolean).join(', ');
 
+  const appointmentType = dayjs(date).isSame(dayjs(), 'day') ? 'IMMEDIATE' : 'SCHEDULE';
+
   const formatDateTime = (date: Date | null, time: string) => {
     if (!date || !time) return '';
     return `${dayjs(date).locale('ko').format('YYYY.MM.DD (ddd)')} ${time}`;
@@ -81,7 +83,7 @@ const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
       doctorId: doctorId!,
       symptom: fullSymptom,
       question,
-      appointmentType: 'SCHEDULED',
+      appointmentType,
       paymentType: paymentMethod,
       appointmentTime,
     };
@@ -127,7 +129,7 @@ const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
         doctorName={doctorName ?? ''}
         patientName={patientName ?? ''}
         residentRegistrationNumber={rrn ?? ''} // TODO: 마스킹 처리 필요
-        appointmentType="SCHEDULED"
+        appointmentType={appointmentType}
         symptoms={fullSymptom}
         paymentMethod={paymentMethod}
         question={question}

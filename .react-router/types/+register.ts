@@ -15,7 +15,7 @@ type Params = {
   "/appointments": {};
   "/login": {};
   "/signup": {};
-  "/signup/form": {};
+  "/signup/social-form": {};
   "/register-doctors": {};
   "/find-email": {};
   "/reset-password": {};

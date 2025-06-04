@@ -1,5 +1,6 @@
 import type { AppointmentList } from '~/types/appointment';
 import styled from 'styled-components';
+import dayjs from 'dayjs';
 
 const Card = styled.div`
   border: 1px solid #e0e0e0;
@@ -55,6 +56,16 @@ interface AppointmentCardProps {
   onClick: () => void;
 }
 
+const formatAppointmentTime = (isoString: string) => {
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  const hours = `${date.getHours()}`.padStart(2, '0');
+  const minutes = `${date.getMinutes()}`.padStart(2, '0');
+  return `${year}.${month}.${day} ${hours}시 ${minutes}분`;
+};
+
 const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
   const statusKorean = (() => {
     switch (appointment.status) {
@@ -78,7 +89,7 @@ const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
         <StatusBadge status={statusKorean}> {statusKorean} </StatusBadge>
       </TopRow>
       <InfoText> {appointment.doctorName} </InfoText>
-      <InfoText> {appointment.appointmentTime} </InfoText>
+      <InfoText> {formatAppointmentTime(appointment.appointmentTime)} </InfoText>
       <InfoText> {appointment.patientName} </InfoText>
 
       {/** 나중에 리뷰버튼 onClick 수정 */}

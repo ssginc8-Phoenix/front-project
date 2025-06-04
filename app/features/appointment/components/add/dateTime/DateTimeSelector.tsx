@@ -44,16 +44,6 @@ const TimeButton = styled.button<{ selected: boolean }>`
   }
 `;
 
-const weekdayMap: Record<string, string> = {
-  Sunday: 'SUNDAY',
-  Monday: 'MONDAY',
-  Tuesday: 'TUESDAY',
-  Wednesday: 'WEDNESDAY',
-  Thursday: 'THURSDAY',
-  Friday: 'FRIDAY',
-  Saturday: 'SATURDAY',
-};
-
 interface DateTimeSelectorProps {
   doctorId: number | null;
 }
@@ -61,14 +51,12 @@ interface DateTimeSelectorProps {
 const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
   const { date, setDate, time, setTime } = useAppointmentStore();
 
-  const { data: schedules = [], isLoading, isError, error } = useDoctorSchedule(doctorId ?? null);
+  // date를 YYYY-MM-DD 문자열로 변환 (useTimeSlots는 string 타입 date 필요)
+  const dateString = date ? dayjs(date).format('YYYY-MM-DD') : null;
 
-  const selectedDay = date ? weekdayMap[dayjs(date).format('dddd')] : null;
+  // useTimeSlots 훅으로 가능한 시간대 불러오기
+  const { list: timeSlots, loading, error } = useTimeSlots(doctorId, dateString);
 
-  const timeSlots = useTimeSlots({
-    schedules,
-    dayOfWeek: selectedDay ?? '',
-  });
   return (
     <Wrapper>
       <div>
@@ -96,10 +84,10 @@ const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
       {date && (
         <div>
           <SectionTitle>시간 선택</SectionTitle>
-          {isLoading ? (
+          {loading ? (
             <p>시간 정보를 불러오는 중...</p>
-          ) : isError ? (
-            <p>오류가 발생했습니다: {(error as Error).message}</p>
+          ) : error ? (
+            <p>오류가 발생했습니다: {error}</p>
           ) : timeSlots.length === 0 ? (
             <p>해당 날짜에 예약 가능한 시간이 없습니다.</p>
           ) : (

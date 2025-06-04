@@ -22,7 +22,7 @@ const SignUpFormPage = () => {
         setProviderId(id);
       } catch (error) {
         console.error('providerId 조회 실패:', error);
-        setProviderId(null);
+        setProviderId(undefined);
       }
     };
 

@@ -77,29 +77,13 @@ const Button = styled.button`
   }
 `;
 
-const EmailGroup = styled.div`
+const InputWithActionButtonGroup = styled.div`
   display: flex;
   gap: 0.5rem;
   align-items: center;
 `;
 
-const EmailCheckButton = styled(Button)`
-  padding: 0.6rem 1rem;
-  margin: 0;
-  background-color: #007bff;
-  &:hover {
-    background-color: #005fcc;
-  }
-`;
-
-const EmailCheckMessage = styled.div<{ success: boolean }>`
-  font-size: 0.85rem;
-  margin-top: 0.25rem;
-  color: ${(props) => (props.success ? '#007bff' : 'red')};
-  height: 1rem;
-`;
-
-const AddressButton = styled.button`
+const ActionButton = styled.button`
   padding: 0.6rem 1rem;
   border-radius: 0.5rem;
   font-size: 0.9rem;
@@ -113,28 +97,11 @@ const AddressButton = styled.button`
   }
 `;
 
-const AddressInputGroup = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-`;
-
-const ModalBackground = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 999;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-`;
-
-const ModalWrapper = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  z-index: 1000;
-  transform: translate(-50%, -50%);
+const EmailCheckMessage = styled.div<{ success: boolean }>`
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  color: ${(props) => (props.success ? '#007bff' : 'red')};
+  height: 1rem;
 `;
 
 const ErrorMessage = styled.div`
@@ -202,7 +169,6 @@ const UserSignupForm = () => {
   const [emailChecked, setEmailChecked] = useState(false);
   const [emailCheckMessage, setEmailCheckMessage] = useState('');
   const [isEmailCheckSuccess, setIsEmailCheckSuccess] = useState(false);
-  const [showModal, setShowModal] = useState(false);
 
   const isEmailValid = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -224,11 +190,6 @@ const UserSignupForm = () => {
       setIsEmailCheckSuccess(false);
       setEmailChecked(false);
     }
-  };
-
-  const handleAddressSelect = (addr: string) => {
-    setAddress(addr);
-    setShowModal(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -280,12 +241,19 @@ const UserSignupForm = () => {
       <Form onSubmit={handleSubmit} encType="multipart/form-data">
         <FieldGroup>
           <Label>이메일</Label>
-          <EmailGroup>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <EmailCheckButton type="button" onClick={handleEmailCheck}>
+          <InputWithActionButtonGroup>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{ flex: 1 }}
+            />
+            <ActionButton type="button" onClick={handleEmailCheck}>
+              {' '}
               중복 확인
-            </EmailCheckButton>
-          </EmailGroup>
+            </ActionButton>
+          </InputWithActionButtonGroup>
           <EmailCheckMessage success={isEmailCheckSuccess}>{emailCheckMessage}</EmailCheckMessage>
         </FieldGroup>
 
@@ -326,12 +294,7 @@ const UserSignupForm = () => {
 
         <FieldGroup>
           <Label>주소</Label>
-          <AddressInputGroup>
-            <Input type="text" value={address} readOnly style={{ flex: 1 }} />
-            <AddressButton type="button" onClick={() => setShowModal(true)}>
-              주소 검색
-            </AddressButton>
-          </AddressInputGroup>
+          <DaumPost address={address} setAddress={setAddress} />
         </FieldGroup>
 
         <FieldGroup>
@@ -364,15 +327,6 @@ const UserSignupForm = () => {
 
         <Button type="submit">회원가입</Button>
       </Form>
-
-      {showModal && (
-        <>
-          <ModalBackground onClick={() => setShowModal(false)} />
-          <ModalWrapper>
-            <DaumPost setAddress={handleAddressSelect} />
-          </ModalWrapper>
-        </>
-      )}
 
       {isSignupComplete && (
         <CommonModal

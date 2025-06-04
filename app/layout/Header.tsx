@@ -41,7 +41,7 @@ const Notification = styled.div`
     color: #fff;
   }
 `;
-  
+
 const Header = () => {
   const user = useLoginStore((state) => state.user);
 

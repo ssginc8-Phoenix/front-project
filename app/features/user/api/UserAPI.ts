@@ -1,8 +1,10 @@
 import axios from 'axios';
 import type {
   AddDoctorListRequest,
+  ConfirmVerifyCode,
   FindEmailRequest,
   PatientRequest,
+  SendVerifyCode,
   UserRequest,
 } from '~/types/user';
 
@@ -124,6 +126,30 @@ export const submitEmailSignup = async (data: FormData) => {
  */
 export const findEmail = async (data: FindEmailRequest) => {
   const res = await axios.post(`${HOST}/users/email/find`, data, {
+    headers: { 'Content-Type': 'application/json' },
+    withCredentials: true,
+  });
+
+  return res.data;
+};
+
+/**
+ * 인증코드 발송
+ */
+export const sendVerifyCode = async (data: SendVerifyCode) => {
+  const res = await axios.post(`${HOST}/users/email/verify-code/send`, data, {
+    headers: { 'Content-Type': 'application/json' },
+    withCredentials: true,
+  });
+
+  return res.data;
+};
+
+/**
+ * 인증코드 확인
+ */
+export const confirmVerifyCode = async (data: ConfirmVerifyCode) => {
+  const res = await axios.post(`${HOST}/users/email/verify-code/confirm`, data, {
     headers: { 'Content-Type': 'application/json' },
     withCredentials: true,
   });

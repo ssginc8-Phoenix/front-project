@@ -2,7 +2,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { findEmail } from '~/features/user/api/UserAPI';
 import CommonModal from '~/components/common/CommonModal';
-import FindEmailForm from '~/features/user/components/FindEmailForm';
+import FindEmailForm from '~/features/user/components/loginHelper/FindEmailForm';
 import Header from '~/layout/Header';
 
 const Wrapper = styled.div`

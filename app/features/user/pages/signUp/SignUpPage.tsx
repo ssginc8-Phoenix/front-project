@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import RoleCard from '../components/signUp/RoleCard';
+import RoleCard from '../../components/signUp/RoleCard';
 import { useNavigate } from 'react-router-dom';
 import Header from '~/layout/Header';
 

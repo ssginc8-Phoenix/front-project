@@ -1,4 +1,4 @@
-import FindEmailPage from '~/features/user/pages/FindEmailPage';
+import FindEmailPage from '~/features/user/pages/loginHelper/FindEmailPage';
 
 export default function FindEmail() {
   return <FindEmailPage />;

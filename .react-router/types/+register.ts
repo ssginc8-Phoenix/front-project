@@ -17,4 +17,5 @@ type Params = {
   "/signup/form": {};
   "/register-doctors": {};
   "/find-email": {};
+  "/reset-password": {};
 };

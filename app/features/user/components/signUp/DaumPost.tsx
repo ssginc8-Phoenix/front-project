@@ -59,7 +59,6 @@ const DaumPost: React.FC<DaumPostProps> = ({ address, setAddress }) => {
           if (data.buildingName !== '') {
             extraAddress += extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName;
           }
-          fullAddress = fullAddress.replace(localAddress, '');
           fullAddress += extraAddress !== '' ? ` (${extraAddress})` : '';
         }
 

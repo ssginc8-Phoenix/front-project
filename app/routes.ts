@@ -5,7 +5,7 @@ export default [
 
   route('/login', 'routes/login.tsx'),
   route('/signup', 'routes/signup.tsx'),
-  // route('/signup/social-form', 'routes/socialSignupForm.tsx'),
+  route('/signup/form', 'routes/signupForm.tsx'),
   route('/register-doctors', 'routes/doctorForm.tsx'),
   route('/find-email', 'routes/findEmail.tsx'),
   route('/reset-password', 'routes/passwordResetVerify.tsx'),

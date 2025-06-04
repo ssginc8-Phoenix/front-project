@@ -137,6 +137,52 @@ const ModalWrapper = styled.div`
   transform: translate(-50%, -50%);
 `;
 
+const ErrorMessage = styled.div`
+  font-size: 0.85rem;
+  color: red;
+  margin-top: 0.25rem;
+`;
+
+const Notice = styled.div`
+  background-color: #f5f5f5;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.4;
+`;
+
+const validatePassword = (password: string): string => {
+  if (!password || password.length < 8) {
+    return '비밀번호는 최소 8자 이상이어야 합니다.';
+  }
+  let typeCount = 0;
+  if (/[A-Z]/.test(password)) typeCount++;
+  if (/[a-z]/.test(password)) typeCount++;
+  if (/[0-9]/.test(password)) typeCount++;
+  if (/[!@#$%^&*()_+\-={}|\[\]:";'<>?,./`~]/.test(password)) typeCount++;
+  if (typeCount < 2) {
+    return '비밀번호는 영문 대소문자, 숫자, 특수문자 중 2가지 이상을 포함해야 합니다.';
+  }
+  const badSequences = [
+    'abcdefghijklmnopqrstuvwxyz',
+    'qwertyuiop',
+    'asdfghjkl',
+    'zxcvbnm',
+    '0123456789',
+  ];
+  const lower = password.toLowerCase();
+  for (const seq of badSequences) {
+    for (let i = 0; i < seq.length - 3; i++) {
+      if (lower.includes(seq.slice(i, i + 4))) {
+        return '비밀번호에 연속된 문자열을 사용할 수 없습니다.';
+      }
+    }
+  }
+  return '';
+};
+
 const UserSignupForm = () => {
   const [searchParams] = useSearchParams();
   const role = searchParams.get('role') || '';
@@ -144,6 +190,8 @@ const UserSignupForm = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -192,6 +240,19 @@ const UserSignupForm = () => {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setPasswordError('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    const passwordValidationMsg = validatePassword(password);
+    if (passwordValidationMsg) {
+      setPasswordError(passwordValidationMsg);
+      return;
+    }
+
+    setPasswordError('');
+
     const formData = new FormData();
     formData.append('email', email);
     formData.append('password', password);
@@ -230,12 +291,27 @@ const UserSignupForm = () => {
 
         <FieldGroup>
           <Label>비밀번호</Label>
+          <Notice>
+            - 8~15자 이내로 입력해주세요.
+            <br />- 영문 대/소문자, 숫자, 특수문자 2가지 이상을 포함해주세요.
+          </Notice>
           <Input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+        </FieldGroup>
+
+        <FieldGroup>
+          <Label>비밀번호 확인</Label>
+          <Input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+          {passwordError && <ErrorMessage>{passwordError}</ErrorMessage>}
         </FieldGroup>
 
         <FieldGroup>

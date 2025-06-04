@@ -1,5 +1,6 @@
+import { Outlet } from 'react-router-dom';
 import styled from 'styled-components';
-import Profile from '~/common/Profile';
+import Profile from '../common/Profile';
 
 const Header = styled.header`
   padding: 1rem 2rem;
@@ -24,15 +25,24 @@ const Notification = styled.div`
   font-size: 1.5rem;
 `;
 
+const Main = styled.main`
+  padding: 2rem;
+`;
+
 const HeaderLayout = () => {
   return (
-    <Header>
-      <Logo src="/logo.png" alt="logo" />
-      <RightGroup>
-        <Profile />
-        <Notification>🔔</Notification>
-      </RightGroup>
-    </Header>
+    <>
+      <Header>
+        <Logo src="/logo.png" alt="logo" />
+        <RightGroup>
+          <Profile />
+          <Notification>🔔</Notification>
+        </RightGroup>
+      </Header>
+      <Main>
+        <Outlet />
+      </Main>
+    </>
   );
 };
 

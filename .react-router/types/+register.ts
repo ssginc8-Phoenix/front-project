@@ -12,4 +12,14 @@ declare module "react-router" {
 
 type Params = {
   "/": {};
+  "/appointments": {};
+  "/appointments/:appointmentId": {
+    "appointmentId": string;
+  "/login": {};
+  "/signup": {};
+  "/signup/form": {};
+  "/register-doctors": {};
+  "/find-email": {};
+  "/reset-password": {};
+  "/reset-password/set": {};
 };

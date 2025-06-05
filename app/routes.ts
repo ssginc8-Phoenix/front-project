@@ -11,17 +11,21 @@ export default [
   route('/reset-password', 'routes/passwordResetVerify.tsx'),
   route('/reset-password/set', 'routes/resetPassword.tsx'),
 
+  route('/patients/mypage', 'routes/PatientMypage.tsx'),
+  route('/patients/info', 'routes/PatientInfoPage.tsx'),
+  route('/patients/guardian', 'routes/GuardianPage.tsx'),
+
   route('appointments', 'layout/MainLayout.tsx', [
     route('', 'routes/appointmentRequest.tsx'),
     route('list', 'routes/appointmentList.tsx'),
   ]),
 
   route('/reviews', 'layout/ReviewLayout.tsx', [
-    route('me/*', 'features/reviews/pages/ReviewMyListPage.tsx', [
+    route('me', 'features/reviews/pages/ReviewMyListPage.tsx', [
       route('new', 'features/reviews/pages/ReviewCreatePage.tsx'),
       route(':reviewId/edit', 'features/reviews/pages/ReviewEditPage.tsx'),
       route(':reviewId/delete', 'features/reviews/pages/ReviewDeletePage.tsx'),
     ]),
-    route('hospital/:hospitalId', 'features/reviews/pages/ReviewAllListPage.tsx'),
+    // route('hospital/:hospitalId', 'features/reviews/pages/ReviewAllListPage.tsx'),
   ]),
 ] satisfies RouteConfig;

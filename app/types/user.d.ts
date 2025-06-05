@@ -9,6 +9,7 @@ interface ProfileProps {
 }
 
 interface User {
+  userId: bigint;
   name: string;
   profileImageUrl: string;
 }

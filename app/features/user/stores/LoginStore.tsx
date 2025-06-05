@@ -18,7 +18,14 @@ const useLoginStore = create<LoginState>()(
       login: async ({ email, password }: UserRequest) => {
         await login({ email, password });
         const myInfo = await getMyInfo();
-        set({ user: { name: myInfo.name, profileImageUrl: myInfo.profileImageUrl } });
+        console.log(myInfo.userId);
+        set({
+          user: {
+            userId: myInfo.userId,
+            name: myInfo.name,
+            profileImageUrl: myInfo.profileImageUrl,
+          },
+        });
       },
 
       logout: async () => {
@@ -29,14 +36,20 @@ const useLoginStore = create<LoginState>()(
       fetchMyInfo: async () => {
         try {
           const myInfo = await getMyInfo();
-          set({ user: { name: myInfo.name, profileImageUrl: myInfo.profileImageUrl } });
+          set({
+            user: {
+              userId: myInfo.userId,
+              name: myInfo.name,
+              profileImageUrl: myInfo.profileImageUrl,
+            },
+          });
         } catch {
           set({ user: null });
         }
       },
     }),
     {
-      name: 'login-storage', // localStorage에 저장될 키
+      name: 'login-storage',
       partialize: (state) => ({ user: state.user }), // 저장할 필드 제한
     },
   ),

@@ -1,9 +1,32 @@
-import { type RouteConfig, route } from '@react-router/dev/routes';
+import 'react-router';
 
-export default [
-  route('/', 'layout/HeaderLayout.tsx', [
-    route('/hospitals/:hospitalId', 'features/hospitals/routes/hospitalDetailPage.tsx'),
-    route('/test', 'features/hospitals/routes/hospitalSearchPage.tsx'),
-    route('/test2', 'features/hospitals/routes/HospitalAdminDashboardPage.tsx'),
-  ]),
-] satisfies RouteConfig;
+declare module 'react-router' {
+  interface Register {
+    params: Params;
+  }
+
+  interface Future {
+    unstable_middleware: false;
+  }
+}
+
+type Params = {
+  '/': {};
+  '/hospitals/:hospitalId': {
+    hospitalId: string;
+  };
+  '/test': {};
+  '/test2': {};
+  '/login': {};
+  '/signup': {};
+  '/register-doctors': {};
+  '/find-email': {};
+  '/reset-password': {};
+  '/reset-password/set': {};
+  '/appointments': {};
+  '/appointments/list': {};
+  '/reviews': {};
+  '/reviews/me/*': {
+    '*': string;
+  };
+};

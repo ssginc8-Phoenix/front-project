@@ -166,5 +166,11 @@ Thumbs.db
 *.tsbuildinfo
 *.swp
 
+# React Router 개발 중 생성되는 캐시/타입 디렉토리
+.react-router
+.react-router/types/
+
+# Vite 관련 캐시
+.vite/
 
 # End of https://www.toptal.com/developers/gitignore/api/react,intellij

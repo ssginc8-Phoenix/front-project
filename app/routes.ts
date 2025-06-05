@@ -5,6 +5,9 @@ export default [
   route('/appointments', 'layout/MainLayout.tsx', [
     route(':appointmentId', 'routes/appointment.tsx'),
   ]),
+  route('/patients/mypage', 'routes/PatientMypage.tsx'),
+  route('/patients/info', 'routes/PatientInfoPage.tsx'),
+  route('/patients/guardian', 'routes/GuardianPage.tsx'),
   route('/login', 'routes/login.tsx'),
   route('/signup', 'routes/signup.tsx'),
   route('/signup/form', 'routes/SignupForm.tsx'),

@@ -1,6 +1,8 @@
 import type { AppointmentList } from '~/types/appointment';
 import styled from 'styled-components';
 import { StatusBadge } from '~/components/styled/StatusBadge';
+import ReviewCreateModal from '~/features/reviews/component/modal/ReviewCreateModal';
+import { useState } from 'react';
 
 const Card = styled.div`
   border: 1px solid #e0e0e0;
@@ -57,6 +59,8 @@ const formatAppointmentTime = (isoString: string) => {
 };
 
 const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
+  const [isReviewOpen, setReviewOpen] = useState(false);
+
   const statusKorean = (() => {
     switch (appointment.status) {
       case 'REQUESTED':
@@ -72,19 +76,42 @@ const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
     }
   })();
 
-  return (
-    <Card onClick={onClick}>
-      <TopRow>
-        <HospitalName> {appointment.hospitalName} </HospitalName>
-        <StatusBadge status={appointment.status}> {statusKorean} </StatusBadge>
-      </TopRow>
-      <InfoText> {appointment.doctorName} </InfoText>
-      <InfoText> {formatAppointmentTime(appointment.appointmentTime)} </InfoText>
-      <InfoText> {appointment.patientName} </InfoText>
+  const handleReviewSaved = () => {
+    setReviewOpen(false);
+  };
 
-      {/** 나중에 리뷰버튼 onClick 수정 */}
-      <ReviewButton onClick={(e) => e.stopPropagation()}>리뷰작성</ReviewButton>
-    </Card>
+  return (
+    <>
+      <Card onClick={onClick}>
+        <TopRow>
+          <HospitalName> {appointment.hospitalName} </HospitalName>
+          <StatusBadge status={appointment.status}> {statusKorean} </StatusBadge>
+        </TopRow>
+        <InfoText> {appointment.doctorName} </InfoText>
+        <InfoText> {formatAppointmentTime(appointment.appointmentTime)} </InfoText>
+        <InfoText> {appointment.patientName} </InfoText>
+
+        <ReviewButton
+          onClick={(e) => {
+            e.stopPropagation();
+            setReviewOpen(true);
+          }}
+        >
+          리뷰작성
+        </ReviewButton>
+      </Card>
+
+      <ReviewCreateModal
+        isOpen={isReviewOpen}
+        onClose={() => setReviewOpen(false)}
+        onSaved={handleReviewSaved}
+        hospitalName={appointment.hospitalName}
+        doctorName={appointment.doctorName}
+        userId={0 /** zustand의 user의 userId 가져오기*/}
+        doctorId={appointment.doctorId}
+        appointmentId={appointment.appointmentId}
+      />
+    </>
   );
 };
 

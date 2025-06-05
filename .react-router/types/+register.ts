@@ -1,25 +1,27 @@
-import "react-router";
+import 'react-router';
 
-declare module "react-router" {
+declare module 'react-router' {
   interface Register {
     params: Params;
   }
 
   interface Future {
-    unstable_middleware: false
+    unstable_middleware: false;
   }
 }
 
 type Params = {
-  "/": {};
-  "/appointments": {};
-  "/appointments/:appointmentId": {
-    "appointmentId": string;
-  "/login": {};
-  "/signup": {};
-  "/signup/form": {};
-  "/register-doctors": {};
-  "/find-email": {};
-  "/reset-password": {};
-  "/reset-password/set": {};
+  '/': {};
+  '/login': {};
+  '/signup': {};
+  '/register-doctors': {};
+  '/find-email': {};
+  '/reset-password': {};
+  '/reset-password/set': {};
+  '/appointments': {};
+  '/appointments/list': {};
+  '/reviews': {};
+  '/reviews/me/*': {
+    '*': string;
+  };
 };

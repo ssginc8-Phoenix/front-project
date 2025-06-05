@@ -9,13 +9,13 @@ interface ProfileProps {
 }
 
 interface User {
-  userId: bigint;
+  userId: number;
   name: string;
   profileImageUrl: string;
 }
 
 interface PatientRequest {
-  userId: bigint;
+  userId: number;
   residentRegistrationNumber: string;
 }
 

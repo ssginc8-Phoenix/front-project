@@ -13,14 +13,15 @@ export const Overlay = styled.div`
 
 export const Container = styled.div`
   position: relative;
-  width: 100%;
-  max-width: 48rem;
-  max-height: 90vh;
+  width: 90%;
+  max-width: 900px;
+  max-height: 80vh;
   background-color: #ffffff;
   border-radius: 0.5rem;
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
   margin: 1rem;
   overflow-y: auto;
+  padding: 2rem 1.5rem;
 `;
 
 export const CloseButton = styled.button`
@@ -41,11 +42,11 @@ export const CloseButton = styled.button`
 export const HeaderWrapper = styled.div`
   text-align: center;
   margin-bottom: 1.5rem;
-  padding: 2rem 2rem 1.5rem;
+  padding: 0 2rem;
 `;
 
 export const HospitalName = styled.h2`
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 0.25rem;
 `;
@@ -63,40 +64,41 @@ export const PromptText = styled.p`
 
 export const KeywordsSection = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 2rem;
+  justify-content: center;
   margin-bottom: 1.5rem;
-
-  @media (min-width: 768px) {
-    flex-direction: row;
-  }
 `;
 
 export const SectionContainer = styled.div`
-  flex: 1;
-  padding: 0 2rem;
+  flex: 1 1 300px;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const SectionTitle = styled.h3`
   font-size: 1.125rem;
   font-weight: 500;
   text-align: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 `;
 
 export const KeywordsWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
+  gap: 0.75rem;
   justify-content: center;
-  gap: 0.5rem;
 `;
 
 export const GoodKeywordButton = styled.button<{ selected: boolean }>`
-  padding: 0.25rem 0.75rem;
+  flex: 1 1 auto;
+  min-width: 120px;
+  padding: 0.5rem 1rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
   transition: background-color 0.2s;
+
   ${({ selected }) =>
     selected
       ? `
@@ -107,6 +109,7 @@ export const GoodKeywordButton = styled.button<{ selected: boolean }>`
       : `
     background-color: rgba(236, 242, 254, 0.7);
     color: #00499E;
+    border: none;
     &:hover {
       background-color: #ECF2FE;
     }
@@ -114,11 +117,14 @@ export const GoodKeywordButton = styled.button<{ selected: boolean }>`
 `;
 
 export const BadKeywordButton = styled.button<{ selected: boolean }>`
-  padding: 0.25rem 0.75rem;
+  flex: 1 1 auto;
+  min-width: 120px;
+  padding: 0.5rem 1rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
   transition: background-color 0.2s;
+
   ${({ selected }) =>
     selected
       ? `
@@ -129,6 +135,7 @@ export const BadKeywordButton = styled.button<{ selected: boolean }>`
       : `
     background-color: rgba(241, 168, 158, 0.7);
     color: #7A261D;
+    border: none;
     &:hover {
       background-color: #F1A89E;
     }
@@ -137,7 +144,7 @@ export const BadKeywordButton = styled.button<{ selected: boolean }>`
 
 export const Textarea = styled.textarea`
   width: 100%;
-  height: 8rem;
+  height: 6rem;
   padding: 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
@@ -153,5 +160,5 @@ export const Textarea = styled.textarea`
 export const ButtonGroup = styled.div`
   display: flex;
   justify-content: center;
-  padding: 1.5rem 0 2rem 0;
+  padding: 1rem 0;
 `;

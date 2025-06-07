@@ -28,12 +28,14 @@ export default function ReviewCreateModal({
   const [goodKeywords, setGoodKeywords] = useState<string[]>([]);
   const [badKeywords, setBadKeywords] = useState<string[]>([]);
   const [contents, setContents] = useState<string>('');
+  const [showSuccess, setShowSuccess] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
       setGoodKeywords([]);
       setBadKeywords([]);
       setContents('');
+      setShowSuccess(false);
     }
   }, [isOpen]);
 
@@ -66,8 +68,15 @@ export default function ReviewCreateModal({
         contents,
         keywords,
       });
+      // 성공 메시지 보여주기
+      setShowSuccess(true);
+      // 부모 콜백 호출
       onSaved();
-      onClose();
+      // 자동으로 닫기
+      setTimeout(() => {
+        setShowSuccess(false);
+        onClose();
+      }, 1500);
     } catch {
       alert('리뷰 작성 중 오류가 발생했습니다.');
     }
@@ -87,6 +96,7 @@ export default function ReviewCreateModal({
         </S.HeaderWrapper>
 
         <S.KeywordsSection>
+          {/* 좋은 점 */}
           <S.SectionContainer>
             <S.SectionTitle>좋은 점</S.SectionTitle>
             <S.KeywordsWrapper>
@@ -98,13 +108,14 @@ export default function ReviewCreateModal({
                     selected={selected}
                     onClick={() => toggleGoodKeyword(opt.value)}
                   >
-                    {opt.label}
+                    {opt.emoji} {opt.label}
                   </S.GoodKeywordButton>
                 );
               })}
             </S.KeywordsWrapper>
           </S.SectionContainer>
 
+          {/* 아쉬운 점 */}
           <S.SectionContainer>
             <S.SectionTitle>아쉬운 점</S.SectionTitle>
             <S.KeywordsWrapper>
@@ -116,7 +127,7 @@ export default function ReviewCreateModal({
                     selected={selected}
                     onClick={() => toggleBadKeyword(opt.value)}
                   >
-                    {opt.label}
+                    {opt.emoji} {opt.label}
                   </S.BadKeywordButton>
                 );
               })}
@@ -141,6 +152,13 @@ export default function ReviewCreateModal({
             onChange={(e) => setContents(e.target.value)}
           />
         </S.SectionContainer>
+
+        {/* 저장 성공 메시지 */}
+        {showSuccess && (
+          <p style={{ textAlign: 'center', color: '#00499e', marginBottom: '1rem' }}>
+            🎉 리뷰가 저장되었습니다!
+          </p>
+        )}
 
         <S.ButtonGroup>
           <Button onClick={handleSave} disabled={!isValid()}>

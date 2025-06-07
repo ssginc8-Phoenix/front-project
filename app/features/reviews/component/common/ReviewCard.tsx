@@ -40,11 +40,11 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review, onEdit, onDelete
     <CardContainer>
       <CardHeader>
         <HeaderLeft>
-          <HospitalText>바른이비인후과</HospitalText>
-          <DoctorText>{authorName} 의사</DoctorText>
+          <HospitalText>{review.hospitalName}</HospitalText>
+          <DoctorText>{review.doctorName}</DoctorText>
         </HeaderLeft>
         <HeaderRight>
-          <IconButton onClick={() => onEdit(review.reviewId)} title="편집">
+          <IconButton onClick={() => onEdit(review.reviewId)} title="수정">
             ✏️
           </IconButton>
           <IconButton onClick={() => onDelete(review.reviewId)} title="삭제">

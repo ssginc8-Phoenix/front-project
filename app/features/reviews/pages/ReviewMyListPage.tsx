@@ -1,209 +1,160 @@
+// src/features/reviews/pages/ReviewMyListPage.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import type { ReviewMyListResponse } from '~/features/reviews/types/review';
-import ReviewCreateModal from '~/features/reviews/component/modal/ReviewCreateModal';
-import ReviewEditModal from '~/features/reviews/component/modal/ReviewEditModal';
-
-import { ReviewSuccessModal } from '~/features/reviews/component/modal/ReviewCreateSuccessModal';
-import ReviewDeleteModal from '~/features/reviews/component/modal/ReviewDeleteModal';
-import ReviewDeleteSuccessModal from '~/features/reviews/component/modal/ReviewDeleteSuccessModal';
+import { useReviewList } from '~/features/reviews/hooks/useReviewList';
+import * as reviewAPI from '~/features/reviews/api/reviewAPI';
 import { ReviewMyListComponent } from '~/features/reviews/component/ReviewMyList';
+import { ReviewEditModal } from '~/features/reviews/component/modal/ReviewEditModal';
+import { ReviewDeleteModal } from '~/features/reviews/component/modal/ReviewDeleteModal';
+import { AlertModal } from '~/features/reviews/component/common/AlertModal';
+
+import type { ReviewMyListResponse } from '~/features/reviews/types/review';
 import { GOOD_OPTIONS, BAD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
-import ReviewEditSuccessModal from '~/features/reviews/component/modal/ReviewEditSuccessModal';
+import useLoginStore from '~/features/user/stores/LoginStore';
+import ReviewCreateModal from '~/features/reviews/component/modal/ReviewCreateModal';
 
 export default function ReviewMyListPage() {
-  const [reviews, setReviews] = useState<ReviewMyListResponse[]>([
-    {
-      // 더미데이터입니다
-      reviewId: 101,
-      createdAt: '2025-06-01T10:00:00.000Z',
-      contents: '의사 선생님이 매우 친절했어요!',
-      keywords: ['FRIENDLY_DOCTOR', 'CLEAN_HOSPITAL'],
-      reportCount: 0,
-    },
-    {
-      reviewId: 102,
-      createdAt: '2025-05-28T14:30:00.000Z',
-      contents: '대기 시간이 길었지만, 진료는 만족스러웠습니다.',
-      keywords: ['SHORT_WAIT', 'PROFESSIONAL'],
-      reportCount: 1,
-    },
-    {
-      reviewId: 103,
-      createdAt: '2025-05-20T09:15:00.000Z',
-      contents: '시설이 깨끗하고 위치가 좋아요!',
-      keywords: ['NICE_FACILITY', 'GOOD_LOCATION'],
-      reportCount: 0,
-    },
-  ]);
+  // 1) 로그인된 유저 체크
+  const user = useLoginStore((state) => state.user);
+  if (!user) return <p>로그인 후 이용해주세요.</p>;
 
-  const [currentPage, setCurrentPage] = useState<number>(0);
-  const pageSize = 3;
-  const totalPages = Math.ceil(reviews.length / pageSize);
-  const pagedReviews = reviews.slice(currentPage * pageSize, currentPage * pageSize + pageSize);
+  // 2) 페이징 상태
+  const [page, setPage] = useState(0);
+  const { reviews, totalPages, loading, error } = useReviewList(page, 10);
 
-  const loading = false;
-  const error: string | null = null;
+  // 3) 리뷰 작성 모달 상태
+  const [isCreateOpen, setCreateOpen] = useState(false);
+  const [createDone, setCreateDone] = useState(false);
 
-  const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
-  const openCreate = () => setIsCreateOpen(true);
-  const closeCreate = () => setIsCreateOpen(false);
-
-  const [isCreateSuccessOpen, setIsCreateSuccessOpen] = useState<boolean>(false);
-  const openCreateSuccess = () => setIsCreateSuccessOpen(true);
-  const closeCreateSuccess = () => setIsCreateSuccessOpen(false);
-
-  const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
+  // 4) 수정 모달 상태
+  const [isEditOpen, setEditOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<ReviewMyListResponse | null>(null);
-  const openEdit = () => setIsEditOpen(true);
-  const closeEdit = () => setIsEditOpen(false);
+  const [editDone, setEditDone] = useState(false);
 
-  const [isEditSuccessOpen, setIsEditSuccessOpen] = useState<boolean>(false);
-  const openEditSuccess = () => setIsEditSuccessOpen(true);
-  const closeEditSuccess = () => setIsEditSuccessOpen(false);
+  // 5) 삭제 모달 상태
+  const [isDeleteOpen, setDeleteOpen] = useState(false);
+  const [deleteDone, setDeleteDone] = useState(false);
 
-  const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
-  const [selectedReviewId, setSelectedReviewId] = useState<number | null>(null);
+  // — 이벤트 핸들러들 —
 
-  const [isDeleteSuccessOpen, setIsDeleteSuccessOpen] = useState<boolean>(false);
-
-  const handleCreate = (payload: {
-    goodKeywords: string[];
-    badKeywords: string[];
-    contents: string;
-  }) => {
-    const newId = Math.max(0, ...reviews.map((r) => r.reviewId)) + 1;
-    const newReview: ReviewMyListResponse = {
-      reviewId: newId,
-      createdAt: new Date().toISOString(),
-      contents: payload.contents,
-      keywords: [...payload.goodKeywords, ...payload.badKeywords],
-      reportCount: 0,
-    };
-    setReviews([newReview, ...reviews]);
-    closeCreate();
-    openCreateSuccess();
+  // 리뷰 작성 버튼 클릭
+  const openCreate = () => setCreateOpen(true);
+  const handleCreateDone = () => {
+    setCreateOpen(false);
+    setCreateDone(true);
+    setPage((p) => p); // 목록 다시 불러오기
   };
 
-  const handleEditClick = (review: ReviewMyListResponse) => {
+  // 리뷰 수정 오픈
+  const openEdit = (review: ReviewMyListResponse) => {
     setSelectedReview(review);
-    openEdit();
+    setEditOpen(true);
+  };
+  const handleEditDone = () => {
+    setEditOpen(false);
+    setEditDone(true);
+    setPage((p) => p);
   };
 
-  const handleEditSubmit = (payload: {
-    reviewId: number;
-    goodKeywords: string[];
-    badKeywords: string[];
-    contents: string;
-  }) => {
-    setReviews((prev) =>
-      prev.map((r) =>
-        r.reviewId === payload.reviewId
-          ? {
-              ...r,
-              contents: payload.contents,
-              keywords: [...payload.goodKeywords, ...payload.badKeywords],
-            }
-          : r,
-      ),
-    );
-    closeEdit();
-    openEditSuccess();
-  };
-
-  const openDelete = (id: number) => {
-    setSelectedReviewId(id);
-    setIsDeleteOpen(true);
-  };
-  const closeDelete = () => {
-    setIsDeleteOpen(false);
-    setSelectedReviewId(null);
-  };
-
-  const handleConfirmDelete = () => {
-    if (selectedReviewId != null) {
-      setReviews((prev) => prev.filter((r) => r.reviewId !== selectedReviewId));
-    }
-    closeDelete();
-    setIsDeleteSuccessOpen(true);
+  // 리뷰 삭제 확정
+  const confirmDelete = async () => {
+    if (!selectedReview) return;
+    await reviewAPI.deleteReview(selectedReview.reviewId);
+    setDeleteOpen(false);
+    setDeleteDone(true);
+    setPage((p) => p);
   };
 
   return (
     <PageWrapper>
       <Header>
         <Title>✏️ 리뷰 관리</Title>
-        <TopBar>
-          <button
-            onClick={openCreate}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            리뷰 작성
-          </button>
-        </TopBar>
+        <CreateButton onClick={openCreate}>리뷰 작성</CreateButton>
       </Header>
       <Divider />
 
-      <ReviewMyListComponent
-        reviews={pagedReviews}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        loading={loading}
-        error={error}
-        onPageChange={(newPage: number) => setCurrentPage(newPage)}
-        onDeleteReview={openDelete}
-        onEditReview={handleEditClick}
+      {loading && <p>로딩 중…</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      {!loading && !error && (
+        <ReviewMyListComponent
+          reviews={reviews}
+          currentPage={page}
+          totalPages={totalPages}
+          loading={loading}
+          error={error}
+          onPageChange={setPage}
+          onEditReview={openEdit}
+          onDeleteReview={(review) => {
+            setSelectedReview(review);
+            setDeleteOpen(true);
+          }}
+        />
+      )}
+
+      {/* — 리뷰 작성 모달 — */}
+      {isCreateOpen && (
+        <ReviewCreateModal
+          isOpen={isCreateOpen}
+          onClose={() => setCreateOpen(false)}
+          onSaved={handleCreateDone}
+          hospitalId={123}
+          doctorId={456}
+          appointmentId={789}
+          userId={Number(user.userId)}
+          hospitalName={'부경대학교병원'}
+          doctorName={'김의사'}
+        />
+      )}
+      <AlertModal
+        isOpen={createDone}
+        onClose={() => setCreateDone(false)}
+        message="리뷰가 작성되었습니다!"
       />
 
-      <ReviewCreateModal
-        isOpen={isCreateOpen}
-        onClose={closeCreate}
-        onSubmit={handleCreate}
-        hospitalName="바른 이비인후과"
-        doctorName="김현재 원장"
-        userId={999}
-        doctorId={888}
-        appointmentId={777}
-      />
-
-      <ReviewSuccessModal isOpen={isCreateSuccessOpen} onClose={closeCreateSuccess} />
-
-      {selectedReview && (
+      {/* — 리뷰 수정 모달 — */}
+      {selectedReview && isEditOpen && (
         <ReviewEditModal
           isOpen={isEditOpen}
-          onClose={closeEdit}
-          onSubmit={handleEditSubmit}
-          hospitalName="바른 이비인후과"
-          doctorName="김현재 원장"
-          userId={999}
-          doctorId={888}
-          appointmentId={777}
+          onClose={() => setEditOpen(false)}
+          onSaved={handleEditDone}
           reviewId={selectedReview.reviewId}
+          hospitalName={selectedReview.hospitalName}
+          doctorName={selectedReview.doctorName}
           initialGood={selectedReview.keywords.filter((kw) =>
-            GOOD_OPTIONS.map((opt) => opt.value).includes(kw),
+            GOOD_OPTIONS.some((o) => o.value === kw),
           )}
           initialBad={selectedReview.keywords.filter((kw) =>
-            BAD_OPTIONS.map((opt) => opt.value).includes(kw),
+            BAD_OPTIONS.some((o) => o.value === kw),
           )}
           initialContents={selectedReview.contents}
         />
       )}
-
-      <ReviewEditSuccessModal isOpen={isEditSuccessOpen} onClose={closeEditSuccess} />
-
-      <ReviewDeleteModal
-        isOpen={isDeleteOpen}
-        onClose={closeDelete}
-        onConfirm={handleConfirmDelete}
+      <AlertModal
+        isOpen={editDone}
+        onClose={() => setEditDone(false)}
+        message="수정이 완료되었습니다!"
       />
 
-      <ReviewDeleteSuccessModal
-        isOpen={isDeleteSuccessOpen}
-        onClose={() => setIsDeleteSuccessOpen(false)}
+      {/* — 리뷰 삭제 모달 — */}
+      {selectedReview && (
+        <ReviewDeleteModal
+          isOpen={isDeleteOpen}
+          onClose={() => setDeleteOpen(false)}
+          onConfirm={confirmDelete}
+        />
+      )}
+      <AlertModal
+        isOpen={deleteDone}
+        onClose={() => setDeleteDone(false)}
+        message="리뷰가 삭제되었습니다!"
       />
     </PageWrapper>
   );
 }
+
+// ───────── styled ─────────
 
 const PageWrapper = styled.div`
   max-width: 800px;
@@ -222,9 +173,16 @@ const Title = styled.h1`
   font-weight: 700;
 `;
 
-const TopBar = styled.div`
-  display: flex;
-  gap: 0.5rem;
+const CreateButton = styled.button`
+  padding: 0.5rem 1rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  &:hover {
+    background-color: #1d4ed8;
+  }
 `;
 
 const Divider = styled.hr`

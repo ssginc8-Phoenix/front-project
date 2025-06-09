@@ -1,4 +1,3 @@
-// src/features/reviews/pages/ReviewMyListPage.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
@@ -103,7 +102,7 @@ export default function ReviewMyListPage() {
           doctorId={456}
           appointmentId={789}
           userId={Number(user.userId)}
-          hospitalName={'부경대학교병원'}
+          hospitalName={'바른이비인후과'}
           doctorName={'김의사'}
         />
       )}

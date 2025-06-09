@@ -3,27 +3,30 @@ import * as S from '~/features/reviews/component/common/ReviewModal.styles';
 import { Button } from '~/features/reviews/component/common/Button';
 import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
 import { addReview } from '~/features/reviews/api/reviewAPI';
+import type { ReviewCreateRequest } from '~/features/reviews/types/review';
 
 interface ReviewCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSaved: () => void;
+  userId: number;
+  hospitalId: number;
+  doctorId: number;
+  appointmentId: number;
   hospitalName: string;
   doctorName: string;
-  userId: number;
-  doctorId?: number;
-  appointmentId?: number;
-  onSaved: () => void;
 }
 
 export default function ReviewCreateModal({
   isOpen,
   onClose,
+  onSaved,
+  userId,
+  hospitalId,
+  doctorId,
+  appointmentId,
   hospitalName,
   doctorName,
-  userId,
-  doctorId = 0,
-  appointmentId = 0,
-  onSaved,
 }: ReviewCreateModalProps) {
   const [goodKeywords, setGoodKeywords] = useState<string[]>([]);
   const [badKeywords, setBadKeywords] = useState<string[]>([]);
@@ -59,25 +62,24 @@ export default function ReviewCreateModal({
       return;
     }
     const keywords = [...goodKeywords, ...badKeywords];
+    const payload: ReviewCreateRequest = {
+      userId,
+      hospitalId,
+      doctorId,
+      appointmentId,
+      keywords,
+      contents,
+    };
     try {
-      await addReview({
-        userId,
-        hospitalId: 0,
-        doctorId,
-        appointmentId,
-        contents,
-        keywords,
-      });
-      // 성공 메시지 보여주기
+      await addReview(payload);
       setShowSuccess(true);
-      // 부모 콜백 호출
       onSaved();
-      // 자동으로 닫기
       setTimeout(() => {
         setShowSuccess(false);
         onClose();
       }, 1500);
-    } catch {
+    } catch (err) {
+      console.error(err);
       alert('리뷰 작성 중 오류가 발생했습니다.');
     }
   };
@@ -96,7 +98,6 @@ export default function ReviewCreateModal({
         </S.HeaderWrapper>
 
         <S.KeywordsSection>
-          {/* 좋은 점 */}
           <S.SectionContainer>
             <S.SectionTitle>좋은 점</S.SectionTitle>
             <S.KeywordsWrapper>
@@ -115,7 +116,6 @@ export default function ReviewCreateModal({
             </S.KeywordsWrapper>
           </S.SectionContainer>
 
-          {/* 아쉬운 점 */}
           <S.SectionContainer>
             <S.SectionTitle>아쉬운 점</S.SectionTitle>
             <S.KeywordsWrapper>
@@ -153,7 +153,6 @@ export default function ReviewCreateModal({
           />
         </S.SectionContainer>
 
-        {/* 저장 성공 메시지 */}
         {showSuccess && (
           <p style={{ textAlign: 'center', color: '#00499e', marginBottom: '1rem' }}>
             🎉 리뷰가 저장되었습니다!

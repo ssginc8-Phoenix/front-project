@@ -34,6 +34,17 @@ export interface ReviewMyListResponse {
 
 export interface ReviewAllListResponse {
   reviewId: number;
+  hospitalId: number;
+  hospitalName: string;
+  contents: string;
+  createdAt: string;
+  updatedAt: string;
+  reportCount: number;
+  keywords: string[];
+}
+
+export interface HospitalReviewResponse {
+  reviewId: number;
   contents: string;
   createdAt: string;
   reportCount: number;

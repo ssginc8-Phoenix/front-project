@@ -56,7 +56,7 @@ const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
   const dateTime = formatDateTime(date, time);
 
   const handlePreSubmit = () => {
-    if (!patientId || !doctorId || !date || !time || !paymentMethod) {
+    if (!patientId || !doctorId || !date || !time || !fullSymptom || !paymentMethod) {
       alert('필수 정보를 모두 입력하세요');
       return;
     }

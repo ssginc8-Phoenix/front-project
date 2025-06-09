@@ -15,9 +15,9 @@ export default [
   route('', 'layout/MainLayout.tsx', [
     /** PATIENT 환자 영역 */
     route('patients', 'routes/patient/emptyPage.tsx', [
-      route('mypage', 'routes/PatientMyPage.tsx'),
-      route('info', 'routes/PatientInfoPage.tsx'),
-      route('guardian', 'routes/GuardianPage.tsx'),
+      route('mypage', 'routes/patient/PatientMyPage.tsx'),
+      route('info', 'routes/patient/PatientInfoPage.tsx'),
+      route('guardian', 'routes/patient/GuardianPage.tsx'),
     ]),
 
     /** GUARDIAN 보호자 영역 */

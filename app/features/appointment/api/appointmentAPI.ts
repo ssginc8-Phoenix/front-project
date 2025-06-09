@@ -50,3 +50,43 @@ export const getAvailableTimeSlots = async (doctorId: number, date: string) => {
 
   return res.data;
 };
+
+/**
+ * 예약의 상태 변경 요청
+ */
+export const changeStatus = async (appointmentId: number, status: string) => {
+  const res = await axios.patch(
+    `${HOST}/${appointmentId}/status`,
+    {
+      status: status,
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,
+    },
+  );
+
+  return res.data;
+};
+
+/**
+ * 재예약
+ */
+export const reschedule = async (appointmentId: number, newTime: string) => {
+  const res = await axios.post(
+    `${HOST}/${appointmentId}/reschedule`,
+    {
+      newTime: newTime,
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,
+    },
+  );
+
+  return res.data;
+};

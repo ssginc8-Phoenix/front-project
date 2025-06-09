@@ -5,6 +5,11 @@ import styled from 'styled-components';
 import Button from '~/components/styled/Button';
 import { RefreshButton } from '~/components/styled/RefreshButton';
 import { FiRefreshCw } from 'react-icons/fi';
+import { useAppointmentActions } from '~/features/appointment/hooks/useAppointmentActions';
+import { useState } from 'react';
+import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
+import dayjs from 'dayjs';
+import DateTimeSelectorModal from '~/features/appointment/components/detail/DateTimeSelectorModal';
 
 const Overlay = styled.div`
   position: fixed;
@@ -102,85 +107,140 @@ const AppointmentDetailModal = ({
     isRefetching,
   } = useAppointmentDetail(appointmentId);
 
+  const { cancelAppointment, rescheduleAppointment } = useAppointmentActions();
+
+  const [isDateTimeSelectorModalOpen, setDateTimeSelectorModalOpen] = useState(false);
+  const { date, time, setDate, setTime } = useAppointmentStore();
+
+  const canModify = appointment?.status === 'REQUESTED' || appointment?.status === 'CONFIRMED';
+
+  /** 예약 취소 */
+  const handleCancel = async () => {
+    if (!appointment) return;
+    const success = await cancelAppointment(appointment.appointmentId);
+    if (success) refetch();
+  };
+
+  /** 재예약 */
+  const handleReschedule = async () => {
+    if (!appointment || !date || !time) {
+      alert('날짜와 시간을 선택해주세요.');
+      return;
+    }
+
+    const newDateTime = dayjs(
+      `${dayjs(date).format('YYYY-MM-DD')} ${time}`,
+      'YYYY-MM-DD HH:mm:ss',
+    ).format('YYYY-MM-DDTHH:mm:ss');
+
+    const success = await rescheduleAppointment(appointment.appointmentId, newDateTime);
+    if (success) {
+      refetch();
+      setDateTimeSelectorModalOpen(false);
+    }
+  };
+
   return (
-    <Overlay>
-      <Modal>
-        {isLoading && <LoadingIndicator />}
-        {error && <ErrorMessage message={error.message} />}
+    <>
+      <Overlay>
+        <Modal>
+          {isLoading && <LoadingIndicator />}
+          {error && <ErrorMessage message={error.message} />}
 
-        {appointment && (
-          <>
-            <Header>
-              <TitleRow>
-                <Title>
-                  {new Date(appointment.appointmentTime).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}{' '}
-                  진료예약
-                </Title>
-                <RefreshButton onClick={() => refetch()} disabled={isRefetching} title="새로고침">
-                  <FiRefreshCw size={20} />
-                </RefreshButton>
-              </TitleRow>
+          {appointment && (
+            <>
+              <Header>
+                <TitleRow>
+                  <Title>
+                    {new Date(appointment.appointmentTime).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}{' '}
+                    진료예약
+                  </Title>
+                  <RefreshButton onClick={() => refetch()} disabled={isRefetching} title="새로고침">
+                    <FiRefreshCw size={20} />
+                  </RefreshButton>
+                </TitleRow>
 
-              <HospitalName> {appointment.hospitalName} </HospitalName>
-              <SubInfo>
-                {appointment.doctorName} 원장 <br />
-                접수: {appointment.createdAt}
-              </SubInfo>
-            </Header>
+                <HospitalName> {appointment.hospitalName} </HospitalName>
+                <SubInfo>
+                  {appointment.doctorName} 원장 <br />
+                  접수: {appointment.createdAt}
+                </SubInfo>
+              </Header>
 
-            <Divider />
+              <Divider />
 
-            <Section>
-              <SectionTitle>병원 정보</SectionTitle>
-              <InfoText>{appointment.hospitalName}</InfoText>
-              <InfoText>{appointment.doctorName} 원장</InfoText>
-            </Section>
-
-            <Section>
-              <SectionTitle>환자 정보</SectionTitle>
-              <InfoText>{appointment.patientName}</InfoText>
-              {/* 주민등록번호 : 민감정보 보여주는 게 맞는가? */}
-            </Section>
-
-            <Section>
-              <SectionTitle>진료 항목</SectionTitle>
-              <InfoText>
-                {appointment.appointmentType === 'SCHEDULED' ||
-                appointment.appointmentType === 'IMMEDIATE'
-                  ? '일반 진료'
-                  : appointment.appointmentType}
-              </InfoText>
-            </Section>
-
-            <Section>
-              <SectionTitle>진료 정보</SectionTitle>
-              <InfoText>{appointment.symptom}</InfoText>
-            </Section>
-
-            {appointment.question && (
               <Section>
-                <SectionTitle>원장님께 궁금한 점</SectionTitle>
-                <InfoText>{appointment.question}</InfoText>
+                <SectionTitle>병원 정보</SectionTitle>
+                <InfoText>{appointment.hospitalName}</InfoText>
+                <InfoText>{appointment.doctorName} 원장</InfoText>
               </Section>
-            )}
 
-            <Section>
-              <SectionTitle>수납 방법</SectionTitle>
-              <InfoText>{appointment.paymentType}</InfoText>
-            </Section>
+              <Section>
+                <SectionTitle>환자 정보</SectionTitle>
+                <InfoText>{appointment.patientName}</InfoText>
+                {/* 주민등록번호 : 민감정보 보여주는 게 맞는가? */}
+              </Section>
 
-            <ButtonGroup>
-              <Button $variant="primary" onClick={onClose}>
-                닫기
-              </Button>
-            </ButtonGroup>
-          </>
-        )}
-      </Modal>
-    </Overlay>
+              <Section>
+                <SectionTitle>진료 항목</SectionTitle>
+                <InfoText>
+                  {appointment.appointmentType === 'SCHEDULED' ||
+                  appointment.appointmentType === 'IMMEDIATE'
+                    ? '일반 진료'
+                    : appointment.appointmentType}
+                </InfoText>
+              </Section>
+
+              <Section>
+                <SectionTitle>진료 정보</SectionTitle>
+                <InfoText>{appointment.symptom}</InfoText>
+              </Section>
+
+              {appointment.question && (
+                <Section>
+                  <SectionTitle>원장님께 궁금한 점</SectionTitle>
+                  <InfoText>{appointment.question}</InfoText>
+                </Section>
+              )}
+
+              <Section>
+                <SectionTitle>수납 방법</SectionTitle>
+                <InfoText>{appointment.paymentType}</InfoText>
+              </Section>
+
+              {canModify && (
+                <ButtonGroup>
+                  <Button $variant="secondary" onClick={handleCancel}>
+                    예약 취소
+                  </Button>
+                  <Button $variant="primary" onClick={() => setDateTimeSelectorModalOpen(true)}>
+                    재예약
+                  </Button>
+                </ButtonGroup>
+              )}
+
+              <ButtonGroup>
+                <Button $variant="primary" onClick={onClose}>
+                  닫기
+                </Button>
+              </ButtonGroup>
+            </>
+          )}
+        </Modal>
+      </Overlay>
+
+      {appointment && (
+        <DateTimeSelectorModal
+          isOpen={isDateTimeSelectorModalOpen}
+          onClose={() => setDateTimeSelectorModalOpen(false)}
+          doctorId={appointment.doctorId}
+          onConfirm={handleReschedule}
+        />
+      )}
+    </>
   );
 };
 

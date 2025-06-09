@@ -18,3 +18,20 @@ export const useAppointmentList = (page: number, size: number = 5) => {
     error,
   };
 };
+
+export const useAppointmentDashboard = (page: number = 0, size: number = 100) => {
+  const { data, loading, error } = useAsync<AppointmentListPage>(
+    () => getAppointmentList(page, size),
+    [page, size],
+  );
+
+  return {
+    list: data?.content ?? [],
+    pagination: {
+      totalPages: data?.totalPages ?? 0,
+      currentPage: data?.number ?? 0,
+    },
+    loading,
+    error,
+  };
+};

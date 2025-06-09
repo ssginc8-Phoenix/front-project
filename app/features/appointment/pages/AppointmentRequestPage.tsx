@@ -44,7 +44,7 @@ const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
 
   const fullSymptom = [...selectedSymptoms, extraSymptom].filter(Boolean).join(', ');
 
-  const appointmentType = dayjs(date).isSame(dayjs(), 'day') ? 'IMMEDIATE' : 'SCHEDULE';
+  const appointmentType = dayjs(date).isSame(dayjs(), 'day') ? 'IMMEDIATE' : 'SCHEDULED';
 
   const formatDateTime = (date: Date | null, time: string) => {
     if (!date || !time) return '';

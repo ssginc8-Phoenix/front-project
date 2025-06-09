@@ -1,151 +1,130 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import {
+  GOOD_OPTIONS,
+  BAD_OPTIONS,
+  type KeywordOption,
+} from '~/features/reviews/constants/keywordOptions';
 import * as S from '~/features/reviews/component/common/ReviewModal.styles';
+import { useReviewStore } from '~/features/reviews/hooks/useReviewStore';
+import { Modal } from '~/features/reviews/component/common/Modal';
 import { Button } from '~/features/reviews/component/common/Button';
-import { editReview } from '~/features/reviews/api/reviewAPI';
-import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
 
-interface ReviewEditModalProps {
+interface Props {
   isOpen: boolean;
   onClose: () => void;
+  onSaved: () => void;
   hospitalName: string;
   doctorName: string;
-  userId: number;
-  doctorId?: number;
-  appointmentId?: number;
   reviewId: number;
   initialGood: string[];
   initialBad: string[];
   initialContents: string;
-  onSaved: () => void;
 }
 
-export default function ReviewEditModal({
+export function ReviewEditModal({
   isOpen,
   onClose,
+  onSaved,
   hospitalName,
   doctorName,
   reviewId,
   initialGood,
   initialBad,
   initialContents,
-  onSaved,
-}: ReviewEditModalProps) {
-  const [goodKeywords, setGoodKeywords] = useState<string[]>([]);
-  const [badKeywords, setBadKeywords] = useState<string[]>([]);
-  const [contents, setContents] = useState<string>('');
+}: Props) {
+  const { keywords, contents, loading, error, setField, toggleKeyword, resetForm, updateReview } =
+    useReviewStore();
 
+  // 열릴 때마다 초기값 세팅
   useEffect(() => {
-    if (isOpen) {
-      setGoodKeywords(initialGood);
-      setBadKeywords(initialBad);
-      setContents(initialContents);
-    }
-  }, [isOpen, initialGood, initialBad, initialContents]);
+    if (!isOpen) return;
+    resetForm();
+    // 기존 선택 키워드 재토글
+    initialGood.forEach((k) => toggleKeyword(k));
+    initialBad.forEach((k) => toggleKeyword(k));
+    setField('contents', initialContents);
+  }, [isOpen, resetForm, toggleKeyword, setField, initialGood, initialBad, initialContents]);
 
-  const toggleGoodKeyword = (value: string) =>
-    setGoodKeywords((prev) =>
-      prev.includes(value) ? prev.filter((x) => x !== value) : [...prev, value],
-    );
-  const toggleBadKeyword = (value: string) =>
-    setBadKeywords((prev) =>
-      prev.includes(value) ? prev.filter((x) => x !== value) : [...prev, value],
-    );
-
-  const isValid = () => {
-    const total = goodKeywords.length + badKeywords.length;
-    return total >= 3 && total <= 8 && contents.trim().length > 0;
-  };
+  const isValid = keywords.length >= 3 && keywords.length <= 8 && contents.trim().length > 0;
 
   const handleSave = async () => {
-    if (!isValid()) {
-      alert('키워드를 3개 이상, 8개 이하로 선택하고 리뷰 내용을 입력해주세요.');
+    if (!isValid) {
+      alert('키워드를 3~8개, 내용을 입력해주세요.');
       return;
     }
-    const keywords = [...goodKeywords, ...badKeywords];
-    try {
-      await editReview(reviewId, { contents, keywords });
-      onSaved();
-      onClose();
-    } catch {
-      alert('리뷰 수정 중 오류가 발생했습니다.');
-    }
+    await updateReview(reviewId);
+    onSaved();
+    onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <S.Overlay onClick={onClose}>
-      <S.Container onClick={(e) => e.stopPropagation()}>
-        <S.CloseButton onClick={onClose}>✕</S.CloseButton>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="리뷰를 수정해주세요!"
+      actions={
+        <Button onClick={handleSave} disabled={!isValid || loading}>
+          {loading ? '저장 중…' : '수정하기'}
+        </Button>
+      }
+    >
+      {/* header */}
+      <S.HeaderWrapper>
+        <S.HospitalName>{hospitalName}</S.HospitalName>
+        <S.DoctorName>{doctorName} 원장</S.DoctorName>
+        <S.PromptText>진료 리뷰를 수정해주세요!</S.PromptText>
+      </S.HeaderWrapper>
 
-        <S.HeaderWrapper>
-          <S.HospitalName>{hospitalName}</S.HospitalName>
-          <S.DoctorName>{doctorName} 원장</S.DoctorName>
-          <S.PromptText>진료 리뷰를 수정해주세요!</S.PromptText>
-        </S.HeaderWrapper>
-
-        <S.KeywordsSection>
-          <S.SectionContainer>
-            <S.SectionTitle>좋은 점</S.SectionTitle>
-            <S.KeywordsWrapper>
-              {GOOD_OPTIONS.map((opt) => {
-                const selected = goodKeywords.includes(opt.value);
-                return (
-                  <S.GoodKeywordButton
-                    key={opt.value}
-                    selected={selected}
-                    onClick={() => toggleGoodKeyword(opt.value)}
-                  >
-                    {opt.label}
-                  </S.GoodKeywordButton>
-                );
-              })}
-            </S.KeywordsWrapper>
-          </S.SectionContainer>
-
-          <S.SectionContainer>
-            <S.SectionTitle>아쉬운 점</S.SectionTitle>
-            <S.KeywordsWrapper>
-              {BAD_OPTIONS.map((opt) => {
-                const selected = badKeywords.includes(opt.value);
-                return (
-                  <S.BadKeywordButton
-                    key={opt.value}
-                    selected={selected}
-                    onClick={() => toggleBadKeyword(opt.value)}
-                  >
-                    {opt.label}
-                  </S.BadKeywordButton>
-                );
-              })}
-            </S.KeywordsWrapper>
-          </S.SectionContainer>
-        </S.KeywordsSection>
-
-        <S.SectionContainer style={{ padding: '0 2rem', marginBottom: '1rem' }}>
-          <label
-            style={{
-              display: 'block',
-              marginBottom: '0.25rem',
-              fontWeight: 500,
-              color: '#374151',
-            }}
-          >
-            리뷰 내용
-          </label>
-          <S.Textarea
-            placeholder="리뷰 내용을 수정해주세요."
-            value={contents}
-            onChange={(e) => setContents(e.target.value)}
-          />
+      {/* keywords */}
+      <S.KeywordsSection>
+        <S.SectionContainer>
+          <S.SectionTitle>좋은 점</S.SectionTitle>
+          <S.KeywordsWrapper>
+            {GOOD_OPTIONS.map((o: KeywordOption) => (
+              <S.GoodKeywordButton
+                key={o.value}
+                selected={keywords.includes(o.value)}
+                onClick={() => toggleKeyword(o.value)}
+              >
+                {o.emoji} {o.label}
+              </S.GoodKeywordButton>
+            ))}
+          </S.KeywordsWrapper>
         </S.SectionContainer>
 
-        <S.ButtonGroup>
-          <Button onClick={handleSave} disabled={!isValid()}>
-            수정하기
-          </Button>
-        </S.ButtonGroup>
-      </S.Container>
-    </S.Overlay>
+        <S.SectionContainer>
+          <S.SectionTitle>아쉬운 점</S.SectionTitle>
+          <S.KeywordsWrapper>
+            {BAD_OPTIONS.map((o: KeywordOption) => (
+              <S.BadKeywordButton
+                key={o.value}
+                selected={keywords.includes(o.value)}
+                onClick={() => toggleKeyword(o.value)}
+              >
+                {o.emoji} {o.label}
+              </S.BadKeywordButton>
+            ))}
+          </S.KeywordsWrapper>
+        </S.SectionContainer>
+      </S.KeywordsSection>
+
+      {/* textarea */}
+      <S.SectionContainer style={{ padding: '0 2rem', marginBottom: '1rem' }}>
+        <label
+          style={{
+            display: 'block',
+            marginBottom: '0.25rem',
+            fontWeight: 500,
+            color: '#374151',
+          }}
+        >
+          리뷰 내용
+        </label>
+        <S.Textarea value={contents} onChange={(e) => setField('contents', e.target.value)} />
+      </S.SectionContainer>
+
+      {/* 에러 */}
+      {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+    </Modal>
   );
 }

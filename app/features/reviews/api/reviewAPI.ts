@@ -7,6 +7,8 @@ import type {
   Page,
   ReviewMyListResponse,
   ReviewUpdateRequest,
+  ReviewAllListResponse,
+  HospitalReviewResponse,
 } from '~/features/reviews/types/review';
 
 const host = 'http://localhost:8080/api/v1/reviews';
@@ -48,4 +50,36 @@ export async function getMyReviews(
     withCredentials: true,
   });
   return res.data;
+}
+
+// 관리자 전체 리뷰 조회
+export async function getAllReviews(
+  page: number,
+  size: number,
+): Promise<ActionResult<Page<ReviewAllListResponse>>> {
+  const url = 'http://localhost:8080/api/v1/admin/reviews';
+  const res = await axios.get(`${url}?page=${page}&size=${size}`, {
+    withCredentials: true,
+  });
+  return res.data;
+}
+
+// 병원별 리뷰 페이징 조회
+export async function getHospitalReviews(
+  hospitalId: number,
+  page: number,
+  size: number,
+): Promise<ActionResult<Page<HospitalReviewResponse>>> {
+  const url = `http://localhost:8080/api/v1/hospitals/${hospitalId}/reviews`;
+  const res = await axios.get(`${url}?page=${page}&size=${size}`, {
+    withCredentials: true,
+  });
+  return res.data;
+}
+
+// 리뷰 신고 기능
+export async function reportReview(reviewId: number): Promise<void> {
+  await axios.post(`http://localhost:8080/api/v1/reviews/${reviewId}/report`, null, {
+    withCredentials: true,
+  });
 }

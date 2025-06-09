@@ -183,7 +183,6 @@ const GuardianPatientPage = () => {
 
   return (
     <>
-      <Header />
       <PageWrapper>
         <SidebarBox>
           <ProfileSection>

@@ -107,8 +107,10 @@ const GuardianPage = () => {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showGuardianModal, setShowGuardianModal] = useState(false);
   const [newGuardianEmail, setNewGuardianEmail] = useState('');
-  const [inviteCode, setInviteCode] = useState<string | null>(null); // 초대코드 저장
-  const [showInviteCodeModal, setShowInviteCodeModal] = useState(false); // 초대코드 모달 열기
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [showInviteCodeModal, setShowInviteCodeModal] = useState(false);
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false); // ✅ 초대 완료 모달
 
   const { user, fetchMyInfo } = useLoginStore();
   const navigate = useNavigate();
@@ -140,16 +142,6 @@ const GuardianPage = () => {
     navigate(`/patients/${key}`);
   };
 
-  const handleGuardianClick = (guardianName: string) => {
-    setSelectedGuardian(guardianName);
-    setShowAssignModal(true);
-  };
-
-  const handleAssign = () => {
-    alert(`${selectedGuardian}에게 위임되었습니다.`);
-    setShowAssignModal(false);
-  };
-
   const openGuardianModal = () => {
     setShowGuardianModal(true);
   };
@@ -159,18 +151,15 @@ const GuardianPage = () => {
     setNewGuardianEmail('');
   };
 
-  const handleEditGuardian = (guardianName: string) => {
-    alert(`${guardianName} 수정 모달 열기 (추후 구현)`);
-  };
-
   const handleInviteGuardian = async () => {
     if (!newGuardianEmail) return;
     try {
       if (!patientInfo?.patientId) return;
-      const res = await inviteGuardian(patientInfo.patientId, newGuardianEmail); // 🔥 수정: 초대 응답 받아오기
-      setInviteCode(res.inviteCode); // 🔥 초대코드 저장
-      setShowInviteCodeModal(true); // 🔥 초대코드 모달 열기
-      closeGuardianModal(); // 이메일 입력 모달 닫기
+      const res = await inviteGuardian(patientInfo.patientId, newGuardianEmail);
+      setInviteCode(res.inviteCode);
+
+      closeGuardianModal();
+      setShowSuccessModal(true); // ✅ 초대 완료 모달 먼저 열기
 
       const guardianData = await getGuardians(patientInfo.patientId);
       setGuardians(guardianData);
@@ -178,6 +167,11 @@ const GuardianPage = () => {
       console.error('보호자 초대 실패', error);
       alert('보호자 초대에 실패했습니다.');
     }
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    setShowInviteCodeModal(true); // ✅ 성공 모달 닫고 초대코드 모달 열기
   };
 
   return (
@@ -205,8 +199,8 @@ const GuardianPage = () => {
               <GuardianCard
                 key={guardian.name}
                 name={guardian.name}
-                onEdit={() => handleEditGuardian(guardian.name)}
-                onClick={() => handleGuardianClick(guardian.name)}
+                onEdit={() => console.log(`${guardian.name} 수정 (추후)`)}
+                onClick={() => console.log(`${guardian.name} 클릭 (추후)`)}
               />
             ))}
             <AddCard onClick={openGuardianModal}>＋</AddCard>
@@ -248,7 +242,31 @@ const GuardianPage = () => {
             </button>
           </div>
         </ReusableModal>
-        {/* 초대코드 모달 */}
+
+        {/* ✅ 초대 성공 모달 */}
+        <ReusableModal open={showSuccessModal} onClose={handleSuccessModalClose}>
+          <div style={{ padding: 20, textAlign: 'center' }}>
+            <h2 style={{ marginBottom: 20 }}>초대코드가 발송되었습니다! 📧</h2>
+            <p style={{ marginBottom: 20 }}>보호자 이메일로 초대코드가 전송되었습니다.</p>
+            <button
+              onClick={handleSuccessModalClose}
+              style={{
+                width: '100%',
+                padding: 12,
+                backgroundColor: '#00499e',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: '1.05rem',
+                cursor: 'pointer',
+              }}
+            >
+              확인
+            </button>
+          </div>
+        </ReusableModal>
+
+        {/* ✅ 초대코드 보여주는 모달 */}
         <ReusableModal open={showInviteCodeModal} onClose={() => setShowInviteCodeModal(false)}>
           <div style={{ padding: 20 }}>
             <h2 style={{ marginBottom: 20 }}>초대코드가 생성되었습니다 🎉</h2>

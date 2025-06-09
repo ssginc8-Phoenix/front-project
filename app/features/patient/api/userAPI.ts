@@ -5,8 +5,8 @@ const HOST = 'http://localhost:8080/api/v1/users/me';
 export interface User {
   userId: number;
   name: string;
-  email: string; // 추가
-  phone: string; // 추가
+  email: string;
+  phone: string;
   address: string;
   profileImageUrl: string;
 }
@@ -16,13 +16,10 @@ export interface User {
  */
 export const verifyPassword = async (password: string) => {
   const response = await axios.post(
-    'http://localhost:8080/api/v1/users/verify-password',
-    {
-      password,
-    },
+    'http://localhost:8080/api/v1/users/check-password',
+    { password },
     { withCredentials: true },
   );
-
   return response.data;
 };
 
@@ -31,7 +28,7 @@ export const verifyPassword = async (password: string) => {
  */
 export const getUserInfo = async (): Promise<User> => {
   const res = await axios.get(HOST, {
-    withCredentials: true, // ✅ 추가
+    withCredentials: true,
   });
   return res.data;
 };
@@ -45,7 +42,9 @@ export const updateUserInfo = async (payload: {
   phone: string;
   address: string;
 }) => {
-  const res = await axios.patch(HOST, payload);
+  const res = await axios.patch(HOST, payload, {
+    withCredentials: true,
+  });
   return res.data;
 };
 
@@ -53,10 +52,15 @@ export const updateUserInfo = async (payload: {
  * 유저 탈퇴 API
  */
 export const deleteAccount = async () => {
-  const res = await axios.delete(HOST);
+  const res = await axios.delete(HOST, {
+    withCredentials: true,
+  });
   return res.data;
 };
 
+/**
+ * (관리자용) 전체 유저 조회 API
+ */
 export const getAllUsers = async () => {
   const response = await axios.get('http://localhost:8080/api/v1/admin/users', {
     params: {

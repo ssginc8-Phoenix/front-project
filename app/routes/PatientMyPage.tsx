@@ -106,35 +106,6 @@ const DashboardButton = styled.button`
   }
 `;
 
-const CenterSection = styled.section`
-  display: flex;
-  justify-content: center;
-  margin-top: 30px;
-`;
-
-const CenterButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 48px;
-  background-color: #eaf1fe;
-  color: #2261bb;
-  font-weight: 700;
-  border-radius: 26px;
-  border: none;
-  font-size: 1.18rem;
-  box-shadow: 0 2px 12px rgba(34, 97, 187, 0.07);
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    box-shadow 0.15s;
-
-  &:hover {
-    background-color: #dbe8fb;
-    box-shadow: 0 4px 24px rgba(34, 97, 187, 0.12);
-  }
-`;
-
 // --- 컴포넌트
 export const PatientMyPage = () => {
   const navigate = useNavigate();
@@ -147,22 +118,21 @@ export const PatientMyPage = () => {
 
   const handleDashboardClick = (key: string) => {
     if (key === 'info') {
-      setShowPasswordModal(true);
+      setShowPasswordModal(true); // 🔥 비밀번호 확인 모달 열기
     } else {
       navigate(`/patients/${key}`);
     }
   };
 
   const handlePasswordSuccess = () => {
-    setShowPasswordModal(false);
-    navigate('/patients/info');
+    setShowPasswordModal(false); // 🔥 모달 닫고
+    navigate('/patients/info'); // 🔥 정보관리 페이지로 이동
   };
 
   return (
     <>
-      <Header></Header>
+      <Header />
       <Main>
-        {/* 프로필 */}
         <ProfileRow>
           <ProfileEmoji role="img" aria-label="profile">
             👵
@@ -174,7 +144,6 @@ export const PatientMyPage = () => {
 
         <Divider />
 
-        {/* 대시보드 */}
         <DashboardSection>
           <DashboardGrid>
             {dashboardItems.map((item) => (
@@ -186,15 +155,7 @@ export const PatientMyPage = () => {
           </DashboardGrid>
         </DashboardSection>
 
-        {/* 고객센터 */}
-        <CenterSection>
-          <CenterButton type="button" onClick={() => alert('고객센터 연결(테스트용)')}>
-            <span style={{ fontSize: '1.35rem' }}>💬</span>
-            실시간 고객센터 연결
-          </CenterButton>
-        </CenterSection>
-
-        {/* 비밀번호 모달 */}
+        {/* 비밀번호 확인 모달 */}
         <PasswordModal
           open={showPasswordModal}
           onClose={() => setShowPasswordModal(false)}

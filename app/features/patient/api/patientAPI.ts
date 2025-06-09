@@ -7,10 +7,13 @@ const HOST = 'http://localhost:8080/api/v1/patients';
  * 환자 본인 정보 조회 API
  */
 export const getPatientInfo = async (): Promise<{
-  name: string;
-  birthDate: string;
+  patientId: number;
+  userId: number;
+  residentRegistrationNumber: string;
 }> => {
-  const res = await axios.get(`${HOST}/me`);
+  const res = await axios.get(`${HOST}/me`, {
+    withCredentials: true,
+  });
   return res.data;
 };
 
@@ -18,7 +21,9 @@ export const getPatientInfo = async (): Promise<{
  * 환자 목록 조회 API
  */
 export const getPatientList = async () => {
-  const res = await axios.get(HOST);
+  const res = await axios.get(HOST, {
+    withCredentials: true,
+  });
   return res.data;
 };
 
@@ -28,7 +33,9 @@ export const getPatientList = async () => {
 export const createPatient = async (
   payload: Omit<Patient, 'patientId' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
 ): Promise<Patient> => {
-  const res = await axios.post<Patient>(HOST, payload);
+  const res = await axios.post<Patient>(HOST, payload, {
+    withCredentials: true,
+  });
   return res.data;
 };
 
@@ -39,7 +46,9 @@ export const updatePatient = async (
   patientId: number,
   payload: Partial<Omit<Patient, 'patientId'>>,
 ): Promise<Patient> => {
-  const res = await axios.patch<Patient>(`${HOST}/${patientId}`, payload);
+  const res = await axios.patch<Patient>(`${HOST}/${patientId}`, payload, {
+    withCredentials: true,
+  });
   return res.data;
 };
 
@@ -47,5 +56,7 @@ export const updatePatient = async (
  * 환자 삭제 API
  */
 export const deletePatient = async (patientId: number): Promise<void> => {
-  await axios.delete(`${HOST}/${patientId}`);
+  await axios.delete(`${HOST}/${patientId}`, {
+    withCredentials: true,
+  });
 };

@@ -5,9 +5,12 @@ import GuardianCard from '~/features/patient/components/Guardian/GuardianCard';
 import SidebarMenu from '~/features/patient/components/SidebarMenu';
 import { patientSidebarItems } from '~/features/patient/constants/sidebarItems';
 import { getGuardians, type Guardian, inviteGuardian } from '~/features/patient/api/guardianAPI';
+import { getUserInfo } from '~/features/patient/api/userAPI';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import Header from '~/layout/Header';
 import ReusableModal from '~/features/patient/components/ReusableModal';
+import { getPatientInfo } from '~/features/patient/api/patientAPI';
+import type { User } from '~/types/user';
 
 // --- 스타일 정의 ---
 const PageWrapper = styled.div`
@@ -95,20 +98,18 @@ const ProfileRole = styled.div`
   font-size: 1rem;
 `;
 
-// --- 더미 환자 데이터 (나중에 API 연결 가능) ---
-// const dummyPatient = {
-//   name: '김순자',
-//   emoji: '👵',
-//   role: '환자',
-// };
-
 // --- 메인 컴포넌트 ---
 const GuardianPage = () => {
   const [guardians, setGuardians] = useState<Guardian[]>([]);
+  const [userinfo, setUserinfo] = useState<User | null>(null);
+  const [patientInfo, setPatientInfo] = useState<{ patientId: number; name: string } | null>(null);
   const [selectedGuardian, setSelectedGuardian] = useState<string | null>(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showGuardianModal, setShowGuardianModal] = useState(false);
-  const [newGuardianEmail, setNewGuardianEmail] = useState(''); // 🔥 추가
+  const [newGuardianEmail, setNewGuardianEmail] = useState('');
+  const [inviteCode, setInviteCode] = useState<string | null>(null); // 초대코드 저장
+  const [showInviteCodeModal, setShowInviteCodeModal] = useState(false); // 초대코드 모달 열기
+
   const { user, fetchMyInfo } = useLoginStore();
   const navigate = useNavigate();
 
@@ -116,13 +117,19 @@ const GuardianPage = () => {
     const fetchData = async () => {
       try {
         await fetchMyInfo();
-        const guardianData = await getGuardians();
-        const mappedGuardians = guardianData.map((item: Guardian) => ({
-          name: item.name,
-        }));
-        setGuardians(mappedGuardians);
+        const userRes = await getUserInfo();
+        setUserinfo(userRes);
+
+        const patientRes = await getPatientInfo();
+        setPatientInfo({
+          patientId: patientRes.patientId,
+          name: userRes.name,
+        });
+
+        const guardianData = await getGuardians(patientRes.patientId);
+        setGuardians(guardianData);
       } catch (error) {
-        console.error('데이터 불러오기 실패', error);
+        console.error('유저/환자 정보 가져오기 실패', error);
       }
     };
 
@@ -149,29 +156,24 @@ const GuardianPage = () => {
 
   const closeGuardianModal = () => {
     setShowGuardianModal(false);
-    setNewGuardianEmail(''); // 모달 닫을 때 초기화
+    setNewGuardianEmail('');
   };
 
   const handleEditGuardian = (guardianName: string) => {
     alert(`${guardianName} 수정 모달 열기 (추후 구현)`);
   };
 
-  // 🔥 보호자 초대 (Guardian 초대 API 호출)
   const handleInviteGuardian = async () => {
     if (!newGuardianEmail) return;
     try {
-      // patientId 임시: 1 (너 DB 확인해서 현재 환자 ID로 바꿔줘야 해)
-      const patientId = 1;
-      await inviteGuardian(patientId, newGuardianEmail);
-      alert('보호자 초대 성공!');
-      closeGuardianModal();
+      if (!patientInfo?.patientId) return;
+      const res = await inviteGuardian(patientInfo.patientId, newGuardianEmail); // 🔥 수정: 초대 응답 받아오기
+      setInviteCode(res.inviteCode); // 🔥 초대코드 저장
+      setShowInviteCodeModal(true); // 🔥 초대코드 모달 열기
+      closeGuardianModal(); // 이메일 입력 모달 닫기
 
-      // 초대 후 목록 새로고침
-      const guardianData = await getGuardians();
-      const mappedGuardians = guardianData.map((item: Guardian) => ({
-        name: item.name,
-      }));
-      setGuardians(mappedGuardians);
+      const guardianData = await getGuardians(patientInfo.patientId);
+      setGuardians(guardianData);
     } catch (error) {
       console.error('보호자 초대 실패', error);
       alert('보호자 초대에 실패했습니다.');
@@ -199,7 +201,7 @@ const GuardianPage = () => {
         <MainSection>
           <Title>🧑‍🤝‍🧑 보호자 관리</Title>
           <ListWrapper>
-            {guardians.slice(0, 2).map((guardian) => (
+            {guardians.map((guardian) => (
               <GuardianCard
                 key={guardian.name}
                 name={guardian.name}
@@ -211,7 +213,7 @@ const GuardianPage = () => {
           </ListWrapper>
         </MainSection>
 
-        {/* --- 보호자 초대 모달 --- */}
+        {/* 보호자 초대 모달 */}
         <ReusableModal open={showGuardianModal} onClose={closeGuardianModal}>
           <div style={{ padding: 20 }}>
             <h2 style={{ marginBottom: 20 }}>보호자 초대</h2>
@@ -243,6 +245,43 @@ const GuardianPage = () => {
               }}
             >
               초대하기
+            </button>
+          </div>
+        </ReusableModal>
+        {/* 초대코드 모달 */}
+        <ReusableModal open={showInviteCodeModal} onClose={() => setShowInviteCodeModal(false)}>
+          <div style={{ padding: 20 }}>
+            <h2 style={{ marginBottom: 20 }}>초대코드가 생성되었습니다 🎉</h2>
+            {inviteCode && (
+              <div
+                style={{
+                  backgroundColor: '#f0f0f0',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  marginBottom: '20px',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {inviteCode}
+              </div>
+            )}
+            <button
+              onClick={() => setShowInviteCodeModal(false)}
+              style={{
+                width: '100%',
+                padding: 12,
+                backgroundColor: '#00499e',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: '1.05rem',
+                cursor: 'pointer',
+              }}
+            >
+              확인
             </button>
           </div>
         </ReusableModal>

@@ -1,38 +1,42 @@
-// src/features/patient/api/guardianAPI.ts
 import axios from 'axios';
 
 export interface Guardian {
   name: string;
 }
 
-interface Page<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-}
-
 const BASE_URL = 'http://localhost:8080';
 
+/**
+ * 보호자 초대 API
+ */
 export const inviteGuardian = async (patientId: number, guardianEmail: string) => {
   const response = await axios.post(
-    `http://localhost:8080/api/v1/guardians/${patientId}/invite`,
-    {
-      guardianEmail,
-    },
-    { withCredentials: true },
+    `${BASE_URL}/api/v1/guardians/${patientId}/invite`,
+    { guardianEmail },
+    { withCredentials: true }, // 세션 쿠키 필요
   );
   return response.data;
 };
 
-export const getGuardians = async (): Promise<Guardian[]> => {
-  const response = await axios.get<Page<Guardian>>(`${BASE_URL}/api/v1/admin/users`, {
-    params: {
-      role: 'GUARDIAN', // role 쿼리 파라미터 추가
-      size: 100, // 한 번에 100명씩 가져오기
+/**
+ * 환자별 보호자 목록 조회 API
+ */
+export const getGuardians = async (patientId: number): Promise<Guardian[]> => {
+  const response = await axios.get<Guardian[]>(
+    `${BASE_URL}/api/v1/patients/${patientId}/guardians`,
+    { withCredentials: true }, // 세션 쿠키 필요
+  );
+  return response.data; // 배열 그대로
+};
+
+export const acceptGuardianInvite = async (inviteCode: string) => {
+  const response = await axios.patch(
+    `http://localhost:8080/api/v1/guardians/respond`, // ✅ URL 변경
+    {
+      inviteCode: inviteCode,
+      status: 'ACCEPTED',
     },
-    withCredentials: true, // CORS + 쿠키 세션 위해 필요
-  });
-  return response.data.content; // content만 리턴
+    { withCredentials: true },
+  );
+  return response.data;
 };

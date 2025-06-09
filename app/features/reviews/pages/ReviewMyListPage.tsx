@@ -153,8 +153,6 @@ export default function ReviewMyListPage() {
   );
 }
 
-// ───────── styled ─────────
-
 const PageWrapper = styled.div`
   max-width: 800px;
   margin: 0 auto;
@@ -167,11 +165,14 @@ const Header = styled.div`
   align-items: center;
 `;
 
-const Title = styled.h1`
-  font-size: 2rem;
-  font-weight: 700;
+export const Title = styled.h1`
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 24px;
+  color: #00499e;
+  text-align: center;
+  width: 100%;
 `;
-
 const CreateButton = styled.button`
   padding: 0.5rem 1rem;
   background-color: #2563eb;

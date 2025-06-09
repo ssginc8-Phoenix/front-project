@@ -24,10 +24,9 @@ export default function ReviewCreateModal({
   hospitalId,
   doctorId = 0,
   appointmentId = 0,
-  onSaved,
-  appointmentId,
   hospitalName,
   doctorName,
+  onSaved,
 }: ReviewCreateModalProps) {
   const [goodKeywords, setGoodKeywords] = useState<string[]>([]);
   const [badKeywords, setBadKeywords] = useState<string[]>([]);

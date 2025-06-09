@@ -50,7 +50,7 @@ export const acceptGuardianInvite = async (inviteCode: string) => {
 /**
  * 보호자가 가진 환자 목록 조회 API
  */
-export const getGuardianPatients = async (): Promise<PatientSummary[]> => {
+export const getGuardianPatients = async () => {
   const res = await axios.get(`${HOST}/me/patients`, {
     withCredentials: true,
   });

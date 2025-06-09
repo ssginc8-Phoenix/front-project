@@ -5,7 +5,7 @@ import {
   type KeywordOption,
 } from '~/features/reviews/constants/keywordOptions';
 import * as S from '~/features/reviews/component/common/ReviewModal.styles';
-import { useReviewStore } from '~/features/reviews/hooks/useReviewStore';
+import { useReviewStore } from '~/features/reviews/stores/useReviewStore';
 import { Modal } from '~/features/reviews/component/common/Modal';
 import { Button } from '~/features/reviews/component/common/Button';
 

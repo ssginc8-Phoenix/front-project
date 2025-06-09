@@ -27,6 +27,13 @@ export default [
       route('patients', 'routes/guardianpatientPage.tsx'),
     ]),
 
+    /** HOSPITAL 병원 영역 */
+    route('hospitals', 'routes/hospital/emptyPage.tsx', [
+      route(':hospitalId', 'routes/hospitalDetail.tsx'),
+      route('/search', 'routes/hospitalSearch.tsx'),
+      route('info', 'routes/hospitalAdmin.tsx'),
+    ]),
+
     /** APPOINTMENT 예약 영역 */
     route('appointments', 'routes/appointment/appointmentRequest.tsx', [
       route('list', 'routes/appointment/appointmentList.tsx'),
@@ -43,7 +50,4 @@ export default [
     route('admin/reviews', 'features/reviews/pages/ReviewAdminPage.tsx'),
     route('hospital/:hospitalId', 'features/reviews/pages/ReviewHospitalPage.tsx'),
   ]),
-  route('/hospitals/:hospitalId', 'routes/hospitalDetail.tsx'),
-  route('/hospitals/search', 'routes/hospitalSearch.tsx'),
-  route('/hospitals/info', 'routes/hospitalAdmin.tsx'),
 ] satisfies RouteConfig;

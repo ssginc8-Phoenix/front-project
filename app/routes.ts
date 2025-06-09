@@ -43,4 +43,7 @@ export default [
     route('admin/reviews', 'features/reviews/pages/ReviewAdminPage.tsx'),
     route('hospital/:hospitalId', 'features/reviews/pages/ReviewHospitalPage.tsx'),
   ]),
+  route('/hospitals/:hospitalId', 'routes/hospitalDetail.tsx'),
+  route('/hospitals/search', 'routes/hospitalSearch.tsx'),
+  route('/hospitals/info', 'routes/hospitalAdmin.tsx'),
 ] satisfies RouteConfig;

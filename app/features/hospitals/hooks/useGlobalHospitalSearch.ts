@@ -1,6 +1,6 @@
-import { useAsync } from '../../../hooks/useAsync';
 import { useCallback } from 'react';
 import type { HospitalPage } from '../types/hospital';
+import { useHospitalAsync } from '~/features/hospitals/hooks/useHospitalAsync';
 
 const emptyPage: HospitalPage = {
   content: [],
@@ -37,5 +37,5 @@ export const useGlobalHospitalSearch = (
     return response.json();
   }, [query, page, size, searchTrigger, enabled]);
 
-  return useAsync<HospitalPage>(fetchHospitals, [fetchHospitals]);
+  return useHospitalAsync<HospitalPage>(fetchHospitals, [fetchHospitals]);
 };

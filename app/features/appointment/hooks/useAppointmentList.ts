@@ -19,10 +19,15 @@ export const useAppointmentList = (page: number, size: number = 5) => {
   };
 };
 
-export const useAppointmentDashboard = (page: number = 0, size: number = 100, date?: string) => {
+export const useAppointmentDashboard = (
+  page: number = 0,
+  size: number = 10,
+  date?: string,
+  refreshTrigger?: boolean,
+) => {
   const { data, loading, error } = useAsync<AppointmentListPage>(
     () => getAppointmentList(page, size, date),
-    [page, size, date],
+    [page, size, date, refreshTrigger],
   );
 
   return {

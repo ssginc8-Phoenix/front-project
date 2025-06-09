@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
-import { useAsync } from '../../../../hooks/useAsync';
+
 import { getUser } from '../../api/hospitalAPI';
 import type { User } from '../../types/user';
+import { useHospitalAsync } from '~/features/hospitals/hooks/useHospitalAsync';
 
 export const useUser = () => {
   const fetchUsers = useCallback(async () => {
@@ -9,6 +10,6 @@ export const useUser = () => {
     return res.content; // content 배열만 반환
   }, []);
 
-  const { data, loading, error } = useAsync<User[]>(fetchUsers, [fetchUsers]);
+  const { data, loading, error } = useHospitalAsync<User[]>(fetchUsers, [fetchUsers]);
   return { data, loading, error };
 };

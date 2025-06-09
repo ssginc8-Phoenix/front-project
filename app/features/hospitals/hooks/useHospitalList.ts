@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { useAsync } from '../../../hooks/useAsync';
 import type { Hospital, HospitalPage } from '../types/hospital';
+import { useHospitalAsync } from '~/features/hospitals/hooks/useHospitalAsync';
 
 export const useHospitalList = (
   latitude: number | null,
@@ -86,7 +86,7 @@ export const useHospitalList = (
     };
   }, [latitude, longitude, searchQuery, specialization, sortBy, pageNumber, pageSize]);
 
-  const { data, loading, error } = useAsync(fetchHospitals, [
+  const { data, loading, error } = useHospitalAsync(fetchHospitals, [
     latitude,
     longitude,
     searchQuery,

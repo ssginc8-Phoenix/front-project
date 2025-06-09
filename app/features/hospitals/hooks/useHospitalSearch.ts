@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
-import { useAsync } from '../../../hooks/useAsync';
+
 import type { Hospital } from '../types/hospital';
+import { useHospitalAsync } from '~/features/hospitals/hooks/useHospitalAsync';
 
 interface HospitalPage {
   content: Hospital[];
@@ -58,7 +59,7 @@ export const useHospitalSearch = (
     return data;
   }, [latitude, longitude, searchQuery, sortBy, radius]);
 
-  const { data, loading, error, execute } = useAsync<HospitalPage>(fetchHospitals);
+  const { data, loading, error, execute } = useHospitalAsync<HospitalPage>(fetchHospitals);
 
   useEffect(() => {
     if (searchMode === 'nearby' && latitude !== null && longitude !== null) {

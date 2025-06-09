@@ -3,37 +3,42 @@ import * as S from '~/features/reviews/component/common/ReviewModal.styles';
 import { Button } from '~/features/reviews/component/common/Button';
 import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
 import { addReview } from '~/features/reviews/api/reviewAPI';
+import type { ReviewCreateRequest } from '~/features/reviews/types/review';
 
 interface ReviewCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSaved: () => void;
+  userId: number;
+  hospitalId: number;
+  doctorId: number;
+  appointmentId: number;
   hospitalName: string;
   doctorName: string;
-  userId: number;
-  doctorId?: number;
-  appointmentId?: number;
-  onSaved: () => void;
 }
 
 export default function ReviewCreateModal({
   isOpen,
   onClose,
+  onSaved,
+  userId,
+  hospitalId,
+  doctorId,
+  appointmentId,
   hospitalName,
   doctorName,
-  userId,
-  doctorId = 0,
-  appointmentId = 0,
-  onSaved,
 }: ReviewCreateModalProps) {
   const [goodKeywords, setGoodKeywords] = useState<string[]>([]);
   const [badKeywords, setBadKeywords] = useState<string[]>([]);
   const [contents, setContents] = useState<string>('');
+  const [showSuccess, setShowSuccess] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
       setGoodKeywords([]);
       setBadKeywords([]);
       setContents('');
+      setShowSuccess(false);
     }
   }, [isOpen]);
 
@@ -57,18 +62,24 @@ export default function ReviewCreateModal({
       return;
     }
     const keywords = [...goodKeywords, ...badKeywords];
+    const payload: ReviewCreateRequest = {
+      userId,
+      hospitalId,
+      doctorId,
+      appointmentId,
+      keywords,
+      contents,
+    };
     try {
-      await addReview({
-        userId,
-        hospitalId: 0,
-        doctorId,
-        appointmentId,
-        contents,
-        keywords,
-      });
+      await addReview(payload);
+      setShowSuccess(true);
       onSaved();
-      onClose();
-    } catch {
+      setTimeout(() => {
+        setShowSuccess(false);
+        onClose();
+      }, 1500);
+    } catch (err) {
+      console.error(err);
       alert('리뷰 작성 중 오류가 발생했습니다.');
     }
   };
@@ -98,7 +109,7 @@ export default function ReviewCreateModal({
                     selected={selected}
                     onClick={() => toggleGoodKeyword(opt.value)}
                   >
-                    {opt.label}
+                    {opt.emoji} {opt.label}
                   </S.GoodKeywordButton>
                 );
               })}
@@ -116,7 +127,7 @@ export default function ReviewCreateModal({
                     selected={selected}
                     onClick={() => toggleBadKeyword(opt.value)}
                   >
-                    {opt.label}
+                    {opt.emoji} {opt.label}
                   </S.BadKeywordButton>
                 );
               })}
@@ -141,6 +152,12 @@ export default function ReviewCreateModal({
             onChange={(e) => setContents(e.target.value)}
           />
         </S.SectionContainer>
+
+        {showSuccess && (
+          <p style={{ textAlign: 'center', color: '#00499e', marginBottom: '1rem' }}>
+            🎉 리뷰가 저장되었습니다!
+          </p>
+        )}
 
         <S.ButtonGroup>
           <Button onClick={handleSave} disabled={!isValid()}>

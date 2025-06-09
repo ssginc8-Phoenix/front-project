@@ -21,6 +21,10 @@ export interface ReviewResponse {
 }
 
 export interface ReviewMyListResponse {
+  hospitalId: number;
+  hospitalName: string;
+  doctorId: number;
+  doctorName: string;
   reviewId: number;
   contents: string;
   createdAt: string;
@@ -29,6 +33,17 @@ export interface ReviewMyListResponse {
 }
 
 export interface ReviewAllListResponse {
+  reviewId: number;
+  hospitalId: number;
+  hospitalName: string;
+  contents: string;
+  createdAt: string;
+  updatedAt: string;
+  reportCount: number;
+  keywords: string[];
+}
+
+export interface HospitalReviewResponse {
   reviewId: number;
   contents: string;
   createdAt: string;

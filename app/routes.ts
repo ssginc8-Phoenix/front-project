@@ -5,9 +5,6 @@ export default [
   route('/appointments', 'layout/MainLayout.tsx', [
     route(':appointmentId', 'routes/appointment.tsx'),
   ]),
-  route('/patients/mypage', 'routes/PatientMypage.tsx'),
-  route('/patients/info', 'routes/PatientInfoPage.tsx'),
-  route('/patients/guardian', 'routes/GuardianPage.tsx'),
 
   route('/login', 'routes/login.tsx'),
   route('/signup', 'routes/signup.tsx'),
@@ -17,9 +14,12 @@ export default [
   route('/reset-password', 'routes/passwordResetVerify.tsx'),
   route('/reset-password/set', 'routes/resetPassword.tsx'),
 
-  route('/patients/mypage', 'routes/PatientMypage.tsx'),
+  route('/patients/mypage', 'routes/PatientMyPage.tsx'),
   route('/patients/info', 'routes/PatientInfoPage.tsx'),
   route('/patients/guardian', 'routes/GuardianPage.tsx'),
+  route('/guardians/mypage', 'routes/guardianMyPage.tsx'),
+  route('/guardians/info', 'routes/guardianInfoPage.tsx'),
+  route('/guardians/patients', 'routes/guardianpatientPage.tsx'),
 
   route('appointments', 'layout/MainLayout.tsx', [
     route('', 'routes/appointmentRequest.tsx'),

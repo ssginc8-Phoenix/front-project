@@ -78,15 +78,8 @@ export async function getHospitalReviews(
 }
 
 // 리뷰 신고 기능
-export async function reportReview(reviewId: number, reason: string): Promise<void> {
-  await axios.post(
-    `http://localhost:8080/api/v1/reviews/${reviewId}/report`,
-    { reason },
-    {
-      withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  );
+export async function reportReview(reviewId: number): Promise<void> {
+  await axios.post(`http://localhost:8080/api/v1/reviews/${reviewId}/report`, null, {
+    withCredentials: true,
+  });
 }

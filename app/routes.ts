@@ -2,9 +2,7 @@ import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
   index('routes/home.tsx'),
-  route('/appointments', 'layout/MainLayout.tsx', [
-    route(':appointmentId', 'routes/appointment.tsx'),
-  ]),
+
   route('/patients/mypage', 'routes/PatientMypage.tsx'),
   route('/patients/info', 'routes/PatientInfoPage.tsx'),
   route('/patients/guardian', 'routes/GuardianPage.tsx'),
@@ -17,13 +15,10 @@ export default [
   route('/reset-password', 'routes/passwordResetVerify.tsx'),
   route('/reset-password/set', 'routes/resetPassword.tsx'),
 
-  route('/patients/mypage', 'routes/PatientMypage.tsx'),
-  route('/patients/info', 'routes/PatientInfoPage.tsx'),
-  route('/patients/guardian', 'routes/GuardianPage.tsx'),
-
   route('appointments', 'layout/MainLayout.tsx', [
-    route('', 'routes/appointmentRequest.tsx'),
-    route('list', 'routes/appointmentList.tsx'),
+    route('', 'routes/appointment/appointmentRequest.tsx'),
+    route('list', 'routes/appointment/appointmentList.tsx'),
+    route('dashboard', 'routes/appointment/dashBoard.tsx'),
   ]),
 
   route('/reviews', 'layout/ReviewLayout.tsx', [

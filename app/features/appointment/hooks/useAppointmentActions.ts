@@ -42,9 +42,28 @@ export const useAppointmentActions = () => {
     }
   };
 
+  const updateAppointmentStatus = async (appointmentId: number, status: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      await changeStatus(appointmentId, status);
+      alert(`예약 상태가 '${status}'(으)로 변경되었습니다.`);
+      return true;
+    } catch (err: any) {
+      setError(err);
+      alert('예약 상태 변경 중 오류가 발생했습니다.');
+      console.error(err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     cancelAppointment,
     rescheduleAppointment,
+    updateAppointmentStatus,
     isLoading,
     error,
   };

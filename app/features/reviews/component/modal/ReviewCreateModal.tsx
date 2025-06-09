@@ -10,6 +10,7 @@ interface ReviewCreateModalProps {
   hospitalName: string;
   doctorName: string;
   userId: number;
+  hospitalId: number;
   doctorId?: number;
   appointmentId?: number;
   onSaved: () => void;
@@ -21,6 +22,7 @@ export default function ReviewCreateModal({
   hospitalName,
   doctorName,
   userId,
+  hospitalId,
   doctorId = 0,
   appointmentId = 0,
   onSaved,

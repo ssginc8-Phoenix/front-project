@@ -12,6 +12,7 @@ import AppointmentConfirmationModal from '~/features/appointment/components/add/
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
+import LoginStore from '~/features/user/stores/LoginStore';
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -39,6 +40,7 @@ const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
     paymentMethod,
     reset,
   } = useAppointmentStore();
+  const { user } = LoginStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -77,7 +79,7 @@ const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
     const appointmentTime = localDateTime.format('YYYY-MM-DDTHH:mm:ss');
 
     const payload = {
-      userId: 2 /* 추후 실제 로그인 유저 ID로 교체 필요 */,
+      userId: user!.userId,
       patientId: patientId!,
       hospitalId: hospitalId!,
       doctorId: doctorId!,

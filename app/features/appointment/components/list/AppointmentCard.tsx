@@ -113,6 +113,7 @@ const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
         hospitalName={appointment.hospitalName}
         doctorName={appointment.doctorName}
         userId={user!.userId}
+        hospitalId={appointment.hospitalId}
         doctorId={appointment.doctorId}
         appointmentId={appointment.appointmentId}
       />

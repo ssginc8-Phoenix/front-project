@@ -19,10 +19,10 @@ export const useAppointmentList = (page: number, size: number = 5) => {
   };
 };
 
-export const useAppointmentDashboard = (page: number = 0, size: number = 100) => {
+export const useAppointmentDashboard = (page: number = 0, size: number = 100, date?: string) => {
   const { data, loading, error } = useAsync<AppointmentListPage>(
-    () => getAppointmentList(page, size),
-    [page, size],
+    () => getAppointmentList(page, size, date),
+    [page, size, date],
   );
 
   return {

@@ -6,7 +6,6 @@ import Button from '~/components/styled/Button';
 import { RefreshButton } from '~/components/styled/RefreshButton';
 import { FiRefreshCw } from 'react-icons/fi';
 import { useAppointmentActions } from '~/features/appointment/hooks/useAppointmentActions';
-import { useState } from 'react';
 
 const Overlay = styled.div`
   position: fixed;
@@ -85,7 +84,7 @@ const ButtonGroup = styled.div`
   margin-top: 2rem;
 `;
 
-interface AppointmentDetailModalProps {
+interface AppointmentUpdateModalProps {
   appointmentId: number;
   isOpen: boolean;
   onClose: () => void;
@@ -95,7 +94,7 @@ const AppointmentUpdateModal = ({
   appointmentId,
   isOpen,
   onClose,
-}: AppointmentDetailModalProps) => {
+}: AppointmentUpdateModalProps) => {
   const {
     data: appointment,
     isLoading,
@@ -113,21 +112,27 @@ const AppointmentUpdateModal = ({
   const handleCancel = async () => {
     if (!appointment) return;
     const success = await cancelAppointment(appointment.appointmentId);
-    if (success) refetch();
+    if (success) {
+      refetch();
+    }
   };
 
   /** 예약 승인 */
   const handleConfirm = async () => {
     if (!appointment) return;
     const success = await updateAppointmentStatus(appointment.appointmentId, 'CONFIRMED');
-    if (success) refetch();
+    if (success) {
+      refetch();
+    }
   };
 
   /** 예약 완료 */
   const handleComplete = async () => {
     if (!appointment) return;
     const success = await updateAppointmentStatus(appointment.appointmentId, 'COMPLETED');
-    if (success) refetch();
+    if (success) {
+      refetch();
+    }
   };
 
   return (

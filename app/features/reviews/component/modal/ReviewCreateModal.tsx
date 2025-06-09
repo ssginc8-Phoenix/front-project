@@ -11,8 +11,8 @@ interface ReviewCreateModalProps {
   onSaved: () => void;
   userId: number;
   hospitalId: number;
-  doctorId: number;
-  appointmentId: number;
+  doctorId?: number;
+  appointmentId?: number;
   hospitalName: string;
   doctorName: string;
 }
@@ -20,10 +20,11 @@ interface ReviewCreateModalProps {
 export default function ReviewCreateModal({
   isOpen,
   onClose,
-  onSaved,
   userId,
   hospitalId,
-  doctorId,
+  doctorId = 0,
+  appointmentId = 0,
+  onSaved,
   appointmentId,
   hospitalName,
   doctorName,

@@ -94,14 +94,16 @@ const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
         <InfoText> {formatAppointmentTime(appointment.appointmentTime)} </InfoText>
         <InfoText> {appointment.patientName} </InfoText>
 
-        <ReviewButton
-          onClick={(e) => {
-            e.stopPropagation();
-            setReviewOpen(true);
-          }}
-        >
-          리뷰작성
-        </ReviewButton>
+        {appointment.status === 'COMPLETED' && (
+          <ReviewButton
+            onClick={(e) => {
+              e.stopPropagation();
+              setReviewOpen(true);
+            }}
+          >
+            리뷰작성
+          </ReviewButton>
+        )}
       </Card>
 
       <ReviewCreateModal
@@ -111,6 +113,7 @@ const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
         hospitalName={appointment.hospitalName}
         doctorName={appointment.doctorName}
         userId={user!.userId}
+        hospitalId={appointment.hospitalId}
         doctorId={appointment.doctorId}
         appointmentId={appointment.appointmentId}
       />

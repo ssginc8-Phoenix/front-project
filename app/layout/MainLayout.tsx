@@ -11,7 +11,7 @@ const LayoutContainer = styled.div`
 const ContentWrapper = styled.main`
   flex: 1;
   padding: 2rem 3rem;
-  max-width: 1200px;
+  width: 90%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;

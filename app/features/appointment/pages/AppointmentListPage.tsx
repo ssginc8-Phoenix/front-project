@@ -4,16 +4,25 @@ import AppointmentListComponent from '~/features/appointment/components/list/App
 
 const AppointmentListPage = () => {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
+  const [refreshListTrigger, setRefreshListTrigger] = useState(false);
+
+  const handleRefreshList = () => {
+    setRefreshListTrigger((prev) => !prev);
+  };
 
   return (
     <>
-      <AppointmentListComponent onSelectAppointment={(id) => setSelectedAppointmentId(id)} />
+      <AppointmentListComponent
+        onSelectAppointment={(id) => setSelectedAppointmentId(id)}
+        refreshTrigger={refreshListTrigger}
+      />
 
       {selectedAppointmentId !== null && (
         <AppointmentDetailModal
           appointmentId={selectedAppointmentId}
           isOpen={true}
           onClose={() => setSelectedAppointmentId(null)}
+          onRefreshList={handleRefreshList}
         />
       )}
     </>

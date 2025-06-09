@@ -7,9 +7,6 @@ import { RefreshButton } from '~/components/styled/RefreshButton';
 import { FiRefreshCw } from 'react-icons/fi';
 import { useAppointmentActions } from '~/features/appointment/hooks/useAppointmentActions';
 import { useState } from 'react';
-import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
-import dayjs from 'dayjs';
-import DateTimeSelectorModal from '~/features/appointment/components/detail/DateTimeSelectorModal';
 
 const Overlay = styled.div`
   position: fixed;
@@ -92,14 +89,12 @@ interface AppointmentDetailModalProps {
   appointmentId: number;
   isOpen: boolean;
   onClose: () => void;
-  onRefreshList: () => void;
 }
 
-const AppointmentDetailModal = ({
+const AppointmentUpdateModal = ({
   appointmentId,
   isOpen,
   onClose,
-  onRefreshList,
 }: AppointmentDetailModalProps) => {
   const {
     data: appointment,
@@ -109,41 +104,30 @@ const AppointmentDetailModal = ({
     isRefetching,
   } = useAppointmentDetail(appointmentId);
 
-  const { cancelAppointment, rescheduleAppointment } = useAppointmentActions();
+  const { cancelAppointment, updateAppointmentStatus } = useAppointmentActions();
 
-  const [isDateTimeSelectorModalOpen, setDateTimeSelectorModalOpen] = useState(false);
-  const { date, time, setDate, setTime } = useAppointmentStore();
-
+  const canConfirm = appointment?.status === 'REQUESTED';
   const canModify = appointment?.status === 'REQUESTED' || appointment?.status === 'CONFIRMED';
 
   /** 예약 취소 */
   const handleCancel = async () => {
     if (!appointment) return;
     const success = await cancelAppointment(appointment.appointmentId);
-    if (success) {
-      refetch();
-      onRefreshList();
-    }
+    if (success) refetch();
   };
 
-  /** 재예약 */
-  const handleReschedule = async () => {
-    if (!appointment || !date || !time) {
-      alert('날짜와 시간을 선택해주세요.');
-      return;
-    }
+  /** 예약 승인 */
+  const handleConfirm = async () => {
+    if (!appointment) return;
+    const success = await updateAppointmentStatus(appointment.appointmentId, 'CONFIRMED');
+    if (success) refetch();
+  };
 
-    const newDateTime = dayjs(
-      `${dayjs(date).format('YYYY-MM-DD')} ${time}`,
-      'YYYY-MM-DD HH:mm:ss',
-    ).format('YYYY-MM-DDTHH:mm:ss');
-
-    const success = await rescheduleAppointment(appointment.appointmentId, newDateTime);
-    if (success) {
-      refetch();
-      setDateTimeSelectorModalOpen(false);
-      onRefreshList();
-    }
+  /** 예약 완료 */
+  const handleComplete = async () => {
+    if (!appointment) return;
+    const success = await updateAppointmentStatus(appointment.appointmentId, 'COMPLETED');
+    if (success) refetch();
   };
 
   return (
@@ -219,11 +203,16 @@ const AppointmentDetailModal = ({
 
               {canModify && (
                 <ButtonGroup>
+                  {canConfirm && (
+                    <Button $variant="secondary" onClick={handleConfirm}>
+                      예약 승인
+                    </Button>
+                  )}
+                  <Button $variant="secondary" onClick={handleComplete}>
+                    예약 완료
+                  </Button>
                   <Button $variant="secondary" onClick={handleCancel}>
                     예약 취소
-                  </Button>
-                  <Button $variant="primary" onClick={() => setDateTimeSelectorModalOpen(true)}>
-                    재예약
                   </Button>
                 </ButtonGroup>
               )}
@@ -237,17 +226,8 @@ const AppointmentDetailModal = ({
           )}
         </Modal>
       </Overlay>
-
-      {appointment && (
-        <DateTimeSelectorModal
-          isOpen={isDateTimeSelectorModalOpen}
-          onClose={() => setDateTimeSelectorModalOpen(false)}
-          doctorId={appointment.doctorId}
-          onConfirm={handleReschedule}
-        />
-      )}
     </>
   );
 };
 
-export default AppointmentDetailModal;
+export default AppointmentUpdateModal;

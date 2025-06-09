@@ -4,7 +4,7 @@ import ErrorMessage from '~/components/common/ErrorMessage';
 import styled from 'styled-components';
 import AppointmentCard from '~/features/appointment/components/list/AppointmentCard';
 import Pagination from '~/components/common/Pagination';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { AppointmentList } from '~/types/appointment';
 
 const Wrapper = styled.div`
@@ -35,12 +35,18 @@ const PaginationWrapper = styled.div`
 
 interface AppointmentListProps {
   onSelectAppointment: (appointmentId: number) => void;
+  refreshTrigger: boolean;
 }
 
-const AppointmentListComponent = ({ onSelectAppointment }: AppointmentListProps) => {
+const AppointmentListComponent = ({
+  onSelectAppointment,
+  refreshTrigger,
+}: AppointmentListProps) => {
   const [page, setPage] = useState(0);
 
   const { list, pagination, loading, error } = useAppointmentList(page, 5);
+
+  useEffect(() => {}, [refreshTrigger]);
 
   return (
     <Wrapper>

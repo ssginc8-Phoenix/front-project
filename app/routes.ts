@@ -2,9 +2,6 @@ import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
   index('routes/home.tsx'),
-  route('/appointments', 'layout/MainLayout.tsx', [
-    route(':appointmentId', 'routes/appointment.tsx'),
-  ]),
 
   route('/login', 'routes/login.tsx'),
   route('/signup', 'routes/signup.tsx'),
@@ -20,10 +17,11 @@ export default [
   route('/guardians/mypage', 'routes/guardianMyPage.tsx'),
   route('/guardians/info', 'routes/guardianInfoPage.tsx'),
   route('/guardians/patients', 'routes/guardianpatientPage.tsx'),
-
+  
   route('appointments', 'layout/MainLayout.tsx', [
-    route('', 'routes/appointmentRequest.tsx'),
-    route('list', 'routes/appointmentList.tsx'),
+    route('', 'routes/appointment/appointmentRequest.tsx'),
+    route('list', 'routes/appointment/appointmentList.tsx'),
+    route('dashboard', 'routes/appointment/dashBoard.tsx'),
   ]),
 
   route('/reviews', 'layout/ReviewLayout.tsx', [

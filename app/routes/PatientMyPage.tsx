@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PasswordModal } from '~/features/patient/components/PasswordModal';
 import useLoginStore from '~/features/user/stores/LoginStore';
-import Header from '~/layout/Header';
 
 // --- 대시보드 아이템
 const dashboardItems = [
@@ -131,7 +130,6 @@ export const PatientMyPage = () => {
 
   return (
     <>
-      <Header />
       <Main>
         <ProfileRow>
           <ProfileEmoji role="img" aria-label="profile">

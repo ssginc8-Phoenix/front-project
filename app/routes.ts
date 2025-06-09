@@ -11,19 +11,30 @@ export default [
   route('/reset-password', 'routes/passwordResetVerify.tsx'),
   route('/reset-password/set', 'routes/resetPassword.tsx'),
 
-  route('/patients/mypage', 'routes/PatientMyPage.tsx'),
-  route('/patients/info', 'routes/PatientInfoPage.tsx'),
-  route('/patients/guardian', 'routes/GuardianPage.tsx'),
-  route('/guardians/mypage', 'routes/guardianMyPage.tsx'),
-  route('/guardians/info', 'routes/guardianInfoPage.tsx'),
-  route('/guardians/patients', 'routes/guardianpatientPage.tsx'),
-  
-  route('appointments', 'layout/MainLayout.tsx', [
-    route('', 'routes/appointment/appointmentRequest.tsx'),
-    route('list', 'routes/appointment/appointmentList.tsx'),
-    route('dashboard', 'routes/appointment/dashBoard.tsx'),
+  /** MainLayout 적용 */
+  route('', 'layout/MainLayout.tsx', [
+    /** PATIENT 환자 영역 */
+    route('patients', 'routes/patient/emptyPage.tsx', [
+      route('mypage', 'routes/PatientMyPage.tsx'),
+      route('info', 'routes/PatientInfoPage.tsx'),
+      route('guardian', 'routes/GuardianPage.tsx'),
+    ]),
+
+    /** GUARDIAN 보호자 영역 */
+    route('guardians', 'routes/guardian/emptyPage.tsx', [
+      route('mypage', 'routes/guardianMyPage.tsx'),
+      route('info', 'routes/guardianInfoPage.tsx'),
+      route('patients', 'routes/guardianpatientPage.tsx'),
+    ]),
+
+    /** APPOINTMENT 예약 영역 */
+    route('appointments', 'routes/appointment/appointmentRequest.tsx', [
+      route('list', 'routes/appointment/appointmentList.tsx'),
+      route('dashboard', 'routes/appointment/dashBoard.tsx'),
+    ]),
   ]),
 
+  /** REVIEWS 리뷰 영역 */
   route('/reviews', 'layout/ReviewLayout.tsx', [
     route('me', 'features/reviews/pages/ReviewMyListPage.tsx', [
       route(':reviewId/edit', 'features/reviews/pages/ReviewEditPage.tsx'),

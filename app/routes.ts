@@ -18,6 +18,7 @@ export default [
       route('mypage', 'routes/PatientMyPage.tsx'),
       route('info', 'routes/PatientInfoPage.tsx'),
       route('guardian', 'routes/GuardianPage.tsx'),
+      route('calendar', 'routes/calendar/patientCalendar.tsx'),
     ]),
 
     /** GUARDIAN 보호자 영역 */
@@ -30,7 +31,7 @@ export default [
     /** HOSPITAL 병원 영역 */
     route('hospitals', 'routes/hospital/emptyPage.tsx', [
       route(':hospitalId', 'routes/hospitalDetail.tsx'),
-      route('/search', 'routes/hospitalSearch.tsx'),
+      route('search', 'routes/hospitalSearch.tsx'),
       route('info', 'routes/hospitalAdmin.tsx'),
     ]),
 

@@ -22,6 +22,15 @@ const PatientCard = ({
   isSelected,
   onSelect,
 }: PatientCardProps) => {
+  const maskRrn = (rrn: string) => {
+    if (!rrn || rrn.length !== 13) return rrn;
+
+    const front = rrn.slice(0, 6);
+    const backFirst = rrn[6]; // 뒷자리 첫번째 숫자
+
+    return `${front}-${backFirst}******`;
+  };
+
   return (
     <Card isSelected={isSelected}>
       <InfoWrapper>
@@ -33,7 +42,7 @@ const PatientCard = ({
 
         <div>
           <NameText>{name}</NameText>
-          <RrsText>{residentRegistrationNumber}</RrsText>
+          <RrsText>{maskRrn(residentRegistrationNumber)}</RrsText>
         </div>
       </InfoWrapper>
       <SelectButton isSelected={isSelected} onClick={onSelect}>

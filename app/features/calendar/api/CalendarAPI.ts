@@ -14,3 +14,16 @@ export const getPatientCalendar = async (year: number, month: number) => {
   console.log(res.data); // 응답 데이터 확인용
   return res.data;
 };
+
+/**
+ * 보호자 캘린더 조회
+ */
+export const getGuardianCalendar = async (year: number, month: number) => {
+  const res = await axios.get(`${HOST}/calendar/guardian`, {
+    params: { year, month },
+    withCredentials: true,
+  });
+
+  console.log(res.data); // 응답 데이터 확인용
+  return res.data;
+};

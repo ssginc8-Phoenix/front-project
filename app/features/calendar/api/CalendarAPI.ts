@@ -11,7 +11,6 @@ export const getPatientCalendar = async (year: number, month: number) => {
     withCredentials: true,
   });
 
-  console.log(res.data); // 응답 데이터 확인용
   return res.data;
 };
 
@@ -24,6 +23,28 @@ export const getGuardianCalendar = async (year: number, month: number) => {
     withCredentials: true,
   });
 
-  console.log(res.data); // 응답 데이터 확인용
+  return res.data;
+};
+
+/**
+ * 의사 캘린더 조회
+ */
+export const getDoctorCalendar = async (year: number, month: number) => {
+  const res = await axios.get(`${HOST}/calendar/doctor`, {
+    params: { year, month },
+    withCredentials: true,
+  });
+
+  return res.data;
+};
+
+/**
+ * 예약 상세 내역 조회
+ */
+export const getAppointmentDetail = async (appointmentId: number) => {
+  const res = await axios.get(`${HOST}/appointments/${appointmentId}`, {
+    withCredentials: true,
+  });
+
   return res.data;
 };

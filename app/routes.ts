@@ -41,6 +41,8 @@ export default [
       route('list', 'routes/appointment/appointmentList.tsx'),
       route('dashboard', 'routes/appointment/dashBoard.tsx'),
     ]),
+
+    route('doctor/calendar', 'routes/calendar/doctorCalendar.tsx'),
   ]),
 
   /** REVIEWS 리뷰 영역 */

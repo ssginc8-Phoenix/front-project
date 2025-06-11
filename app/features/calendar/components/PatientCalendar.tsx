@@ -7,8 +7,8 @@ import CommonModal from '~/components/common/CommonModal';
 
 const Wrapper = styled.div`
   display: flex;
-  gap: 2rem;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 1.5rem;
   padding: 2rem;
   font-family: 'Segoe UI', sans-serif;
   background-color: #f7f9fc;
@@ -17,15 +17,14 @@ const Wrapper = styled.div`
 
 const Legend = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
+  gap: 1.25rem;
+  margin-bottom: 0.5rem;
 
   .legend-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-size: 0.9rem;
   }
 
   .dot {
@@ -46,7 +45,6 @@ const Legend = styled.div`
 const CalendarWrapper = styled.div`
   .react-calendar {
     width: 100%;
-    max-width: 800px;
     background: white;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
@@ -58,6 +56,10 @@ const CalendarWrapper = styled.div`
     border-radius: 12px;
     padding: 0.75rem 0.5rem;
     transition: background 0.2s ease;
+    min-height: 100px; /* <-- 일정한 높이 지정 */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .react-calendar__tile--now {
@@ -71,8 +73,9 @@ const CalendarWrapper = styled.div`
   }
 
   .calendar-day-wrapper {
-    position: relative;
-    min-height: 70px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
   .calendar-event {
@@ -83,6 +86,7 @@ const CalendarWrapper = styled.div`
     display: flex;
     align-items: center;
     gap: 4px;
+    word-break: keep-all;
   }
 
   .medication {

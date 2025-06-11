@@ -68,7 +68,7 @@ const PatientCalendarPage = () => {
 
         <SidebarMenu
           items={patientSidebarItems}
-          activeKey={'info'}
+          activeKey={'calendar'}
           onChange={handleSidebarChange}
         />
       </SidebarBox>

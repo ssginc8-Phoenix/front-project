@@ -1,10 +1,6 @@
 import styled from 'styled-components';
 import DoctorCalendar from '~/features/calendar/components/DoctorCalendar';
 import useLoginStore from '~/features/user/stores/LoginStore';
-import { doctorSidebarItems } from '~/features/doctor/components/constants/doctorSidebarItems';
-import DoctorSidebarMenu from '~/features/doctor/ui/DoctorSidebarMenu';
-import React from 'react';
-import { useNavigate } from 'react-router';
 
 const PageWrapper = styled.div`
   display: flex;
@@ -52,15 +48,7 @@ const ContentWrapper = styled.div`
 
 const DoctorCalendarPage = () => {
   const { user } = useLoginStore();
-  const navigate = useNavigate();
-  const handleSidebarChange = (key: string) => {
-    const targetPath = `/doctor/${key}`;
-    if (window.location.pathname === targetPath) {
-      navigate(0);
-    } else {
-      navigate(targetPath);
-    }
-  };
+
   return (
     <PageWrapper>
       <SidebarBox>
@@ -69,11 +57,6 @@ const DoctorCalendarPage = () => {
           <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
           <ProfileRole>의사</ProfileRole>
         </ProfileSection>
-        <DoctorSidebarMenu
-          items={doctorSidebarItems}
-          activeKey="schedule"
-          onChange={handleSidebarChange}
-        />
       </SidebarBox>
 
       <ContentWrapper>

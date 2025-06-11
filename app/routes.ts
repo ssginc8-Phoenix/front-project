@@ -31,9 +31,9 @@ export default [
 
     /** HOSPITAL 병원 영역 */
     route('hospitals', 'routes/hospital/emptyPage.tsx', [
-      route(':hospitalId', 'routes/hospitalDetail.tsx'),
-      route('search', 'routes/hospitalSearch.tsx'),
-      route('info', 'routes/hospitalAdmin.tsx'),
+      route(':hospitalId', 'routes/hospital/hospitalDetail.tsx'),
+      route('search', 'routes/hospital/hospitalSearch.tsx'),
+      route('info', 'routes/hospital/hospitalAdmin.tsx'),
     ]),
 
     /** APPOINTMENT 예약 영역 */
@@ -41,8 +41,12 @@ export default [
       route('list', 'routes/appointment/appointmentList.tsx'),
       route('dashboard', 'routes/appointment/dashBoard.tsx'),
     ]),
-
-    route('doctor/calendar', 'routes/calendar/doctorCalendar.tsx'),
+    /** DOCTOR 의사 영역 */
+    route('doctor', 'routes/doctor/emptyPage.tsx', [
+      route('calendar', 'routes/calendar/doctorCalendar.tsx'),
+      route('info', 'routes/doctor/doctorInfo.tsx'),
+      route('schedule', 'routes/doctor/doctorSchedule.tsx'),
+    ]),
   ]),
 
   /** REVIEWS 리뷰 영역 */

@@ -20,6 +20,7 @@
     "isbot": "^5.1.27",
     "lucide-react": "^0.511.0",
     "react": "^19.1.0",
+    "react-big-calendar": "^1.19.2",
     "react-calendar": "^5.1.0",
     "react-cookie": "^8.0.1",
     "react-datepicker": "^8.4.0",

@@ -7,8 +7,8 @@ import { PasswordModal } from '~/features/patient/components/PasswordModal';
 import SidebarMenu from '~/features/patient/components/SidebarMenu';
 import { patientSidebarItems } from '~/features/patient/constants/sidebarItems';
 import useLoginStore from '~/features/user/stores/LoginStore';
-import { getUserInfo } from '~/features/patient/api/userAPI';
-import Header from '~/layout/Header';
+import { getUserInfo, updateUserInfo } from '~/features/patient/api/userAPI';
+import DaumPost from '~/features/user/components/signUp/DaumPost';
 
 // --- 스타일 정의 ---
 const PageBg = styled.div`
@@ -177,6 +177,7 @@ const PatientInfoPage = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
   const [showByeModal, setShowByeModal] = useState(false);
+  const [detailAddress, setDetailAddress] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -196,13 +197,27 @@ const PatientInfoPage = () => {
     fetchUser();
   }, []);
 
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const fullAddress = form.address + (detailAddress ? ' ' + detailAddress : '');
+      await updateUserInfo({
+        ...form,
+        address: fullAddress, // ✅ 주소 + 상세주소 합쳐서 보내기
+      });
+      alert('정보가 성공적으로 저장되었습니다.');
+    } catch (error) {
+      console.error('정보 저장 실패', error);
+      alert('정보 저장에 실패했습니다.');
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('정보 저장 (가짜 저장)');
+  const handleDetailAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDetailAddress(e.target.value);
   };
 
   const handleSidebarChange = (key: string) => {
@@ -230,8 +245,6 @@ const PatientInfoPage = () => {
 
   return (
     <>
-      <Header></Header>
-
       <PageBg>
         <FlexRow>
           <SidebarBox>
@@ -289,14 +302,23 @@ const PatientInfoPage = () => {
                   placeholder="전화번호 입력"
                 />
               </InputRow>
+              {/* 주소 검색 */}
               <InputRow>
-                <Label htmlFor="address">주소</Label>
+                <Label>주소</Label>
+                <DaumPost
+                  address={form.address}
+                  setAddress={(newAddr) => setForm({ ...form, address: newAddr })}
+                />
+              </InputRow>
+              {/* 상세주소 입력 */}
+              <InputRow>
+                <Label htmlFor="detail">상세주소</Label>
                 <Input
-                  id="address"
-                  name="address"
-                  value={form.address}
-                  onChange={handleChange}
-                  placeholder="주소 입력"
+                  id="detail"
+                  name="detail"
+                  value={detailAddress}
+                  onChange={handleDetailAddressChange}
+                  placeholder="상세주소 입력"
                 />
               </InputRow>
               <SaveButton type="submit">저장</SaveButton>

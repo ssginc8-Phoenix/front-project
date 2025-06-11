@@ -128,3 +128,16 @@ export const createWaiting = async (hospitalId: number, waiting: number): Promis
   );
   return res.data;
 };
+
+// 병원 웨이팅 조회
+export const getWaiting = async (hospitalId: number) => {
+  const res = await apiClient.get(`/api/v1/hospitals/${hospitalId}/waiting`);
+
+  return res.data;
+};
+
+// 병원 웨이팅 수정
+export const updateWaiting = async (hospitalId: number, waiting: number) => {
+  const res = await apiClient.patch(`/api/v1/hospitals/${hospitalId}/waiting`, { waiting });
+  return res.data;
+};

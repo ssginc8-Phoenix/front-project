@@ -4,10 +4,9 @@ import { useAppointmentDashboard } from '~/features/appointment/hooks/useAppoint
 import styled from 'styled-components';
 import type { AppointmentList } from '~/types/appointment';
 import { useState } from 'react';
-import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import DashboardCard from '~/features/appointment/components/update/DashboardCard';
-import AppointmentUpdateModal from '~/features/appointment/components/update/UpdateModal';
+import Pagination from '~/components/common/Pagination';
 
 const DashboardWrapper = styled.div`
   background-color: #ffffff;
@@ -18,18 +17,6 @@ const DashboardWrapper = styled.div`
   align-items: stretch;
   gap: 20px;
   max-width: 100%;
-`;
-
-const HospitalTitle = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-  text-align: center;
-  color: #003366; // 예시 색상
-  margin: 0;
-`;
-
-const DatePickerWrapper = styled.div`
-  margin-bottom: 20px;
 `;
 
 const SectionWrapper = styled.div`
@@ -55,14 +42,28 @@ const SectionTitle = styled.h2`
   margin-bottom: 16px;
 `;
 
-const AppointmentDashboard = () => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
+interface AppointmentDashboardProps {
+  selectedDate: Date;
+  onSelectAppointment: (id: number) => void;
+  refreshTrigger?: boolean;
+}
 
+const AppointmentDashboard = ({
+  selectedDate,
+  onSelectAppointment,
+  refreshTrigger,
+}: AppointmentDashboardProps) => {
   // format YYYY-MM-DD → 백엔드 date 파라미터용
-  const formattedDate = selectedDate.toISOString().slice(0, 10);
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
 
-  const { list: appointments, loading, error } = useAppointmentDashboard(0, 100, formattedDate);
+  const formattedDate = selectedDate.toISOString().slice(0, 10);
+  const {
+    list: appointments,
+    pagination,
+    loading,
+    error,
+  } = useAppointmentDashboard(page, pageSize, formattedDate, refreshTrigger);
 
   /** 필터링 */
   const immediateAppointments = appointments.filter(
@@ -79,76 +80,64 @@ const AppointmentDashboard = () => {
 
   return (
     <DashboardWrapper>
-      <DatePickerWrapper>
-        <DatePicker
-          selected={selectedDate}
-          onChange={(date: Date | null) => {
-            if (date) setSelectedDate(date);
-          }}
-          dateFormat="yyyy-MM-dd"
-          isClearable={false}
-          placeholderText="날짜 선택"
-        />
-      </DatePickerWrapper>
-
-      <HospitalTitle>{appointments.hospitalName}</HospitalTitle>
-
       {loading ? (
         <LoadingIndicator />
       ) : error ? (
         <ErrorMessage message={error} />
       ) : (
-        <SectionWrapper>
-          {/** 당일 예약내역 */}
-          <Section>
-            <SectionTitle>당일 예약내역</SectionTitle>
-            {immediateAppointments?.map((app: AppointmentList) => (
-              <DashboardCard
-                key={app.appointmentId}
-                doctorName={app.doctorName}
-                patientName={app.patientName}
-                appointmentTime={app.appointmentTime}
-                onClick={() => setSelectedAppointmentId(app.appointmentId)}
-              />
-            ))}
-          </Section>
+        <>
+          <SectionWrapper>
+            {/** 당일 예약내역 */}
+            <Section>
+              <SectionTitle>당일 예약내역</SectionTitle>
+              {immediateAppointments?.map((app: AppointmentList) => (
+                <DashboardCard
+                  key={app.appointmentId}
+                  doctorName={app.doctorName}
+                  patientName={app.patientName}
+                  appointmentTime={app.appointmentTime}
+                  onClick={() => onSelectAppointment(app.appointmentId)}
+                />
+              ))}
+            </Section>
 
-          {/* 스케줄 예약내역 */}
-          <Section>
-            <SectionTitle>스케줄 예약내역</SectionTitle>
-            {scheduledAppointments?.map((app: AppointmentList) => (
-              <DashboardCard
-                key={app.appointmentId}
-                doctorName={app.doctorName}
-                patientName={app.patientName}
-                appointmentTime={app.appointmentTime}
-                onClick={() => setSelectedAppointmentId(app.appointmentId)}
-              />
-            ))}
-          </Section>
+            {/* 스케줄 예약내역 */}
+            <Section>
+              <SectionTitle>스케줄 예약내역</SectionTitle>
+              {scheduledAppointments?.map((app: AppointmentList) => (
+                <DashboardCard
+                  key={app.appointmentId}
+                  doctorName={app.doctorName}
+                  patientName={app.patientName}
+                  appointmentTime={app.appointmentTime}
+                  onClick={() => onSelectAppointment(app.appointmentId)}
+                />
+              ))}
+            </Section>
 
-          {/* 접수 대기 내역 */}
-          <Section>
-            <SectionTitle>접수 대기 내역</SectionTitle>
-            {requestedAppointments?.map((app: AppointmentList) => (
-              <DashboardCard
-                key={app.appointmentId}
-                doctorName={app.doctorName}
-                patientName={app.patientName}
-                appointmentTime={app.appointmentTime}
-                onClick={() => setSelectedAppointmentId(app.appointmentId)}
-              />
-            ))}
-          </Section>
-        </SectionWrapper>
-      )}
+            {/* 접수 대기 내역 */}
+            <Section>
+              <SectionTitle>접수 대기 내역</SectionTitle>
+              {requestedAppointments?.map((app: AppointmentList) => (
+                <DashboardCard
+                  key={app.appointmentId}
+                  doctorName={app.doctorName}
+                  patientName={app.patientName}
+                  appointmentTime={app.appointmentTime}
+                  onClick={() => onSelectAppointment(app.appointmentId)}
+                />
+              ))}
+            </Section>
+          </SectionWrapper>
 
-      {selectedAppointmentId && (
-        <AppointmentUpdateModal
-          appointmentId={selectedAppointmentId}
-          isOpen={!!selectedAppointmentId}
-          onClose={() => setSelectedAppointmentId(null)}
-        />
+          {(pagination?.totalPages ?? 0) > 1 && (
+            <Pagination
+              totalPages={pagination.totalPages}
+              currentPage={pagination.currentPage}
+              onPageChange={setPage}
+            />
+          )}
+        </>
       )}
     </DashboardWrapper>
   );

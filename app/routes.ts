@@ -34,6 +34,7 @@ export default [
       route(':hospitalId', 'routes/hospitalDetail.tsx'),
       route('search', 'routes/hospitalSearch.tsx'),
       route('info', 'routes/hospitalAdmin.tsx'),
+      route('calendar', 'routes/calendar/hospitalCalendar.tsx'),
     ]),
 
     /** APPOINTMENT 예약 영역 */

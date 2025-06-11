@@ -270,7 +270,11 @@ export default function HospitalCalendar() {
       </ContentBox>
 
       {modalOpen && (
-        <CommonModal title={`${modalDate}`} buttonText="닫기" onClose={() => setModalOpen(false)}>
+        <CommonModal
+          title={`${modalDate} 진료 전체보기`}
+          buttonText="닫기"
+          onClose={() => setModalOpen(false)}
+        >
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {modalItems.map((item, idx) => (
               <li

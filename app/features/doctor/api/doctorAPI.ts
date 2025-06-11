@@ -1,5 +1,4 @@
 import axios from 'axios';
-import type { CalendarRequest, DoctorCalendarResponse } from '~/features/doctor/types/calendar';
 
 const HOST = 'http://localhost:8080/api/v1/doctors';
 
@@ -24,12 +23,21 @@ export const getDoctorSchedules = async (doctorId: number) => {
   return res.data;
 };
 
-export const getDoctorCalendar = async (
-  params: CalendarRequest,
-): Promise<DoctorCalendarResponse> => {
-  const res = await axios.get(`http://localhost:8080/api/v1/calendar/doctor`, {
-    params,
-    withCredentials: true, // 로그인 인증 쿠키 포함
+export const getMyDoctorInfo = async () => {
+  const res = await axios.get(`${HOST}/me`, {
+    withCredentials: true,
   });
+  return res.data;
+};
+
+// 👉 30분당 진료 가능 인원 수 수정
+export const updateDoctorCapacity = async (doctorId: number, capacityPerHalfHour: number) => {
+  const res = await axios.patch(
+    `${HOST}/${doctorId}/capacity`,
+    { capacityPerHalfHour },
+    {
+      withCredentials: true,
+    },
+  );
   return res.data;
 };

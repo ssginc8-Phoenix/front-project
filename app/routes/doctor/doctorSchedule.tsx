@@ -1,5 +1,5 @@
-import DoctorCalendarPage from '~/features/doctor/page/DoctorCalendarPage';
+import DoctorSchedulePage from '~/features/doctor/page/DoctorSchedulePage';
 
 export default function DoctorSchedule() {
-  return <DoctorCalendarPage />;
+  return <DoctorSchedulePage />;
 }

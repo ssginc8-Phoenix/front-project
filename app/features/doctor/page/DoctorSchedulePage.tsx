@@ -1,10 +1,8 @@
 import styled from 'styled-components';
 import { useNavigate } from 'react-router';
 import { doctorSidebarItems } from '~/features/doctor/components/constants/doctorSidebarItems';
-import DoctorInfoForm from '~/features/doctor/components/doctorinfo/info/DoctorInfoForm';
-import { hospitalSidebarItems } from '~/features/hospitals/components/constants/hospitalSidebarItems';
-import HospitalSidebarMenu from '~/features/hospitals/components/hospitalAdmin/HospitalSidebarMenu';
 import DoctorSidebarMenu from '~/features/doctor/ui/DoctorSidebarMenu';
+import DoctorScheduleForm from '~/features/doctor/components/doctorinfo/schedule/DoctorScheduleForm';
 
 // ------------------- 스타일 정의 -------------------
 const PageWrapper = styled.div`
@@ -46,7 +44,7 @@ const SidebarBox = styled.div`
 `;
 
 // ------------------- 컴포넌트 -------------------
-const DoctorInfoPage = () => {
+const DoctorSchedulePage = () => {
   const navigate = useNavigate();
 
   const handleSidebarChange = (key: string) => {
@@ -64,18 +62,18 @@ const DoctorInfoPage = () => {
       <SidebarBox>
         <DoctorSidebarMenu
           items={doctorSidebarItems}
-          activeKey="info"
+          activeKey="schedule"
           onChange={handleSidebarChange}
         />
       </SidebarBox>
 
       {/* 메인 콘텐츠 */}
       <MainSection>
-        <Title>👨‍⚕️ 의사 정보 관리</Title>
-        <DoctorInfoForm />
+        <Title>📅 진료 스케줄 관리</Title>
+        <DoctorScheduleForm />
       </MainSection>
     </PageWrapper>
   );
 };
 
-export default DoctorInfoPage;
+export default DoctorSchedulePage;

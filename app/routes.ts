@@ -26,6 +26,7 @@ export default [
       route('mypage', 'routes/guardianMyPage.tsx'),
       route('info', 'routes/guardianInfoPage.tsx'),
       route('patients', 'routes/guardianpatientPage.tsx'),
+      route('calendar', 'routes/calendar/guardianCalendar.tsx'),
     ]),
 
     /** HOSPITAL 병원 영역 */

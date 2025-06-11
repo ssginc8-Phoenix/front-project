@@ -6,7 +6,7 @@ import {
   updateHospital,
   getMyHospital,
   getHospitalSchedules,
-  updateHospitalSchedule,
+  updateHospitalSchedules,
   createHospitalSchedule,
   createWaiting,
 } from '~/features/hospitals/api/hospitalAPI';
@@ -314,6 +314,7 @@ const HospitalRegisterForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const currentUserId = Number(localStorage.getItem('userId') || '0');
     const hospitalPayload: CreateHospitalRequest = {
       userId: currentUserId,
@@ -327,22 +328,27 @@ const HospitalRegisterForm: React.FC = () => {
       businessRegistrationNumber: form.businessNumber,
       serviceNames: form.serviceNames,
     };
-    const schedulePayloads = businessHours.map(
-      ({ scheduleId, day, open, close }) =>
-        ({
-          scheduleId,
-          data: {
-            dayOfWeek: dayOfWeekMap[day],
-            openTime: `${open}:00`,
-            closeTime: `${close}:00`,
-            lunchStart: '12:00:00',
-            lunchEnd: '13:00:00',
-          },
-        }) as { scheduleId?: number; data: CreateScheduleRequest },
-    );
+
+    // 진료 스케줄 정보 구성
+    const schedulePayloads = businessHours
+      .filter(({ open, close }) => open && close)
+      .map(({ scheduleId, day, open, close }) => ({
+        hospitalScheduleId: scheduleId, // 백엔드가 요구하는 필드명으로 맞춤
+        dayOfWeek: dayOfWeekMap[day],
+        openTime: `${open}:00`,
+        closeTime: `${close}:00`,
+        lunchStart: '12:00:00',
+        lunchEnd: '13:00:00',
+      }));
+
+    // 등록/수정 구분
+    const updatePayloads = schedulePayloads.filter((p) => p.hospitalScheduleId);
+    const createPayloads = schedulePayloads.filter((p) => !p.hospitalScheduleId);
 
     try {
       let realHospitalId = Number(hospitalId);
+
+      // 병원 등록 또는 수정
       if (isEdit && hospitalId) {
         await updateHospital(realHospitalId, hospitalPayload);
       } else {
@@ -350,13 +356,21 @@ const HospitalRegisterForm: React.FC = () => {
         realHospitalId = created.hospitalId;
         setHospitalId(String(realHospitalId));
       }
-      await Promise.all(
-        schedulePayloads.map(({ scheduleId, data }) =>
-          scheduleId
-            ? updateHospitalSchedule(realHospitalId, scheduleId, data)
-            : createHospitalSchedule(realHospitalId, data),
-        ),
-      );
+
+      // 스케줄 수정
+      if (updatePayloads.length > 0) {
+        await updateHospitalSchedules(realHospitalId, updatePayloads);
+      }
+
+      // 스케줄 생성
+      if (createPayloads.length > 0) {
+        await Promise.all(
+          createPayloads.map(({ hospitalScheduleId, ...data }) =>
+            createHospitalSchedule(realHospitalId, data),
+          ),
+        );
+      }
+
       alert(isEdit ? '수정 완료' : '등록 완료');
     } catch (err) {
       console.error(err);
@@ -395,7 +409,7 @@ const HospitalRegisterForm: React.FC = () => {
         />
       </FieldWrapper>
       <FieldWrapper>
-        <Label>곳서비스 이름</Label>
+        <Label>서비스 이름</Label>
         <ServiceInputChips
           services={form.serviceNames}
           onChange={(arr) => setForm((p) => ({ ...p, serviceNames: arr }))}

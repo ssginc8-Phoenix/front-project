@@ -60,7 +60,6 @@ const AdminDashboard = () => {
 
   return (
     <>
-      <Header />
       <PageWrapper>
         {/* 사이드바 */}
         <SidebarBox>

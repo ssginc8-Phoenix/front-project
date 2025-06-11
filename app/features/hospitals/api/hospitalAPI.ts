@@ -95,22 +95,16 @@ export const updateHospital = async (
   return res.data;
 };
 
-// 단일 스케줄 수정
-export const updateHospitalSchedule = async (
+export const updateHospitalSchedules = async (
   hospitalId: number,
-  scheduleId: number,
-  data: CreateScheduleRequest,
+  schedules: CreateScheduleRequest[], // scheduleId 제거
 ) => {
-  const res = await apiClient.patch(
-    `/api/v1/hospitals/${hospitalId}/schedules/${scheduleId}`,
-    data,
-  );
-  return res.data;
+  return await apiClient.patch(`/api/v1/hospitals/${hospitalId}/schedules`, schedules);
 };
 
-// 스케줄 생성
 export const createHospitalSchedule = async (hospitalId: number, data: CreateScheduleRequest) => {
-  const res = await apiClient.post(`/api/v1/hospitals/${hospitalId}/schedules`, data);
+  // 배열로 감싸서 보냄
+  const res = await apiClient.post(`/api/v1/hospitals/${hospitalId}/schedules`, [data]);
   return res.data;
 };
 

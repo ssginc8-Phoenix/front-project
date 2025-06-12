@@ -8,9 +8,10 @@ export interface QaPostUpdateRequest {
 }
 
 export interface QaPostResponse {
-  qnaPostId: number;
+  qnaPostId: number | null;
   appointmentId: number;
   content: string;
   createdAt: string;
   updatedAt: string;
+  answered: boolean;
 }

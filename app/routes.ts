@@ -41,6 +41,12 @@ export default [
     ]),
   ]),
 
+  /** QNAS 영역 */
+  route('', 'layout/QnALayout.tsx', [
+    route('qna', 'routes/qna/QnAListPage.tsx', [route(':qnaId', 'routes/qna/QnADetailPage.tsx')]),
+    route('doctor/qna', 'routes/doctor/Qna.tsx', [route(':qnaId', 'routes/doctor/QnaDetail.tsx')]),
+  ]),
+
   /** REVIEWS 리뷰 영역 */
   route('/reviews', 'layout/ReviewLayout.tsx', [
     route('me', 'features/reviews/pages/ReviewMyListPage.tsx', [

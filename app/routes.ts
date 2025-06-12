@@ -15,17 +15,17 @@ export default [
   route('', 'layout/MainLayout.tsx', [
     /** PATIENT 환자 영역 */
     route('patients', 'routes/patient/emptyPage.tsx', [
-      route('mypage', 'routes/PatientMyPage.tsx'),
-      route('info', 'routes/PatientInfoPage.tsx'),
-      route('guardian', 'routes/GuardianPage.tsx'),
+      route('mypage', 'routes/patient/patientMyPage.tsx'),
+      route('info', 'routes/patient/patientInfoPage.tsx'),
+      route('guardian', 'routes/patient/guardian.tsx'),
       route('calendar', 'routes/calendar/patientCalendar.tsx'),
     ]),
 
     /** GUARDIAN 보호자 영역 */
     route('guardians', 'routes/guardian/emptyPage.tsx', [
-      route('mypage', 'routes/guardianMyPage.tsx'),
-      route('info', 'routes/guardianInfoPage.tsx'),
-      route('patients', 'routes/guardianpatientPage.tsx'),
+      route('mypage', 'routes/guardian/guardianMyPage.tsx'),
+      route('info', 'routes/guardian/guardianInfoPage.tsx'),
+      route('patients', 'routes/guardian/guardianpatientPage.tsx'),
       route('calendar', 'routes/calendar/guardianCalendar.tsx'),
     ]),
 

@@ -8,6 +8,7 @@ export interface PatientSummary {
   patientId: number;
   name: string;
   residentRegistrationNumber: string;
+  patientGuardianId: number;
 }
 
 const HOST = 'http://localhost:8080/api/v1/guardians';
@@ -55,4 +56,11 @@ export const getGuardianPatients = async () => {
     withCredentials: true,
   });
   return res.data;
+};
+
+export const getMyGuardianInfo = async () => {
+  const res = await axios.get(`${HOST}/me`, {
+    withCredentials: true,
+  });
+  return res.data; // { guardianId, name, email, role }
 };

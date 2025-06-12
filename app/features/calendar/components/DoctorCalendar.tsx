@@ -105,6 +105,9 @@ const CalendarWrapper = styled.div`
     gap: 4px;
     cursor: pointer;
   }
+  .react-calendar__month-view__days__day:nth-child(7n) {
+    color: black !important;
+  }
 `;
 
 interface AppointmentDetail {
@@ -256,7 +259,7 @@ export default function HospitalCalendar() {
 
         <CalendarWrapper>
           <Calendar
-            locale="ko-KR"
+            locale="en-US"
             onChange={(date) => {
               if (date instanceof Date) setSelectedDate(date);
             }}

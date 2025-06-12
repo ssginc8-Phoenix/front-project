@@ -46,7 +46,7 @@ const ProfileRole = styled.div`
 const ContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
-  overflow-y: auto;
+  overflow: hidden;
 `;
 
 const GuardianCalendarPage = () => {

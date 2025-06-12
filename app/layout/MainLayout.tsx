@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { Outlet } from 'react-router';
 import Header from '~/layout/Header';
-import Footer from '~/layout/FooterLayout';
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -26,7 +25,6 @@ const MainLayout = () => {
       <ContentWrapper>
         <Outlet />
       </ContentWrapper>
-      <Footer />
     </LayoutContainer>
   );
 };

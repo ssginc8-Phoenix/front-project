@@ -98,6 +98,10 @@ const CalendarWrapper = styled.div`
     background-color: #e0f0ff;
     color: #1a5da2;
   }
+
+  .react-calendar__month-view__days__day:nth-child(7n) {
+    color: black !important;
+  }
 `;
 
 export default function PatientCalendar() {
@@ -197,7 +201,7 @@ export default function PatientCalendar() {
 
         <CalendarWrapper>
           <Calendar
-            locale="ko-KR"
+            locale="en-US"
             onChange={(date) => {
               if (date instanceof Date) setSelectedDate(date);
             }}

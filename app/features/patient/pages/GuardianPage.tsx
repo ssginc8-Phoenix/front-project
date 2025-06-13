@@ -176,7 +176,6 @@ const GuardianPage = () => {
 
   return (
     <>
-      <Header />
       <PageWrapper>
         <SidebarBox>
           <ProfileSection>

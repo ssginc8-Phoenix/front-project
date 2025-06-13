@@ -45,9 +45,7 @@ const SymptomCheckboxList = ({ selected, onChange }: SymptomCheckboxProps) => {
     }
   };
 
-  useEffect(() => {
-    console.log('선택된 증상:', selected);
-  }, [selected]);
+  useEffect(() => {}, [selected]);
 
   return (
     <CheckboxContainer>

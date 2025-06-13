@@ -56,15 +56,12 @@ export default [
     route('doctor/qna', 'routes/doctor/Qna.tsx', [route(':qnaId', 'routes/doctor/QnaDetail.tsx')]),
   ]),
 
-  // /** REVIEWS 리뷰 영역 */
-  // route('/reviews', 'layout/ReviewLayout.tsx', [
-  //   route('me', 'features/reviews/pages/ReviewMyListPage.tsx', [
-  //     route(':reviewId/edit', 'features/reviews/pages/ReviewEditPage.tsx'),
-  //     route(':reviewId/delete', 'features/reviews/pages/ReviewDeletePage.tsx'),
-  //   ]),
-  //   route('admin/reviews', 'features/reviews/pages/ReviewAdminPage.tsx'),
-  //   route('hospital/:hospitalId', 'features/reviews/pages/ReviewHospitalPage.tsx'),
-  // ]),
+  /** REVIEWS 리뷰 영역 */
+  route('', 'layout/ReviewLayout.tsx', [
+    route('/reviews/admin', 'features/reviews/pages/ReviewAdminPage.tsx'),
+    route('/reviews/hospital/:hospitalId', 'features/reviews/pages/ReviewHospitalPage.tsx'),
+    route('/reviews/:userId', 'features/reviews/pages/ReviewMyListPage.tsx'),
+  ]),
 
   route('*', 'routes/NotFound.tsx'),
 ] satisfies RouteConfig;

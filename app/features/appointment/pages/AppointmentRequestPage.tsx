@@ -92,7 +92,6 @@ const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
 
     try {
       const result = await createAppointment(payload);
-      console.log('예약 완료: ', result);
       alert('예약이 접수되었습니다.');
 
       reset();

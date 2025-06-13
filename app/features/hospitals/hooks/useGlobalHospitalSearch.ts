@@ -20,7 +20,7 @@ export const useGlobalHospitalSearch = (
   enabled: boolean = true, // ✅ 추가
 ) => {
   const fetchHospitals = useCallback(async (): Promise<HospitalPage> => {
-    if (!enabled || !query) {
+    if (!enabled) {
       // ✅ 조건에 맞지 않으면 빈 결과 반환
       return emptyPage;
     }

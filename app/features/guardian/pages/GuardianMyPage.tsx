@@ -160,7 +160,6 @@ export const GuardianMyPage = () => {
 
   return (
     <>
-      <Header />
       <Main>
         {/* 프로필 */}
         <ProfileRow>

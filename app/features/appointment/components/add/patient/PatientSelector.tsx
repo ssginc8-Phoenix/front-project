@@ -41,11 +41,7 @@ const PatientSelector = () => {
     useAppointmentStore();
 
   /** 디버깅용 코드 추후 삭제 예정 */
-  useEffect(() => {
-    console.log('현재 선택된 환자 ID: ', patientId);
-    console.log('현재 선택된 환자 이름: ', patientName);
-    console.log('현재 선택된 주민등록번호: ', rrn);
-  }, [patientId]);
+  useEffect(() => {}, [patientId]);
 
   return (
     <Wrapper>

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, UserRequest } from '~/types/user';
 import { getMyInfo, login, logout } from '~/features/user/api/UserAPI';
+import { requestPermissionAndRegisterToken } from '~/features/fcm/util/fcm';
 
 export interface LoginState {
   user: User | null;
@@ -18,6 +19,7 @@ const useLoginStore = create<LoginState>()(
       login: async ({ email, password }: UserRequest) => {
         await login({ email, password });
         const myInfo = await getMyInfo();
+
         console.log(myInfo.userId);
         set({
           user: {
@@ -26,6 +28,13 @@ const useLoginStore = create<LoginState>()(
             profileImageUrl: myInfo.profileImageUrl,
           },
         });
+
+        console.log('requestPermissionAndRegisterToken 호출 전');
+        requestPermissionAndRegisterToken(myInfo.userId).catch((err) => {
+          console.error('FCM 등록 실패: ', err);
+        });
+
+        console.log('requestPermissionAndRegisterToken 호출 후');
       },
 
       logout: async () => {

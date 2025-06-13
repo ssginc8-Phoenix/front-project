@@ -51,13 +51,25 @@ interface Props {
   onFindEmail: (name: string, phone: string) => void;
 }
 
+const formatPhoneNumber = (value: string) => {
+  const digits = value.replace(/\D/g, '').slice(0, 11); // 숫자만 추출해서 11자리 제한
+  if (digits.length < 4) return digits;
+  if (digits.length < 8) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+};
+
 const FindEmailForm = ({ onFindEmail }: Props) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setPhone(formatted);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onFindEmail(name, phone);
+    onFindEmail(name, phone.replace(/-/g, ''));
   };
 
   return (
@@ -78,7 +90,7 @@ const FindEmailForm = ({ onFindEmail }: Props) => {
           type="tel"
           placeholder="010-1234-5678"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={handlePhoneChange}
           required
         />
       </FieldGroup>

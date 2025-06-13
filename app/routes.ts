@@ -1,8 +1,6 @@
 import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
-  index('routes/home.tsx'),
-
   route('/login', 'routes/login.tsx'),
   route('/signup', 'routes/signup.tsx'),
   route('/signup/form', 'routes/signupForm.tsx'),
@@ -10,6 +8,9 @@ export default [
   route('/find-email', 'routes/findEmail.tsx'),
   route('/reset-password', 'routes/passwordResetVerify.tsx'),
   route('/reset-password/set', 'routes/resetPassword.tsx'),
+
+  /** HOME  */
+  route('', 'layout/MainPageLayout.tsx', [index('routes/home.tsx')]),
 
   /** MainLayout 적용 */
   route('', 'layout/MainLayout.tsx', [

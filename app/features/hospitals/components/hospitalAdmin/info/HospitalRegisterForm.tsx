@@ -247,7 +247,7 @@ const HospitalRegisterForm: React.FC = () => {
       introduction: form.intro,
       notice: form.notice,
       businessRegistrationNumber: form.businessNumber,
-      serviceNames: form.serviceName,
+      serviceName: form.serviceName,
       fileId,
     };
     if (selectedImage) {

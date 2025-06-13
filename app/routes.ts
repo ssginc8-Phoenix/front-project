@@ -14,7 +14,6 @@ export default [
 
   /** MainLayout 적용 */
   route('', 'layout/MainLayout.tsx', [
-
     /** PATIENT 환자 영역 */
     route('patients', 'routes/patient/emptyPage.tsx', [
       route('mypage', 'routes/patient/patientMyPage.tsx'),
@@ -32,10 +31,12 @@ export default [
     ]),
 
     /** HOSPITAL 병원 영역 */
+    /** HOSPITAL 병원 영역 */
     route('hospitals', 'routes/hospital/emptyPage.tsx', [
-      route(':hospitalId', 'routes/hospitalDetail.tsx'),
-      route('search', 'routes/hospitalSearch.tsx'),
-      route('info', 'routes/hospitalAdmin.tsx'),
+      route(':hospitalId', 'routes/hospital/hospitalDetail.tsx'),
+      route('search', 'routes/hospital/hospitalSearch.tsx'),
+      route('info', 'routes/hospital/hospitalAdmin.tsx'),
+      route('chart', 'routes/hospital/hospitalAdminChart.tsx'),
       route('calendar', 'routes/calendar/hospitalCalendar.tsx'),
     ]),
 

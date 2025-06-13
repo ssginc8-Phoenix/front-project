@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router';
 import SidebarMenu from '~/features/patient/components/SidebarMenu';
 import { guardianSidebarItems } from '~/features/guardian/constants/sidebarItems';
 import useLoginStore from '~/features/user/stores/LoginStore';
-import Header from '~/layout/Header';
 import { acceptGuardianInvite } from '~/features/patient/api/guardianAPI'; // ✅ 초대코드 수락 API
 import ReusableModal from '~/features/patient/components/ReusableModal';
 import { getGuardianPatients, type PatientSummary } from '~/features/guardian/api/guardianAPI'; // ✅ 모달 컴포넌트 가져오기
@@ -160,7 +159,7 @@ const GuardianPatientPage = () => {
   };
 
   const maskRRN = (rrn: string) => {
-    return rrn ? rrn.substring(0, 6) + '-*******' : '';
+    return rrn ? rrn.substring(0, 6) + '-' + rrn.substring(7, 8) + '******' : '';
   };
 
   const handleInviteAccept = async () => {

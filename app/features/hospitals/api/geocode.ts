@@ -6,7 +6,7 @@ export const getCoordsFromAddress = async (
     `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(address)}`,
     {
       headers: {
-        Authorization: `KakaoAK ${'3bde56866d8f5daeff2c18e2bcbdf4f1'}`,
+        Authorization: `KakaoAK ${'88fcb35a3f23060fbf073f45fda2d0d5'}`,
       },
     },
   );

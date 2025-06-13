@@ -80,8 +80,16 @@ const CommonModal = ({ title, buttonText, onClose, children }: CommonModalProps)
       <ModalWrapper onClick={(e) => e.stopPropagation()}>
         <CloseIcon onClick={onClose} />
         <ModalTitle>{title}</ModalTitle>
-        {children && <ModalDescription>{children}</ModalDescription>}
-        <ModalButton onClick={onClose}>{buttonText}</ModalButton>
+
+        {/* 조건 분기: 버튼 텍스트가 있으면 설명 모드, 없으면 자유 모드 */}
+        {buttonText ? (
+          <>
+            <ModalDescription>{children}</ModalDescription>
+            <ModalButton onClick={onClose}>{buttonText}</ModalButton>
+          </>
+        ) : (
+          children
+        )}
       </ModalWrapper>
     </ModalBackground>
   );

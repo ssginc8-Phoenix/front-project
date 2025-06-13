@@ -70,7 +70,8 @@ export const registerHospital = async (data: {
   introduction: string;
   notice: string;
   businessRegistrationNumber: string;
-  serviceNames: string[];
+  serviceName: string[];
+  fileId?: number;
 }) => {
   const res = await apiClient.post('/api/v1/hospitals', data);
   return res.data;
@@ -88,7 +89,8 @@ export const updateHospital = async (
     introduction: string;
     notice: string;
     businessRegistrationNumber: string;
-    serviceNames: string[];
+    serviceName: string[];
+    fileId?: number;
   },
 ) => {
   const res = await apiClient.patch(`/api/v1/hospitals/${hospitalId}`, data);

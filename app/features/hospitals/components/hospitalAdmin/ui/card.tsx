@@ -1,15 +1,18 @@
-// app/components/ui/card.tsx
+import styled from 'styled-components';
 
-import React from 'react';
+export const Card = styled.div<{ isSelected: boolean }>`
+  flex: calc(50% - 0.5rem);
+  min-width: 280px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid ${({ isSelected }) => (isSelected ? '#3b82f6' : '#e5e7eb')};
+  background-color: ${({ isSelected }) => (isSelected ? '#dbeafe' : '#ffffff')};
+  box-sizing: border-box;
 
-export const Card = ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className="rounded-2xl border bg-white shadow p-4" {...props}>
-    {children}
-  </div>
-);
-
-export const CardContent = ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className="p-4" {...props}>
-    {children}
-  </div>
-);
+  @media (max-width: 768px) {
+    flex: 1 1 100%; /* 모바일에선 1개씩 */
+  }
+`;

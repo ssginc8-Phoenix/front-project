@@ -1,5 +1,4 @@
-// src/components/hospitalSearch/HospitalSearchPage.tsx
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useCurrentLocation } from '../hooks/useCurrentLocation';
 import SearchMenu from '../components/hospitalSearch/searchMenu/SearchMenu';
@@ -40,17 +39,16 @@ const SidePanel = styled.div`
 const DetailModalWrapper = styled.div`
   position: absolute;
   top: 100px;
-  right: 16px;
+  right: 250px;
   width: 300px;
   max-height: 70vh;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   z-index: 1100;
-  overflow-y: auto;
 `;
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 1000;
 
 const HospitalSearchPage: React.FC = () => {
   const { currentLocation } = useCurrentLocation();
@@ -58,20 +56,21 @@ const HospitalSearchPage: React.FC = () => {
     useHospitalSearchStore();
 
   const [searchMode, setSearchMode] = useState<'nearby' | 'global'>('nearby');
-  const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
+  const [selectedHospitalIdState, setSelectedHospitalIdState] = useState<number | null>(null);
 
-  const initialCenter = currentLocation
-    ? { lat: currentLocation.latitude, lng: currentLocation.longitude }
-    : { lat: 35.159545, lng: 129.075633 };
+  const initialCenter = useMemo(
+    () =>
+      currentLocation
+        ? { lat: currentLocation.latitude, lng: currentLocation.longitude }
+        : { lat: 35.159545, lng: 129.075633 },
+    [currentLocation],
+  );
+
   const [mapCenter, setMapCenter] = useState(initialCenter);
 
   useEffect(() => {
     if (currentLocation) {
-      console.log('📍 위치 업데이트됨:', currentLocation);
-      setMapCenter({
-        lat: currentLocation.latitude,
-        lng: currentLocation.longitude,
-      });
+      setMapCenter({ lat: currentLocation.latitude, lng: currentLocation.longitude });
     }
   }, [currentLocation]);
 
@@ -80,8 +79,8 @@ const HospitalSearchPage: React.FC = () => {
     currentLocation?.longitude ?? null,
     searchQuery,
     sortBy,
-    5,
-    searchMode,
+    PAGE_SIZE,
+    searchMode === 'nearby',
   );
 
   const globalSearch = useGlobalHospitalSearch(
@@ -89,7 +88,7 @@ const HospitalSearchPage: React.FC = () => {
     0,
     PAGE_SIZE,
     0,
-    searchMode === 'global', // ✅ enabled: true일 때만 실행
+    searchMode === 'global',
   );
 
   const hospitals =
@@ -98,29 +97,21 @@ const HospitalSearchPage: React.FC = () => {
       : (globalSearch.data?.content ?? []);
 
   const loading = searchMode === 'nearby' ? nearbySearchResult.loading : globalSearch.loading;
-  function isError(err: unknown): err is Error {
-    return typeof err === 'object' && err !== null && 'message' in err;
-  }
 
   const error =
     searchMode === 'nearby'
-      ? isError(nearbySearchResult.error)
+      ? nearbySearchResult.error instanceof Error
         ? nearbySearchResult.error
         : null
-      : isError(globalSearch.error)
+      : globalSearch.error instanceof Error
         ? globalSearch.error
         : null;
 
-  useEffect(() => {
-    if (searchMode === 'nearby') {
-      console.log('🏥 받아온 병원 목록:', nearbySearchResult.data?.content);
-    }
-  }, [searchMode, nearbySearchResult.data]);
-
   const handleHospitalSelect = useCallback((h: Hospital) => {
-    setSelectedHospital(h);
+    setSelectedHospitalIdState(h.hospitalId);
     setMapCenter({ lat: h.latitude, lng: h.longitude });
   }, []);
+
   const handleMarkerClick = useCallback(
     (id: number) => {
       const h = hospitals.find((x) => x.hospitalId === id);
@@ -128,10 +119,11 @@ const HospitalSearchPage: React.FC = () => {
     },
     [hospitals, handleHospitalSelect],
   );
+
   return (
     <MapContainer>
       <FullMap
-        hospitals={hospitals} // ✅ 이거 빠져있었음!
+        hospitals={hospitals}
         center={mapCenter}
         currentLocation={currentLocation}
         onMarkerClick={handleMarkerClick}
@@ -140,7 +132,15 @@ const HospitalSearchPage: React.FC = () => {
       <SidePanel>
         <div style={{ padding: '1rem', display: 'flex', gap: '1rem' }}>
           <button
-            onClick={() => setSearchMode('nearby')}
+            onClick={() => {
+              setSearchMode('nearby');
+              if (currentLocation) {
+                setMapCenter({
+                  lat: currentLocation.latitude,
+                  lng: currentLocation.longitude,
+                });
+              }
+            }}
             style={{
               background: searchMode === 'nearby' ? '#00499e' : '#eee',
               color: searchMode === 'nearby' ? '#fff' : '#333',
@@ -166,6 +166,7 @@ const HospitalSearchPage: React.FC = () => {
             전체 검색
           </button>
         </div>
+
         <SearchMenu
           currentSearchMode={searchMode}
           onSearchModeChange={setSearchMode}
@@ -174,9 +175,10 @@ const HospitalSearchPage: React.FC = () => {
           onSearch={(q, s) => {
             setSearchQuery(q);
             setSortBy(s);
-            setSelectedHospital(null);
+            setSelectedHospitalIdState(null);
           }}
         />
+
         <HospitalList
           hospitals={hospitals}
           loading={loading}
@@ -185,15 +187,15 @@ const HospitalSearchPage: React.FC = () => {
             const h = hospitals.find((x) => x.hospitalId === id);
             if (h) handleHospitalSelect(h);
           }}
-          selectedHospitalId={selectedHospitalId}
+          selectedHospitalId={selectedHospitalIdState}
         />
       </SidePanel>
 
-      {selectedHospital && (
+      {selectedHospitalIdState != null && (
         <DetailModalWrapper>
           <HospitalDetailPanel
-            hospital={selectedHospital}
-            onClose={() => setSelectedHospital(null)}
+            hospitalId={selectedHospitalIdState}
+            onClose={() => setSelectedHospitalIdState(null)}
           />
         </DetailModalWrapper>
       )}

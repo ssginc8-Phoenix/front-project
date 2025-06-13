@@ -15,7 +15,12 @@ const firebaseConfig = {
 /** Firebase 앱 초기화 (앱에서 Firebase 기능 사용 가능해짐) */
 const app = initializeApp(firebaseConfig);
 
+let messaging;
+
 /** Messaging 객체 가져오기*/
-const messaging = getMessaging(app);
+if (typeof window !== 'undefined') {
+  // 클라이언트 환경에서만 실행
+  messaging = getMessaging(app);
+}
 
 export { messaging, getToken, onMessage };

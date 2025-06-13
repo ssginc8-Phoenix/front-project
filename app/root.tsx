@@ -8,10 +8,11 @@ import {
 } from 'react-router';
 
 import type { Route } from './+types/root';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QueryClient } from '@tanstack/query-core';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { listenForegroundMessages } from '~/features/fcm/util/fcm';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -46,6 +47,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const [queryClient] = useState(() => new QueryClient());
+
+  // 서비스 워커 등록 (클라이언트 환경에서만 실행)
+  useEffect(() => {
+    // 클라이언트 환경인지 확인
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/firebase-messaging-sw.js')
+        .then((registration) => console.log('Service Worker registered:', registration))
+        .catch((err) => console.error('Service Worker registration failed', err));
+
+      listenForegroundMessages();
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

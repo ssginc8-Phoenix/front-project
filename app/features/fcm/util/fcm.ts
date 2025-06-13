@@ -53,6 +53,8 @@ export const requestPermissionAndRegisterToken = async (userId: number) => {
  * Foreground 상태에서 FCM 메세지 수신 (브라우저가 켜져 있을 때)
  */
 export const listenForegroundMessages = () => {
+  if (!messaging) return;
+
   onMessage(messaging, (payload) => {
     console.log('Foreground message 수신: ', payload);
 

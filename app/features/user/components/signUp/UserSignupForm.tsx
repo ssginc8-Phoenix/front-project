@@ -169,8 +169,18 @@ const UserSignupForm = () => {
   const [emailChecked, setEmailChecked] = useState(false);
   const [emailCheckMessage, setEmailCheckMessage] = useState('');
   const [isEmailCheckSuccess, setIsEmailCheckSuccess] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+  const [rrnError, setRrnError] = useState('');
 
   const isEmailValid = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidPhone = (phone: string) => /^01[016789]\d{7,8}$/.test(phone);
+  const isValidRRN = (rrn: string) => /^\d{6}-\d{7}$/.test(rrn);
+
+  const formatPhoneNumber = (value: string) => {
+    if (value.length === 11) return value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+    if (value.length === 10) return value.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    return value;
+  };
 
   const handleEmailCheck = async () => {
     if (!isEmailValid(email)) {
@@ -205,6 +215,18 @@ const UserSignupForm = () => {
       setPasswordError('비밀번호가 일치하지 않습니다.');
       return;
     }
+
+    if (!isValidPhone(phone)) {
+      setPhoneError('휴대폰 번호 형식이 올바르지 않습니다. (예: 010-1234-5678)');
+      return;
+    }
+    setPhoneError('');
+
+    if (role === 'PATIENT' && !isValidRRN(residentRegistrationNumber)) {
+      setRrnError('주민등록번호 형식이 올바르지 않습니다. (예: 900101-1234567)');
+      return;
+    }
+    setRrnError('');
 
     const passwordValidationMsg = validatePassword(password);
     if (passwordValidationMsg) {
@@ -289,7 +311,13 @@ const UserSignupForm = () => {
 
         <FieldGroup>
           <Label>휴대폰 번호</Label>
-          <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <Input
+            type="tel"
+            value={formatPhoneNumber(phone)}
+            onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+            required
+          />
+          {phoneError && <ErrorMessage>{phoneError}</ErrorMessage>}
         </FieldGroup>
 
         <FieldGroup>
@@ -313,7 +341,9 @@ const UserSignupForm = () => {
               type="text"
               value={residentRegistrationNumber}
               onChange={(e) => setResidentRegistrationNumber(e.target.value)}
+              required
             />
+            {rrnError && <ErrorMessage>{rrnError}</ErrorMessage>}
           </FieldGroup>
         )}
 

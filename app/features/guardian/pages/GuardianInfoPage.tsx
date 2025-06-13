@@ -7,7 +7,7 @@ import { PasswordModal } from '~/features/patient/components/PasswordModal';
 import SidebarMenu from '~/features/guardian/components/SidebarMenu'; // 🔥 보호자용 사이드바 메뉴
 import { guardianSidebarItems } from '~/features/guardian/constants/sidebarItems'; // 🔥 보호자용 메뉴
 import useLoginStore from '~/features/user/stores/LoginStore';
-import { getUserInfo } from '~/features/patient/api/userAPI'; // API는 공통
+import { getUserInfo, updateUserInfo } from '~/features/patient/api/userAPI'; // API는 공통
 import Header from '~/layout/Header';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
 
@@ -204,7 +204,23 @@ const GuardianInfoPage = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('정보 저장 (가짜 저장)');
+    try {
+      // address + detailAddress 합치기
+      const fullAddress = detailAddress ? `${form.address} ${detailAddress}` : form.address;
+
+      // 저장 API 호출
+      await updateUserInfo({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        address: fullAddress, // 합쳐진 주소
+      });
+
+      alert('정보가 성공적으로 저장되었습니다.');
+    } catch (error) {
+      console.error('정보 저장 실패', error);
+      alert('정보 저장에 실패했습니다.');
+    }
   };
 
   const handleSidebarChange = (key: string) => {
@@ -232,8 +248,6 @@ const GuardianInfoPage = () => {
 
   return (
     <>
-      <Header />
-
       <PageBg>
         <FlexRow>
           <SidebarBox>

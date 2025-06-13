@@ -59,8 +59,6 @@ const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
   // useTimeSlots 훅으로 가능한 시간대 불러오기
   const { list: timeSlots, loading, error } = useTimeSlots(doctorId, dateString);
 
-  console.log(timeSlots);
-
   return (
     <Wrapper>
       <div>

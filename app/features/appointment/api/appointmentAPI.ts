@@ -36,8 +36,6 @@ export const getAppointmentList = async (page: number, size: number, date?: stri
     params: { page, size, date },
   });
 
-  console.log(date);
-
   return res.data;
 };
 

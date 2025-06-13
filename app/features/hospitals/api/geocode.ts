@@ -1,14 +1,14 @@
 // ~/features/hospitals/api/geocode.ts
 export const getCoordsFromAddress = async (
-  address: string,
+    address: string,
 ): Promise<{ lat: number; lng: number }> => {
   const res = await fetch(
-    `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(address)}`,
-    {
-      headers: {
-        Authorization: `KakaoAK ${'88fcb35a3f23060fbf073f45fda2d0d5'}`,
+      `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(address)}`,
+      {
+        headers: {
+          Authorization: `KakaoAK ${'88fcb35a3f23060fbf073f45fda2d0d5'}`,
+        },
       },
-    },
   );
   const data = await res.json();
 

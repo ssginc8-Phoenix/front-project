@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal } from '~/features/reviews/component/common/Modal';
-import { Button } from '~/features/reviews/component/common/Button';
+import Button from '~/components/styled/Button';
 
 interface Props {
   isOpen: boolean;
@@ -17,9 +17,7 @@ export function ReviewDeleteModal({ isOpen, onClose, onConfirm }: Props) {
       actions={
         <>
           <Button onClick={onClose}>취소</Button>
-          <Button variant="destructive" onClick={onConfirm}>
-            삭제하기
-          </Button>
+          <Button onClick={onConfirm}>삭제하기</Button>
         </>
       }
     />

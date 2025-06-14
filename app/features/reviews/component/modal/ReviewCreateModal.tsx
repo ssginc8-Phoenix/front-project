@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import * as S from '~/features/reviews/component/common/ReviewModal.styles';
-import { Button } from '~/features/reviews/component/common/Button';
 import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
 import { addReview } from '~/features/reviews/api/reviewAPI';
 import type { ReviewCreateRequest } from '~/features/reviews/types/review';
+import Button from '~/components/styled/Button';
 
 interface ReviewCreateModalProps {
   isOpen: boolean;
@@ -11,8 +11,8 @@ interface ReviewCreateModalProps {
   onSaved: () => void;
   userId: number;
   hospitalId: number;
-  doctorId?: number;
-  appointmentId?: number;
+  doctorId: number;
+  appointmentId: number;
   hospitalName: string;
   doctorName: string;
 }
@@ -20,25 +20,24 @@ interface ReviewCreateModalProps {
 export default function ReviewCreateModal({
   isOpen,
   onClose,
+  onSaved,
   userId,
   hospitalId,
-  doctorId = 0,
-  appointmentId = 0,
+  doctorId,
+  appointmentId,
   hospitalName,
   doctorName,
-  onSaved,
 }: ReviewCreateModalProps) {
   const [goodKeywords, setGoodKeywords] = useState<string[]>([]);
   const [badKeywords, setBadKeywords] = useState<string[]>([]);
   const [contents, setContents] = useState<string>('');
-  const [showSuccess, setShowSuccess] = useState<boolean>(false);
 
+  // 모달 열릴 때마다 초기화
   useEffect(() => {
     if (isOpen) {
       setGoodKeywords([]);
       setBadKeywords([]);
       setContents('');
-      setShowSuccess(false);
     }
   }, [isOpen]);
 
@@ -57,27 +56,18 @@ export default function ReviewCreateModal({
   };
 
   const handleSave = async () => {
-    if (!isValid()) {
-      alert('키워드를 3개 이상, 8개 이하로 선택하고 리뷰 내용을 입력해주세요.');
-      return;
-    }
-    const keywords = [...goodKeywords, ...badKeywords];
     const payload: ReviewCreateRequest = {
       userId,
       hospitalId,
       doctorId,
       appointmentId,
-      keywords,
+      keywords: [...goodKeywords, ...badKeywords],
       contents,
     };
     try {
       await addReview(payload);
-      setShowSuccess(true);
       onSaved();
-      setTimeout(() => {
-        setShowSuccess(false);
-        onClose();
-      }, 1500);
+      onClose();
     } catch (err) {
       console.error(err);
       alert('리뷰 작성 중 오류가 발생했습니다.');
@@ -95,6 +85,7 @@ export default function ReviewCreateModal({
           <S.HospitalName>{hospitalName}</S.HospitalName>
           <S.DoctorName>{doctorName} 원장</S.DoctorName>
           <S.PromptText>진료 리뷰를 남겨주세요!</S.PromptText>
+          <S.PromptText>(키워드는 3~8개 필수 선택입니다.)</S.PromptText>
         </S.HeaderWrapper>
 
         <S.KeywordsSection>
@@ -137,12 +128,7 @@ export default function ReviewCreateModal({
 
         <S.SectionContainer style={{ padding: '0 2rem', marginBottom: '1rem' }}>
           <label
-            style={{
-              display: 'block',
-              marginBottom: '0.25rem',
-              fontWeight: 500,
-              color: '#374151',
-            }}
+            style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500, color: '#374151' }}
           >
             내용 작성
           </label>
@@ -153,13 +139,8 @@ export default function ReviewCreateModal({
           />
         </S.SectionContainer>
 
-        {showSuccess && (
-          <p style={{ textAlign: 'center', color: '#00499e', marginBottom: '1rem' }}>
-            🎉 리뷰가 저장되었습니다!
-          </p>
-        )}
-
         <S.ButtonGroup>
+          {/* 버튼만 비활성화되고, 클릭해도 경고는 뜨지 않음 */}
           <Button onClick={handleSave} disabled={!isValid()}>
             완료
           </Button>

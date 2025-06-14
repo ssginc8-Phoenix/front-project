@@ -4,6 +4,8 @@ import { StatusBadge } from '~/components/styled/StatusBadge';
 import ReviewCreateModal from '~/features/reviews/component/modal/ReviewCreateModal';
 import { useState } from 'react';
 import LoginStore from '~/features/user/stores/LoginStore';
+import { useNavigate } from 'react-router';
+import { AlertModal } from '~/features/reviews/component/common/AlertModal';
 
 const Card = styled.div`
   border: 1px solid #e0e0e0;
@@ -60,7 +62,9 @@ const formatAppointmentTime = (isoString: string) => {
 };
 
 const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
+  const navigate = useNavigate();
   const [isReviewOpen, setReviewOpen] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false); //성공 모달창
 
   const { user } = LoginStore();
 
@@ -81,6 +85,12 @@ const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
 
   const handleReviewSaved = () => {
     setReviewOpen(false);
+    setShowSuccessAlert(true);
+    // 리뷰 작성 완료되면 바로 리뷰관리 페이지로 이동
+    setTimeout(() => {
+      setShowSuccessAlert(false);
+      navigate('/reviews/me');
+    }, 1500);
   };
 
   return (
@@ -116,6 +126,12 @@ const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
         hospitalId={appointment.hospitalId}
         doctorId={appointment.doctorId}
         appointmentId={appointment.appointmentId}
+      />
+
+      <AlertModal
+        isOpen={showSuccessAlert}
+        onClose={() => setShowSuccessAlert(false)}
+        message="리뷰 작성이 완료되었습니다!"
       />
     </>
   );

@@ -1,5 +1,3 @@
-// src/features/reviews/component/common/Modal.tsx
-
 import React from 'react';
 import styled from 'styled-components';
 
@@ -36,16 +34,16 @@ const Overlay = styled.div<{ zIndex: number }>`
   align-items: center;
   justify-content: center;
   background-color: rgba(0, 0, 0, 0.3);
-  padding: 1rem; /* 여백을 줘서 모바일에서도 스크롤 가능 */
+  padding: 1rem;
 `;
 
 const Container = styled.div`
   background: #fff;
   border-radius: 0.5rem;
   width: 100%;
-  max-width: 32rem; /* 최대 너비를 32rem으로 제한 */
-  max-height: 90vh; /* 화면 높이의 90%를 넘지 않도록 */
-  overflow-y: auto; /* 내용이 길면 내부 스크롤 생김 */
+  max-width: 32rem;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 1.5rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 `;

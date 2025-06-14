@@ -5,18 +5,12 @@ import { GOOD_OPTIONS, BAD_OPTIONS } from '~/features/reviews/constants/keywordO
 
 interface ReviewCardProps {
   review: ReviewMyListResponse;
-  onEdit: (id: number) => void;
-  onDelete: (id: number) => void;
+  onClick: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
-export const ReviewCard: React.FC<ReviewCardProps> = ({ review, onEdit, onDelete }) => {
-  const maskedAuthor = (author: string) => {
-    if (author.length <= 1) return '*';
-    return author[0] + '*';
-  };
-  const authorName = `김${maskedAuthor('현')}`; // 더미값 예시
-
-  // 날짜(YYYY.MM.DD)
+export const ReviewCard: React.FC<ReviewCardProps> = ({ review, onClick, onEdit, onDelete }) => {
   const formattedDate = (iso: string) => {
     const d = new Date(iso);
     const yyyy = d.getFullYear();
@@ -25,29 +19,38 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review, onEdit, onDelete
     return `${yyyy}.${mm}.${dd}`;
   };
 
-  // value → label 매핑용 함수
   const getLabelByValue = (value: string) => {
     const goodMatch = GOOD_OPTIONS.find((opt) => opt.value === value);
     if (goodMatch) return { label: goodMatch.label, type: 'good' as const };
-
     const badMatch = BAD_OPTIONS.find((opt) => opt.value === value);
     if (badMatch) return { label: badMatch.label, type: 'bad' as const };
-
     return { label: value, type: 'unknown' as const };
   };
 
   return (
-    <CardContainer>
+    <CardContainer onClick={onClick}>
       <CardHeader>
         <HeaderLeft>
           <HospitalText>{review.hospitalName}</HospitalText>
-          <DoctorText>{review.doctorName}</DoctorText>
+          <DoctorText>{review.doctorName} 원장</DoctorText>
         </HeaderLeft>
         <HeaderRight>
-          <IconButton onClick={() => onEdit(review.reviewId)} title="수정">
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            title="수정"
+          >
             ✏️
           </IconButton>
-          <IconButton onClick={() => onDelete(review.reviewId)} title="삭제">
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            title="삭제"
+          >
             🗑️
           </IconButton>
         </HeaderRight>
@@ -64,11 +67,13 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review, onEdit, onDelete
         })}
       </KeywordsWrapper>
 
-      <ContentText>{review.contents}</ContentText>
+      <ContentText>
+        {review.contents.length > 30 ? `${review.contents.slice(0, 30)}` : review.contents}
+      </ContentText>
 
       <Footer>
         <DateText>{formattedDate(review.createdAt)}</DateText>
-        <AuthorText>{authorName}</AuthorText>
+        {/*<AuthorText>{appointmentId.patientName}</AuthorText>*/}
       </Footer>
     </CardContainer>
   );
@@ -80,7 +85,7 @@ const CardContainer = styled.div`
   border-radius: 0.75rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  cursor: pointer;
 `;
 
 const CardHeader = styled.div`
@@ -135,7 +140,6 @@ const KeywordTag = styled.span<{ type: 'good' | 'bad' | 'unknown' }>`
   font-weight: 500;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
-
   ${({ type }) =>
     type === 'good'
       ? css`
@@ -168,4 +172,3 @@ const Footer = styled.div`
 `;
 
 const DateText = styled.span``;
-const AuthorText = styled.span``;

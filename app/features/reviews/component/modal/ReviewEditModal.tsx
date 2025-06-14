@@ -5,9 +5,9 @@ import {
   type KeywordOption,
 } from '~/features/reviews/constants/keywordOptions';
 import * as S from '~/features/reviews/component/common/ReviewModal.styles';
-import { useReviewStore } from '~/features/reviews/hooks/useReviewStore';
+import { useReviewStore } from '~/features/reviews/stores/useReviewStore';
 import { Modal } from '~/features/reviews/component/common/Modal';
-import { Button } from '~/features/reviews/component/common/Button';
+import Button from '~/components/styled/Button';
 
 interface Props {
   isOpen: boolean;
@@ -108,7 +108,6 @@ export function ReviewEditModal({
         </S.SectionContainer>
       </S.KeywordsSection>
 
-      {/* textarea */}
       <S.SectionContainer style={{ padding: '0 2rem', marginBottom: '1rem' }}>
         <label
           style={{
@@ -123,7 +122,6 @@ export function ReviewEditModal({
         <S.Textarea value={contents} onChange={(e) => setField('contents', e.target.value)} />
       </S.SectionContainer>
 
-      {/* 에러 */}
       {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
     </Modal>
   );

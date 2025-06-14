@@ -44,9 +44,10 @@ export async function deleteReview(reviewId: number): Promise<ActionResult<void>
 export async function getMyReviews(
   page: number,
   size: number,
-): Promise<ActionResult<Page<ReviewMyListResponse>>> {
+): Promise<Page<ReviewMyListResponse>> {
   const url = 'http://localhost:8080/api/v1/users/me/reviews';
-  const res = await axios.get(`${url}?page=${page}&size=${size}`, {
+  const res = await axios.get<Page<ReviewMyListResponse>>(url, {
+    params: { page, size },
     withCredentials: true,
   });
   return res.data;

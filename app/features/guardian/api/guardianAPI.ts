@@ -64,3 +64,7 @@ export const getMyGuardianInfo = async () => {
   });
   return res.data; // { guardianId, name, email, role }
 };
+
+export const deleteGuardianPatient = async (patientId: number): Promise<void> => {
+  await axios.delete(`${HOST}/me/patients/${patientId}`, { withCredentials: true });
+};

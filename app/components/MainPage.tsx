@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router';
 import styled, { keyframes } from 'styled-components';
 import Slider from 'react-slick';
 import useLoginStore from '~/features/user/stores/LoginStore';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
+// import 'slick-carousel/slick/slick.css';
+// import 'slick-carousel/slick/slick-theme.css';
 
 const ads = ['/ads/ad1.png', '/ads/ad2.png', '/ads/ad3.png'];
 

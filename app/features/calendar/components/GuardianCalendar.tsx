@@ -12,7 +12,6 @@ const PageContainer = styled.div`
   display: flex;
   justify-content: center;
   padding: 3rem 2rem;
-  background-color: #f5f7fa;
   min-height: 100vh;
 `;
 
@@ -181,8 +180,10 @@ export default function GuardianCalendar() {
     setFullList(res.calendarItemLists);
 
     const namesAndIds = res.calendarItemLists
-      .filter((item) => item.name && item.patientGuardianId)
-      .map((item) => ({
+      .filter(
+        (item: { name: string; patientGuardianId: number }) => item.name && item.patientGuardianId,
+      )
+      .map((item: { name: string; patientGuardianId: number }) => ({
         name: item.name,
         patientGuardianId: item.patientGuardianId,
       }));
@@ -224,7 +225,10 @@ export default function GuardianCalendar() {
 
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
-    const dateStr = date.toISOString().split('T')[0];
+
+    const kstOffsetMs = 9 * 60 * 60 * 1000;
+    const localDate = new Date(date.getTime() + kstOffsetMs);
+    const dateStr = localDate.toISOString().split('T')[0];
 
     // 📌 날짜 범위에 따라 복약 일정 필터링
     const items = (calendarData[dateStr] || []).filter((item: CalendarItem) => {

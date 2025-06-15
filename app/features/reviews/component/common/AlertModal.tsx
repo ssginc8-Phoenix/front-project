@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '~/features/reviews/component/common/Button';
+import Button from '~/components/styled/Button';
 import { Modal } from '~/features/reviews/component/common/Modal';
 
 interface Props {

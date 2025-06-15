@@ -9,8 +9,8 @@ import 'slick-carousel/slick/slick-theme.css';
 const ads = ['/ads/ad1.png', '/ads/ad2.png', '/ads/ad3.png'];
 
 const features = [
-  { title: '주변 병원', route: '/hospitals', icon: '/location.png' },
-  { title: '진료 예약', route: '/appointments', icon: '/appointment.png' },
+  { title: '주변 병원', route: '/hospitals/search', icon: '/location.png' },
+  { title: '진료 예약', route: '/appointments/request', icon: '/appointment.png' },
   { title: '서류 발급', route: '/documents', icon: '/document.png' },
 ];
 

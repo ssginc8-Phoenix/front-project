@@ -50,12 +50,16 @@ export default function QnAListPage() {
   const handleDelete = async (qnaId: number) => {
     try {
       await deleteQaPost(qnaId);
-      await refetch();
+      await refetch(); // 삭제 후 목록 갱신
     } catch (e) {
-      console.error('삭제 실패', e);
-    } finally {
-      setConfirmId(null);
+      console.error('질문 삭제 실패:', e);
     }
+  };
+
+  const handleAndCloseDelete = async () => {
+    if (confirmId === null) return;
+    await handleDelete(confirmId);
+    setConfirmId(null);
   };
 
   if (listLoading) return <CenterText>로딩 중…</CenterText>;
@@ -72,27 +76,29 @@ export default function QnAListPage() {
 
       {items.length > 0 ? (
         <List>
-          {items.map((appt) => (
-            <Card key={appt.appointmentId} onClick={() => setOpenId(appt.appointmentId)}>
-              <DeleteBtn
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setConfirmId(appt.appointmentId);
-                }}
-                title="질문 삭제"
-              >
-                🗑️
-              </DeleteBtn>
+          {items.map((appt) =>
+            appt.question ? (
+              <Card key={appt.appointmentId} onClick={() => setOpenId(appt.appointmentId)}>
+                <DeleteBtn
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setConfirmId(appt.appointmentId);
+                  }}
+                  title="질문 삭제"
+                >
+                  🗑️
+                </DeleteBtn>
 
-              <HospitalName>{appt.hospitalName}</HospitalName>
-              <DoctorName>{appt.doctorName} 의사</DoctorName>
-              <MetaInfo>
-                {format(new Date(appt.appointmentTime), 'yyyy.MM.dd')} {maskName(appt.patientName)}{' '}
-                방문
-              </MetaInfo>
-              <QuestionText>{appt.question ?? '질문이 없습니다.'}</QuestionText>
-            </Card>
-          ))}
+                <HospitalName>{appt.hospitalName}</HospitalName>
+                <DoctorName>{appt.doctorName} 의사</DoctorName>
+                <MetaInfo>
+                  {format(new Date(appt.appointmentTime), 'yyyy.MM.dd')}{' '}
+                  {maskName(appt.patientName)} 방문
+                </MetaInfo>
+                <QuestionText>{appt.question}</QuestionText>
+              </Card>
+            ) : null,
+          )}
         </List>
       ) : (
         <CenterText>질문이 없습니다.</CenterText>
@@ -120,7 +126,7 @@ export default function QnAListPage() {
 
       {/* 삭제 확인 모달 */}
       {confirmId !== null && (
-        <CommonModal title="질문 삭제" buttonText="삭제" onClose={() => handleDelete(confirmId)}>
+        <CommonModal title="질문 삭제" buttonText="삭제" onClose={handleAndCloseDelete}>
           이 질문을 정말 삭제하시겠습니까?
         </CommonModal>
       )}
@@ -138,22 +144,26 @@ const PageWrapper = styled.div`
   margin: 0 auto;
   padding: 2rem 1rem;
 `;
+
 const Title = styled.h1`
   font-size: 1.5rem;
   font-weight: bold;
   color: #00499e;
   text-align: center;
 `;
+
 const CenterText = styled.p`
   text-align: center;
   color: #6b7280;
   margin: 2rem 0;
 `;
+
 const List = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
 `;
+
 const Card = styled.button`
   position: relative;
   background: #ffffff;
@@ -171,6 +181,7 @@ const Card = styled.button`
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 `;
+
 const DeleteBtn = styled.button`
   position: absolute;
   top: 0.5rem;
@@ -185,38 +196,47 @@ const DeleteBtn = styled.button`
     opacity: 1;
   }
 `;
+
 const HospitalName = styled.div`
   font-size: 0.75rem;
   color: #6b7280;
 `;
+
 const DoctorName = styled.div`
   font-size: 1rem;
   font-weight: 600;
   margin: 0.25rem 0;
 `;
+
 const MetaInfo = styled.div`
   font-size: 0.75rem;
   color: #9ca3af;
   margin-bottom: 0.75rem;
 `;
+
 const QuestionText = styled.p`
   font-size: 1rem;
 `;
+
 const Pagination = styled.div`
   display: flex;
   justify-content: center;
   gap: 1rem;
   margin-top: 2rem;
 `;
+
 const PageButton = styled.button`
   padding: 0.5rem 1rem;
 `;
+
 const PageInfo = styled.span`
   align-self: center;
 `;
+
 const Divider = styled.hr`
   margin: 1rem 0;
 `;
+
 const Header = styled.div`
   text-align: center;
   margin-bottom: 1rem;

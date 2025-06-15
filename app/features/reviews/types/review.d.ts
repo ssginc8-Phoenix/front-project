@@ -51,6 +51,7 @@ export interface HospitalReviewResponse {
   createdAt: string;
   reportCount: number;
   keywords: string[];
+  writerName: string;
 }
 
 //페이징 처리

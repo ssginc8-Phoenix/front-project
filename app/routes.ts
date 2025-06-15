@@ -30,11 +30,18 @@ export default [
       route('calendar', 'routes/calendar/guardianCalendar.tsx'),
     ]),
 
-    /** HOSPITAL 병원 영역 */
+    /** DOCTOR 병원 영역 */
+    route('doctor', 'routes/doctor/emptyPage.tsx', [
+      route('info', 'routes/doctor/doctorInfo.tsx'),
+      route('schedule', 'routes/doctor/doctorSchedule.tsx'),
+      route('calendar', 'routes/calendar/doctorCalendar.tsx'),
+    ]),
+
     /** HOSPITAL 병원 영역 */
     route('hospitals', 'routes/hospital/emptyPage.tsx', [
       route(':hospitalId', 'routes/hospital/hospitalDetail.tsx'),
       route('search', 'routes/hospital/hospitalSearch.tsx'),
+      route('create', 'routes/hospital/hospitalCreate.tsx'),
       route('info', 'routes/hospital/hospitalAdmin.tsx'),
       route('chart', 'routes/hospital/hospitalAdminChart.tsx'),
       route('calendar', 'routes/calendar/hospitalCalendar.tsx'),
@@ -46,8 +53,6 @@ export default [
       route('list', 'routes/appointment/appointmentList.tsx'),
       route('dashboard', 'routes/appointment/dashBoard.tsx'),
     ]),
-
-    route('doctor/calendar', 'routes/calendar/doctorCalendar.tsx'),
   ]),
 
   /** QNAS 영역 */

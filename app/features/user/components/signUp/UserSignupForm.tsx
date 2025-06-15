@@ -251,7 +251,7 @@ const UserSignupForm = () => {
       await submitPatientInfo({ userId: response.userId, residentRegistrationNumber });
       setIsSignupComplete(true);
     } else if (role === 'HOSPITAL_ADMIN') {
-      navigate('/register-doctors');
+      navigate('/hospitals/create');
     } else {
       setIsSignupComplete(true);
     }

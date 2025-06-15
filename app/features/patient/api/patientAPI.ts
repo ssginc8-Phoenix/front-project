@@ -3,6 +3,11 @@ import type { Patient } from '~/features/patient/types/patient';
 
 const HOST = 'http://localhost:8080/api/v1/patients';
 
+export interface Guardian {
+  patientGuardianId: number;
+  name: string;
+}
+
 /**
  * 환자 본인 정보 조회 API
  */
@@ -59,4 +64,22 @@ export const deletePatient = async (patientId: number): Promise<void> => {
   await axios.delete(`${HOST}/${patientId}`, {
     withCredentials: true,
   });
+};
+
+/**
+ * 환자별 보호자 목록 조회 API
+ */
+export const getGuardians = async (patientId: number): Promise<Guardian[]> => {
+  const res = await axios.get<Guardian[]>(`${HOST}/${patientId}/guardians`, {
+    withCredentials: true,
+  });
+  return res.data;
+};
+
+/**
+ * 환자가 가진 보호자 매핑 soft‑delete API
+ * (로그인된 환자의 PatientController.removeMyGuardian)
+ */
+export const deletePatientGuardian = async (mappingId: number): Promise<void> => {
+  await axios.delete(`${HOST}/me/guardians/${mappingId}`, { withCredentials: true });
 };

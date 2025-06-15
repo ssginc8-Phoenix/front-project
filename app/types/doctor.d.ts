@@ -15,3 +15,9 @@ export interface DoctorSchedule {
   lunchStart: string;
   lunchEnd: string;
 }
+
+export interface DoctorSaveRequest {
+  hospitalId: number;
+  specialization: string;
+  userId: number;
+}

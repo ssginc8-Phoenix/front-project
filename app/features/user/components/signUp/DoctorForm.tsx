@@ -128,6 +128,14 @@ const DoctorForm = ({
           onChange={(e) => onChange(index, 'phone', e.target.value)}
         />
       </FieldGroup>
+      <FieldGroup>
+        <Label>전공</Label>
+        <Input
+          type="text"
+          value={doctor.specialization}
+          onChange={(e) => onChange(index, 'specialization', e.target.value)}
+        />
+      </FieldGroup>
       <ButtonRow>
         <RemoveButton type="button" onClick={() => onRemove(index)}>
           삭제하기

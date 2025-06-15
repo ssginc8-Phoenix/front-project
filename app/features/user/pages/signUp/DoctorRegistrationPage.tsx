@@ -6,6 +6,8 @@ import CommonModal from '~/components/common/CommonModal';
 import { checkEmailDuplicate, submitDoctorsInfo } from '~/features/user/api/UserAPI';
 import type { DoctorInfo } from '~/types/user';
 import Header from '~/layout/Header';
+import { createDoctor } from '~/features/doctor/api/doctorAPI';
+import useHospitalStore from '~/features/hospitals/state/hospitalStore';
 
 const Wrapper = styled.div`
   max-width: 600px;
@@ -48,8 +50,9 @@ const AddButton = styled(Button)`
 `;
 
 const DoctorRegistrationPage = () => {
+  const { hospitalId } = useHospitalStore();
   const [doctors, setDoctors] = useState<DoctorInfo[]>([
-    { email: '', password: '', name: '', phone: '' },
+    { email: '', password: '', name: '', phone: '', specialization: '' },
   ]);
   const [emailCheckResults, setEmailCheckResults] = useState<
     { success: boolean; message: string }[]
@@ -70,7 +73,7 @@ const DoctorRegistrationPage = () => {
   };
 
   const handleAddDoctor = () => {
-    setDoctors([...doctors, { email: '', password: '', name: '', phone: '' }]);
+    setDoctors([...doctors, { email: '', password: '', name: '', phone: '', specialization: '' }]);
     setEmailCheckResults([...emailCheckResults, { success: false, message: '' }]);
   };
 
@@ -79,6 +82,7 @@ const DoctorRegistrationPage = () => {
       await checkEmailDuplicate(email);
       updateEmailCheckResult(index, true, '사용 가능한 이메일입니다.');
     } catch (e) {
+      console.error(e);
       updateEmailCheckResult(index, false, '이미 사용 중인 이메일입니다.');
     }
   };
@@ -90,8 +94,32 @@ const DoctorRegistrationPage = () => {
   };
 
   const handleSubmit = async () => {
-    await submitDoctorsInfo({ doctorInfos: doctors });
-    setShowModal(true);
+    try {
+      console.log('[등록 시도] 병원 ID:', hospitalId);
+      if (!hospitalId) {
+        alert('병원 ID가 없습니다. 병원을 먼저 등록해주세요.');
+        return;
+      }
+
+      const response = await submitDoctorsInfo({ doctorInfos: doctors });
+      const registeredUsers = response.registeredDoctors;
+
+      for (const { email, userId } of registeredUsers) {
+        const doctor = doctors.find((d) => d.email === email);
+        if (!doctor) continue;
+
+        await createDoctor({
+          hospitalId,
+          userId,
+          specialization: doctor.specialization,
+        });
+      }
+
+      setShowModal(true);
+    } catch (err) {
+      console.error(err);
+      alert('의사 등록 중 오류 발생');
+    }
   };
 
   const handleCloseModal = () => {

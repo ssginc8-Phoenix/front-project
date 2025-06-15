@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import type { HospitalReviewResponse, Page } from '~/features/reviews/types/review';
-import type { ActionResult } from '~/features/reviews/types/common';
 import { getHospitalReviews } from '~/features/reviews/api/reviewAPI';
 
 export function useHospitalReviews(hospitalId: number, page: number, size: number = 10) {
@@ -13,8 +12,8 @@ export function useHospitalReviews(hospitalId: number, page: number, size: numbe
     setError(null);
 
     getHospitalReviews(hospitalId, page, size)
-      .then((res: ActionResult<Page<HospitalReviewResponse>>) => {
-        setData(res.data);
+      .then((res: Page<HospitalReviewResponse>) => {
+        setData(res);
       })
       .catch((e) => {
         console.error(e);

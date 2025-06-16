@@ -98,6 +98,14 @@ const ProfileRole = styled.div`
   font-size: 1rem;
 `;
 
+const ProfileImage = styled.img`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+`;
+
 // --- 메인 컴포넌트 ---
 const GuardianPage = () => {
   const [guardians, setGuardians] = useState<Guardian[]>([]);
@@ -179,7 +187,14 @@ const GuardianPage = () => {
       <PageWrapper>
         <SidebarBox>
           <ProfileSection>
-            <ProfileEmoji>👵</ProfileEmoji>
+            {userinfo?.profileImageUrl ? (
+              <ProfileImage src={userinfo.profileImageUrl} alt="프로필 이미지" />
+            ) : (
+              <ProfileImage
+                src="https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png"
+                alt="기본 프로필"
+              />
+            )}
             <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
             <ProfileRole>환자</ProfileRole>
           </ProfileSection>

@@ -135,6 +135,14 @@ const CenterButton = styled.button`
   }
 `;
 
+const ProfileImage = styled.img`
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+`;
+
 // --- 컴포넌트
 export const GuardianMyPage = () => {
   const navigate = useNavigate();
@@ -163,9 +171,13 @@ export const GuardianMyPage = () => {
       <Main>
         {/* 프로필 */}
         <ProfileRow>
-          <ProfileEmoji role="img" aria-label="profile">
-            🧑‍🦰
-          </ProfileEmoji>
+          <ProfileImage
+            src={
+              user?.profileImageUrl ??
+              'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png'
+            }
+            alt="프로필 사진"
+          />
           <ProfileInfoCol>
             <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
           </ProfileInfoCol>

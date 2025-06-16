@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import type { ProfileProps } from '~/types/user';
 import useLoginStore from '~/features/user/stores/LoginStore';
+import { useNavigate } from 'react-router';
 
 const UserProfile = styled.div`
   position: relative;
@@ -33,7 +34,7 @@ const Dropdown = styled.div`
   border: 1px solid #ddd;
   border-radius: 0.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  min-width: 120px;
+  min-width: 140px;
   z-index: 100;
   padding: 0.5rem 0;
 `;
@@ -56,7 +57,8 @@ const DropdownItem = styled.button`
 const Profile = ({ name, imageUrl }: ProfileProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const { logout } = useLoginStore();
+  const { logout, user } = useLoginStore();
+  const navigate = useNavigate();
 
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
@@ -66,6 +68,24 @@ const Profile = ({ name, imageUrl }: ProfileProps) => {
     await logout();
     window.location.href = '/login';
   };
+
+  // const handleGoToMyPage = () => {
+  //   if (!user?.role) return;
+  //
+  //   const role = user.role;
+  //
+  //   if (role === 'PATIENT') {
+  //     navigate('/patients/mypage');
+  //   } else if (role === 'GUARDIAN') {
+  //     navigate('/guardians/mypage');
+  //   } else if (role === 'HOSPITAL') {
+  //     navigate('/hospitals/info');
+  //   } else if (role === 'DOCTOR') {
+  //     navigate('/doctor/calendar');
+  //   }
+  //
+  //   setIsOpen(false);
+  // };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -84,6 +104,7 @@ const Profile = ({ name, imageUrl }: ProfileProps) => {
 
       {isOpen && (
         <Dropdown>
+          {/*<DropdownItem onClick={handleGoToMyPage}>마이페이지</DropdownItem>*/}
           <DropdownItem onClick={handleLogout}>로그아웃</DropdownItem>
         </Dropdown>
       )}

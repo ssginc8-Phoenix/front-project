@@ -39,7 +39,7 @@ const PAYMENT_OPTIONS = [
     icon: <FaStore />,
   },
   {
-    method: 'IN_APP',
+    method: 'ONLINE',
     label: '앱 내 결제',
     icon: <FaCreditCard />,
   },

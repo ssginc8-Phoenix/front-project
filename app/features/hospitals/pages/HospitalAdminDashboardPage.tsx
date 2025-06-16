@@ -4,6 +4,9 @@ import HospitalSidebarMenu from '~/features/hospitals/components/hospitalAdmin/H
 import { hospitalSidebarItems } from '~/features/hospitals/components/constants/hospitalSidebarItems';
 import HospitalUpdateForm from '~/features/hospitals/components/hospitalAdmin/info/HospitalUpdateForm';
 import useLoginStore from '~/features/user/stores/LoginStore';
+import { getMyHospital } from '~/features/hospitals/api/hospitalAPI';
+import { useQuery } from '@tanstack/react-query';
+import { getMyDoctorInfo } from '~/features/doctor/api/doctorAPI';
 
 // ------------------- 스타일 정의 -------------------
 const PageWrapper = styled.div`
@@ -54,6 +57,7 @@ const ProfileRole = styled.div`
 `;
 const SidebarBox = styled.div`
   width: 200px;
+  height: 600px;
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -68,6 +72,12 @@ const SidebarBox = styled.div`
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useLoginStore();
+
+  const { data } = useQuery({
+    queryKey: ['myHospitalInfo'],
+    queryFn: getMyHospital,
+  });
+
   const handleSidebarChange = (key: string) => {
     const targetPath = `/hospitals/${key}`;
     if (window.location.pathname === targetPath) {
@@ -83,13 +93,29 @@ const AdminDashboard = () => {
         {/* 사이드바 */}
         <SidebarBox>
           <ProfileSection>
-            <ProfileEmoji>🏥️</ProfileEmoji>
+            <ProfileEmoji>
+              {data?.imageUrl ? (
+                <img
+                  src={data.imageUrl}
+                  alt="병원관리자 프로필"
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                  }}
+                />
+              ) : (
+                '🏥️'
+              )}
+            </ProfileEmoji>
+
             <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
             <ProfileRole>병원관리자</ProfileRole>
           </ProfileSection>
           <HospitalSidebarMenu
             items={hospitalSidebarItems}
-            activeKey=""
+            activeKey="info"
             onChange={handleSidebarChange}
           />
         </SidebarBox>

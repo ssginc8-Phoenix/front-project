@@ -12,13 +12,17 @@ import type { Hospital } from '../types/hospital';
 
 const MapContainer = styled.div`
   position: relative;
-  width: 100vw;
+  width: 91vw;
   height: 100vh;
+  overflow-x: hidden;
 `;
 
 const FullMap = styled(AroundMap)`
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 `;
 
 const SidePanel = styled.div`
@@ -34,6 +38,7 @@ const SidePanel = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overflow-x: hidden;
 `;
 
 const PAGE_SIZE = 1000;
@@ -132,7 +137,6 @@ const HospitalSearchPage: React.FC = () => {
             onClick={() => {
               setSearchMode('nearby');
               if (currentLocation) {
-                console.log('[내 주변] 현재 위치 있음:', currentLocation);
                 setMapCenter({
                   lat: currentLocation.latitude,
                   lng: currentLocation.longitude,

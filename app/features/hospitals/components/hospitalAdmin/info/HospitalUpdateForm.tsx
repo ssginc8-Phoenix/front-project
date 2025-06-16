@@ -87,19 +87,16 @@ export const ServiceInputChips: React.FC<{
 };
 
 const FileInput = styled.input`
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
+  display: none;
 `;
 
 const PreviewImage = styled.img`
   width: 100%;
   max-height: 200px;
-  object-fit: contain; // cover → contain 으로 변경
+  object-fit: contain;
   margin-top: 0.5rem;
   border-radius: 0.5rem;
-  background: #f9fafb; // 이미지가 작을 경우 배경 처리도 가능
+  background: #fff;
 `;
 
 const HospitalUpdateForm: React.FC = () => {
@@ -138,7 +135,7 @@ const HospitalUpdateForm: React.FC = () => {
     const fetchHospitalAndSchedules = async () => {
       try {
         const data = await getMyHospital();
-        console.log('[병원 데이터]', data);
+
         if (!data) return;
 
         setHospitalId(String(data.hospitalId));
@@ -156,7 +153,6 @@ const HospitalUpdateForm: React.FC = () => {
         setCoords({ lat: data.latitude || 0, lng: data.longitude || 0 });
         // 수정된 코드
         if (data.imageUrl) {
-          console.log('[이미지 불러오기]', data.imageUrl);
           setPreviewUrl(data.imageUrl);
         }
 
@@ -229,6 +225,45 @@ const HospitalUpdateForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    for (const { day, open, close, lunchStart, lunchEnd } of businessHours) {
+      // ① 빈 데이터(오픈/종료 둘 다 빈 값)는 건너뛰기
+      if (!open && !close && !lunchStart && !lunchEnd) {
+        continue;
+      }
+
+      // ② 진료 시작/종료는 둘 다 있어야 함
+      if (!open || !close) {
+        alert(`${day}의 진료 시작·종료 시간을 모두 입력해주세요.`);
+        return;
+      }
+
+      // ③ 진료 시작 < 종료
+      if (open >= close) {
+        alert(`${day} 진료 시작시간은 종료시간보다 빠르게 입력해야 합니다.`);
+        return;
+      }
+
+      // ④ 점심이 있으면 진료시간 내부에 있어야 함
+      if (lunchStart) {
+        if (lunchStart < open || lunchStart >= close) {
+          alert(`${day} 점심 시작시간은 진료시간(${open}~${close}) 안에 있어야 합니다.`);
+          return;
+        }
+      }
+      if (lunchEnd) {
+        if (lunchEnd <= open || lunchEnd > close) {
+          alert(`${day} 점심 종료시간은 진료시간(${open}~${close}) 안에 있어야 합니다.`);
+          return;
+        }
+      }
+
+      // ⑤ 점심 시작 < 점심 종료
+      if (lunchStart && lunchEnd && lunchStart >= lunchEnd) {
+        alert(`${day} 점심 시작시간은 점심 종료시간보다 빠르게 입력해야 합니다.`);
+        return;
+      }
+    }
+
     if (selectedImage) {
       const formData = new FormData();
       formData.append('file', selectedImage);
@@ -298,8 +333,6 @@ const HospitalUpdateForm: React.FC = () => {
         setIsEdit(true);
       }
 
-      console.log('[병원 저장 요청]', hospitalPayload);
-
       if (toUpdate.length) await updateHospitalSchedules(id, toUpdate);
       if (toCreate.length) {
         await Promise.all(toCreate.map(({ ...rest }) => createHospitalSchedule(id, rest)));
@@ -339,7 +372,8 @@ const HospitalUpdateForm: React.FC = () => {
     <Form onSubmit={handleSubmit}>
       <FieldWrapper>
         <Label>병원 이미지</Label>
-        <FileInput type="file" accept="image/*" onChange={handleImageChange} />
+        <FileInput id="hospitalImage" type="file" accept="image/*" onChange={handleImageChange} />
+        <FileLabel htmlFor="hospitalImage">이미지 선택</FileLabel>
         {previewUrl && <PreviewImage src={previewUrl} alt="미리보기" />}
       </FieldWrapper>
       <FieldWrapper>
@@ -457,7 +491,7 @@ const HospitalUpdateForm: React.FC = () => {
                 </option>
               ))}
             </StyledSelect>
-
+            <span style={{ fontWeight: 500 }}>진료:</span>
             {/* 오픈/종료 */}
             {(['open', 'close'] as const).map((key) => (
               <StyledTimeSelect
@@ -580,6 +614,18 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+`;
+const FileLabel = styled.label`
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #2563eb;
+  color: white;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  &:hover {
+    background-color: #003c80;
+  }
 `;
 const FieldWrapper = styled.div`
   display: flex;

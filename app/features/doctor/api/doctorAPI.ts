@@ -75,3 +75,11 @@ export const updateDoctorSchedule = async (
 export const deleteDoctorSchedule = async (doctorId: number, scheduleId: number): Promise<void> => {
   await axios.delete(`/api/v1/doctors/${doctorId}/schedules/${scheduleId}`);
 };
+
+export const updateDoctorProfile = async (doctorId: number, formData: FormData) => {
+  return await axios.patch(`/api/v1/doctors/${doctorId}/profile`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};

@@ -27,7 +27,6 @@ const HospitalMap = ({ hospitalId }: HospitalMapProps) => {
 
   return (
     <TabContent>
-      <SectionTitle>위치 정보</SectionTitle>
       <MapContainer>
         {lat !== null && lon !== null ? (
           <KakaoMap lat={lat} lng={lon} />

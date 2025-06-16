@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import type { DoctorInfo } from '~/types/user';
-import { useEffect, useState } from 'react';
 
 interface Props {
   doctor: DoctorInfo;
@@ -10,94 +9,22 @@ interface Props {
   onRemove: (index: number) => void;
   emailCheckMessage?: string;
   emailCheckSuccess?: boolean;
-  onPhoneValidChange?: (index: number, isValid: boolean) => void;
 }
-
-const FieldGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 28px;
-`;
-
-const Label = styled.label`
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #222;
-`;
-
-const InputWithButton = styled.div`
-  display: flex;
-  gap: 16px;
-`;
-
-const ButtonRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 32px;
-`;
-
-const FormBlock = styled.div`
-  background: #ffffff;
-  padding: 3rem;
-  border-radius: 1.5rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-  margin-bottom: 3rem;
-  transition: all 0.3s ease;
-
-  &:hover {
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
-  }
-`;
-
-const Input = styled.input`
-  padding: 1rem 1.25rem;
-  font-size: 1rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.75rem;
-  background-color: #f9fafb;
-  transition: all 0.25s ease;
-
-  &:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-    background-color: #ffffff;
-  }
-`;
-
-const ActionButton = styled.button`
-  padding: 0.9rem 1.5rem;
-  font-size: 0.95rem;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #2563eb;
-  }
-`;
-
-const RemoveButton = styled(ActionButton)`
-  background-color: #ef4444;
-
-  &:hover {
-    background-color: #dc2626;
-  }
-`;
-
-const EmailCheckMessage = styled.div<{ success: boolean }>`
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: ${(props) => (props.success ? '#10b981' : '#ef4444')};
-  margin-top: 0.5rem;
-  min-height: 1.25rem;
-`;
-
+const SPECIALIZATIONS = [
+  { value: 'CARDIOLOGY', label: '심장내과' },
+  { value: 'NEUROLOGY', label: '신경과' },
+  { value: 'DERMATOLOGY', label: '피부과' },
+  { value: 'PEDIATRICS', label: '소아과' },
+  { value: 'RADIOLOGY', label: '영상의학과' },
+  { value: 'ONCOLOGY', label: '종양내과' },
+  { value: 'GYNECOLOGY', label: '산부인과' },
+  { value: 'PSYCHIATRY', label: '정신과' },
+  { value: 'GENERAL_SURGERY', label: '일반외과' },
+  { value: 'UROLOGY', label: '비뇨기과' },
+  { value: 'OPHTHALMOLOGY', label: '안과' },
+  { value: 'ENT', label: '이비인후과' },
+  { value: 'INTERNAL_MEDICINE', label: '내과' },
+];
 const DoctorForm = ({
   doctor,
   index,
@@ -106,49 +33,22 @@ const DoctorForm = ({
   onRemove,
   emailCheckMessage = '',
   emailCheckSuccess = false,
-  onPhoneValidChange,
 }: Props) => {
-  const [phoneError, setPhoneError] = useState('');
-
-  const formatPhoneNumber = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 11);
-    if (digits.length < 4) return digits;
-    if (digits.length < 8) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
-  };
-
-  const isValidPhone = (phone: string) => /^01[016789]-\d{3,4}-\d{4}$/.test(phone);
-
-  useEffect(() => {
-    const formatted = formatPhoneNumber(doctor.phone);
-    const valid = isValidPhone(formatted);
-
-    setPhoneError(
-      doctor.phone && !valid ? '휴대폰 번호 형식이 올바르지 않습니다. (예: 010-1234-5678)' : '',
-    );
-
-    onPhoneValidChange?.(index, valid);
-  }, [doctor.phone]);
-
   return (
     <FormBlock>
       <FieldGroup>
         <Label>이메일</Label>
-        <InputWithButton>
+        <EmailGroup>
           <Input
             type="email"
             value={doctor.email}
             onChange={(e) => onChange(index, 'email', e.target.value)}
-            required
-            style={{ flex: 1 }}
           />
-          <ActionButton type="button" onClick={() => onCheckEmail(index, doctor.email)}>
+          <Button type="button" onClick={() => onCheckEmail(index, doctor.email)}>
             중복 확인
-          </ActionButton>
-        </InputWithButton>
-        <EmailCheckMessage success={emailCheckSuccess}>
-          {emailCheckMessage || '이메일 중복 확인을 해주세요.'}
-        </EmailCheckMessage>
+          </Button>
+        </EmailGroup>
+        <EmailCheckMessage success={emailCheckSuccess}>{emailCheckMessage}</EmailCheckMessage>
       </FieldGroup>
 
       <FieldGroup>
@@ -157,7 +57,6 @@ const DoctorForm = ({
           type="password"
           value={doctor.password}
           onChange={(e) => onChange(index, 'password', e.target.value)}
-          required
         />
       </FieldGroup>
 
@@ -167,7 +66,6 @@ const DoctorForm = ({
           type="text"
           value={doctor.name}
           onChange={(e) => onChange(index, 'name', e.target.value)}
-          required
         />
       </FieldGroup>
 
@@ -175,11 +73,37 @@ const DoctorForm = ({
         <Label>휴대폰 번호</Label>
         <Input
           type="tel"
-          value={formatPhoneNumber(doctor.phone)}
-          onChange={(e) => onChange(index, 'phone', e.target.value.replace(/\D/g, ''))}
-          required
+          value={doctor.phone}
+          onChange={(e) => {
+            const raw = e.target.value.replace(/\D/g, '').slice(0, 11); // 숫자만, 최대 11자리
+            let formatted = raw;
+
+            if (raw.length <= 3) {
+              formatted = raw;
+            } else if (raw.length <= 7) {
+              formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
+            } else {
+              formatted = `${raw.slice(0, 3)}-${raw.slice(3, 7)}-${raw.slice(7)}`;
+            }
+
+            onChange(index, 'phone', formatted);
+          }}
         />
-        {phoneError && <EmailCheckMessage success={false}>{phoneError}</EmailCheckMessage>}
+      </FieldGroup>
+
+      <FieldGroup>
+        <Label>전공</Label>
+        <Select
+          value={doctor.specialization}
+          onChange={(e) => onChange(index, 'specialization', e.target.value)}
+        >
+          <option value="">전공을 선택하세요</option>
+          {SPECIALIZATIONS.map((item) => (
+            <option key={item.value} value={item.value}>
+              {item.label}
+            </option>
+          ))}
+        </Select>
       </FieldGroup>
 
       <ButtonRow>
@@ -192,3 +116,82 @@ const DoctorForm = ({
 };
 
 export default DoctorForm;
+
+const FormBlock = styled.div`
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #eee;
+  border-radius: 1rem;
+  background-color: #f9f9f9;
+`;
+
+const FieldGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+`;
+
+const Label = styled.label`
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+`;
+
+const Input = styled.input`
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+  }
+`;
+
+const EmailGroup = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+const Select = styled.select`
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background-color: white;
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+  }
+`;
+const EmailCheckMessage = styled.div<{ success: boolean }>`
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  color: ${(props) => (props.success ? '#007bff' : 'red')};
+`;
+
+const ButtonRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+`;
+
+const Button = styled.button`
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  &:hover {
+    background-color: #005fcc;
+  }
+`;
+
+const RemoveButton = styled(Button)`
+  background-color: #dc3545;
+  &:hover {
+    background-color: #c82333;
+  }
+`;

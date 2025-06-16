@@ -15,10 +15,11 @@ export type Specialization =
   | 'INTERNAL_MEDICINE'; // 내과
 
 export interface Doctor {
+  name: string;
   doctorId: number;
   hospitalId: number;
   specialization: Specialization;
-  username?: string;
+  imageUrl?: never;
 }
 
 export interface PagedDoctorResponse {

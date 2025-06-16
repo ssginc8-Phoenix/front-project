@@ -38,6 +38,7 @@ export const hospitalAPI = async (): Promise<HospitalPage> => {
 // 의사 목록 조회 (쿼리 매개변수로 병원 ID 전달)
 export const getDoctor = async (hospitalId: number) => {
   const res = await apiClient.get('/api/v1/doctors', { params: { hospitalId } });
+  console.log('[getDoctor] 응답 확인:', res.data);
   return res.data;
 };
 
@@ -93,8 +94,7 @@ export const registerHospital = async (data: {
     },
     withCredentials: true, // axios에서는 credentials → withCredentials
   });
-  console.log('🔥 res:', res);
-  console.log('🔥 res.data:', res.data);
+
   return { hospitalId: res.data };
 };
 

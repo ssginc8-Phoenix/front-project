@@ -12,6 +12,7 @@ import type {
 import useHospitalStore from '~/features/hospitals/state/hospitalStore';
 import { useNavigate } from 'react-router';
 import useLoginStore from '~/features/user/stores/LoginStore';
+import { resizeImage } from '~/features/hospitals/components/common/resizeImage';
 
 const dayOfWeekMap: Record<string, CreateScheduleRequest['dayOfWeek']> = {
   월요일: 'MONDAY',
@@ -74,15 +75,28 @@ const HospitalCreateForm: React.FC = () => {
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
     };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setSelectedImage(file);
+
+    const fileSizeMB = file.size / (1024 * 1024);
+    if (fileSizeMB > 2) {
+      alert('2MB 이하의 이미지만 업로드할 수 있습니다.');
+      return;
+    }
+
+    // ✅ 이미지 리사이즈
+    const resized = await resizeImage(file, 500);
+    setSelectedImage(resized);
+
+    // 미리보기
     const reader = new FileReader();
     reader.onload = () => {
-      if (typeof reader.result === 'string') setPreviewUrl(reader.result);
+      if (typeof reader.result === 'string') {
+        setPreviewUrl(reader.result);
+      }
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(resized);
   };
 
   const handleAddSchedule = () => {
@@ -130,7 +144,44 @@ const HospitalCreateForm: React.FC = () => {
   });
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    for (const { dayOfWeek, open, close, lunchStart, lunchEnd } of businessHours) {
+      // ① 빈 데이터(오픈/종료 둘 다 빈 값)는 건너뛰기
+      if (!open && !close && !lunchStart && !lunchEnd) {
+        continue;
+      }
 
+      // ② 진료 시작/종료는 둘 다 있어야 함
+      if (!open || !close) {
+        alert(`${dayOfWeek}의 진료 시작·종료 시간을 모두 입력해주세요.`);
+        return;
+      }
+
+      // ③ 진료 시작 < 종료
+      if (open >= close) {
+        alert(`${dayOfWeek} 진료 시작시간은 종료시간보다 빠르게 입력해야 합니다.`);
+        return;
+      }
+
+      // ④ 점심이 있으면 진료시간 내부에 있어야 함
+      if (lunchStart) {
+        if (lunchStart < open || lunchStart >= close) {
+          alert(`${dayOfWeek} 점심 시작시간은 진료시간(${open}~${close}) 안에 있어야 합니다.`);
+          return;
+        }
+      }
+      if (lunchEnd) {
+        if (lunchEnd <= open || lunchEnd > close) {
+          alert(`${dayOfWeek} 점심 종료시간은 진료시간(${open}~${close}) 안에 있어야 합니다.`);
+          return;
+        }
+      }
+
+      // ⑤ 점심 시작 < 점심 종료
+      if (lunchStart && lunchEnd && lunchStart >= lunchEnd) {
+        alert(`${dayOfWeek} 점심 시작시간은 점심 종료시간보다 빠르게 입력해야 합니다.`);
+        return;
+      }
+    }
     const errors = {
       name: form.name.trim() ? '' : '병원명은 필수 입력 항목입니다.',
       businessNumber: form.businessNumber.trim() ? '' : '사업자번호는 필수 입력 항목입니다.',
@@ -174,7 +225,7 @@ const HospitalCreateForm: React.FC = () => {
           lunchEnd: lunchEnd ? `${lunchEnd}:00` : '00:00:00',
         }),
       );
-      console.log('스케줄 생성 hospitalId:', hospitalId);
+
       await Promise.all(schedulePayloads.map((s) => createHospitalSchedule(hospitalId, s)));
 
       alert('병원 등록이 완료되었습니다. 이제 의사를 등록해주세요.');
@@ -241,21 +292,48 @@ const HospitalCreateForm: React.FC = () => {
         <Label>전화번호</Label>
         <Input
           ref={phoneRef}
-          value={form.phoneNumber}
           inputMode="numeric"
+          value={form.phoneNumber}
           onChange={(e) => {
-            let value = e.target.value.replace(/\D/g, ''); // 숫자만 추출
-
-            // 숫자만 기준으로 11자리 이상 못 쓰게 자름
-            value = value.slice(0, 10); // 3+3+4 = 10자리 숫자 (051-123-4567)
-
+            let raw = e.target.value.replace(/\D/g, ''); // 숫자만
             let formatted = '';
-            if (value.length <= 3) {
-              formatted = value;
-            } else if (value.length <= 6) {
-              formatted = `${value.slice(0, 3)}-${value.slice(3)}`;
+
+            // 4자리 국번 (0507 등): 0507-1234-1234 (12자리)
+            if (/^0507/.test(raw)) {
+              raw = raw.slice(0, 12);
+              if (raw.length <= 4) {
+                formatted = raw;
+              } else if (raw.length <= 8) {
+                formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+              } else {
+                formatted = `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8)}`;
+              }
+
+              // 2자리 국번 (02): 02-123-1234 (최대 10자리)
+            } else if (/^02/.test(raw)) {
+              raw = raw.slice(0, 10);
+              if (raw.length <= 2) {
+                formatted = raw;
+              } else if (raw.length <= 5) {
+                formatted = `${raw.slice(0, 2)}-${raw.slice(2)}`;
+              } else {
+                formatted = `${raw.slice(0, 2)}-${raw.slice(2, 5)}-${raw.slice(5)}`;
+              }
+
+              // 3자리 국번 (010, 051 등): 010-1234-5678 / 051-123-4567 (11자리)
+            } else if (/^0\d{2}/.test(raw)) {
+              raw = raw.slice(0, 11);
+              if (raw.length <= 3) {
+                formatted = raw;
+              } else if (raw.length <= 7) {
+                formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
+              } else {
+                formatted = `${raw.slice(0, 3)}-${raw.slice(3, 7)}-${raw.slice(7)}`;
+              }
             } else {
-              formatted = `${value.slice(0, 3)}-${value.slice(3, 6)}-${value.slice(6)}`;
+              // 잘못된 국번 → 그냥 자르기
+              raw = raw.slice(0, 11);
+              formatted = raw;
             }
 
             setForm((prev) => ({
@@ -263,24 +341,27 @@ const HospitalCreateForm: React.FC = () => {
               phoneNumber: formatted,
             }));
           }}
-          maxLength={13} // 하이픈 포함 최대 길이
-          placeholder="예: 051-123-4567"
+          placeholder="예: 010-1234-5678"
+          maxLength={13}
         />
 
         {formErrors.phoneNumber && <Error>{formErrors.phoneNumber}</Error>}
       </FieldWrapper>
       <FieldWrapper>
         <Label>소개글</Label>
-        <TextArea value={form.intro} onChange={handleChange('intro')} />
+        <BigTextArea value={form.intro} onChange={handleChange('intro')} />
       </FieldWrapper>
       <FieldWrapper>
         <Label>공지사항</Label>
-        <TextArea value={form.notice} onChange={handleChange('notice')} />
+        <BigTextArea value={form.notice} onChange={handleChange('notice')} />
       </FieldWrapper>
       <FieldWrapper>
         <Label>병원 이미지</Label>
-        <input type="file" accept="image/*" onChange={handleImageChange} />
-        {previewUrl && <PreviewImage src={previewUrl} alt="미리보기" />}
+        <FileInput id="hospitalImage" type="file" accept="image/*" onChange={handleImageChange} />
+        <FileLabel htmlFor="hospitalImage">이미지 선택</FileLabel>
+        <PreviewWrapper>
+          <PreviewImage src={previewUrl} alt="미리보기" />
+        </PreviewWrapper>
       </FieldWrapper>
       <FieldWrapper>
         <Label>서비스 이름</Label>
@@ -436,11 +517,50 @@ const Input = styled.input`
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 0.375rem;
+  font-size: 1rem;
 `;
-const TextArea = styled.textarea`
+const PreviewWrapper = styled.div`
+  width: 150px;
+  height: 150px;
+  margin-top: 1rem;
+  border-radius: 0.5rem;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+`;
+const FileInput = styled.input`
+  display: none;
+`;
+
+const FileLabel = styled.label`
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #2563eb;
+  color: white;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  &:hover {
+    background-color: #003c80;
+  }
+`;
+
+const PreviewImage = styled.img`
+  width: 150px;
+  height: 150px;
+  margin-top: 1rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  background-color: #fff;
+`;
+const BigTextArea = styled.textarea`
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 0.375rem;
+  height: 3.5rem;
+  font-size: 1rem;
 `;
 const Error = styled.div`
   color: red;
@@ -458,12 +578,6 @@ const Button = styled.button`
   &:hover {
     background: #1d4ed8;
   }
-`;
-const PreviewImage = styled.img`
-  margin-top: 0.5rem;
-  max-width: 100%;
-  height: auto;
-  border-radius: 0.5rem;
 `;
 const AddScheduleButton = styled.button`
   margin-top: 0.75rem;

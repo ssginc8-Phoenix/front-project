@@ -171,14 +171,18 @@ export default function GuardianCalendar() {
       const { guardianId } = await getMyGuardianInfo();
       setGuardianUserId(guardianId);
 
-      // 2) 달력 데이터 가져오기
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const res = await getGuardianCalendar(year, month);
+  const getLocalDateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
-      // 3) 서버에서 내려준 calendarItemLists 그대로 사용
-      const lists = res.calendarItemLists || [];
-      setFullList(lists);
+  const fetchData = async (date: Date = activeDate) => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const res = await getGuardianCalendar(year, month);
+    setFullList(res.calendarItemLists);
 
       // 4) patientList: 중복 제거하여 {patientGuardianId, name} 목록 생성
       const map = new Map<number, string>();
@@ -226,8 +230,8 @@ export default function GuardianCalendar() {
 
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
-    const dateStr = date.toISOString().split('T')[0];
-    const items = (calendarData[dateStr] || []).filter((item) => {
+    
+    const dateStr = getLocalDateString(date);
 
     // 📌 날짜 범위에 따라 복약 일정 필터링
       if (item.itemType === 'MEDICATION') {
@@ -338,7 +342,7 @@ export default function GuardianCalendar() {
             onChange={(date) => {
               if (date instanceof Date) {
                 setSelectedDate(date);
-                const dateStr = date.toISOString().split('T')[0];
+                const dateStr = getLocalDateString(date);
                 const items = calendarData[dateStr];
                 if (items?.length) {
                   setModalItems(items);

@@ -23,8 +23,6 @@ const PatientCard = ({
   onSelect,
 }: PatientCardProps) => {
   const maskRrn = (rrn: string) => {
-    console.log(rrn);
-
     if (!rrn || rrn.length !== 14) return rrn;
 
     const front = rrn.slice(0, 6);

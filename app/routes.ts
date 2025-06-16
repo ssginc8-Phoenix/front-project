@@ -10,7 +10,10 @@ export default [
   route('/reset-password/set', 'routes/resetPassword.tsx'),
 
   /** HOME  */
-  route('', 'layout/MainPageLayout.tsx', [index('routes/home.tsx')]),
+  route('', 'layout/MainPageLayout.tsx', [
+    index('routes/home.tsx'),
+    route('hospital/main', 'routes/hospital/HospitalMainPage.tsx'),
+  ]),
 
   /** MainLayout 적용 */
   route('', 'layout/MainLayout.tsx', [

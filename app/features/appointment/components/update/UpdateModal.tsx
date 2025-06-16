@@ -1,88 +1,24 @@
 import { useAppointmentDetail } from '~/features/appointment/hooks/useAppointmentDetail';
 import LoadingIndicator from '~/components/common/LoadingIndicator';
 import ErrorMessage from '~/components/common/ErrorMessage';
-import styled from 'styled-components';
 import Button from '~/components/styled/Button';
 import { RefreshButton } from '~/components/styled/RefreshButton';
 import { FiRefreshCw } from 'react-icons/fi';
 import { useAppointmentActions } from '~/features/appointment/hooks/useAppointmentActions';
-
-const Overlay = styled.div`
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-`;
-
-const Modal = styled.div`
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  width: 90%;
-  max-width: 540px;
-`;
-
-const Header = styled.div`
-  margin-bottom: 1rem;
-`;
-
-const TitleRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const Title = styled.h2`
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #0066ff;
-  margin-bottom: 0.25rem;
-`;
-
-const HospitalName = styled.div`
-  font-size: 1rem;
-  font-weight: 600;
-  color: #000;
-  margin-top: 0.5rem;
-`;
-
-const SubInfo = styled.div`
-  font-size: 0.75rem;
-  color: #666;
-  margin-top: 0.25rem;
-  line-height: 1.4;
-`;
-
-const Divider = styled.hr`
-  border: none;
-  border-top: 1px solid #e5e7eb; // 연한 회색 선
-  margin: 1rem 0;
-`;
-
-const Section = styled.div`
-  margin-bottom: 1.5rem;
-`;
-
-const SectionTitle = styled.div`
-  font-weight: 600;
-  color: #1d4ed8;
-  margin-bottom: 0.25rem;
-`;
-
-const InfoText = styled.p`
-  margin: 0;
-  color: #333;
-  line-height: 1.5;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-`;
+import {
+  Divider,
+  Header,
+  HospitalName,
+  InfoText,
+  Modal,
+  Overlay,
+  Section,
+  SectionTitle,
+  SubInfo,
+  Title,
+  TitleRow,
+} from '../common/AppointmentModal.styles';
+import ButtonGroup from 'antd/es/button/button-group';
 
 interface AppointmentUpdateModalProps {
   appointmentId: number;

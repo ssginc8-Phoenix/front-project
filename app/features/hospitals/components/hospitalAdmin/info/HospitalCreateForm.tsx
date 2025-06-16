@@ -225,7 +225,7 @@ const HospitalCreateForm: React.FC = () => {
           lunchEnd: lunchEnd ? `${lunchEnd}:00` : '00:00:00',
         }),
       );
-      console.log('스케줄 생성 hospitalId:', hospitalId);
+
       await Promise.all(schedulePayloads.map((s) => createHospitalSchedule(hospitalId, s)));
 
       alert('병원 등록이 완료되었습니다. 이제 의사를 등록해주세요.');

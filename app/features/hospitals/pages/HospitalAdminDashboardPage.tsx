@@ -77,7 +77,7 @@ const AdminDashboard = () => {
     queryKey: ['myHospitalInfo'],
     queryFn: getMyHospital,
   });
-  console.log(data);
+
   const handleSidebarChange = (key: string) => {
     const targetPath = `/hospitals/${key}`;
     if (window.location.pathname === targetPath) {

@@ -34,14 +34,6 @@ export const useHospitalSearch = (
       };
     }
 
-    console.log('📍[내 주변 검색] API 요청 시작:', {
-      latitude,
-      longitude,
-      radius,
-      searchQuery,
-      sortBy,
-    });
-
     const params = new URLSearchParams({
       lat: latitude.toString(),
       lng: longitude.toString(),
@@ -56,7 +48,7 @@ export const useHospitalSearch = (
     }
 
     const data = await response.json();
-    console.log('📍[내 주변 검색] API 응답 수신:', data);
+
     return data;
   }, [latitude, longitude, searchQuery, sortBy, radius]);
 

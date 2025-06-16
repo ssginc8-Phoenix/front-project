@@ -94,8 +94,7 @@ export const registerHospital = async (data: {
     },
     withCredentials: true, // axios에서는 credentials → withCredentials
   });
-  console.log('🔥 res:', res);
-  console.log('🔥 res.data:', res.data);
+
   return { hospitalId: res.data };
 };
 

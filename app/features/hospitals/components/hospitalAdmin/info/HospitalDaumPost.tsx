@@ -69,7 +69,7 @@ const HospitalDaumPost = forwardRef<HTMLInputElement, DaumPostProps>(
 
           try {
             const coords = await getCoordsFromAddress(fullAddress);
-            console.log('📍 변환된 좌표:', coords);
+
             setCoords(coords);
           } catch (err) {
             console.error('❌ 좌표 변환 실패:', err);

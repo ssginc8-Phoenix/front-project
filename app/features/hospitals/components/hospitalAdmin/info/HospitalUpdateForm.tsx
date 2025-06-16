@@ -135,7 +135,7 @@ const HospitalUpdateForm: React.FC = () => {
     const fetchHospitalAndSchedules = async () => {
       try {
         const data = await getMyHospital();
-        console.log('[병원 데이터]', data);
+
         if (!data) return;
 
         setHospitalId(String(data.hospitalId));
@@ -153,7 +153,6 @@ const HospitalUpdateForm: React.FC = () => {
         setCoords({ lat: data.latitude || 0, lng: data.longitude || 0 });
         // 수정된 코드
         if (data.imageUrl) {
-          console.log('[이미지 불러오기]', data.imageUrl);
           setPreviewUrl(data.imageUrl);
         }
 
@@ -333,8 +332,6 @@ const HospitalUpdateForm: React.FC = () => {
         setHospitalId(String(id));
         setIsEdit(true);
       }
-
-      console.log('[병원 저장 요청]', hospitalPayload);
 
       if (toUpdate.length) await updateHospitalSchedules(id, toUpdate);
       if (toCreate.length) {

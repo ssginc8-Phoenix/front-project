@@ -54,7 +54,6 @@ export const createDoctorSchedules = async (
   doctorId: number,
   schedules: DoctorScheduleRequest[],
 ): Promise<void> => {
-  console.log('[API] createDoctorSchedules →', JSON.stringify(schedules, null, 2));
   await axios.post(`/api/v1/doctors/${doctorId}/schedules`, schedules);
 };
 

@@ -77,34 +77,6 @@ const DoctorScheduleForm: React.FC = () => {
     })();
   }, []);
 
-  const formatTime = (raw?: string | number) => {
-    const input = String(raw ?? '');
-    const d = input.replace(/\D/g, '').slice(0, 4);
-    if (d.length === 4) return `${d.slice(0, 2)}:${d.slice(2)}`;
-    if (d.length === 3) return `${d.slice(0, 2)}:${d.slice(2)}0`;
-    if (d.length === 2) return `${d}:00`;
-    if (d.length === 1) return `0${d}:00`;
-    return '';
-  };
-  type TimeField = keyof Omit<HourRow, 'scheduleId' | 'day'>;
-  const handleRawChange = (idx: number, key: TimeField, raw: string) => {
-    const digits = raw.replace(/\D/g, '').slice(0, 4);
-    setBusinessHours((prev) => {
-      const c = [...prev];
-      c[idx] = { ...c[idx], [key]: digits };
-      return c;
-    });
-  };
-
-  const handleBlur = (idx: number, key: keyof HourRow) => {
-    const formatted = formatTime(businessHours[idx][key]);
-    setBusinessHours((prev) => {
-      const c = [...prev];
-      c[idx] = { ...c[idx], [key]: formatted };
-      return c;
-    });
-  };
-
   const handleAdd = () => {
     const used = businessHours.map((b) => dayOfWeekMap[b.day]);
     const avail = Object.values(dayOfWeekMap).find((d) => !used.includes(d));
@@ -159,6 +131,7 @@ const DoctorScheduleForm: React.FC = () => {
           })),
         );
       } catch (e) {
+        console.error(e);
         errorOccurred = true;
         alert('생성 실패');
       }
@@ -177,6 +150,7 @@ const DoctorScheduleForm: React.FC = () => {
               lunchEnd: `${b.lunchEnd}:00`,
             });
           } catch (e) {
+            console.error(e);
             errorOccurred = true;
             alert('업데이트 실패');
           }

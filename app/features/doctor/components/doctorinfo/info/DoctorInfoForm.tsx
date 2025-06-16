@@ -87,7 +87,6 @@ const DoctorInfoForm: React.FC = () => {
     const fetchDoctorInfo = async () => {
       try {
         const data = await getMyDoctorInfo();
-        console.log('[DoctorInfoForm] 의사 정보:', data);
         setDoctorId(data.doctorId);
         setForm({
           hospitalName: data.hospitalName || '',

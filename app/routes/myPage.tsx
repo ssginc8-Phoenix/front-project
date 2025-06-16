@@ -14,7 +14,7 @@ export default function myPage() {
 
   return (
     <>
-      {role == 'PATIENT' && <GuardianPage />}
+      {role === 'PATIENT' && <GuardianPage />}
       {role === 'GUARDIAN' && <GuardianPatientPage />}
       {role === 'DOCTOR' && <DoctorInfoPage />}
       {role === 'HOSPITAL_ADMIN' && <HospitalAdminDashboardPage />}

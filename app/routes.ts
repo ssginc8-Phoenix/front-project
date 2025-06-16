@@ -14,7 +14,8 @@ export default [
 
   /** MainLayout 적용 */
   route('', 'layout/MainLayout.tsx', [
-    route('mypage', 'routes/myPage.tsx'), // 마이페이지
+    route('myPage', 'routes/myPage.tsx'), // 역할별 마이페이지
+    route('appointments/list', 'routes/appointmentDashboard.tsx'), // 역할별 예약 리스트 조회 페이지
 
     /** PATIENT 환자 영역 */
     route('patients', 'routes/patient/emptyPage.tsx', [
@@ -48,8 +49,6 @@ export default [
     /** APPOINTMENT 예약 영역 */
     route('appointments', 'routes/appointment/emptyPage.tsx', [
       route('request', 'routes/appointment/appointmentRequest.tsx'),
-      route('list', 'routes/appointment/appointmentList.tsx'),
-      route('dashboard', 'routes/appointment/dashBoard.tsx'),
     ]),
   ]),
 

@@ -150,9 +150,14 @@ export default function MedicationRegisterModal({
 
     try {
       if (initialData) {
-        await updateMedicationSchedule(initialData.medicationId, req);
+        // 수정 요청에는 newTimeToTake, newDays 만 보내도록
+        await updateMedicationSchedule(initialData.medicationId, {
+          newTimeToTake: `${selectedTime}:00`,
+          newDays: selectedDays,
+        });
         alert('수정되었습니다.');
       } else {
+        // 등록일 때는 기존 req 그대로
         await postMedicationSchedule(req);
         alert('등록되었습니다.');
       }

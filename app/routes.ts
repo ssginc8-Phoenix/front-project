@@ -14,9 +14,10 @@ export default [
 
   /** MainLayout 적용 */
   route('', 'layout/MainLayout.tsx', [
+    route('mypage', 'routes/myPage.tsx'), // 마이페이지
+
     /** PATIENT 환자 영역 */
     route('patients', 'routes/patient/emptyPage.tsx', [
-      route('mypage', 'routes/patient/patientMyPage.tsx'),
       route('info', 'routes/patient/patientInfoPage.tsx'),
       route('guardian', 'routes/patient/guardian.tsx'),
       route('calendar', 'routes/calendar/patientCalendar.tsx'),
@@ -24,7 +25,6 @@ export default [
 
     /** GUARDIAN 보호자 영역 */
     route('guardians', 'routes/guardian/emptyPage.tsx', [
-      route('mypage', 'routes/guardian/guardianMyPage.tsx'),
       route('info', 'routes/guardian/guardianInfoPage.tsx'),
       route('patients', 'routes/guardian/guardianpatientPage.tsx'),
       route('calendar', 'routes/calendar/guardianCalendar.tsx'),
@@ -32,7 +32,6 @@ export default [
 
     /** DOCTOR 병원 영역 */
     route('doctor', 'routes/doctor/emptyPage.tsx', [
-      route('info', 'routes/doctor/doctorInfo.tsx'),
       route('schedule', 'routes/doctor/doctorSchedule.tsx'),
       route('calendar', 'routes/calendar/doctorCalendar.tsx'),
     ]),
@@ -42,7 +41,6 @@ export default [
       route(':hospitalId', 'routes/hospital/hospitalDetail.tsx'),
       route('search', 'routes/hospital/hospitalSearch.tsx'),
       route('create', 'routes/hospital/hospitalCreate.tsx'),
-      route('info', 'routes/hospital/hospitalAdmin.tsx'),
       route('chart', 'routes/hospital/hospitalAdminChart.tsx'),
       route('calendar', 'routes/calendar/hospitalCalendar.tsx'),
     ]),

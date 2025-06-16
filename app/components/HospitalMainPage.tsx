@@ -10,8 +10,8 @@ import { getMyInfo } from '~/features/user/api/UserAPI';
 const ads = ['/ads/ad1.png', '/ads/ad2.png', '/ads/ad3.png'];
 
 const features = [
-  { title: '주변 병원', route: '/hospitals/search', icon: '/location.png' },
-  { title: '예약 관리', route: '/appointments/list', icon: '/appointment.png' },
+  { title: '', route: '/hospitals/search', icon: '/location.png' },
+  { title: '예약 관리', route: '/appointments/dashboard', icon: '/appointment.png' },
   { title: '서류 발급', route: '/documents', icon: '/document.png' },
 ];
 
@@ -46,14 +46,12 @@ export default function MainPage() {
     getMyInfo()
       .then((myInfo) => {
         const role = myInfo.role?.toUpperCase();
-
-        if (role !== 'PATIENT' && role !== 'GUARDIAN') {
+        if (role === 'HOSPITAL_ADMIN' || role === 'ADMIN') {
           navigate('/hospital/main');
         }
       })
       .catch((err) => {
-        console.error('사용자 정보 조회 실패:', err);
-        navigate('/login');
+        console.error('getMyInfo 오류', err);
       });
   }, [navigate]);
 

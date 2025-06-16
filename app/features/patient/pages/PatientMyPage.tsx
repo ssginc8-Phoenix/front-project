@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { PasswordModal } from '~/features/patient/components/PasswordModal';
 import useLoginStore from '~/features/user/stores/LoginStore';
+import type { User } from '~/types/user';
+import { getUserInfo } from '~/features/patient/api/userAPI';
 
 // --- 대시보드 아이템
 const dashboardItems = [
@@ -29,6 +31,14 @@ const ProfileRow = styled.section`
   justify-content: center;
   gap: 24px;
   margin-bottom: 42px;
+`;
+
+const ProfileImage = styled.img`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
 `;
 
 const ProfileEmoji = styled.span`
@@ -109,10 +119,15 @@ const DashboardButton = styled.button`
 export const PatientMyPage = () => {
   const navigate = useNavigate();
   const { user, fetchMyInfo } = useLoginStore();
+  const [userinfo, setUserinfo] = useState<User | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   useEffect(() => {
-    fetchMyInfo();
+    (async () => {
+      await fetchMyInfo(); // 로그인 스토어 최신화
+      const info = await getUserInfo(); // 프로필 URL 포함한 유저 정보 가져오기
+      setUserinfo(info);
+    })();
   }, [fetchMyInfo]);
 
   const handleDashboardClick = (key: string) => {
@@ -132,9 +147,14 @@ export const PatientMyPage = () => {
     <>
       <Main>
         <ProfileRow>
-          <ProfileEmoji role="img" aria-label="profile">
-            👵
-          </ProfileEmoji>
+          {userinfo?.profileImageUrl ? (
+            <ProfileImage src={userinfo.profileImageUrl} alt="프로필 이미지" />
+          ) : (
+            <ProfileImage
+              src="https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png"
+              alt="기본 프로필"
+            />
+          )}
           <ProfileInfoCol>
             <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
           </ProfileInfoCol>

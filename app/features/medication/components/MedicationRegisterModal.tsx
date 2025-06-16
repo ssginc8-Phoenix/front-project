@@ -129,6 +129,7 @@ export default function MedicationRegisterModal({
   };
 
   const handleSubmit = async () => {
+    // 필수 입력 검증
     if (!medicationName || !selectedDays.length || !startDate || !endDate) {
       alert('모든 필드를 입력해주세요.');
       return;
@@ -138,7 +139,8 @@ export default function MedicationRegisterModal({
       return;
     }
 
-    const req = {
+    // 등록용 바디
+    const createBody = {
       userId: user?.userId ?? 0,
       patientGuardianId,
       medicationName: medicationName.trim(),
@@ -150,10 +152,14 @@ export default function MedicationRegisterModal({
 
     try {
       if (initialData) {
-        await updateMedicationSchedule(initialData.medicationId, req);
+        // 수정 시에는 newTimeToTake, newDays 만 보내야 백엔드가 처리합니다.
+        await updateMedicationSchedule(initialData.medicationId, {
+          newTimeToTake: `${selectedTime}:00`,
+          newDays: selectedDays,
+        });
         alert('수정되었습니다.');
       } else {
-        await postMedicationSchedule(req);
+        await postMedicationSchedule(createBody);
         alert('등록되었습니다.');
       }
       onClose();
@@ -172,12 +178,14 @@ export default function MedicationRegisterModal({
         onChange={(e) => setMedicationName(e.target.value)}
         disabled={!!initialData}
       />
+
       <Label>🕓 복약 시간</Label>
       <TimeInput
         type="time"
         value={selectedTime}
         onChange={(e) => setSelectedTime(e.target.value)}
       />
+
       <Label>📅 복약 요일</Label>
       <ButtonGroup>
         {daysOfWeek.map((d) => (
@@ -190,10 +198,13 @@ export default function MedicationRegisterModal({
           </SelectButton>
         ))}
       </ButtonGroup>
+
       <Label>📌 시작일</Label>
       <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+
       <Label>📌 종료일</Label>
       <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+
       <ButtonRow>
         <ActionButton onClick={onClose}>취소</ActionButton>
         <ActionButton onClick={handleSubmit}>{initialData ? '수정하기' : '등록하기'}</ActionButton>

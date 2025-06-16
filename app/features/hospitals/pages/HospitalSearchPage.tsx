@@ -36,26 +36,14 @@ const SidePanel = styled.div`
   overflow: hidden;
 `;
 
-const DetailModalWrapper = styled.div`
-  position: absolute;
-  top: 100px;
-  right: 250px;
-  width: 300px;
-  max-height: 70vh;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 1100;
-`;
-
 const PAGE_SIZE = 1000;
+const RADIUS_KM = 5;
 
 const HospitalSearchPage: React.FC = () => {
   const { currentLocation } = useCurrentLocation();
-  const { searchQuery, sortBy, selectedHospitalId, setSearchQuery, setSortBy } =
-    useHospitalSearchStore();
+  const { searchQuery, sortBy, setSearchQuery, setSortBy } = useHospitalSearchStore();
 
-  const [searchMode, setSearchMode] = useState<'nearby' | 'global'>('nearby');
+  const [searchMode, setSearchMode] = useState<'nearby' | 'global'>('global');
   const [selectedHospitalIdState, setSelectedHospitalIdState] = useState<number | null>(null);
 
   const initialCenter = useMemo(
@@ -79,8 +67,8 @@ const HospitalSearchPage: React.FC = () => {
     currentLocation?.longitude ?? null,
     searchQuery,
     sortBy,
-    PAGE_SIZE,
-    searchMode === 'nearby',
+    RADIUS_KM,
+    searchMode === 'nearby', // ✅ 실행 조건은 내부에서 처리
   );
 
   const globalSearch = useGlobalHospitalSearch(
@@ -100,12 +88,8 @@ const HospitalSearchPage: React.FC = () => {
 
   const error =
     searchMode === 'nearby'
-      ? nearbySearchResult.error instanceof Error
-        ? nearbySearchResult.error
-        : null
-      : globalSearch.error instanceof Error
-        ? globalSearch.error
-        : null;
+      ? (nearbySearchResult.error as Error | null)
+      : (globalSearch.error as Error | null);
 
   const handleHospitalSelect = useCallback((h: Hospital) => {
     setSelectedHospitalIdState(h.hospitalId);
@@ -132,9 +116,23 @@ const HospitalSearchPage: React.FC = () => {
       <SidePanel>
         <div style={{ padding: '1rem', display: 'flex', gap: '1rem' }}>
           <button
+            onClick={() => setSearchMode('global')}
+            style={{
+              background: searchMode === 'global' ? '#00499e' : '#eee',
+              color: searchMode === 'global' ? '#fff' : '#333',
+              padding: '0.5rem 1rem',
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            전체 검색
+          </button>
+          <button
             onClick={() => {
               setSearchMode('nearby');
               if (currentLocation) {
+                console.log('[내 주변] 현재 위치 있음:', currentLocation);
                 setMapCenter({
                   lat: currentLocation.latitude,
                   lng: currentLocation.longitude,
@@ -152,19 +150,6 @@ const HospitalSearchPage: React.FC = () => {
           >
             내 주변
           </button>
-          <button
-            onClick={() => setSearchMode('global')}
-            style={{
-              background: searchMode === 'global' ? '#00499e' : '#eee',
-              color: searchMode === 'global' ? '#fff' : '#333',
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            전체 검색
-          </button>
         </div>
 
         <SearchMenu
@@ -179,26 +164,26 @@ const HospitalSearchPage: React.FC = () => {
           }}
         />
 
-        <HospitalList
-          hospitals={hospitals}
-          loading={loading}
-          error={error}
-          onHospitalSelect={(id) => {
-            const h = hospitals.find((x) => x.hospitalId === id);
-            if (h) handleHospitalSelect(h);
-          }}
-          selectedHospitalId={selectedHospitalIdState}
-        />
-      </SidePanel>
-
-      {selectedHospitalIdState != null && (
-        <DetailModalWrapper>
+        {selectedHospitalIdState == null ? (
+          <HospitalList
+            hospitals={hospitals}
+            loading={loading}
+            error={error}
+            onHospitalSelect={(id) => {
+              const h = hospitals.find((x) => x.hospitalId === id);
+              if (h) handleHospitalSelect(h);
+            }}
+            selectedHospitalId={selectedHospitalIdState}
+          />
+        ) : (
           <HospitalDetailPanel
             hospitalId={selectedHospitalIdState}
             onClose={() => setSelectedHospitalIdState(null)}
           />
-        </DetailModalWrapper>
-      )}
+        )}
+
+        {/*/>*/}
+      </SidePanel>
     </MapContainer>
   );
 };

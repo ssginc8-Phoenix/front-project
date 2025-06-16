@@ -1,10 +1,9 @@
 import { useAppointmentDetail } from '~/features/appointment/hooks/useAppointmentDetail';
 import LoadingIndicator from '~/components/common/LoadingIndicator';
 import ErrorMessage from '~/components/common/ErrorMessage';
-import Button from '~/components/styled/Button';
 import { RefreshButton } from '~/components/styled/RefreshButton';
 import { FiRefreshCw } from 'react-icons/fi';
-import { useAppointmentActions } from '~/features/appointment/hooks/useAppointmentActions';
+import Button from '~/components/styled/Button';
 import {
   Divider,
   Header,
@@ -20,17 +19,17 @@ import {
 } from '../common/AppointmentModal.styles';
 import ButtonGroup from 'antd/es/button/button-group';
 
-interface AppointmentUpdateModalProps {
+interface DoctorAppointmentDetailModal {
   appointmentId: number;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const AppointmentUpdateModal = ({
+const DoctorAppointmentDetailModal = ({
   appointmentId,
   isOpen,
   onClose,
-}: AppointmentUpdateModalProps) => {
+}: DoctorAppointmentDetailModal) => {
   const {
     data: appointment,
     isLoading,
@@ -38,38 +37,6 @@ const AppointmentUpdateModal = ({
     refetch,
     isRefetching,
   } = useAppointmentDetail(appointmentId);
-
-  const { cancelAppointment, updateAppointmentStatus } = useAppointmentActions();
-
-  const canConfirm = appointment?.status === 'REQUESTED';
-  const canModify = appointment?.status === 'REQUESTED' || appointment?.status === 'CONFIRMED';
-
-  /** 예약 취소 */
-  const handleCancel = async () => {
-    if (!appointment) return;
-    const success = await cancelAppointment(appointment.appointmentId);
-    if (success) {
-      refetch();
-    }
-  };
-
-  /** 예약 승인 */
-  const handleConfirm = async () => {
-    if (!appointment) return;
-    const success = await updateAppointmentStatus(appointment.appointmentId, 'CONFIRMED');
-    if (success) {
-      refetch();
-    }
-  };
-
-  /** 예약 완료 */
-  const handleComplete = async () => {
-    if (!appointment) return;
-    const success = await updateAppointmentStatus(appointment.appointmentId, 'COMPLETED');
-    if (success) {
-      refetch();
-    }
-  };
 
   return (
     <>
@@ -142,22 +109,6 @@ const AppointmentUpdateModal = ({
                 <InfoText>{appointment.paymentType}</InfoText>
               </Section>
 
-              {canModify && (
-                <ButtonGroup>
-                  {canConfirm && (
-                    <Button $variant="secondary" onClick={handleConfirm}>
-                      예약 승인
-                    </Button>
-                  )}
-                  <Button $variant="secondary" onClick={handleComplete}>
-                    예약 완료
-                  </Button>
-                  <Button $variant="secondary" onClick={handleCancel}>
-                    예약 취소
-                  </Button>
-                </ButtonGroup>
-              )}
-
               <ButtonGroup>
                 <Button $variant="primary" onClick={onClose}>
                   닫기
@@ -171,4 +122,4 @@ const AppointmentUpdateModal = ({
   );
 };
 
-export default AppointmentUpdateModal;
+export default DoctorAppointmentDetailModal;

@@ -12,6 +12,7 @@ interface User {
   userId: number;
   name: string;
   profileImageUrl: string;
+  role: string;
 }
 
 interface PatientRequest {
@@ -20,6 +21,7 @@ interface PatientRequest {
 }
 
 interface DoctorInfo {
+  specialization: string;
   email: string;
   password: string;
   name: string;

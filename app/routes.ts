@@ -17,9 +17,11 @@ export default [
 
   /** MainLayout 적용 */
   route('', 'layout/MainLayout.tsx', [
+    route('myPage', 'routes/myPage.tsx'), // 역할별 마이페이지
+    route('appointments/list', 'routes/appointmentDashboard.tsx'), // 역할별 예약 리스트 조회 페이지
+
     /** PATIENT 환자 영역 */
     route('patients', 'routes/patient/emptyPage.tsx', [
-      route('mypage', 'routes/patient/patientMyPage.tsx'),
       route('info', 'routes/patient/patientInfoPage.tsx'),
       route('guardian', 'routes/patient/guardian.tsx'),
       route('calendar', 'routes/calendar/patientCalendar.tsx'),
@@ -27,18 +29,22 @@ export default [
 
     /** GUARDIAN 보호자 영역 */
     route('guardians', 'routes/guardian/emptyPage.tsx', [
-      route('mypage', 'routes/guardian/guardianMyPage.tsx'),
       route('info', 'routes/guardian/guardianInfoPage.tsx'),
       route('patients', 'routes/guardian/guardianpatientPage.tsx'),
       route('calendar', 'routes/calendar/guardianCalendar.tsx'),
     ]),
 
-    /** HOSPITAL 병원 영역 */
+    /** DOCTOR 병원 영역 */
+    route('doctor', 'routes/doctor/emptyPage.tsx', [
+      route('schedule', 'routes/doctor/doctorSchedule.tsx'),
+      route('calendar', 'routes/calendar/doctorCalendar.tsx'),
+    ]),
+
     /** HOSPITAL 병원 영역 */
     route('hospitals', 'routes/hospital/emptyPage.tsx', [
       route(':hospitalId', 'routes/hospital/hospitalDetail.tsx'),
       route('search', 'routes/hospital/hospitalSearch.tsx'),
-      route('info', 'routes/hospital/hospitalAdmin.tsx'),
+      route('create', 'routes/hospital/hospitalCreate.tsx'),
       route('chart', 'routes/hospital/hospitalAdminChart.tsx'),
       route('calendar', 'routes/calendar/hospitalCalendar.tsx'),
     ]),
@@ -46,11 +52,7 @@ export default [
     /** APPOINTMENT 예약 영역 */
     route('appointments', 'routes/appointment/emptyPage.tsx', [
       route('request', 'routes/appointment/appointmentRequest.tsx'),
-      route('list', 'routes/appointment/appointmentList.tsx'),
-      route('dashboard', 'routes/appointment/dashBoard.tsx'),
     ]),
-
-    route('doctor/calendar', 'routes/calendar/doctorCalendar.tsx'),
   ]),
 
   /** QNAS 영역 */

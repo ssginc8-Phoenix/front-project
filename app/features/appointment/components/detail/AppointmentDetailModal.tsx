@@ -187,7 +187,6 @@ const AppointmentDetailModal = ({
               <Section>
                 <SectionTitle>환자 정보</SectionTitle>
                 <InfoText>{appointment.patientName}</InfoText>
-                {/* 주민등록번호 : 민감정보 보여주는 게 맞는가? */}
               </Section>
 
               <Section>
@@ -243,6 +242,7 @@ const AppointmentDetailModal = ({
           isOpen={isDateTimeSelectorModalOpen}
           onClose={() => setDateTimeSelectorModalOpen(false)}
           doctorId={appointment.doctorId}
+          patientId={appointment.patientId}
           onConfirm={handleReschedule}
         />
       )}

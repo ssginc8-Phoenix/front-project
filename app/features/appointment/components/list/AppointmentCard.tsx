@@ -104,7 +104,7 @@ const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
         <InfoText> {formatAppointmentTime(appointment.appointmentTime)} </InfoText>
         <InfoText> {appointment.patientName} </InfoText>
 
-        {appointment.status === 'COMPLETED' && (
+        {appointment.status === 'COMPLETED' && !appointment.hasReview && (
           <ReviewButton
             onClick={(e) => {
               e.stopPropagation();

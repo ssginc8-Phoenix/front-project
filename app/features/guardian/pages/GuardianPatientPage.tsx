@@ -4,10 +4,13 @@ import { useNavigate } from 'react-router';
 import SidebarMenu from '~/features/patient/components/SidebarMenu';
 import { guardianSidebarItems } from '~/features/guardian/constants/sidebarItems';
 import useLoginStore from '~/features/user/stores/LoginStore';
-import Header from '~/layout/Header';
-import { acceptGuardianInvite } from '~/features/patient/api/guardianAPI'; // ✅ 초대코드 수락 API
+import {
+  acceptGuardianInvite,
+  getGuardianPatients,
+  deleteGuardianPatient,
+  type PatientSummary,
+} from '~/features/guardian/api/guardianAPI';
 import ReusableModal from '~/features/patient/components/ReusableModal';
-import { getGuardianPatients, type PatientSummary } from '~/features/guardian/api/guardianAPI'; // ✅ 모달 컴포넌트 가져오기
 
 // --- 스타일 정의 ---
 const PageWrapper = styled.div`
@@ -24,7 +27,7 @@ const PageWrapper = styled.div`
 const MainSection = styled.div`
   flex: 1;
   min-width: 0;
-  position: relative; /* 초대코드 버튼 배치용 */
+  position: relative;
 `;
 
 const TitleWrapper = styled.div`
@@ -61,6 +64,7 @@ const ListWrapper = styled.div`
 `;
 
 const Card = styled.div`
+  position: relative; /* 삭제 버튼 위치용 */
   background: #fff;
   border-radius: 12px;
   padding: 20px;
@@ -68,6 +72,20 @@ const Card = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+`;
+
+const DeleteButton = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: #999;
+  cursor: pointer;
+  &:hover {
+    color: #ff4646;
+  }
 `;
 
 const PatientName = styled.div`
@@ -135,10 +153,22 @@ const SubmitButton = styled.button`
   cursor: pointer;
 `;
 
-const GuardianPatientPage = () => {
+const ProfileImage = styled.img`
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+`;
+
+// --- 컴포넌트 ---
+export const GuardianPatientPage = () => {
   const [patients, setPatients] = useState<PatientSummary[]>([]);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
+
   const { user, fetchMyInfo } = useLoginStore();
   const navigate = useNavigate();
 
@@ -146,38 +176,58 @@ const GuardianPatientPage = () => {
     const fetchData = async () => {
       try {
         await fetchMyInfo();
-        const patientList = await getGuardianPatients();
-        setPatients(patientList);
+        const list = await getGuardianPatients();
+        setPatients(list);
       } catch (error) {
         console.error('환자 목록 가져오기 실패', error);
       }
     };
     fetchData();
-  }, []);
+  }, [fetchMyInfo]);
 
   const handleSidebarChange = (key: string) => {
     navigate(`/guardians/${key}`);
   };
 
-  const maskRRN = (rrn: string) => {
-    return rrn ? rrn.substring(0, 6) + '-*******' : '';
-  };
+  const maskRRN = (rrn: string) =>
+    rrn ? rrn.substring(0, 6) + '-' + rrn.substring(7, 8) + '******' : '';
 
   const handleInviteAccept = async () => {
+    if (!inviteCode) {
+      alert('초대 코드를 입력하세요!');
+      return;
+    }
     try {
-      if (!inviteCode) {
-        alert('초대 코드를 입력하세요!');
-        return;
-      }
       await acceptGuardianInvite(inviteCode);
       alert('보호자 수락 성공!');
       setInviteModalOpen(false);
       setInviteCode('');
-      const updatedList = await getGuardianPatients();
-      setPatients(updatedList); // 새로고침
+      const updated = await getGuardianPatients();
+      setPatients(updated);
     } catch (error) {
       console.error('초대 수락 실패', error);
       alert('초대 코드가 잘못되었습니다.');
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (selectedPatientId == null) return;
+    try {
+      // 1) 백엔드에서 soft‑delete
+      await deleteGuardianPatient(selectedPatientId);
+
+      // 2) 로컬 상태에서 해당 환자만 필터링
+      setPatients((prev) => prev.filter((p) => p.patientId !== selectedPatientId));
+
+      // (선택) 전체 다시 불러오고 싶다면:
+      // const updated = await getGuardianPatients();
+      // setPatients(updated);
+    } catch (error) {
+      console.error('삭제 실패', error);
+      alert('삭제에 실패했습니다.');
+    } finally {
+      setDeleteModalOpen(false);
+      setSelectedPatientId(null);
     }
   };
 
@@ -186,7 +236,13 @@ const GuardianPatientPage = () => {
       <PageWrapper>
         <SidebarBox>
           <ProfileSection>
-            <ProfileEmoji>🧑‍💼</ProfileEmoji>
+            <ProfileImage
+              src={
+                user?.profileImageUrl ??
+                'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png'
+              }
+              alt="프로필 사진"
+            />
             <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
             <ProfileRole>보호자</ProfileRole>
           </ProfileSection>
@@ -207,6 +263,14 @@ const GuardianPatientPage = () => {
           <ListWrapper>
             {patients.map((patient) => (
               <Card key={patient.patientId}>
+                <DeleteButton
+                  onClick={() => {
+                    setSelectedPatientId(patient.patientId);
+                    setDeleteModalOpen(true);
+                  }}
+                >
+                  ×
+                </DeleteButton>
                 <div>
                   <PatientName>{patient.name}</PatientName>
                   <PatientInfo>{maskRRN(patient.residentRegistrationNumber)}</PatientInfo>
@@ -227,6 +291,21 @@ const GuardianPatientPage = () => {
               placeholder="초대 코드를 입력하세요"
             />
             <SubmitButton onClick={handleInviteAccept}>수락하기</SubmitButton>
+          </div>
+        </ReusableModal>
+
+        {/* 삭제 확인 모달 */}
+        <ReusableModal
+          open={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          hideCloseButton
+        >
+          <div style={{ fontSize: '1.13rem', fontWeight: 600, marginBottom: 24 }}>
+            정말 이 환자 연결을 해제하시겠습니까?
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
+            <button onClick={() => setDeleteModalOpen(false)}>취소</button>
+            <button onClick={handleConfirmDelete}>삭제하기</button>
           </div>
         </ReusableModal>
       </PageWrapper>

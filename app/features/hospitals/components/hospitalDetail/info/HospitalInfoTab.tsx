@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { useHospitalDetail } from '../../../hooks/useHospitalDetail';
 import type { HospitalSchedule } from '../../../types/hospitalSchedule';
+import { useNavigate } from 'react-router';
 
 const Container = styled.div`
   max-width: 900px;
@@ -102,6 +103,7 @@ interface HospitalInfoTabProps {
 
 const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
   const { data: hospital, loading, error } = useHospitalDetail(hospitalId);
+  const navigate = useNavigate();
 
   if (loading) return <p style={{ textAlign: 'center' }}>로딩 중...</p>;
   if (error) return <p style={{ textAlign: 'center', color: 'red' }}>{error}</p>;
@@ -153,7 +155,9 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
       )}
 
       <ButtonGroup>
-        <ActionButton>🏥 대면 진료 접수</ActionButton>
+        <ActionButton onClick={() => navigate(`/appointments/request?hospitalId=${hospitalId}`)}>
+          🏥 대면 진료 접수
+        </ActionButton>
       </ButtonGroup>
     </Container>
   );

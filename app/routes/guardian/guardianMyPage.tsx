@@ -1,5 +1,5 @@
-import GuardianMyPage from '~/features/guardian/pages/GuardianMyPage';
+import GuardianPatientPage from '~/features/guardian/pages/GuardianPatientPage';
 
 export default function GuardianPage() {
-  return <GuardianMyPage />;
+  return <GuardianPatientPage />;
 }

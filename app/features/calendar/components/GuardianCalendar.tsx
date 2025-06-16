@@ -173,6 +173,13 @@ export default function GuardianCalendar() {
     }
   };
 
+  const getLocalDateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const fetchData = async (date: Date = activeDate) => {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
@@ -226,9 +233,7 @@ export default function GuardianCalendar() {
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
 
-    const kstOffsetMs = 9 * 60 * 60 * 1000;
-    const localDate = new Date(date.getTime() + kstOffsetMs);
-    const dateStr = localDate.toISOString().split('T')[0];
+    const dateStr = getLocalDateString(date);
 
     // 📌 날짜 범위에 따라 복약 일정 필터링
     const items = (calendarData[dateStr] || []).filter((item: CalendarItem) => {
@@ -321,7 +326,7 @@ export default function GuardianCalendar() {
             onChange={(date) => {
               if (date instanceof Date) {
                 setSelectedDate(date);
-                const dateStr = date.toISOString().split('T')[0];
+                const dateStr = getLocalDateString(date);
                 const items = calendarData[dateStr];
                 if (items?.length) {
                   setModalItems(items);
@@ -361,7 +366,7 @@ export default function GuardianCalendar() {
           }}
         >
           <MedicationRegisterModal
-            date={selectedDate.toISOString().split('T')[0]}
+            date={getLocalDateString(selectedDate)}
             patientGuardianId={selectedPatient.patientGuardianId}
             onClose={async () => {
               await fetchData();

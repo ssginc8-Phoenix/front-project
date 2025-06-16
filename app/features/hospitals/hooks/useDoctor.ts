@@ -6,9 +6,7 @@ import { useHospitalAsync } from '~/features/hospitals/hooks/useHospitalAsync';
 export const useDoctor = (hospitalId: number) => {
   const fetchDoctor = useCallback(() => getDoctor(hospitalId), [hospitalId]);
 
-  const { data, loading, error } = useHospitalAsync<PagedDoctorResponse>(fetchDoctor, [
-    fetchDoctor,
-  ]);
+  const { data, loading, error } = useHospitalAsync<Doctor[]>(fetchDoctor, [fetchDoctor]);
 
   return { data, loading, error };
 };

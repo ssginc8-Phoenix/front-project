@@ -4,6 +4,7 @@ import type { Hospital } from '../../../types/hospital';
 import type { HospitalSchedule } from '~/features/hospitals/types/hospitalSchedule';
 import { calculateDistance } from '~/features/hospitals/hooks/useDistanceTo';
 import { useCurrentLocation } from '~/features/hospitals/hooks/useCurrentLocation';
+import Loading from '../../common/Loading';
 
 interface HospitalListProps {
   hospitals: Hospital[];
@@ -38,7 +39,10 @@ const Card = styled.li<{ selected: boolean }>`
     selected ? '0 0 0 3px #a3c2ff' : '0 2px 6px rgba(0, 0, 0, 0.08)'};
   cursor: pointer;
   transition: box-shadow 0.2s;
+  flex: 0 0 auto;
+  width: 325px;
 
+  height: 100px;
   &:hover {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   }
@@ -73,7 +77,7 @@ const Row = styled.div`
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #555;
 `;
 
@@ -121,7 +125,7 @@ const HospitalList: React.FC<HospitalListProps> = ({
   const totalPages = Math.ceil(hospitals.length / ITEMS_PER_PAGE);
   const paginatedHospitals = hospitals.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
-  if (loading) return <div>로딩 중...</div>;
+  if (loading) return <Loading />;
   if (error) return <div style={{ color: 'red' }}>에러: {error.message}</div>;
 
   return (

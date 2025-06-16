@@ -55,6 +55,7 @@ export type KeywordType =
 
 // 리뷰 인터페이스
 export interface Review {
+  name: string;
   reviewId: number;
   userId: number; // 실제 User 객체가 아니라 userId만 포함 가능
   hospitalId: number;

@@ -9,11 +9,14 @@ import HospitalReviews from '../components/hospitalDetail/review/HospitalReviews
 import HospitalDoctor from '../components/hospitalDetail/doctor/HospitalDoctor';
 
 const Container = styled.div`
-  max-width: 900px;
-  margin: 2rem auto;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 2rem;
   background-color: #ffffff;
   border-radius: 1rem;
+  min-height: 800px;
+  box-sizing: border-box;
 `;
 
 const TabBar = styled.div`
@@ -66,14 +69,7 @@ const HospitalDetailPage = () => {
 
   return (
     <Container>
-      <HospitalInfoTab
-        hospitalId={hospitalIdNum}
-        selectedTab="location"
-        setSelectedTab={(tab) => {
-          // 탭 선택 변경 함수 구현
-          console.log('선택된 탭:', tab);
-        }}
-      />
+      <HospitalInfoTab hospitalId={hospitalIdNum} selectedTab="location" />
 
       <TabBar>
         <Tab active={selectedTab === 'location'} onClick={() => setSelectedTab('location')}>

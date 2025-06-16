@@ -8,6 +8,8 @@ import UserRatioChart from '~/features/hospitals/components/hospitalAdmin/chart/
 import { useMyHospitalId } from '~/features/hospitals/hooks/useMyHospitalId';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { Card } from '~/features/hospitals/components/hospitalAdmin/ui/card';
+import { useQuery } from '@tanstack/react-query';
+import { getMyHospital } from '~/features/hospitals/api/hospitalAPI';
 
 const PageWrapper = styled.div`
   width: 100%;
@@ -84,7 +86,10 @@ const HospitalAdminChartPage = () => {
   const navigate = useNavigate();
   const { hospitalId, loading } = useMyHospitalId();
   const { user } = useLoginStore();
-
+  const { data } = useQuery({
+    queryKey: ['myHospitalInfo'],
+    queryFn: getMyHospital,
+  });
   const handleSidebarChange = (key: string) => {
     const targetPath = `/hospitals/${key}`;
     if (window.location.pathname === targetPath) {
@@ -101,9 +106,25 @@ const HospitalAdminChartPage = () => {
     <PageWrapper>
       <SidebarBox>
         <ProfileSection>
-          <ProfileEmoji>🏥️</ProfileEmoji>
+          <ProfileEmoji>
+            {data?.imageUrl ? (
+              <img
+                src={data.imageUrl}
+                alt="의사 프로필"
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                }}
+              />
+            ) : (
+              '🏥️'
+            )}
+          </ProfileEmoji>
+
           <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
-          <ProfileRole>병원관리자</ProfileRole>
+          <ProfileRole>의사</ProfileRole>
         </ProfileSection>
         <HospitalSidebarMenu
           items={hospitalSidebarItems}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DoctorForm from '~/features/user/components/signUp/DoctorForm';
@@ -6,8 +6,8 @@ import CommonModal from '~/components/common/CommonModal';
 import { checkEmailDuplicate, submitDoctorsInfo } from '~/features/user/api/UserAPI';
 import type { DoctorInfo } from '~/types/user';
 import Header from '~/layout/Header';
-import { createDoctor } from '~/features/doctor/api/doctorAPI';
 import useHospitalStore from '~/features/hospitals/state/hospitalStore';
+import { getMyHospital } from '~/features/hospitals/api/hospitalAPI';
 
 const PageBackground = styled.div`
   background: linear-gradient(to bottom right, #f0f4f8, #ffffff);
@@ -56,7 +56,7 @@ const AddButton = styled(Button)`
 `;
 
 const DoctorRegistrationPage = () => {
-  const { hospitalId } = useHospitalStore();
+  const { hospitalId, setHospitalId } = useHospitalStore();
   const [doctors, setDoctors] = useState<DoctorInfo[]>([
     { email: '', password: '', name: '', phone: '', specialization: '' },
   ]);
@@ -66,21 +66,13 @@ const DoctorRegistrationPage = () => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
-  const [phoneValidList, setPhoneValidList] = useState<boolean[]>([]);
-
-  const handlePhoneValidChange = (index: number, isValid: boolean) => {
-    setPhoneValidList((prev) => {
-      const copy = [...prev];
-      copy[index] = isValid;
-      return copy;
-    });
-  };
-
-  const handleRemove = (index: number) => {
-    if (doctors.length === 1) return;
-    setDoctors((prev) => prev.filter((_, i) => i !== index));
-    setEmailCheckResults((prev) => prev.filter((_, i) => i !== index));
-  };
+  useEffect(() => {
+    if (!hospitalId) {
+      getMyHospital()
+        .then((res) => setHospitalId(res.hospitalId))
+        .catch((err) => console.error('병원 정보 불러오기 실패', err));
+    }
+  }, [hospitalId, setHospitalId]);
 
   const handleChange = (index: number, field: keyof DoctorInfo, value: string) => {
     const updated = [...doctors];
@@ -89,16 +81,25 @@ const DoctorRegistrationPage = () => {
   };
 
   const handleAddDoctor = () => {
-    setDoctors([...doctors, { email: '', password: '', name: '', phone: '', specialization: '' }]);
-    setEmailCheckResults([...emailCheckResults, { success: false, message: '' }]);
+    setDoctors((prev) => [
+      ...prev,
+      { email: '', password: '', name: '', phone: '', specialization: '' },
+    ]);
+    setEmailCheckResults((prev) => [...prev, { success: false, message: '' }]);
+  };
+
+  const handleRemove = (index: number) => {
+    if (doctors.length > 1) {
+      setDoctors((prev) => prev.filter((_, i) => i !== index));
+      setEmailCheckResults((prev) => prev.filter((_, i) => i !== index));
+    }
   };
 
   const handleCheckEmail = async (index: number, email: string) => {
     try {
       await checkEmailDuplicate(email);
       updateEmailCheckResult(index, true, '사용 가능한 이메일입니다.');
-    } catch (e) {
-      console.error(e);
+    } catch {
       updateEmailCheckResult(index, false, '이미 사용 중인 이메일입니다.');
     }
   };
@@ -110,83 +111,60 @@ const DoctorRegistrationPage = () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      console.log('[등록 시도] 병원 ID:', hospitalId);
-      if (!hospitalId) {
-        alert('병원 ID가 없습니다. 병원을 먼저 등록해주세요.');
-        return;
-      }
-
-      const response = await submitDoctorsInfo({ doctorInfos: doctors });
-      const registeredUsers = response.registeredDoctors;
-
-      for (const { email, userId } of registeredUsers) {
-        const doctor = doctors.find((d) => d.email === email);
-        if (!doctor) continue;
-
-        await createDoctor({
-          hospitalId,
-          userId,
-          specialization: doctor.specialization,
-        });
-      }
-
-      setShowModal(true);
-    } catch (err) {
-      console.error(err);
-      alert('의사 등록 중 오류 발생');
-    }
-    const allValid = phoneValidList.every((valid) => valid);
-
-    if (!allValid) {
+    if (!hospitalId) {
+      alert('병원 ID가 없습니다. 병원을 먼저 등록해주세요.');
       return;
     }
 
-    await submitDoctorsInfo({ doctorInfos: doctors });
-    setShowModal(true);
+    try {
+      await submitDoctorsInfo({
+        doctorInfos: doctors.map((d) => ({ ...d, hospitalId })),
+      });
+      setShowModal(true);
+    } catch (err) {
+      console.error('의사 등록 실패:', err);
+      alert('의사 등록 중 오류가 발생했습니다.');
+    }
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    navigate('/login');
+    navigate('/');
   };
 
   return (
-    <>
-      <PageBackground>
-        <Header></Header>
-        <Wrapper>
-          <Title>의사 등록</Title>
-          {doctors.map((doctor, index) => (
-            <DoctorForm
-              key={index}
-              doctor={doctor}
-              index={index}
-              onChange={handleChange}
-              onCheckEmail={handleCheckEmail}
-              onRemove={handleRemove}
-              onPhoneValidChange={handlePhoneValidChange}
-              emailCheckMessage={emailCheckResults[index]?.message}
-              emailCheckSuccess={emailCheckResults[index]?.success}
-            />
-          ))}
-          <AddButton type="button" onClick={handleAddDoctor}>
-            의사 추가
-          </AddButton>
-          <Button type="button" onClick={handleSubmit}>
-            등록하기
-          </Button>
+    <PageBackground>
+      <Header />
+      <Wrapper>
+        <Title>의사 등록</Title>
+        {doctors.map((doctor, index) => (
+          <DoctorForm
+            key={index}
+            doctor={doctor}
+            index={index}
+            onChange={handleChange}
+            onCheckEmail={handleCheckEmail}
+            onRemove={handleRemove}
+            emailCheckMessage={emailCheckResults[index]?.message}
+            emailCheckSuccess={emailCheckResults[index]?.success}
+          />
+        ))}
+        <AddButton type="button" onClick={handleAddDoctor}>
+          의사 추가
+        </AddButton>
+        <Button type="button" onClick={handleSubmit}>
+          등록하기
+        </Button>
 
-          {showModal && (
-            <CommonModal
-              title="의사 등록이 완료되었습니다."
-              buttonText="확인"
-              onClose={handleCloseModal}
-            />
-          )}
-        </Wrapper>
-      </PageBackground>
-    </>
+        {showModal && (
+          <CommonModal
+            title="의사 등록이 완료되었습니다."
+            buttonText="확인"
+            onClose={handleCloseModal}
+          />
+        )}
+      </Wrapper>
+    </PageBackground>
   );
 };
 

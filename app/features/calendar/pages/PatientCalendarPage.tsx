@@ -4,6 +4,9 @@ import SidebarMenu from '~/features/patient/components/SidebarMenu';
 import { patientSidebarItems } from '~/features/patient/constants/sidebarItems';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { useNavigate } from 'react-router';
+import { getUserInfo } from '~/features/patient/api/userAPI';
+import type { User } from '~/types/user';
+import { useEffect, useState } from 'react';
 
 const PageWrapper = styled.div`
   display: flex;
@@ -39,6 +42,14 @@ const ProfileSection = styled.div`
   margin-bottom: 2rem;
 `;
 
+const ProfileImage = styled.img`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+`;
+
 const ProfileEmoji = styled.div`
   font-size: 4rem;
   margin-bottom: 0.5rem;
@@ -55,8 +66,17 @@ const ProfileRole = styled.div`
 `;
 
 const PatientCalendarPage = () => {
-  const { user } = useLoginStore();
+  const { user, fetchMyInfo } = useLoginStore();
+  const [userinfo, setUserinfo] = useState<User | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    (async () => {
+      await fetchMyInfo();
+      const info = await getUserInfo();
+      setUserinfo(info);
+    })();
+  }, [fetchMyInfo]);
 
   const handleSidebarChange = (key: string) => {
     navigate(`/patients/${key}`);
@@ -66,7 +86,14 @@ const PatientCalendarPage = () => {
     <PageWrapper>
       <SidebarBox>
         <ProfileSection>
-          <ProfileEmoji>👵</ProfileEmoji>
+          {userinfo?.profileImageUrl ? (
+            <ProfileImage src={userinfo.profileImageUrl} alt="프로필 이미지" />
+          ) : (
+            <ProfileImage
+              src="https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png"
+              alt="기본 프로필"
+            />
+          )}
           <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
           <ProfileRole>환자</ProfileRole>
         </ProfileSection>

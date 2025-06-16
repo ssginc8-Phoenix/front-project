@@ -12,7 +12,6 @@ const PageWrapper = styled.div`
   padding: 40px 20px;
   display: flex;
   gap: 48px;
-  background-color: #f8f9fa;
   min-height: 100vh;
 `;
 

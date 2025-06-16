@@ -2,8 +2,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router';
 import HospitalSidebarMenu from '~/features/hospitals/components/hospitalAdmin/HospitalSidebarMenu';
 import { hospitalSidebarItems } from '~/features/hospitals/components/constants/hospitalSidebarItems';
-import HospitalRegisterForm from '~/features/hospitals/components/hospitalAdmin/info/HospitalRegisterForm';
-import Header from '~/layout/Header';
+import HospitalUpdateForm from '~/features/hospitals/components/hospitalAdmin/info/HospitalUpdateForm';
 import useLoginStore from '~/features/user/stores/LoginStore';
 
 // ------------------- 스타일 정의 -------------------
@@ -11,10 +10,9 @@ const PageWrapper = styled.div`
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px; // <-- 통일
+  padding: 40px 20px;
   display: flex;
   gap: 48px;
-  background-color: #f8f9fa;
   min-height: 100vh;
 `;
 
@@ -30,6 +28,7 @@ const Title = styled.h2`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-left: 3rem;
   margin-bottom: 2rem; // <-- 여백 맞춤
 `;
 const ProfileSection = styled.div`
@@ -98,7 +97,7 @@ const AdminDashboard = () => {
         {/* 메인 콘텐츠 */}
         <MainSection>
           <Title>🏥 병원 대시보드</Title>
-          <HospitalRegisterForm />
+          <HospitalUpdateForm />
           {/* <ReviewSection /> */}
           {/* <WaitModal /> */}
         </MainSection>

@@ -158,6 +158,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# 확장자 기반 무시
+*.lock
+
 # 기타 캐시, lock 관련
 .cache/
 .eslintcache

@@ -1,15 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { X } from 'lucide-react';
+import { getWaiting } from '~/features/hospitals/api/hospitalAPI';
 
 interface WaitModalProps {
+  hospitalId: number;
   onClose: () => void;
   onConfirm: (count: number) => void;
 }
 
-const WaitModal: React.FC<WaitModalProps> = ({ onClose, onConfirm }) => {
+const WaitModal: React.FC<WaitModalProps> = ({ hospitalId, onClose, onConfirm }) => {
   const [count, setCount] = useState(0);
+  useEffect(() => {
+    const fetchWaiting = async () => {
+      try {
+        const res = await getWaiting(hospitalId);
+        if (typeof res === 'number') setCount(res);
+        else if (res.waiting) setCount(res.waiting);
+      } catch (error) {
+        console.error('웨이팅 정보 불러오기 실패', error);
+      }
+    };
 
+    fetchWaiting();
+  }, [hospitalId]);
   return (
     <Overlay>
       <ModalBox>

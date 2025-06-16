@@ -20,6 +20,7 @@ interface PatientRequest {
 }
 
 interface DoctorInfo {
+  specialization: string;
   email: string;
   password: string;
   name: string;

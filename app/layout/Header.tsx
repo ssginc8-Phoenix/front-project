@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import Profile from '~/common/Profile';
 import useLoginStore from '~/features/user/stores/LoginStore';
+import { Link } from 'react-router-dom';
 
 const HeaderBar = styled.header`
   padding: 1rem 2rem;
@@ -10,8 +11,12 @@ const HeaderBar = styled.header`
   align-items: center;
 `;
 
-const Logo = styled.img`
+const LogoLink = styled(Link)`
   width: 11%;
+`;
+
+const LogoImage = styled.img`
+  width: 100%;
 `;
 
 const RightGroup = styled.div`
@@ -25,7 +30,7 @@ const Notification = styled.div`
   font-size: 1.5rem;
 `;
 
-  const AuthButton = styled.a`
+const AuthButton = styled.a`
   padding: 8px 16px;
   border-radius: 6px;
   border: 1px solid #007bff;
@@ -47,7 +52,9 @@ const Header = () => {
 
   return (
     <HeaderBar>
-      <Logo src="/logo.png" alt="logo" />
+      <LogoLink to="/">
+        <LogoImage src="/logo.png" alt="logo" />
+      </LogoLink>
       <RightGroup>
         {user ? (
           <>

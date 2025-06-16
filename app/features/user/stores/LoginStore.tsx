@@ -20,12 +20,12 @@ const useLoginStore = create<LoginState>()(
         await login({ email, password });
         const myInfo = await getMyInfo();
 
-        console.log(myInfo.userId);
         set({
           user: {
             userId: myInfo.userId,
             name: myInfo.name,
             profileImageUrl: myInfo.profileImageUrl,
+            role: myInfo.role,
           },
         });
 
@@ -50,6 +50,7 @@ const useLoginStore = create<LoginState>()(
               userId: myInfo.userId,
               name: myInfo.name,
               profileImageUrl: myInfo.profileImageUrl,
+              role: myInfo.role,
             },
           });
         } catch {

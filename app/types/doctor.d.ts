@@ -1,8 +1,9 @@
 export interface Doctor {
   doctorId: number;
+  name: string;
   specialization: string;
-  username: string;
-  hospitalId: number;
+  hospitalName: number;
+  capacityPerHalfHour: string;
   imageUrl: string;
 }
 
@@ -14,4 +15,10 @@ export interface DoctorSchedule {
   endTime: string;
   lunchStart: string;
   lunchEnd: string;
+}
+
+export interface DoctorSaveRequest {
+  hospitalId: number;
+  specialization: string;
+  userId: number;
 }

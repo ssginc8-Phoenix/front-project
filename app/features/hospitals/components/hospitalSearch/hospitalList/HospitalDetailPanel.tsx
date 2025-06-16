@@ -92,24 +92,31 @@ const ServiceTag = styled.span`
   cursor: default;
   user-select: none;
 `;
-
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+`;
 const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, onClose }) => {
   const { data: hospital, loading, error } = useHospitalDetail(hospitalId);
   const navigate = useNavigate();
-
+  console.log('[🏥 병원 상세 데이터]', hospital);
   if (loading) return <div>로딩 중...</div>;
   if (error || !hospital) return <div>정보를 불러오지 못했습니다.</div>;
 
   return (
     <Panel>
-      <Thumbnail
-        src={hospital.thumbnailUrl || 'https://via.placeholder.com/300x160'}
-        alt="병원 사진"
-      />
+      <Thumbnail src={hospital.imageUrl || 'https://via.placeholder.com/300x160'} alt="병원 사진" />
 
       <Header>
-        <HospitalName>{hospital.hospitalName}</HospitalName>
-        <Tag>대기 {hospital.waiting ?? 0}명</Tag>
+        <HospitalName>{hospital.name}</HospitalName>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Tag>대기 {hospital.waiting ?? 0}명</Tag>
+          <CloseButton onClick={onClose}>✕</CloseButton>
+        </div>
       </Header>
 
       <div>
@@ -120,9 +127,6 @@ const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, o
 
       <Row>📍 {hospital.introduction ?? '소개 정보 없음'}</Row>
       <Row>📌 {hospital.notice ?? '공지사항 없음'}</Row>
-      <Row>
-        {hospital.keywords?.map((kw, idx) => <KeywordButton key={idx}>{kw}</KeywordButton>)}
-      </Row>
 
       <DetailButton onClick={() => navigate(`/hospitals/${hospital.hospitalId}`)}>
         병원 상세 보기

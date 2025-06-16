@@ -12,6 +12,7 @@ interface User {
   userId: number;
   name: string;
   profileImageUrl: string;
+  role: string;
 }
 
 interface PatientRequest {

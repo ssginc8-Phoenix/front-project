@@ -1,4 +1,4 @@
-import AppointmentDashboard from '~/features/appointment/components/update/AppointmentDashboard';
+import AppointmentDashboard from '~/features/appointment/components/list/AppointmentDashboard';
 import DatePickerSection from '~/features/appointment/components/update/DatePickerSection';
 import { useState } from 'react';
 import AppointmentUpdateModal from '~/features/appointment/components/update/UpdateModal';

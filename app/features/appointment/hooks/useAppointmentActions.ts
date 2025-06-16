@@ -13,7 +13,7 @@ export const useAppointmentActions = () => {
     setError(null);
 
     try {
-      await changeStatus(appointmentId, 'CANCELED');
+      await cancelAppointment(appointmentId);
       alert('에약이 취소되었습니다.');
       return true;
     } catch (err: any) {

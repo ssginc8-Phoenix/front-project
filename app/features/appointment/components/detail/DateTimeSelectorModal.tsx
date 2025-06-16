@@ -37,17 +37,24 @@ interface DateTimeSelectorModalProps {
   isOpen: boolean;
   onClose: () => void;
   doctorId: number;
+  patientId: number;
   onConfirm: () => void;
 }
 
-const DateTimeSelectorModal = ({ isOpen, onClose, doctorId, onConfirm }: DateTimeSelectorModalProps) => {
+const DateTimeSelectorModal = ({
+  isOpen,
+  onClose,
+  doctorId,
+  patientId,
+  onConfirm,
+}: DateTimeSelectorModalProps) => {
   if (!isOpen) return null;
 
   return (
     <Overlay>
       <Modal>
         <Title>재예약 날짜/시간 선택</Title>
-        <DateTimeSelector doctorId={doctorId} />
+        <DateTimeSelector doctorId={doctorId} patientId={patientId} />
         <ButtonGroup>
           <Button $variant="secondary" onClick={onClose}>
             취소

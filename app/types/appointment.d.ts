@@ -14,7 +14,7 @@ export interface Appointment {
   appointmentId: number;
   hospitalId: number;
   doctorId: number;
-  patientGuardianId: number;
+  patientId: number;
 
   hospitalName: string;
   doctorName: string;
@@ -44,6 +44,8 @@ export interface AppointmentList {
   appointmentTime: string;
   appointmentType: string;
   status: string;
+
+  hasReview?: boolean;
 }
 
 export type AppointmentListPage = Page<AppointmentList>;

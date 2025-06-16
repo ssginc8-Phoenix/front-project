@@ -42,9 +42,9 @@ export const getAppointmentList = async (page: number, size: number, date?: stri
 /**
  * 예약 가능한 시간 슬롯 리스트 조회 (로그인한 유저의)
  */
-export const getAvailableTimeSlots = async (doctorId: number, date: string) => {
+export const getAvailableTimeSlots = async (doctorId: number, patientId: number, date: string) => {
   const res = await axios.get(`${HOST}/available-time-slots`, {
-    params: { doctorId, date },
+    params: { doctorId, patientId, date },
     withCredentials: true,
   });
 
@@ -67,6 +67,17 @@ export const changeStatus = async (appointmentId: number, status: string) => {
       withCredentials: true,
     },
   );
+
+  return res.data;
+};
+
+/**
+ * 예약 취소
+ */
+export const cancelAppointment = async (appointmentId: number) => {
+  const res = await axios.patch(`${HOST}/${appointmentId}/cancel`, {
+    withCredentials: true,
+  });
 
   return res.data;
 };

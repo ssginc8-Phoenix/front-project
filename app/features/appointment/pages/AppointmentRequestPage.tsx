@@ -13,6 +13,7 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import LoginStore from '~/features/user/stores/LoginStore';
+import { useLocation } from 'react-router';
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -21,11 +22,12 @@ const ButtonGroup = styled.div`
   margin-top: 2rem;
 `;
 
-interface AppointmentPageProps {
-  hospitalId: number;
-}
+const AppointmentRequestPage = () => {
+  // URL 쿼리 파라미터 (나중에 zustand로 바꿀수도 있음)
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const hospitalId = Number(params.get('hospitalId'));
 
-const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
   const {
     patientId,
     patientName,
@@ -106,9 +108,9 @@ const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
   return (
     <>
       <PatientSelector />
-      <DoctorSelector hospitalId={1} />
+      <DoctorSelector hospitalId={hospitalId} />
       <SymptomSelector />
-      <DateTimeSelector doctorId={doctorId} />
+      <DateTimeSelector doctorId={doctorId} patientId={patientId} />
       <QuestionInput />
       <PaymentMethodSelector />
 
@@ -126,10 +128,10 @@ const AppointmentRequestPage = ({ hospitalId }: AppointmentPageProps) => {
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleSubmit}
         dateTime={dateTime ?? ''}
-        hospitalName="신세계병원"
+        hospitalName=""
         doctorName={doctorName ?? ''}
         patientName={patientName ?? ''}
-        residentRegistrationNumber={rrn ?? ''} // TODO: 마스킹 처리 필요
+        residentRegistrationNumber={rrn ?? ''}
         appointmentType={appointmentType}
         symptoms={fullSymptom}
         paymentMethod={paymentMethod}

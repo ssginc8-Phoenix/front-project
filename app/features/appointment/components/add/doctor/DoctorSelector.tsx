@@ -53,7 +53,7 @@ const DoctorSelector = ({ hospitalId }: DoctorSelectorProps) => {
         {doctors?.map((doctor) => (
           <DoctorCard
             key={doctor.doctorId}
-            username={doctor.username}
+            username={doctor.name}
             specialization={doctor.specialization}
             imageUrl={doctor.imageUrl}
             isSelected={doctorId === doctor.doctorId}
@@ -63,7 +63,7 @@ const DoctorSelector = ({ hospitalId }: DoctorSelectorProps) => {
                 setDoctorName(null);
               } else {
                 setDoctorId(doctor.doctorId);
-                setDoctorName(doctor.username);
+                setDoctorName(doctor.name);
               }
             }}
           />

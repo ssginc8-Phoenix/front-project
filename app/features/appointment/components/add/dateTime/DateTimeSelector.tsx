@@ -48,16 +48,17 @@ const TimeButton = styled.button<{ selected: boolean; disabled: boolean }>`
 
 interface DateTimeSelectorProps {
   doctorId: number | null;
+  patientId: number | null;
 }
 
-const DateTimeSelector = ({ doctorId }: DateTimeSelectorProps) => {
+const DateTimeSelector = ({ doctorId, patientId }: DateTimeSelectorProps) => {
   const { date, setDate, time, setTime } = useAppointmentStore();
 
   // date를 YYYY-MM-DD 문자열로 변환 (useTimeSlots는 string 타입 date 필요)
   const dateString = date ? dayjs(date).format('YYYY-MM-DD') : null;
 
   // useTimeSlots 훅으로 가능한 시간대 불러오기
-  const { list: timeSlots, loading, error } = useTimeSlots(doctorId, dateString);
+  const { list: timeSlots, loading, error } = useTimeSlots(doctorId, patientId, dateString);
 
   return (
     <Wrapper>

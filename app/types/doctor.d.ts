@@ -1,8 +1,9 @@
 export interface Doctor {
   doctorId: number;
+  name: string;
   specialization: string;
-  username: string;
-  hospitalId: number;
+  hospitalName: number;
+  capacityPerHalfHour: string;
   imageUrl: string;
 }
 

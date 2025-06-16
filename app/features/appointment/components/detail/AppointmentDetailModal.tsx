@@ -243,6 +243,7 @@ const AppointmentDetailModal = ({
           isOpen={isDateTimeSelectorModalOpen}
           onClose={() => setDateTimeSelectorModalOpen(false)}
           doctorId={appointment.doctorId}
+          patientId={appointment.patientId}
           onConfirm={handleReschedule}
         />
       )}

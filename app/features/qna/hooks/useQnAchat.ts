@@ -42,7 +42,10 @@ export function useQnAchat(qnaId: number, onClose?: () => void) {
     Error,
     { commentId: number; payload: CommentRequest }
   >({
-    mutationFn: ({ commentId, payload }) => updateComment(commentId, payload),
+    mutationFn: async ({ commentId, payload }) => {
+      const result = await updateComment(commentId, payload);
+      return result.data;
+    },
     onSuccess: () => {
       commentsQuery.refetch();
     },
@@ -50,7 +53,10 @@ export function useQnAchat(qnaId: number, onClose?: () => void) {
 
   // 댓글 삭제
   const deleteMut = useMutation<void, Error, number>({
-    mutationFn: (commentId) => deleteComment(commentId),
+    mutationFn: async (commentId) => {
+      const result = await deleteComment(commentId);
+      return result.data;
+    },
     onSuccess: () => {
       commentsQuery.refetch();
     },
@@ -71,9 +77,18 @@ export function useQnAchat(qnaId: number, onClose?: () => void) {
 
   const submit = async () => {
     if (!draft.trim()) return;
+    const detail = detailQuery.data;
+
     try {
       await createMut.mutateAsync({ content: draft });
-      await statusMut.mutateAsync();
+
+      // 상태가 PENDING일 경우에만 업데이트
+      if (detail?.status === 'PENDING') {
+        await statusMut.mutateAsync();
+      }
+
+      await commentsQuery.refetch();
+      setDraft('');
     } catch (err) {
       console.error('답변 등록 실패:', err);
     }

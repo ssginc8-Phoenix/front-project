@@ -15,7 +15,6 @@ const PageContainer = styled.div`
   background-color: #f5f7fa;
   min-height: 100vh;
 `;
-
 const ContentBox = styled.div`
   display: flex;
   flex-direction: column;
@@ -23,14 +22,12 @@ const ContentBox = styled.div`
   max-width: 1000px;
   gap: 2rem;
 `;
-
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
 `;
-
 const Legend = styled.div`
   display: flex;
   gap: 1.25rem;
@@ -52,13 +49,11 @@ const Legend = styled.div`
     background-color: #267e3e;
   }
 `;
-
 const PatientSelector = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 `;
-
 const PatientButton = styled.button`
   padding: 0.5rem 0.9rem;
   border: none;
@@ -76,7 +71,6 @@ const PatientButton = styled.button`
     background-color: #dbeafe;
   }
 `;
-
 const CalendarWrapper = styled.div`
   .react-calendar {
     width: 100%;
@@ -89,11 +83,11 @@ const CalendarWrapper = styled.div`
   .react-calendar__tile {
     border-radius: 12px;
     padding: 0.75rem 0.5rem;
-    transition: background 0.2s ease;
     min-height: 100px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    transition: background 0.2s ease;
   }
   .react-calendar__tile--now {
     background: #e3f2fd;
@@ -126,12 +120,10 @@ const CalendarWrapper = styled.div`
     background-color: #e0f0ff;
     color: #1a5da2;
   }
-
   .react-calendar__month-view__days__day:nth-child(7n) {
     color: black !important;
   }
 `;
-
 const AddMedicationButton = styled.button`
   margin-top: 1rem;
   align-self: flex-end;
@@ -167,8 +159,8 @@ export default function GuardianCalendar() {
 
   const fetchGuardianId = async () => {
     try {
-      const info = await getMyGuardianInfo();
-      setGuardianUserId(info.guardianId);
+      const { guardianId } = await getMyGuardianInfo();
+      setGuardianUserId(guardianId);
     } catch (e) {
       console.error('보호자 ID 조회 실패', e);
     }
@@ -180,14 +172,13 @@ export default function GuardianCalendar() {
     const res = await getGuardianCalendar(year, month);
     setFullList(res.calendarItemLists);
 
+    // build patient list
     const namesAndIds = res.calendarItemLists
       .filter((item) => item.name && item.patientGuardianId)
-      .map((item) => ({
-        name: item.name,
-        patientGuardianId: item.patientGuardianId,
-      }));
+      .map((item) => ({ name: item.name, patientGuardianId: item.patientGuardianId }));
     setPatientList(namesAndIds);
 
+    // auto-select if only one
     if (namesAndIds.length === 1) {
       setSelectedName(namesAndIds[0].name);
       setSelectedPatient(namesAndIds[0]);
@@ -215,8 +206,7 @@ export default function GuardianCalendar() {
           : [],
     );
     const grouped = flat.reduce((acc: Record<string, any[]>, item: any) => {
-      if (!acc[item.date]) acc[item.date] = [];
-      acc[item.date].push(item);
+      (acc[item.date] ||= []).push(item);
       return acc;
     }, {});
     setCalendarData(grouped);
@@ -225,18 +215,14 @@ export default function GuardianCalendar() {
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
     const dateStr = date.toISOString().split('T')[0];
-
-    // 📌 날짜 범위에 따라 복약 일정 필터링
-    const items = (calendarData[dateStr] || []).filter((item: CalendarItem) => {
+    const items = (calendarData[dateStr] || []).filter((item: any) => {
       if (item.itemType === 'MEDICATION') {
         if (item.startDate && new Date(dateStr) < new Date(item.startDate)) return false;
         if (item.endDate && new Date(dateStr) > new Date(item.endDate)) return false;
       }
       return true;
     });
-
     if (!items.length) return null;
-
     return (
       <div className="calendar-day-wrapper">
         {items.slice(0, 3).map((item, idx) => (
@@ -248,7 +234,6 @@ export default function GuardianCalendar() {
               setSelectedItem(item);
               setItemDetailOpen(true);
             }}
-            style={{ cursor: 'pointer' }}
           >
             {item.itemType === 'MEDICATION' ? '💊' : '🏥'} {item.title}
           </div>
@@ -284,32 +269,51 @@ export default function GuardianCalendar() {
               <span>약 복용</span>
             </div>
           </Legend>
+
           <PatientSelector>
             <PatientButton
+              className={selectedName === '전체' ? 'active' : ''}
               onClick={() => {
+                setRegisterModalOpen(false);
+                setSelectedItem(null);
                 setSelectedName('전체');
                 setSelectedPatient(null);
                 updateCalendarData(fullList, '전체');
               }}
-              className={selectedName === '전체' ? 'active' : ''}
             >
               전체
             </PatientButton>
             {patientList.map((p) => (
               <PatientButton
                 key={p.patientGuardianId}
+                className={selectedName === p.name ? 'active' : ''}
                 onClick={() => {
+                  setRegisterModalOpen(false);
+                  setSelectedItem(null);
                   setSelectedName(p.name);
                   setSelectedPatient(p);
                   updateCalendarData(fullList, p.name);
                 }}
-                className={selectedName === p.name ? 'active' : ''}
               >
                 {p.name}
               </PatientButton>
             ))}
           </PatientSelector>
         </Header>
+
+        <AddMedicationButton
+          onClick={() => {
+            if (!selectedPatient || guardianUserId === null) {
+              alert('환자와 보호자 정보를 확인해주세요.');
+              return;
+            }
+            // clear any existing selection before opening
+            setSelectedItem(null);
+            setRegisterModalOpen(true);
+          }}
+        >
+          + 약 등록
+        </AddMedicationButton>
 
         <CalendarWrapper>
           <Calendar
@@ -333,39 +337,22 @@ export default function GuardianCalendar() {
             }}
           />
         </CalendarWrapper>
-
-        <AddMedicationButton
-          onClick={() => {
-            if (!selectedPatient || guardianUserId === null) {
-              alert('환자와 보호자 정보를 확인해주세요.');
-              return;
-            }
-            setRegisterModalOpen(true);
-          }}
-        >
-          + 약 등록
-        </AddMedicationButton>
       </ContentBox>
 
       {registerModalOpen && selectedPatient && guardianUserId !== null && (
         <CommonModal
           title={selectedItem ? '약 수정' : '약 등록'}
-          buttonText=""
           onClose={() => {
             setRegisterModalOpen(false);
             setSelectedItem(null);
           }}
+          buttonText=""
         >
           <MedicationRegisterModal
             date={selectedDate.toISOString().split('T')[0]}
             patientGuardianId={selectedPatient.patientGuardianId}
-            onClose={async () => {
-              await fetchData();
-              setRegisterModalOpen(false);
-              setSelectedItem(null);
-            }}
             initialData={
-              selectedItem && selectedItem.itemType === 'MEDICATION'
+              selectedItem?.itemType === 'MEDICATION'
                 ? {
                     medicationId: selectedItem.relatedId,
                     medicationName: selectedItem.title,
@@ -376,6 +363,11 @@ export default function GuardianCalendar() {
                   }
                 : undefined
             }
+            onClose={async () => {
+              await fetchData();
+              setRegisterModalOpen(false);
+              setSelectedItem(null);
+            }}
           />
         </CommonModal>
       )}
@@ -383,8 +375,8 @@ export default function GuardianCalendar() {
       {modalOpen && (
         <CommonModal
           title={`${modalDate} 일정`}
-          buttonText="닫기"
           onClose={() => setModalOpen(false)}
+          buttonText="닫기"
         >
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {modalItems.map((item, idx) => (
@@ -392,7 +384,6 @@ export default function GuardianCalendar() {
                 key={`${modalDate}-${idx}`}
                 style={{
                   marginBottom: '0.5rem',
-                  textAlign: 'left',
                   cursor: 'pointer',
                   padding: '0.25rem 0.5rem',
                   borderRadius: '6px',
@@ -414,10 +405,10 @@ export default function GuardianCalendar() {
       {itemDetailOpen && selectedItem && (
         <CommonModal
           title={`${selectedItem.date} 상세정보`}
-          buttonText=""
           onClose={() => setItemDetailOpen(false)}
+          buttonText=""
         >
-          <div style={{ textAlign: 'left', lineHeight: '1.6' }}>
+          <div style={{ textAlign: 'left', lineHeight: 1.6 }}>
             <p>
               <strong>환자:</strong> {selectedItem.name}
             </p>
@@ -443,8 +434,8 @@ export default function GuardianCalendar() {
                   style={{
                     display: 'flex',
                     gap: '1rem',
-                    marginTop: '1rem',
                     justifyContent: 'flex-end',
+                    marginTop: '1rem',
                   }}
                 >
                   <button

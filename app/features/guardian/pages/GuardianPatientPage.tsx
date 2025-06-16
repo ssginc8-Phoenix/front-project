@@ -153,6 +153,14 @@ const SubmitButton = styled.button`
   cursor: pointer;
 `;
 
+const ProfileImage = styled.img`
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+`;
+
 // --- 컴포넌트 ---
 export const GuardianPatientPage = () => {
   const [patients, setPatients] = useState<PatientSummary[]>([]);
@@ -228,7 +236,13 @@ export const GuardianPatientPage = () => {
       <PageWrapper>
         <SidebarBox>
           <ProfileSection>
-            <ProfileEmoji>🧑‍💼</ProfileEmoji>
+            <ProfileImage
+              src={
+                user?.profileImageUrl ??
+                'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png'
+              }
+              alt="프로필 사진"
+            />
             <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
             <ProfileRole>보호자</ProfileRole>
           </ProfileSection>

@@ -164,47 +164,38 @@ export default function GuardianCalendar() {
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const [guardianUserId, setGuardianUserId] = useState<number | null>(null);
 
-  // ❗️ fetchData 전면 수정
+  const getLocalDateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const fetchData = async (date: Date = activeDate) => {
-    try {
-      // 1) 보호자 ID만 조회
-      const { guardianId } = await getMyGuardianInfo();
-      setGuardianUserId(guardianId);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const res = await getGuardianCalendar(year, month);
+    setFullList(res.calendarItemLists);
 
-      // 2) 달력 데이터 가져오기
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const res = await getGuardianCalendar(year, month);
-
-      // 3) 서버에서 내려준 calendarItemLists 그대로 사용
-      const lists = res.calendarItemLists || [];
-      setFullList(lists);
-
-      // 4) patientList: 중복 제거하여 {patientGuardianId, name} 목록 생성
-      const map = new Map<number, string>();
-      lists.forEach((li) => map.set(li.patientGuardianId, li.name));
-      const unique = Array.from(map.entries()).map(([patientGuardianId, name]) => ({
-        patientGuardianId,
-        name,
+    const namesAndIds = res.calendarItemLists
+      .filter(
+        (item: { name: string; patientGuardianId: number }) => item.name && item.patientGuardianId,
+      )
+      .map((item: { name: string; patientGuardianId: number }) => ({
+        name: item.name,
+        patientGuardianId: item.patientGuardianId,
       }));
-      setPatientList(unique);
+    setPatientList(namesAndIds);
 
-      // 5) 처음 선택: 단일 환자면 자동 선택, 다중이면 '전체'
-      if (unique.length === 1) {
-        setSelectedName(unique[0].name);
-        setSelectedPatient(unique[0]);
-        updateCalendarData(lists, unique[0].name);
-      } else {
-        updateCalendarData(lists, selectedName);
-      }
-    } catch (e) {
-      console.error('데이터 로드 실패', e);
+    if (namesAndIds.length === 1) {
+      setSelectedName(namesAndIds[0].name);
+      setSelectedPatient(namesAndIds[0]);
+      updateCalendarData(res.calendarItemLists, namesAndIds[0].name);
+    } else {
+      updateCalendarData(res.calendarItemLists, selectedName);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
   useEffect(() => {
     fetchData(activeDate);
   }, [activeDate]);
@@ -226,10 +217,11 @@ export default function GuardianCalendar() {
 
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
-    const dateStr = date.toISOString().split('T')[0];
-    const items = (calendarData[dateStr] || []).filter((item) => {
+
+    const dateStr = getLocalDateString(date);
 
     // 📌 날짜 범위에 따라 복약 일정 필터링
+    const items = (calendarData[dateStr] || []).filter((item: CalendarItem) => {
       if (item.itemType === 'MEDICATION') {
         if (item.startDate && new Date(dateStr) < new Date(item.startDate)) return false;
         if (item.endDate && new Date(dateStr) > new Date(item.endDate)) return false;
@@ -338,7 +330,7 @@ export default function GuardianCalendar() {
             onChange={(date) => {
               if (date instanceof Date) {
                 setSelectedDate(date);
-                const dateStr = date.toISOString().split('T')[0];
+                const dateStr = getLocalDateString(date);
                 const items = calendarData[dateStr];
                 if (items?.length) {
                   setModalItems(items);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useHospitalDetail } from '../../../hooks/useHospitalDetail';
 import type { HospitalSchedule } from '../../../types/hospitalSchedule';
+import { useNavigate } from 'react-router';
 
 const Container = styled.div`
   width: 100%;
@@ -137,6 +138,7 @@ interface HospitalInfoTabProps {
 
 const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
   const { data: hospital, loading, error } = useHospitalDetail(hospitalId);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const formatTime = (time: string) => time.substring(0, 5);
   useEffect(() => {
@@ -145,6 +147,9 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
       document.body.style.overflow = '';
     };
   }, [isModalOpen]);
+
+  const navigate = useNavigate();
+
 
   if (loading) return <p style={{ textAlign: 'center' }}>로딩 중...</p>;
   if (error) return <p style={{ textAlign: 'center', color: 'red' }}>{String(error)}</p>;
@@ -174,6 +179,7 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
           </ModalContent>
         </Overlay>
       )}
+
 
       <Container>
         <ImageWrapper onClick={() => setIsModalOpen(true)}>
@@ -205,11 +211,14 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
           </NoticeBox>
         )}
 
-        <ButtonGroup>
-          <ActionButton>🏥 대면 진료 접수</ActionButton>
-        </ButtonGroup>
-      </Container>
-    </>
+
+      <ButtonGroup>
+        <ActionButton onClick={() => navigate(`/appointments/request?hospitalId=${hospitalId}`)}>
+          🏥 대면 진료 접수
+        </ActionButton>
+      </ButtonGroup>
+    </Container>
+
   );
 };
 

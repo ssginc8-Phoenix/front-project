@@ -317,7 +317,10 @@ export default function HospitalCalendar() {
               <strong>환자:</strong> {appointmentDetail.patientName}
             </p>
             <p>
-              <strong>진료 시간:</strong> {appointmentDetail.appointmentTime}
+              <strong>날짜:</strong> {appointmentDetail.appointmentTime.split('T')[0]}
+            </p>
+            <p>
+              <strong>시간:</strong> {appointmentDetail.appointmentTime.split('T')[1]}
             </p>
             <p>
               <strong>증상:</strong> {appointmentDetail.symptom}

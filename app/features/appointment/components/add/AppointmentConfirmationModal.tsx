@@ -86,6 +86,15 @@ const AppointmentConfirmationModal = ({
 }: AppointmentConfirmationModalProps) => {
   if (!isOpen) return null;
 
+  const maskRrn = (rrn: string) => {
+    if (!rrn || rrn.length !== 14) return rrn;
+
+    const front = rrn.slice(0, 6);
+    const backFirst = rrn[7]; // 뒷자리 첫번째 숫자
+
+    return `${front}-${backFirst}******`;
+  };
+
   return (
     <Overlay>
       <Modal>
@@ -101,7 +110,7 @@ const AppointmentConfirmationModal = ({
           <SectionTitle>환자 정보</SectionTitle>
           {patientName}
           <br />
-          {residentRegistrationNumber}
+          {maskRrn(residentRegistrationNumber)}
 
           <SectionTitle>진료 항목</SectionTitle>
           {appointmentType === 'SCHEDULED' || appointmentType === 'IMMEDIATE'

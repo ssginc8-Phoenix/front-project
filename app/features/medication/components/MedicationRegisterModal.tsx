@@ -85,20 +85,20 @@ const ActionButton = styled.button`
   }
 `;
 
+interface MedicationData {
+  medicationId: number;
+  medicationName: string;
+  timeToTake: string;
+  days: string[];
+  startDate: string;
+  endDate: string;
+}
 interface Props {
   date: string;
   patientGuardianId: number;
-  initialData?: {
-    medicationId: number;
-    medicationName: string;
-    timeToTake: string;
-    days: string[];
-    startDate: string;
-    endDate: string;
-  };
+  initialData?: MedicationData;
   onClose: () => void;
 }
-
 export default function MedicationRegisterModal({
   date,
   patientGuardianId,
@@ -129,14 +129,23 @@ export default function MedicationRegisterModal({
   };
 
   const handleSubmit = async () => {
-    // 필수 입력 검증
-    if (!medicationName || !selectedDays.length || !startDate || !endDate) {
-      alert('모든 필드를 입력해주세요.');
-      return;
-    }
-    if (startDate > endDate) {
-      alert('시작일이 종료일보다 이후일 수 없습니다.');
-      return;
+    if (initialData) {
+      // 수정 모드: 날짜 필드까지 포함해 보내기
+      try {
+        const payload: Record<string, any> = {
+          newTimeToTake: `${selectedTime}:00`,
+          newDays: selectedDays,
+          newStartDate: startDate,
+          newEndDate: endDate,
+        };
+        await updateMedicationSchedule(initialData.medicationId, payload);
+        alert('수정되었습니다.');
+        onClose();
+      } catch (e) {
+        console.error(e);
+        alert('수정 실패');
+      }
+      return; // 반드시 return 해서 이후 등록 로직이 실행되지 않도록
     }
 
     // 등록용 바디
@@ -199,10 +208,10 @@ export default function MedicationRegisterModal({
         ))}
       </ButtonGroup>
 
-      <Label>📌 시작일</Label>
+      <Label>📌 복용 시작일</Label>
       <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
 
-      <Label>📌 종료일</Label>
+      <Label>📌 복용 종료일</Label>
       <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
 
       <ButtonRow>

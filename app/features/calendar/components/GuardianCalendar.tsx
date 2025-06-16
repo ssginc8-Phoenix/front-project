@@ -378,18 +378,22 @@ export default function GuardianCalendar() {
               setSelectedItem(null);
             }}
           >
+            {selectedItem &&
+              selectedItem.itemType === 'MEDICATION' &&
+              console.log('📌 selectedItem.days:', selectedItem.days)}
+
             <MedicationRegisterModal
               date={selectedDate.toISOString().split('T')[0]}
               patientGuardianId={selectedPatient.patientGuardianId}
               initialData={
-                selectedItem?.itemType === 'MEDICATION'
+                selectedItem && selectedItem.itemType === 'MEDICATION'
                   ? {
                       medicationId: selectedItem.relatedId,
                       medicationName: selectedItem.title,
                       timeToTake: selectedItem.time,
                       days: selectedItem.days || [],
-                      startDate: selectedItem.startDate,
-                      endDate: selectedItem.endDate,
+                      startDate: selectedItem.startDate!,
+                      endDate: selectedItem.endDate!,
                     }
                   : undefined
               }
@@ -442,26 +446,54 @@ export default function GuardianCalendar() {
             onClose={() => setItemDetailOpen(false)}
           >
             <div style={{ textAlign: 'left', lineHeight: 1.6 }}>
-              <p>
-                <strong>환자:</strong> {selectedItem.name}
-              </p>
-              <p>
-                <strong>종류:</strong>{' '}
-                {selectedItem.itemType === 'MEDICATION' ? '약 복용' : '일반진료'}
-              </p>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  alignItems: 'center',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <span
+                  style={{
+                    border: '2px solid #7dd3fc',
+                    backgroundColor: '#e0f2fe',
+                    color: '#0369a1',
+                    padding: '2px 10px',
+                    borderRadius: '12px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  {selectedItem.name}
+                </span>
+                <span
+                  style={{
+                    border: '2px solid #000',
+                    backgroundColor: '#003458',
+                    padding: '2px 10px',
+                    color: '#ECEAE4',
+                    borderRadius: '12px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  {selectedItem.itemType === 'MEDICATION' ? '약 복용' : '일반진료'}
+                </span>
+              </div>
               <p>
                 <strong>제목:</strong> {selectedItem.title}
               </p>
               <p>
-                <strong>시간:</strong> {selectedItem.time}
+                <strong>시간:</strong> {selectedItem.time ? selectedItem.time.slice(0, 5) : ''}
               </p>
               {selectedItem.itemType === 'MEDICATION' && (
                 <>
                   <p>
-                    <strong>시작일:</strong> {selectedItem.startDate}
+                    <strong>복용 시작일:</strong> {selectedItem.startDate}
                   </p>
                   <p>
-                    <strong>종료일:</strong> {selectedItem.endDate}
+                    <strong>복용 종료일:</strong> {selectedItem.endDate}
                   </p>
                   <div
                     style={{

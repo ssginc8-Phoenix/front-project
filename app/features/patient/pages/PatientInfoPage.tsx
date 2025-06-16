@@ -9,6 +9,7 @@ import { patientSidebarItems } from '~/features/patient/constants/sidebarItems';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { getUserInfo, updateUserInfo } from '~/features/patient/api/userAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
+import type { User } from '~/types/user';
 
 // --- 스타일 정의 ---
 const PageBg = styled.div`
@@ -54,6 +55,14 @@ const ProfileSection = styled.div`
   flex-direction: column;
   align-items: center;
   margin-bottom: 24px;
+`;
+
+const ProfileImage = styled.img`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
 `;
 
 const ProfileEmoji = styled.div`
@@ -166,6 +175,7 @@ const Footer = styled.div`
 const PatientInfoPage = () => {
   const { user, fetchMyInfo } = useLoginStore();
   const navigate = useNavigate();
+  const [userinfo, setUserinfo] = useState<User | null>(null);
 
   const [form, setForm] = useState({
     name: '',
@@ -182,7 +192,9 @@ const PatientInfoPage = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        await fetchMyInfo();
         const myInfo = await getUserInfo();
+        setUserinfo(myInfo);
         setForm({
           name: myInfo.name || '',
           email: myInfo.email || '',
@@ -250,7 +262,14 @@ const PatientInfoPage = () => {
           <SidebarBox>
             {/* 프로필 영역 */}
             <ProfileSection>
-              <ProfileEmoji>👵</ProfileEmoji>
+              {userinfo?.profileImageUrl ? (
+                <ProfileImage src={userinfo.profileImageUrl} alt="프로필 이미지" />
+              ) : (
+                <ProfileImage
+                  src="https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png"
+                  alt="기본 프로필"
+                />
+              )}
               <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
               <ProfileRole>환자</ProfileRole>
             </ProfileSection>

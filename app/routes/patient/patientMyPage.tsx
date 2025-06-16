@@ -1,5 +1,7 @@
-import PatientMyPage from '~/features/patient/pages/PatientMyPage';
+import GuardianPage from '~/features/patient/pages/GuardianPage';
 
 export default function patientMy() {
-  return <PatientMyPage />;
+  return <GuardianPage />;
 }
+
+// mypage

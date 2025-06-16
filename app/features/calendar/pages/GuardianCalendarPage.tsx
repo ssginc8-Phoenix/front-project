@@ -53,6 +53,13 @@ const ProfileRole = styled.div`
   color: #777;
   font-size: 1rem;
 `;
+const ProfileImage = styled.img`
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+`;
 
 const GuardianCalendarPage = () => {
   const { user } = useLoginStore();
@@ -66,7 +73,13 @@ const GuardianCalendarPage = () => {
     <PageWrapper>
       <SidebarBox>
         <ProfileSection>
-          <ProfileEmoji>🧑‍💼</ProfileEmoji> {/* 🔥 보호자 이모지 변경 */}
+          <ProfileImage
+            src={
+              user?.profileImageUrl ??
+              'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png'
+            }
+            alt="프로필 사진"
+          />
           <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
           <ProfileRole>보호자</ProfileRole>
         </ProfileSection>

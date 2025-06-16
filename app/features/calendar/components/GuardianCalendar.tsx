@@ -12,7 +12,6 @@ const PageContainer = styled.div`
   display: flex;
   justify-content: center;
   padding: 3rem 2rem;
-  background-color: #f5f7fa;
   min-height: 100vh;
 `;
 
@@ -127,6 +126,10 @@ const CalendarWrapper = styled.div`
     background-color: #e0f0ff;
     color: #1a5da2;
   }
+
+  .react-calendar__month-view__days__day:nth-child(7n) {
+    color: black !important;
+  }
 `;
 
 const AddMedicationButton = styled.button`
@@ -225,6 +228,8 @@ export default function GuardianCalendar() {
     if (view !== 'month') return null;
     const dateStr = date.toISOString().split('T')[0];
     const items = (calendarData[dateStr] || []).filter((item) => {
+
+    // 📌 날짜 범위에 따라 복약 일정 필터링
       if (item.itemType === 'MEDICATION') {
         if (item.startDate && new Date(dateStr) < new Date(item.startDate)) return false;
         if (item.endDate && new Date(dateStr) > new Date(item.endDate)) return false;
@@ -329,7 +334,7 @@ export default function GuardianCalendar() {
 
         <CalendarWrapper>
           <Calendar
-            locale="ko-KR"
+            locale="en-US"
             onChange={(date) => {
               if (date instanceof Date) {
                 setSelectedDate(date);

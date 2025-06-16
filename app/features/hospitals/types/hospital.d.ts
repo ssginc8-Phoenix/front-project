@@ -40,7 +40,8 @@ export interface CreateHospitalRequest {
   introduction: string;
   notice: string;
   businessRegistrationNumber: string;
-  serviceNames: string[]; // ex: ["주차 가능", "야간 진료"]
+  serviceName: string[]; // ex: ["주차 가능", "야간 진료"]
+  fileId?: number;
 }
 
 export type DayOfWeek =

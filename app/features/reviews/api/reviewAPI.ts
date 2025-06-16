@@ -44,9 +44,10 @@ export async function deleteReview(reviewId: number): Promise<ActionResult<void>
 export async function getMyReviews(
   page: number,
   size: number,
-): Promise<ActionResult<Page<ReviewMyListResponse>>> {
+): Promise<Page<ReviewMyListResponse>> {
   const url = 'http://localhost:8080/api/v1/users/me/reviews';
-  const res = await axios.get(`${url}?page=${page}&size=${size}`, {
+  const res = await axios.get<Page<ReviewMyListResponse>>(url, {
+    params: { page, size },
     withCredentials: true,
   });
   return res.data;
@@ -56,7 +57,7 @@ export async function getMyReviews(
 export async function getAllReviews(
   page: number,
   size: number,
-): Promise<ActionResult<Page<ReviewAllListResponse>>> {
+): Promise<Page<ReviewAllListResponse>> {
   const url = 'http://localhost:8080/api/v1/admin/reviews';
   const res = await axios.get(`${url}?page=${page}&size=${size}`, {
     withCredentials: true,
@@ -69,7 +70,7 @@ export async function getHospitalReviews(
   hospitalId: number,
   page: number,
   size: number,
-): Promise<ActionResult<Page<HospitalReviewResponse>>> {
+): Promise<Page<HospitalReviewResponse>> {
   const url = `http://localhost:8080/api/v1/hospitals/${hospitalId}/reviews`;
   const res = await axios.get(`${url}?page=${page}&size=${size}`, {
     withCredentials: true,
@@ -78,8 +79,9 @@ export async function getHospitalReviews(
 }
 
 // 리뷰 신고 기능
-export async function reportReview(reviewId: number): Promise<void> {
+export async function reportReview(reviewId: number, reason: string): Promise<void> {
   await axios.post(`http://localhost:8080/api/v1/reviews/${reviewId}/report`, null, {
+    params: { reason },
     withCredentials: true,
   });
 }

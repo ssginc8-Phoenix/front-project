@@ -9,8 +9,6 @@ const PageContainer = styled.div`
   display: flex;
   justify-content: center;
   padding: 3rem 2rem;
-  background-color: #f5f7fa;
-  min-height: 100vh;
 `;
 
 const ContentBox = styled.div`
@@ -80,6 +78,7 @@ const CalendarWrapper = styled.div`
     padding: 1rem;
     border: none;
   }
+
   .react-calendar__tile {
     border-radius: 12px;
     padding: 0.75rem 0.5rem;
@@ -88,11 +87,13 @@ const CalendarWrapper = styled.div`
     flex-direction: column;
     align-items: flex-start;
   }
+
   .calendar-day-wrapper {
     width: 100%;
     display: flex;
     flex-direction: column;
   }
+
   .calendar-event {
     font-size: 0.7rem;
     padding: 3px 6px;
@@ -104,6 +105,9 @@ const CalendarWrapper = styled.div`
     align-items: center;
     gap: 4px;
     cursor: pointer;
+  }
+  .react-calendar__month-view__days__day:nth-child(7n) {
+    color: black !important;
   }
 `;
 
@@ -184,7 +188,10 @@ export default function HospitalCalendar() {
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
 
-    const dateStr = date.toISOString().split('T')[0];
+    const kstOffsetMs = 9 * 60 * 60 * 1000;
+    const localDate = new Date(date.getTime() + kstOffsetMs);
+    const dateStr = localDate.toISOString().split('T')[0];
+
     const items = calendarData[dateStr];
     if (!items) return null;
 
@@ -256,7 +263,7 @@ export default function HospitalCalendar() {
 
         <CalendarWrapper>
           <Calendar
-            locale="ko-KR"
+            locale="en-US"
             onChange={(date) => {
               if (date instanceof Date) setSelectedDate(date);
             }}

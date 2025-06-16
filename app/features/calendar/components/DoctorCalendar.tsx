@@ -105,6 +105,9 @@ const CalendarWrapper = styled.div`
     gap: 4px;
     cursor: pointer;
   }
+  .react-calendar__month-view__days__day:nth-child(7n) {
+    color: black !important;
+  }
 `;
 
 interface AppointmentDetail {
@@ -184,7 +187,10 @@ export default function HospitalCalendar() {
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
 
-    const dateStr = date.toISOString().split('T')[0];
+    const kstOffsetMs = 9 * 60 * 60 * 1000;
+    const localDate = new Date(date.getTime() + kstOffsetMs);
+    const dateStr = localDate.toISOString().split('T')[0];
+
     const items = calendarData[dateStr];
     if (!items) return null;
 
@@ -256,7 +262,7 @@ export default function HospitalCalendar() {
 
         <CalendarWrapper>
           <Calendar
-            locale="ko-KR"
+            locale="en-US"
             onChange={(date) => {
               if (date instanceof Date) setSelectedDate(date);
             }}

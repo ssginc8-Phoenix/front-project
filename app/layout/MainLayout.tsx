@@ -12,7 +12,7 @@ const ContentWrapper = styled.main`
   flex: 1;
   padding: 2rem 3rem;
   width: 90%;
-  margin: 0 auto;
+  margin: 0;
   display: flex;
   flex-direction: column;
   gap: 2rem;

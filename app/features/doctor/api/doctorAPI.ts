@@ -22,3 +22,22 @@ export const getDoctorSchedules = async (doctorId: number) => {
   });
   return res.data;
 };
+
+export const getMyDoctorInfo = async () => {
+  const res = await axios.get(`${HOST}/me`, {
+    withCredentials: true,
+  });
+  return res.data;
+};
+
+// 👉 30분당 진료 가능 인원 수 수정
+export const updateDoctorCapacity = async (doctorId: number, capacityPerHalfHour: number) => {
+  const res = await axios.patch(
+    `${HOST}/${doctorId}/capacity`,
+    { capacityPerHalfHour },
+    {
+      withCredentials: true,
+    },
+  );
+  return res.data;
+};

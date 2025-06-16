@@ -18,31 +18,35 @@ interface SidebarMenuProps {
 
 // Styled-components
 const Sidebar = styled.nav`
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 15rem; /* 고정 너비 대신 rem 단위 */
+  padding: 1rem; /* 상하좌우 1rem 패딩 */
 `;
 
-const SidebarMenuUl = styled.ul`
-  width: 100%;
-  padding: 0;
+const SidebarMenuList = styled.ul`
   margin: 0;
+  padding: 0;
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 항목 사이 0.5rem 간격 */
 `;
 
 const SidebarMenuItem = styled.li<{ $active?: boolean }>`
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 8px 14px 18px;
-  font-size: 1.13rem;
+  gap: 0.75rem; /* 아이콘과 텍스트 간격 */
+  padding: 0.75rem 1rem; /* 상하 0.75rem, 좌우 1rem */
+  font-size: 1.125rem; /* 1.125rem = 18px 정도 */
   font-weight: 500;
   color: ${({ $active }) => ($active ? '#1646a0' : '#222')};
-  background: ${({ $active }) => ($active ? '#f3f6fa' : 'none')};
-  border-radius: 10px;
+  background: ${({ $active }) => ($active ? '#f3f6fa' : 'transparent')};
+  border-radius: 0.625rem; /* 10px */
   cursor: pointer;
-  margin: 4px 0;
   transition:
-    background 0.12s,
-    color 0.12s;
+    background 0.12s ease,
+    color 0.12s ease;
 
   &:hover {
     background: #eef3fa;
@@ -61,18 +65,18 @@ export const SidebarMenu: React.FC<SidebarMenuProps> = ({
 }) => (
   <Sidebar>
     {children}
-    <SidebarMenuUl>
+    <SidebarMenuList>
       {items.map((item) => (
         <SidebarMenuItem
           key={item.key}
           $active={item.key === activeKey}
           onClick={() => onChange(item.key)}
         >
-          <span style={{ fontSize: '1.29rem' }}>{item.icon}</span>
+          <span style={{ fontSize: '1.25rem' }}>{item.icon}</span>
           {item.label}
         </SidebarMenuItem>
       ))}
-    </SidebarMenuUl>
+    </SidebarMenuList>
   </Sidebar>
 );
 

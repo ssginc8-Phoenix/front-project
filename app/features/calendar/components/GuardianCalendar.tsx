@@ -197,8 +197,28 @@ export default function GuardianCalendar() {
   };
 
   useEffect(() => {
+    (async () => {
+      try {
+        const info = await getMyGuardianInfo();
+        setGuardianUserId(info.userId);
+      } catch (err) {
+        console.error('보호자 정보 로드 실패', err);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
     fetchData(activeDate);
   }, [activeDate]);
+
+  const handleEditClick = () => {
+    // 1) 상세보기 모달 닫기
+    setItemDetailOpen(false);
+    // 2) 다음 렌더 사이클에서 수정 모달 열기
+    setTimeout(() => {
+      setRegisterModalOpen(true);
+    }, 0);
+  };
 
   const updateCalendarData = (lists: any[], name: string) => {
     const flat = lists.flatMap(({ name: pname, calendarItems }: any) =>
@@ -314,10 +334,11 @@ export default function GuardianCalendar() {
 
         <AddMedicationButton
           onClick={() => {
-            if (!selectedPatient || guardianUserId === null) {
-              alert('환자와 보호자 정보를 확인해주세요.');
+            if (!selectedPatient) {
+              alert('환자 정보를 확인해주세요.');
               return;
             }
+            setSelectedItem(null);
             setRegisterModalOpen(true);
           }}
         >
@@ -392,6 +413,9 @@ export default function GuardianCalendar() {
                 <li
                   key={`${modalDate}-${idx}`}
                   onClick={() => {
+                    // 목록 모달 닫기
+                    setModalOpen(false);
+                    // 상세 모달 열기
                     setSelectedItem(item);
                     setItemDetailOpen(true);
                   }}
@@ -448,10 +472,7 @@ export default function GuardianCalendar() {
                     }}
                   >
                     <button
-                      onClick={() => {
-                        setItemDetailOpen(false);
-                        setRegisterModalOpen(true);
-                      }}
+                      onClick={handleEditClick}
                       style={{
                         background: '#e0e7ff',
                         padding: '0.5rem 1rem',

@@ -7,22 +7,14 @@ import { patientSidebarItems } from '~/features/patient/constants/sidebarItems';
 import { getGuardians, type Guardian, inviteGuardian } from '~/features/patient/api/guardianAPI';
 import { getUserInfo } from '~/features/patient/api/userAPI';
 import useLoginStore from '~/features/user/stores/LoginStore';
-import Header from '~/layout/Header';
 import ReusableModal from '~/features/patient/components/ReusableModal';
 import { getPatientInfo } from '~/features/patient/api/patientAPI';
 import type { User } from '~/types/user';
+import { SidebarContainer } from '~/components/styled/SidebarContainer';
+import { PageWrapper } from '~/components/styled/PageWrapper';
 
 // --- 스타일 정의 ---
-const PageWrapper = styled.div`
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  display: flex;
-  gap: 48px;
-  background-color: #f8f9fa;
-  min-height: 100vh;
-`;
+const PageWrapperOne = PageWrapper;
 
 const MainSection = styled.div`
   flex: 1;
@@ -63,17 +55,7 @@ const AddCard = styled.button`
   }
 `;
 
-const SidebarBox = styled.div`
-  width: 280px;
-  background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 32px 0 20px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-`;
+const SidebarBox = SidebarContainer;
 
 const ProfileSection = styled.div`
   display: flex;
@@ -184,7 +166,7 @@ const GuardianPage = () => {
 
   return (
     <>
-      <PageWrapper>
+      <PageWrapperOne>
         <SidebarBox>
           <ProfileSection>
             {userinfo?.profileImageUrl ? (
@@ -317,7 +299,7 @@ const GuardianPage = () => {
             </button>
           </div>
         </ReusableModal>
-      </PageWrapper>
+      </PageWrapperOne>
     </>
   );
 };

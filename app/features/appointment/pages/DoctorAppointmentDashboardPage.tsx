@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import DatePickerSection from '~/features/appointment/components/update/DatePickerSection';
 import AppointmentDashboard from '~/features/appointment/components/list/AppointmentDashboard';
-import AppointmentUpdateModal from '~/features/appointment/components/update/UpdateModal';
+import DoctorAppointmentDetailModal from '~/features/appointment/components/detail/DoctorAppointmentDetailModal';
 
 const DoctorAppointmentDashboardPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -30,7 +30,7 @@ const DoctorAppointmentDashboardPage = () => {
         />
 
         {selectedAppointmentId && (
-          <AppointmentUpdateModal
+          <DoctorAppointmentDetailModal
             appointmentId={selectedAppointmentId}
             isOpen={!!selectedAppointmentId}
             onClose={handleCloseModal}

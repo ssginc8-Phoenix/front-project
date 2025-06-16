@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import type { Hospital } from '../../../types/hospital';
+import type { HospitalSchedule } from '~/features/hospitals/types/hospitalSchedule';
+import { calculateDistance } from '~/features/hospitals/hooks/useDistanceTo';
+import { useCurrentLocation } from '~/features/hospitals/hooks/useCurrentLocation';
 
 interface HospitalListProps {
   hospitals: Hospital[];
@@ -74,16 +77,6 @@ const Row = styled.div`
   color: #555;
 `;
 
-const KeywordButton = styled.button`
-  background: #e8f0ff;
-  color: #00499e;
-  border: none;
-  padding: 0.3rem 0.7rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  cursor: default;
-`;
-
 const Pagination = styled.div`
   display: flex;
   justify-content: center;
@@ -111,8 +104,21 @@ const HospitalList: React.FC<HospitalListProps> = ({
 }) => {
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 3;
-  const totalPages = Math.ceil(hospitals.length / ITEMS_PER_PAGE);
+  const { currentLocation } = useCurrentLocation(); // ✅ 위치 한 번만 가져옴
 
+  const dayOfWeekMap: Record<number, string> = {
+    0: 'SUNDAY',
+    1: 'MONDAY',
+    2: 'TUESDAY',
+    3: 'WEDNESDAY',
+    4: 'THURSDAY',
+    5: 'FRIDAY',
+    6: 'SATURDAY',
+  };
+
+  const formatTime = (timeStr: string) => timeStr?.slice(0, 5);
+  const todayKey = dayOfWeekMap[new Date().getDay()];
+  const totalPages = Math.ceil(hospitals.length / ITEMS_PER_PAGE);
   const paginatedHospitals = hospitals.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   if (loading) return <div>로딩 중...</div>;
@@ -121,33 +127,49 @@ const HospitalList: React.FC<HospitalListProps> = ({
   return (
     <Wrapper>
       <List>
-        {paginatedHospitals.map((hospital) => (
-          <Card
-            key={hospital.hospitalId}
-            selected={hospital.hospitalId === selectedHospitalId}
-            onClick={() =>
-              onHospitalSelect(hospital.hospitalId, hospital.latitude, hospital.longitude)
-            }
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                onHospitalSelect(hospital.hospitalId, hospital.latitude, hospital.longitude);
+        {paginatedHospitals.map((hospital) => {
+          const todaySchedule = hospital.schedules?.find(
+            (s: HospitalSchedule) => s.dayOfWeek === todayKey,
+          );
+          const sch = todaySchedule
+            ? `${formatTime(todaySchedule.openTime)} ~ ${formatTime(todaySchedule.closeTime)}`
+            : '진료시간 정보 없음';
+
+          const distance =
+            currentLocation && hospital.latitude && hospital.longitude
+              ? calculateDistance(
+                  currentLocation.latitude,
+                  currentLocation.longitude,
+                  Number(hospital.latitude),
+                  Number(hospital.longitude),
+                )
+              : null;
+
+          return (
+            <Card
+              key={hospital.hospitalId}
+              selected={hospital.hospitalId === selectedHospitalId}
+              onClick={() =>
+                onHospitalSelect(hospital.hospitalId, hospital.latitude, hospital.longitude)
               }
-            }}
-          >
-            <Header>
-              <HospitalName>{hospital.hospitalName}</HospitalName>
-              <Tag>대기 {hospital.waiting ?? 0}명</Tag>
-            </Header>
-            <Row>🕒 {hospital.schedules ?? '진료시간 정보 없음'}</Row>
-            <Row>📍 {hospital.distance ?? '거리 정보 없음'}</Row>
-            <Row>📌 {hospital.address}</Row>
-            <Row>
-              {hospital.keywords?.map((kw, idx) => <KeywordButton key={idx}>{kw}</KeywordButton>)}
-            </Row>
-          </Card>
-        ))}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  onHospitalSelect(hospital.hospitalId, hospital.latitude, hospital.longitude);
+                }
+              }}
+            >
+              <Header>
+                <HospitalName>{hospital.name}</HospitalName>
+                <Tag>대기 {hospital.waiting ?? 0}명</Tag>
+              </Header>
+              <Row>🕒 {sch}</Row>
+              {distance !== null && <Row>📍 거리: {distance.toFixed(2)} km</Row>}
+              <Row>📌 {hospital.address}</Row>
+            </Card>
+          );
+        })}
       </List>
       <Pagination>
         {Array.from({ length: totalPages }, (_, i) => (

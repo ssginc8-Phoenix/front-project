@@ -18,6 +18,7 @@ export interface Hospital {
   serviceNames: string[];
   notice: string;
   introduction: string;
+  fileId?: number;
 }
 
 export interface HospitalPage {
@@ -40,8 +41,8 @@ export interface CreateHospitalRequest {
   introduction: string;
   notice: string;
   businessRegistrationNumber: string;
-  serviceName: string[]; // ex: ["주차 가능", "야간 진료"]
-  fileId?: number;
+  serviceNames: string[]; // ex: ["주차 가능", "야간 진료"]
+  file?: File;
 }
 
 export type DayOfWeek =

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { updateDoctorCapacity, getMyDoctorInfo } from '~/features/doctor/api/doctorAPI';
+import { getMyDoctorInfo } from '~/features/doctor/api/doctorAPI';
 
 const Form = styled.form`
   max-width: 48rem;
@@ -49,22 +49,8 @@ export const specializationLabelMap: Record<string, string> = {
   INTERNAL_MEDICINE: '내과',
 };
 
-const Button = styled.button`
-  background: linear-gradient(to right, #4f46e5, #4338ca);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.375rem;
-  font-weight: 600;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border: none;
-  cursor: pointer;
-  &:hover {
-    background: linear-gradient(to right, #4338ca, #312e81);
-  }
-`;
-
 const DoctorInfoForm: React.FC = () => {
-  const [doctorId, setDoctorId] = useState<number | null>(null);
+  const [, setDoctorId] = useState<number | null>(null);
   const [form, setForm] = useState({
     hospitalName: '',
     hospitalAddress: '',
@@ -81,8 +67,8 @@ const DoctorInfoForm: React.FC = () => {
         setDoctorId(data.doctorId);
         setForm({
           hospitalName: data.hospitalName || '',
-          hospitalAddress: data.hospitalAddress || '',
-          doctorName: data.username || '',
+          hospitalAddress: data.address || '',
+          doctorName: data.name || '',
           specialty: data.specialization || '',
           capacityPerHalfHour: data.capacityPerHalfHour?.toString() || '',
         });
@@ -97,20 +83,8 @@ const DoctorInfoForm: React.FC = () => {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!doctorId) return;
-    try {
-      await updateDoctorCapacity(doctorId, Number(form.capacityPerHalfHour));
-      alert('진료 가능 인원 수가 수정되었습니다.');
-    } catch (err) {
-      console.error(err);
-      alert('저장 중 오류가 발생했습니다.');
-    }
-  };
-
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form>
       <FieldWrapper>
         <Label>소속 병원</Label>
         <Input value={form.hospitalName} disabled />
@@ -127,16 +101,6 @@ const DoctorInfoForm: React.FC = () => {
         <Label>전공</Label>
         <Input value={specializationLabelMap[form.specialty] || form.specialty} disabled />
       </FieldWrapper>
-      <FieldWrapper>
-        <Label>30분당 진료 가능 인원 수</Label>
-        <Input
-          type="number"
-          value={form.capacityPerHalfHour}
-          onChange={handleChange('capacityPerHalfHour')}
-          placeholder="예: 5"
-        />
-      </FieldWrapper>
-      <Button type="submit">진료 인원 수정</Button>
     </Form>
   );
 };

@@ -153,7 +153,6 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
       )}
 
       <ButtonGroup>
-        <ActionButton>📹 비대면 진료 접수</ActionButton>
         <ActionButton>🏥 대면 진료 접수</ActionButton>
       </ButtonGroup>
     </Container>

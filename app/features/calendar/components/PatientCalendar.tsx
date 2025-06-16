@@ -11,7 +11,6 @@ const Wrapper = styled.div`
   gap: 1.5rem;
   padding: 2rem;
   font-family: 'Segoe UI', sans-serif;
-  background-color: #f7f9fc;
   min-height: 100vh;
 `;
 
@@ -56,7 +55,7 @@ const CalendarWrapper = styled.div`
     border-radius: 12px;
     padding: 0.75rem 0.5rem;
     transition: background 0.2s ease;
-    min-height: 100px; /* <-- 일정한 높이 지정 */
+    min-height: 100px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -147,7 +146,10 @@ export default function PatientCalendar() {
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
 
-    const dateStr = date.toISOString().split('T')[0];
+    const kstOffsetMs = 9 * 60 * 60 * 1000;
+    const localDate = new Date(date.getTime() + kstOffsetMs);
+    const dateStr = localDate.toISOString().split('T')[0];
+
     const items = calendarData[dateStr];
     if (!items || items.length === 0) return null;
 

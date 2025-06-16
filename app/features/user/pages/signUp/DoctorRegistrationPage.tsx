@@ -9,21 +9,27 @@ import Header from '~/layout/Header';
 import { createDoctor } from '~/features/doctor/api/doctorAPI';
 import useHospitalStore from '~/features/hospitals/state/hospitalStore';
 
+const PageBackground = styled.div`
+  background: linear-gradient(to bottom right, #f0f4f8, #ffffff);
+  min-height: 100vh;
+  padding: 4rem 1rem;
+`;
+
 const Wrapper = styled.div`
-  max-width: 600px;
-  margin: 60px auto;
-  padding: 2rem;
+  max-width: 720px;
+  margin: 5rem auto;
+  padding: 3rem;
   background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 1rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.06);
 `;
 
 const Title = styled.h1`
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 2rem;
+  color: #111827;
+  margin-bottom: 2.5rem;
 `;
 
 const Button = styled.button`
@@ -59,6 +65,16 @@ const DoctorRegistrationPage = () => {
   >([{ success: false, message: '' }]);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+
+  const [phoneValidList, setPhoneValidList] = useState<boolean[]>([]);
+
+  const handlePhoneValidChange = (index: number, isValid: boolean) => {
+    setPhoneValidList((prev) => {
+      const copy = [...prev];
+      copy[index] = isValid;
+      return copy;
+    });
+  };
 
   const handleRemove = (index: number) => {
     if (doctors.length === 1) return;
@@ -120,45 +136,56 @@ const DoctorRegistrationPage = () => {
       console.error(err);
       alert('의사 등록 중 오류 발생');
     }
+    const allValid = phoneValidList.every((valid) => valid);
+
+    if (!allValid) {
+      return;
+    }
+
+    await submitDoctorsInfo({ doctorInfos: doctors });
+    setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    navigate('/');
+    navigate('/login');
   };
 
   return (
     <>
-      <Header></Header>
-      <Wrapper>
-        <Title>의사 등록</Title>
-        {doctors.map((doctor, index) => (
-          <DoctorForm
-            key={index}
-            doctor={doctor}
-            index={index}
-            onRemove={handleRemove}
-            onChange={handleChange}
-            onCheckEmail={handleCheckEmail}
-            emailCheckSuccess={emailCheckResults[index]?.success}
-            emailCheckMessage={emailCheckResults[index]?.message}
-          />
-        ))}
-        <AddButton type="button" onClick={handleAddDoctor}>
-          의사 추가
-        </AddButton>
-        <Button type="button" onClick={handleSubmit}>
-          등록하기
-        </Button>
+      <PageBackground>
+        <Header></Header>
+        <Wrapper>
+          <Title>의사 등록</Title>
+          {doctors.map((doctor, index) => (
+            <DoctorForm
+              key={index}
+              doctor={doctor}
+              index={index}
+              onChange={handleChange}
+              onCheckEmail={handleCheckEmail}
+              onRemove={handleRemove}
+              onPhoneValidChange={handlePhoneValidChange}
+              emailCheckMessage={emailCheckResults[index]?.message}
+              emailCheckSuccess={emailCheckResults[index]?.success}
+            />
+          ))}
+          <AddButton type="button" onClick={handleAddDoctor}>
+            의사 추가
+          </AddButton>
+          <Button type="button" onClick={handleSubmit}>
+            등록하기
+          </Button>
 
-        {showModal && (
-          <CommonModal
-            title="의사 등록이 완료되었습니다."
-            buttonText="확인"
-            onClose={handleCloseModal}
-          />
-        )}
-      </Wrapper>
+          {showModal && (
+            <CommonModal
+              title="의사 등록이 완료되었습니다."
+              buttonText="확인"
+              onClose={handleCloseModal}
+            />
+          )}
+        </Wrapper>
+      </PageBackground>
     </>
   );
 };

@@ -1,109 +1,120 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router';
 import styled from 'styled-components';
 
 import { useReviewList } from '~/features/reviews/hooks/useReviewList';
 import * as reviewAPI from '~/features/reviews/api/reviewAPI';
+import { getAppointment } from '~/features/appointment/api/appointmentAPI';
+import type { Appointment } from '~/types/appointment';
+
 import { ReviewMyListComponent } from '~/features/reviews/component/ReviewMyList';
+import ReviewCreateModal from '~/features/reviews/component/modal/ReviewCreateModal';
 import { ReviewEditModal } from '~/features/reviews/component/modal/ReviewEditModal';
 import { ReviewDeleteModal } from '~/features/reviews/component/modal/ReviewDeleteModal';
+
 import { AlertModal } from '~/features/reviews/component/common/AlertModal';
 
 import type { ReviewMyListResponse } from '~/features/reviews/types/review';
-import { GOOD_OPTIONS, BAD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
 import useLoginStore from '~/features/user/stores/LoginStore';
-import ReviewCreateModal from '~/features/reviews/component/modal/ReviewCreateModal';
+import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
+import { ReviewDetailModal } from '~/features/reviews/component/modal/ReviewDetailModal';
+
+type LocationState = { appointmentId: number };
 
 export default function ReviewMyListPage() {
-  // 1) 로그인된 유저 체크
-  const user = useLoginStore((state) => state.user);
+  const { state } = useLocation();
+  const { appointmentId } = (state as LocationState) || { appointmentId: 0 };
+
+  const user = useLoginStore((s) => s.user);
   if (!user) return <p>로그인 후 이용해주세요.</p>;
 
-  // 2) 페이징 상태
   const [page, setPage] = useState(0);
-  const { reviews, totalPages, loading, error } = useReviewList(page, 10);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const { reviews, totalPages, loading, error } = useReviewList(page, 5, refreshTrigger);
 
-  // 3) 리뷰 작성 모달 상태
+  const [appointment, setAppointment] = useState<Appointment | null>(null);
+  useEffect(() => {
+    if (appointmentId) getAppointment(appointmentId).then(setAppointment);
+  }, [appointmentId]);
+
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [createDone, setCreateDone] = useState(false);
 
-  // 4) 수정 모달 상태
-  const [isEditOpen, setEditOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<ReviewMyListResponse | null>(null);
+  const [isDetailOpen, setDetailOpen] = useState(false);
+  const [isEditOpen, setEditOpen] = useState(false);
   const [editDone, setEditDone] = useState(false);
 
-  // 5) 삭제 모달 상태
   const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [deleteDone, setDeleteDone] = useState(false);
 
-  // — 이벤트 핸들러들 —
-
-  // 리뷰 작성 버튼 클릭
-  const openCreate = () => setCreateOpen(true);
   const handleCreateDone = () => {
     setCreateOpen(false);
     setCreateDone(true);
-    setPage((p) => p); // 목록 다시 불러오기
+    setPage(0);
+    setRefreshTrigger((t) => t + 1);
   };
 
-  // 리뷰 수정 오픈
-  const openEdit = (review: ReviewMyListResponse) => {
-    setSelectedReview(review);
+  const openDetail = (r: ReviewMyListResponse) => {
+    setSelectedReview(r);
+    setDetailOpen(true);
+  };
+
+  const openEdit = (r: ReviewMyListResponse) => {
+    setSelectedReview(r);
     setEditOpen(true);
   };
   const handleEditDone = () => {
     setEditOpen(false);
     setEditDone(true);
-    setPage((p) => p);
+    setRefreshTrigger((t) => t + 1);
   };
 
-  // 리뷰 삭제 확정
-  const confirmDelete = async () => {
+  const openDelete = (r: ReviewMyListResponse) => {
+    setSelectedReview(r);
+    setDeleteOpen(true);
+  };
+  const handleDeleteConfirm = async () => {
     if (!selectedReview) return;
     await reviewAPI.deleteReview(selectedReview.reviewId);
     setDeleteOpen(false);
     setDeleteDone(true);
-    setPage((p) => p);
+    setRefreshTrigger((t) => t + 1);
   };
 
   return (
     <PageWrapper>
       <Header>
-        <Title>✏️ 리뷰 관리</Title>
-        <CreateButton onClick={openCreate}>리뷰 작성</CreateButton>
+        <Title>✏️ 나의 리뷰 관리</Title>
       </Header>
       <Divider />
 
-      {loading && <p>로딩 중…</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {loading && <InfoText>로딩 중…</InfoText>}
+      {error && <ErrorText>{error}</ErrorText>}
 
       {!loading && !error && (
         <ReviewMyListComponent
           reviews={reviews}
           currentPage={page}
           totalPages={totalPages}
-          loading={loading}
-          error={error}
           onPageChange={setPage}
+          onDetailReview={openDetail}
           onEditReview={openEdit}
-          onDeleteReview={(review) => {
-            setSelectedReview(review);
-            setDeleteOpen(true);
-          }}
+          onDeleteReview={openDelete}
         />
       )}
 
-      {/* — 리뷰 작성 모달 — */}
-      {isCreateOpen && (
+      {isCreateOpen && appointment && (
         <ReviewCreateModal
           isOpen={isCreateOpen}
           onClose={() => setCreateOpen(false)}
           onSaved={handleCreateDone}
-          hospitalId={123}
-          doctorId={456}
-          appointmentId={789}
-          userId={Number(user.userId)}
-          hospitalName={'바른이비인후과'}
-          doctorName={'김의사'}
+          appointmentId={appointment.appointmentId}
+          userId={user.userId}
+          hospitalId={appointment.hospitalId}
+          doctorId={appointment.doctorId}
+          hospitalName={appointment.hospitalName}
+          doctorName={appointment.doctorName}
         />
       )}
       <AlertModal
@@ -112,8 +123,15 @@ export default function ReviewMyListPage() {
         message="리뷰가 작성되었습니다!"
       />
 
-      {/* — 리뷰 수정 모달 — */}
-      {selectedReview && isEditOpen && (
+      {selectedReview && (
+        <ReviewDetailModal
+          isOpen={isDetailOpen}
+          onClose={() => setDetailOpen(false)}
+          review={selectedReview}
+        />
+      )}
+
+      {selectedReview && (
         <ReviewEditModal
           isOpen={isEditOpen}
           onClose={() => setEditOpen(false)}
@@ -133,15 +151,14 @@ export default function ReviewMyListPage() {
       <AlertModal
         isOpen={editDone}
         onClose={() => setEditDone(false)}
-        message="수정이 완료되었습니다!"
+        message="리뷰가 수정되었습니다!"
       />
 
-      {/* — 리뷰 삭제 모달 — */}
       {selectedReview && (
         <ReviewDeleteModal
           isOpen={isDeleteOpen}
           onClose={() => setDeleteOpen(false)}
-          onConfirm={confirmDelete}
+          onConfirm={handleDeleteConfirm}
         />
       )}
       <AlertModal
@@ -158,13 +175,11 @@ const PageWrapper = styled.div`
   margin: 0 auto;
   padding: 2rem 1rem;
 `;
-
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
 `;
-
 export const Title = styled.h1`
   font-size: 1.5rem;
   font-weight: bold;
@@ -173,21 +188,16 @@ export const Title = styled.h1`
   text-align: center;
   width: 100%;
 `;
-const CreateButton = styled.button`
-  padding: 0.5rem 1rem;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  &:hover {
-    background-color: #1d4ed8;
-  }
-`;
-
 const Divider = styled.hr`
   border: none;
   height: 1px;
   background-color: #e5e7eb;
   margin: 1rem 0;
+`;
+const InfoText = styled.p`
+  text-align: center;
+`;
+const ErrorText = styled.p`
+  text-align: center;
+  color: red;
 `;

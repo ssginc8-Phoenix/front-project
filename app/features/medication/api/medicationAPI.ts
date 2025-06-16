@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { MedicationScheduleResponse } from '~/features/medication/types/types';
 
 const HOST = 'http://localhost:8080/api/v1';
 
@@ -13,6 +14,16 @@ export const postMedicationSchedule = async (data: {
   days: string[]; // ["MONDAY", "WEDNESDAY"]
 }) => {
   const res = await axios.post(`${HOST}/medications`, data, {
+    withCredentials: true,
+  });
+  return res.data;
+};
+
+/**
+ * 특정 복약 스케줄 단건 조회
+ */
+export const getMedicationSchedule = async (medicationId: number) => {
+  const res = await axios.get<MedicationScheduleResponse>(`${HOST}/medications/${medicationId}`, {
     withCredentials: true,
   });
   return res.data;

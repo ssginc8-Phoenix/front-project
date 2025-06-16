@@ -5,7 +5,6 @@ import { hospitalSidebarItems } from '~/features/hospitals/components/constants/
 import HospitalChart from '~/features/hospitals/components/hospitalAdmin/chart/HospitalChart';
 import ReviewPolarityChart from '~/features/hospitals/components/hospitalAdmin/chart/ReviewPolarityChart';
 import UserRatioChart from '~/features/hospitals/components/hospitalAdmin/chart/UserRatioChart';
-import HospitalRegisterForm from '~/features/hospitals/components/hospitalAdmin/info/HospitalRegisterForm';
 import { useMyHospitalId } from '~/features/hospitals/hooks/useMyHospitalId';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { Card } from '~/features/hospitals/components/hospitalAdmin/ui/card';
@@ -17,7 +16,6 @@ const PageWrapper = styled.div`
   padding: 40px 20px; // <-- 통일
   display: flex;
   gap: 48px;
-  background-color: #f8f9fa;
   min-height: 100vh;
 `;
 

@@ -50,6 +50,8 @@ export default function App() {
 
   // 서비스 워커 등록 (클라이언트 환경에서만 실행)
   useEffect(() => {
+    document.title = 'DocTo';
+
     // 클라이언트 환경인지 확인
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker

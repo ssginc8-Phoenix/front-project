@@ -7,6 +7,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { getMyInfo } from '~/features/user/api/UserAPI';
 
+
 const ads = ['/ads/ad1.png', '/ads/ad2.png', '/ads/ad3.png'];
 
 const features = [

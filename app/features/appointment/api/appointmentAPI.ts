@@ -75,7 +75,7 @@ export const changeStatus = async (appointmentId: number, status: string) => {
  * 예약 취소
  */
 export const cancelAppointment = async (appointmentId: number) => {
-  const res = await axios.patch(`${HOST}/${appointmentId}/cancel`, {
+  const res = await axios.patch(`${HOST}/${appointmentId}/cancel`, null, {
     withCredentials: true,
   });
 

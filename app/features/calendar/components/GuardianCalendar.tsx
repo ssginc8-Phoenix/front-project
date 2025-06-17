@@ -1,12 +1,15 @@
+// GuardianCalendar.tsx
 import { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import styled from 'styled-components';
 import { getGuardianCalendar } from '~/features/calendar/api/CalendarAPI';
+import { getMedicationSchedule } from '~/features/medication/api/medicationAPI';
 import CommonModal from '~/components/common/CommonModal';
 import MedicationRegisterModal from '~/features/medication/components/MedicationRegisterModal';
 import { getMyGuardianInfo } from '~/features/guardian/api/guardianAPI';
 import { deleteMedicationSchedule } from '~/features/medication/api/medicationAPI';
+import { Overlay } from '~/features/hospitals/components/waiting/WaitingModal';
 
 const PageContainer = styled.div`
   display: flex;
@@ -165,36 +168,34 @@ export default function GuardianCalendar() {
   const [guardianUserId, setGuardianUserId] = useState<number | null>(null);
 
   const getLocalDateString = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   };
 
   const fetchData = async (date: Date = activeDate) => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const res = await getGuardianCalendar(year, month);
+    const res = await getGuardianCalendar(date.getFullYear(), date.getMonth() + 1);
     setFullList(res.calendarItemLists);
+    const names = res.calendarItemLists
+      .filter((it: any) => it.name)
+      .map((it: any) => ({ name: it.name, patientGuardianId: it.patientGuardianId }));
+    setPatientList(names);
 
-    const namesAndIds = res.calendarItemLists
-      .filter(
-        (item: { name: string; patientGuardianId: number }) => item.name && item.patientGuardianId,
-      )
-      .map((item: { name: string; patientGuardianId: number }) => ({
-        name: item.name,
-        patientGuardianId: item.patientGuardianId,
-      }));
-    setPatientList(namesAndIds);
-
-    if (namesAndIds.length === 1) {
-      setSelectedName(namesAndIds[0].name);
-      setSelectedPatient(namesAndIds[0]);
-      updateCalendarData(res.calendarItemLists, namesAndIds[0].name);
+    if (names.length === 1) {
+      setSelectedName(names[0].name);
+      setSelectedPatient(names[0]);
+      updateCalendarData(res.calendarItemLists, names[0].name);
     } else {
       updateCalendarData(res.calendarItemLists, selectedName);
     }
   };
+
+  useEffect(() => {
+    getMyGuardianInfo()
+      .then((info) => setGuardianUserId(info.userId))
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     fetchData(activeDate);
@@ -203,9 +204,9 @@ export default function GuardianCalendar() {
   const updateCalendarData = (lists: any[], name: string) => {
     const flat = lists.flatMap(({ name: pname, calendarItems }: any) =>
       name === '전체'
-        ? calendarItems.map((item: any) => ({ ...item, name: pname }))
+        ? calendarItems.map((i: any) => ({ ...i, name: pname }))
         : pname === name
-          ? calendarItems.map((item: any) => ({ ...item, name: pname }))
+          ? calendarItems.map((i: any) => ({ ...i, name: pname }))
           : [],
     );
     const grouped = flat.reduce((acc: Record<string, any[]>, item: any) => {
@@ -215,24 +216,35 @@ export default function GuardianCalendar() {
     setCalendarData(grouped);
   };
 
+  // 상세 모달 열기 전에 times 정보를 백엔드에서 가져옵니다.
+  const openDetail = async (item: any) => {
+    if (item.itemType === 'MEDICATION') {
+      try {
+        const detail = await getMedicationSchedule(item.relatedId);
+        setSelectedItem({ ...item, ...detail });
+      } catch {
+        alert('상세 정보를 불러오는 데 실패했습니다.');
+        return;
+      }
+    } else {
+      setSelectedItem(item);
+    }
+    setItemDetailOpen(true);
+  };
+
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
-
-    const dateStr = getLocalDateString(date);
-
-    // 📌 날짜 범위에 따라 복약 일정 필터링
-    const items = (calendarData[dateStr] || []).filter((item: CalendarItem) => {
-      if (item.itemType === 'MEDICATION') {
-        if (item.startDate && new Date(dateStr) < new Date(item.startDate)) return false;
-        if (item.endDate && new Date(dateStr) > new Date(item.endDate)) return false;
+    const ds = getLocalDateString(date);
+    const items = (calendarData[ds] || []).filter((it: any) => {
+      if (it.itemType === 'MEDICATION') {
+        if (it.startDate && new Date(ds) < new Date(it.startDate)) return false;
+        if (it.endDate && new Date(ds) > new Date(it.endDate)) return false;
       }
       return true;
     });
-
     if (!items.length) return null;
 
-    // MEDICATION 우선 정렬
-    items.sort((a, b) => {
+    items.sort((a: any, b: any) => {
       if (a.itemType === 'MEDICATION' && b.itemType !== 'MEDICATION') return -1;
       if (a.itemType !== 'MEDICATION' && b.itemType === 'MEDICATION') return 1;
       return 0;
@@ -242,12 +254,11 @@ export default function GuardianCalendar() {
       <div className="calendar-day-wrapper">
         {items.slice(0, 3).map((item, idx) => (
           <div
-            key={`${dateStr}-${idx}`}
+            key={`${ds}-${idx}`}
             className={`calendar-event ${item.itemType === 'MEDICATION' ? 'medication' : 'appointment'}`}
             onClick={(e) => {
               e.stopPropagation();
-              setSelectedItem(item);
-              setItemDetailOpen(true);
+              openDetail(item);
             }}
             style={{ cursor: 'pointer' }}
           >
@@ -260,7 +271,7 @@ export default function GuardianCalendar() {
             onClick={(e) => {
               e.stopPropagation();
               setModalItems(items);
-              setModalDate(dateStr);
+              setModalDate(ds);
               setModalOpen(true);
             }}
           >
@@ -314,10 +325,12 @@ export default function GuardianCalendar() {
 
         <AddMedicationButton
           onClick={() => {
-            if (!selectedPatient || guardianUserId === null) {
-              alert('환자와 보호자 정보를 확인해주세요.');
+            if (!selectedPatient) {
+              alert('환자 정보를 확인해주세요.');
               return;
             }
+            // ❗ 기존 선택 항목 초기화
+            setSelectedItem(null);
             setRegisterModalOpen(true);
           }}
         >
@@ -330,11 +343,10 @@ export default function GuardianCalendar() {
             onChange={(date) => {
               if (date instanceof Date) {
                 setSelectedDate(date);
-                const dateStr = getLocalDateString(date);
-                const items = calendarData[dateStr];
-                if (items?.length) {
-                  setModalItems(items);
-                  setModalDate(dateStr);
+                const ds = getLocalDateString(date);
+                if (calendarData[ds]?.length) {
+                  setModalItems(calendarData[ds]);
+                  setModalDate(ds);
                   setModalOpen(true);
                 }
               }
@@ -347,40 +359,36 @@ export default function GuardianCalendar() {
           />
         </CalendarWrapper>
 
-        {/* 모달 렌더링 로직은 기존 그대로 */}
+        {/* 등록/수정 모달 */}
         {registerModalOpen && selectedPatient && guardianUserId !== null && (
-          <CommonModal
-            title={selectedItem ? '약 수정' : '약 등록'}
-            buttonText=""
-            onClose={() => {
-              setRegisterModalOpen(false);
-              setSelectedItem(null);
-            }}
-          >
-            <MedicationRegisterModal
-              date={selectedDate.toISOString().split('T')[0]}
-              patientGuardianId={selectedPatient.patientGuardianId}
-              initialData={
-                selectedItem?.itemType === 'MEDICATION'
-                  ? {
-                      medicationId: selectedItem.relatedId,
-                      medicationName: selectedItem.title,
-                      timeToTake: selectedItem.time,
-                      days: selectedItem.days || [],
-                      startDate: selectedItem.startDate,
-                      endDate: selectedItem.endDate,
-                    }
-                  : undefined
-              }
-              onClose={async () => {
-                await fetchData();
-                setRegisterModalOpen(false);
-                setSelectedItem(null);
-              }}
-            />
-          </CommonModal>
+          <Overlay onClick={() => setRegisterModalOpen(false)}>
+            <div onClick={(e) => e.stopPropagation()}>
+              <MedicationRegisterModal
+                date={selectedDate.toISOString().slice(0, 10)}
+                patientGuardianId={selectedPatient.patientGuardianId}
+                initialData={
+                  selectedItem?.itemType === 'MEDICATION'
+                    ? {
+                        medicationId: selectedItem.relatedId,
+                        medicationName: selectedItem.title,
+                        days: selectedItem.days,
+                        startDate: selectedItem.startDate!,
+                        endDate: selectedItem.endDate!,
+                        times: selectedItem.times,
+                      }
+                    : undefined
+                }
+                onClose={async () => {
+                  await fetchData();
+                  setRegisterModalOpen(false);
+                  setSelectedItem(null);
+                }}
+              />
+            </div>
+          </Overlay>
         )}
 
+        {/* 날짜별 리스트 모달 */}
         {modalOpen && (
           <CommonModal
             title={`${modalDate} 일정`}
@@ -392,8 +400,8 @@ export default function GuardianCalendar() {
                 <li
                   key={`${modalDate}-${idx}`}
                   onClick={() => {
-                    setSelectedItem(item);
-                    setItemDetailOpen(true);
+                    setModalOpen(false);
+                    openDetail(item);
                   }}
                   style={{
                     marginBottom: '0.5rem',
@@ -411,6 +419,7 @@ export default function GuardianCalendar() {
           </CommonModal>
         )}
 
+        {/* 상세정보 모달 */}
         {itemDetailOpen && selectedItem && (
           <CommonModal
             title={`${selectedItem.date} 상세정보`}
@@ -418,74 +427,119 @@ export default function GuardianCalendar() {
             onClose={() => setItemDetailOpen(false)}
           >
             <div style={{ textAlign: 'left', lineHeight: 1.6 }}>
-              <p>
-                <strong>환자:</strong> {selectedItem.name}
-              </p>
-              <p>
-                <strong>종류:</strong>{' '}
-                {selectedItem.itemType === 'MEDICATION' ? '약 복용' : '일반진료'}
-              </p>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  alignItems: 'center',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <span
+                  style={{
+                    border: '2px solid #7dd3fc',
+                    backgroundColor: '#e0f2fe',
+                    color: '#0369a1',
+                    padding: '2px 10px',
+                    borderRadius: '12px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  {selectedItem.name}
+                </span>
+                <span
+                  style={{
+                    border: '2px solid #000',
+                    backgroundColor: '#003458',
+                    padding: '2px 10px',
+                    color: '#ECEAE4',
+                    borderRadius: '12px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  {selectedItem.itemType === 'MEDICATION' ? '약 복용' : '일반진료'}
+                </span>
+              </div>
+
               <p>
                 <strong>제목:</strong> {selectedItem.title}
               </p>
-              <p>
-                <strong>시간:</strong> {selectedItem.time}
-              </p>
+
+              {/* 아침 : 점심 : 저녁 요약 */}
+              {selectedItem.itemType === 'MEDICATION' && (
+                <p>
+                  <strong>시간:</strong>{' '}
+                  {['morning', 'lunch', 'dinner'].map((m, i) => {
+                    const e = selectedItem.times?.find((t: any) => t.meal === m);
+                    const lb = m === 'morning' ? '아침' : m === 'lunch' ? '점심' : '저녁';
+                    const ts = e ? e.time.slice(0, 5) : '--:--';
+                    return (
+                      <span key={`${m}-${i}`}>
+                        {lb} {ts}
+                        {i < 2 ? ' : ' : ''}
+                      </span>
+                    );
+                  })}
+                </p>
+              )}
+
+              {/* 복용 시작/종료일 */}
               {selectedItem.itemType === 'MEDICATION' && (
                 <>
                   <p>
-                    <strong>시작일:</strong> {selectedItem.startDate}
+                    <strong>복용 시작일:</strong> {selectedItem.startDate}
                   </p>
                   <p>
-                    <strong>종료일:</strong> {selectedItem.endDate}
+                    <strong>복용 종료일:</strong> {selectedItem.endDate}
                   </p>
-                  <div
+                </>
+              )}
+
+              {/* 수정/삭제 버튼 */}
+              {selectedItem.itemType === 'MEDICATION' && (
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    justifyContent: 'flex-end',
+                    marginTop: '1rem',
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setItemDetailOpen(false);
+                      setRegisterModalOpen(true);
+                    }}
                     style={{
-                      display: 'flex',
-                      gap: '1rem',
-                      marginTop: '1rem',
-                      justifyContent: 'flex-end',
+                      background: '#e0e7ff',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '8px',
+                      border: 'none',
                     }}
                   >
-                    <button
-                      onClick={() => {
+                    수정
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (window.confirm('정말 삭제하시겠습니까?')) {
+                        await deleteMedicationSchedule(selectedItem.relatedId);
                         setItemDetailOpen(false);
-                        setRegisterModalOpen(true);
-                      }}
-                      style={{
-                        background: '#e0e7ff',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '8px',
-                        border: 'none',
-                      }}
-                    >
-                      수정
-                    </button>
-                    <button
-                      onClick={async () => {
-                        if (window.confirm('정말 삭제하시겠습니까?')) {
-                          try {
-                            await deleteMedicationSchedule(selectedItem.relatedId);
-                            alert('삭제되었습니다.');
-                            setItemDetailOpen(false);
-                            await fetchData();
-                          } catch {
-                            alert('삭제에 실패했습니다.');
-                          }
-                        }
-                      }}
-                      style={{
-                        background: '#fee2e2',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '8px',
-                        border: 'none',
-                        color: '#b91c1c',
-                      }}
-                    >
-                      삭제
-                    </button>
-                  </div>
-                </>
+                        await fetchData();
+                      }
+                    }}
+                    style={{
+                      background: '#fee2e2',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '8px',
+                      border: 'none',
+                      color: '#b91c1c',
+                    }}
+                  >
+                    삭제
+                  </button>
+                </div>
               )}
             </div>
           </CommonModal>

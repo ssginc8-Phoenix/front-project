@@ -31,7 +31,6 @@ export const useHospitalDetail = (hospitalId: number) => {
         const schedules = scheduleRes.data;
         const doctors = doctorRes.data;
         const reviews = reviewRes.data;
-        console.log(hospitalRes.data);
         setData({ ...hospital, schedules });
         setDoctors(doctors);
         setReviews(reviews);

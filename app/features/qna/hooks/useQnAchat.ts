@@ -1,66 +1,118 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getQnADetail } from '~/features/qna/api/qnaAPI';
+import { getQnADetail, updateQaPostStatus } from '~/features/qna/api/qnaAPI';
 import {
   getCommentsByPost,
-  createComment as apiCreateComment,
+  createComment,
+  updateComment,
+  deleteComment,
 } from '~/features/qna/api/commentAPI';
 import type { QaPostResponse } from '~/types/qna';
 import type { CommentRequest, CommentResponse } from '~/types/comment';
 
-export function useQnAchat(qnaId: number) {
+export function useQnAchat(qnaId: number, onClose?: () => void) {
   const qc = useQueryClient();
   const [draft, setDraft] = useState('');
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  // 1) 질문 상세 조회
+  // 질문 상세
   const detailQuery = useQuery<QaPostResponse, Error>({
     queryKey: ['qnaDetail', qnaId],
     queryFn: () => getQnADetail(qnaId),
-    staleTime: 1000 * 60 * 5,
+    enabled: !!qnaId,
+    staleTime: 5 * 60 * 1000,
   });
 
-  // 2) 답변 목록 조회
+  // 댓글 목록
   const commentsQuery = useQuery<CommentResponse[], Error>({
     queryKey: ['qnaComments', qnaId],
-    queryFn: async () => {
-      const res = await getCommentsByPost(qnaId);
-      return res.data;
-    },
-    staleTime: 1000 * 60 * 2,
+    queryFn: () => getCommentsByPost(qnaId),
+    enabled: !!qnaId,
+    staleTime: 2 * 60 * 1000,
   });
 
-  // 3) 답변 등록
-  const createMutation = useMutation<CommentResponse, Error, CommentRequest>({
-    mutationFn: (payload) => apiCreateComment(qnaId, payload).then((res) => res.data),
+  // 댓글 등록
+  const createMut = useMutation<CommentResponse, Error, CommentRequest>({
+    mutationFn: (payload) => createComment(qnaId, payload),
+  });
+
+  // 댓글 수정
+  const updateMut = useMutation<
+    CommentResponse,
+    Error,
+    { commentId: number; payload: CommentRequest }
+  >({
+    mutationFn: ({ commentId, payload }) => updateComment(commentId, payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['qnaComments', qnaId] });
-      setDraft('');
+      commentsQuery.refetch();
     },
   });
 
-  // 4) 제출 핸들러
-  const submit = () => {
+  // 댓글 삭제
+  const deleteMut = useMutation<void, Error, number>({
+    mutationFn: (commentId) => deleteComment(commentId),
+    onSuccess: () => {
+      commentsQuery.refetch();
+    },
+  });
+
+  // 상태 변경
+  const statusMut = useMutation({
+    mutationFn: () => updateQaPostStatus(qnaId, 'COMPLETED'),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['doctorQnAs'] });
+      qc.invalidateQueries({ queryKey: ['myQnAs'] });
+      qc.invalidateQueries({ queryKey: ['qnaComments'] });
+      setDraft('');
+      setHasSubmitted(true);
+      if (onClose) onClose();
+    },
+  });
+
+  const submit = async () => {
     if (!draft.trim()) return;
-    createMutation.mutate({ content: draft });
+    try {
+      await createMut.mutateAsync({ content: draft });
+      await statusMut.mutateAsync();
+    } catch (err) {
+      console.error('답변 등록 실패:', err);
+    }
   };
 
+  const update = async (commentId: number, content: string) => {
+    try {
+      await updateMut.mutateAsync({ commentId, payload: { content } });
+    } catch (err) {
+      console.error('답변 수정 실패:', err);
+    }
+  };
+
+  const remove = async (commentId: number) => {
+    try {
+      await deleteMut.mutateAsync(commentId);
+    } catch (err) {
+      console.error('답변 삭제 실패:', err);
+    }
+  };
+
+  const isSubmitting = createMut.isPending || statusMut.isPending;
+
   return {
-    // 질문
     detail: detailQuery.data,
     isDetailLoading: detailQuery.isLoading,
     isDetailError: detailQuery.isError,
 
-    // 댓글
     comments: commentsQuery.data,
     isCommentsLoading: commentsQuery.isLoading,
     isCommentsError: commentsQuery.isError,
 
-    // 입력 폼
     draft,
     setDraft,
-
-    // 등록
     submit,
-    isSubmitting: createMutation,
+    update,
+    remove,
+    isSubmitting,
+    hasSubmitted,
+    refetchComments: commentsQuery.refetch,
   };
 }

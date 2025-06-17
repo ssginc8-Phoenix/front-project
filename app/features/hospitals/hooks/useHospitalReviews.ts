@@ -3,6 +3,7 @@ import axios from 'axios';
 import type { Review } from '../types/review';
 
 interface ReviewPage {
+  name: string;
   content: Review[];
   totalPages: number;
   number: number;

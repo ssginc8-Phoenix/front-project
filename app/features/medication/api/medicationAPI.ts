@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { MedicationScheduleResponse } from '~/features/medication/types/types';
 
 const HOST = 'http://localhost:8080/api/v1';
 
@@ -13,6 +14,16 @@ export const postMedicationSchedule = async (data: {
   days: string[]; // ["MONDAY", "WEDNESDAY"]
 }) => {
   const res = await axios.post(`${HOST}/medications`, data, {
+    withCredentials: true,
+  });
+  return res.data;
+};
+
+/**
+ * 특정 복약 스케줄 단건 조회
+ */
+export const getMedicationSchedule = async (medicationId: number) => {
+  const res = await axios.get<MedicationScheduleResponse>(`${HOST}/medications/${medicationId}`, {
     withCredentials: true,
   });
   return res.data;
@@ -56,9 +67,22 @@ export const completeMedication = async (medicationId: number, status: 'TAKEN' |
  */
 export const updateMedicationSchedule = async (
   medicationId: number,
-  data: { newTimeToTake: string; newDays: string[] },
+  data: {
+    newTimeToTake?: string;
+    newDays?: string[];
+    newStartDate?: string;
+    newEndDate?: string;
+  },
 ) => {
-  const res = await axios.patch(`${HOST}/medications/${medicationId}`, data, {
+  // body에 undefined 필드가 들어가지 않도록 필터링할 수도 있고,
+  // 백엔드가 nullable 허용하면 그대로 보내도 됩니다.
+  const payload: Record<string, any> = {};
+  if (data.newTimeToTake !== undefined) payload.newTimeToTake = data.newTimeToTake;
+  if (data.newDays !== undefined) payload.newDays = data.newDays;
+  if (data.newStartDate !== undefined) payload.newStartDate = data.newStartDate;
+  if (data.newEndDate !== undefined) payload.newEndDate = data.newEndDate;
+
+  const res = await axios.patch(`${HOST}/medications/${medicationId}`, payload, {
     withCredentials: true,
   });
   return res.data;

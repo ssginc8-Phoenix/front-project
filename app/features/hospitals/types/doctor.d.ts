@@ -15,10 +15,11 @@ export type Specialization =
   | 'INTERNAL_MEDICINE'; // 내과
 
 export interface Doctor {
+  name: string;
   doctorId: number;
   hospitalId: number;
   specialization: Specialization;
-  username?: string;
+  imageUrl?: never;
 }
 
 export interface PagedDoctorResponse {
@@ -48,3 +49,18 @@ export const SpecializationKoreanMap: Record<Specialization, string> = {
   ENT: '이비인후과',
   INTERNAL_MEDICINE: '내과',
 };
+export interface DoctorScheduleRequest {
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+  lunchStart?: string;
+  lunchEnd?: string;
+}
+export interface DoctorSchedule {
+  scheduleId: number;
+  dayOfWeek: string;
+  openTime: string;
+  closeTime: string;
+  lunchStart?: string;
+  lunchEnd?: string;
+}

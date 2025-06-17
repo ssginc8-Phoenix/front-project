@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import DoctorForm from '~/features/user/components/signUp/DoctorForm';
@@ -6,22 +6,30 @@ import CommonModal from '~/components/common/CommonModal';
 import { checkEmailDuplicate, submitDoctorsInfo } from '~/features/user/api/UserAPI';
 import type { DoctorInfo } from '~/types/user';
 import Header from '~/layout/Header';
+import useHospitalStore from '~/features/hospitals/state/hospitalStore';
+import { getMyHospital } from '~/features/hospitals/api/hospitalAPI';
+
+const PageBackground = styled.div`
+  background: linear-gradient(to bottom right, #f0f4f8, #ffffff);
+  min-height: 100vh;
+  padding: 4rem 1rem;
+`;
 
 const Wrapper = styled.div`
-  max-width: 600px;
-  margin: 60px auto;
-  padding: 2rem;
+  max-width: 720px;
+  margin: 5rem auto;
+  padding: 3rem;
   background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 1rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.06);
 `;
 
 const Title = styled.h1`
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 2rem;
+  color: #111827;
+  margin-bottom: 2.5rem;
 `;
 
 const Button = styled.button`
@@ -48,8 +56,9 @@ const AddButton = styled(Button)`
 `;
 
 const DoctorRegistrationPage = () => {
+  const { hospitalId, setHospitalId } = useHospitalStore();
   const [doctors, setDoctors] = useState<DoctorInfo[]>([
-    { email: '', password: '', name: '', phone: '' },
+    { email: '', password: '', name: '', phone: '', specialization: '' },
   ]);
   const [emailCheckResults, setEmailCheckResults] = useState<
     { success: boolean; message: string }[]
@@ -57,11 +66,13 @@ const DoctorRegistrationPage = () => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
-  const handleRemove = (index: number) => {
-    if (doctors.length === 1) return;
-    setDoctors((prev) => prev.filter((_, i) => i !== index));
-    setEmailCheckResults((prev) => prev.filter((_, i) => i !== index));
-  };
+  useEffect(() => {
+    if (!hospitalId) {
+      getMyHospital()
+        .then((res) => setHospitalId(res.hospitalId))
+        .catch((err) => console.error('병원 정보 불러오기 실패', err));
+    }
+  }, [hospitalId, setHospitalId]);
 
   const handleChange = (index: number, field: keyof DoctorInfo, value: string) => {
     const updated = [...doctors];
@@ -70,15 +81,25 @@ const DoctorRegistrationPage = () => {
   };
 
   const handleAddDoctor = () => {
-    setDoctors([...doctors, { email: '', password: '', name: '', phone: '' }]);
-    setEmailCheckResults([...emailCheckResults, { success: false, message: '' }]);
+    setDoctors((prev) => [
+      ...prev,
+      { email: '', password: '', name: '', phone: '', specialization: '' },
+    ]);
+    setEmailCheckResults((prev) => [...prev, { success: false, message: '' }]);
+  };
+
+  const handleRemove = (index: number) => {
+    if (doctors.length > 1) {
+      setDoctors((prev) => prev.filter((_, i) => i !== index));
+      setEmailCheckResults((prev) => prev.filter((_, i) => i !== index));
+    }
   };
 
   const handleCheckEmail = async (index: number, email: string) => {
     try {
       await checkEmailDuplicate(email);
       updateEmailCheckResult(index, true, '사용 가능한 이메일입니다.');
-    } catch (e) {
+    } catch {
       updateEmailCheckResult(index, false, '이미 사용 중인 이메일입니다.');
     }
   };
@@ -90,8 +111,20 @@ const DoctorRegistrationPage = () => {
   };
 
   const handleSubmit = async () => {
-    await submitDoctorsInfo({ doctorInfos: doctors });
-    setShowModal(true);
+    if (!hospitalId) {
+      alert('병원 ID가 없습니다. 병원을 먼저 등록해주세요.');
+      return;
+    }
+
+    try {
+      await submitDoctorsInfo({
+        doctorInfos: doctors.map((d) => ({ ...d, hospitalId })),
+      });
+      setShowModal(true);
+    } catch (err) {
+      console.error('의사 등록 실패:', err);
+      alert('의사 등록 중 오류가 발생했습니다.');
+    }
   };
 
   const handleCloseModal = () => {
@@ -100,8 +133,8 @@ const DoctorRegistrationPage = () => {
   };
 
   return (
-    <>
-      <Header></Header>
+    <PageBackground>
+      <Header />
       <Wrapper>
         <Title>의사 등록</Title>
         {doctors.map((doctor, index) => (
@@ -109,11 +142,11 @@ const DoctorRegistrationPage = () => {
             key={index}
             doctor={doctor}
             index={index}
-            onRemove={handleRemove}
             onChange={handleChange}
             onCheckEmail={handleCheckEmail}
-            emailCheckSuccess={emailCheckResults[index]?.success}
+            onRemove={handleRemove}
             emailCheckMessage={emailCheckResults[index]?.message}
+            emailCheckSuccess={emailCheckResults[index]?.success}
           />
         ))}
         <AddButton type="button" onClick={handleAddDoctor}>
@@ -131,7 +164,7 @@ const DoctorRegistrationPage = () => {
           />
         )}
       </Wrapper>
-    </>
+    </PageBackground>
   );
 };
 

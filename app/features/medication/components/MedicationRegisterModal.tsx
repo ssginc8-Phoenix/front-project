@@ -1,3 +1,4 @@
+// MedicationRegisterModal.tsx
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import {
@@ -8,11 +9,43 @@ import useLoginStore from '~/features/user/stores/LoginStore';
 import { daysOfWeek } from '~/features/medication/constants/daysOfWeek';
 
 const ModalBox = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60vw;
+  max-width: 700px;
+  max-height: 85vh;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  align-items: center;
-  width: 100%;
+  z-index: 2001;
+`;
+
+const ModalHeader = styled.div`
+  flex: 0 0 auto;
+  padding: 1rem;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  border-bottom: 1px solid #eee;
+`;
+
+const ModalBody = styled.div`
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 1rem;
+`;
+
+const ModalFooter = styled.div`
+  flex: 0 0 auto;
+  padding: 1rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 `;
 
 const Label = styled.div`
@@ -55,13 +88,6 @@ const TimeInput = styled.input`
   border: 1px solid #ccc;
 `;
 
-const ButtonRow = styled.div`
-  margin-top: 2rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-`;
-
 const ActionButton = styled.button`
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
@@ -85,19 +111,27 @@ const ActionButton = styled.button`
   }
 `;
 
+interface MedicationData {
+  medicationId: number;
+  medicationName: string;
+  days: string[];
+  startDate: string;
+  endDate: string;
+  times?: { meal: 'morning' | 'lunch' | 'dinner'; time: string }[];
+}
+
 interface Props {
   date: string;
   patientGuardianId: number;
-  initialData?: {
-    medicationId: number;
-    medicationName: string;
-    timeToTake: string;
-    days: string[];
-    startDate: string;
-    endDate: string;
-  };
+  initialData?: MedicationData;
   onClose: () => void;
 }
+
+const mealOptions = [
+  { value: 'morning', label: '아침' },
+  { value: 'lunch', label: '점심' },
+  { value: 'dinner', label: '저녁' },
+];
 
 export default function MedicationRegisterModal({
   date,
@@ -107,19 +141,33 @@ export default function MedicationRegisterModal({
 }: Props) {
   const { user } = useLoginStore();
   const [medicationName, setMedicationName] = useState('');
-  const [selectedTime, setSelectedTime] = useState('08:00');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [startDate, setStartDate] = useState(date);
   const [endDate, setEndDate] = useState(date);
+  const [selectedMeals, setSelectedMeals] = useState<string[]>([]);
+  const [mealTimes, setMealTimes] = useState<Record<string, string>>({
+    morning: '',
+    lunch: '',
+    dinner: '',
+  });
 
   useEffect(() => {
-    if (initialData) {
-      setMedicationName(initialData.medicationName);
-      setSelectedTime(initialData.timeToTake.slice(0, 5));
-      setSelectedDays(initialData.days ?? []);
-      setStartDate(initialData.startDate);
-      setEndDate(initialData.endDate);
-    }
+    if (!initialData) return;
+
+    setMedicationName(initialData.medicationName);
+    setSelectedDays(initialData.days);
+    setStartDate(initialData.startDate);
+    setEndDate(initialData.endDate);
+
+    const times = initialData.times ?? [];
+    const meals = Array.from(new Set(times.map((t) => t.meal)));
+    setSelectedMeals(meals);
+
+    const timesMap: Record<string, string> = {};
+    times.forEach((t) => {
+      timesMap[t.meal] = t.time.slice(0, 5);
+    });
+    setMealTimes((prev) => ({ ...prev, ...timesMap }));
   }, [initialData]);
 
   const toggleDay = (day: string) => {
@@ -128,76 +176,122 @@ export default function MedicationRegisterModal({
     );
   };
 
+  const toggleMeal = (meal: string) => {
+    setSelectedMeals((prev) =>
+      prev.includes(meal) ? prev.filter((m) => m !== meal) : [...prev, meal],
+    );
+  };
+
   const handleSubmit = async () => {
-    if (!medicationName || !selectedDays.length || !startDate || !endDate) {
-      alert('모든 필드를 입력해주세요.');
+    if (!medicationName.trim()) {
+      alert('약 이름을 입력해주세요.');
       return;
     }
-    if (startDate > endDate) {
-      alert('시작일이 종료일보다 이후일 수 없습니다.');
+    if (selectedDays.length === 0 || selectedMeals.length === 0) {
+      alert('요일과 끼니를 모두 선택해주세요.');
       return;
     }
 
-    const req = {
-      userId: user?.userId ?? 0,
-      patientGuardianId,
-      medicationName: medicationName.trim(),
-      timeToTake: `${selectedTime}:00`,
-      days: selectedDays,
-      startDate,
-      endDate,
-    };
+    const timesPayload = selectedMeals.map((meal) => ({
+      meal,
+      time: `${mealTimes[meal]}:00`,
+    }));
 
     try {
       if (initialData) {
-        await updateMedicationSchedule(initialData.medicationId, req);
+        await updateMedicationSchedule(initialData.medicationId, {
+          newTimes: timesPayload,
+          newDays: selectedDays,
+          newStartDate: startDate,
+          newEndDate: endDate,
+        });
         alert('수정되었습니다.');
       } else {
-        await postMedicationSchedule(req);
+        await postMedicationSchedule({
+          userId: user?.userId ?? 0,
+          patientGuardianId,
+          medicationName: medicationName.trim(),
+          times: timesPayload,
+          days: selectedDays,
+          startDate,
+          endDate,
+        });
         alert('등록되었습니다.');
       }
       onClose();
-    } catch (e) {
+    } catch {
       alert(initialData ? '수정 실패' : '등록 실패');
-      console.error(e);
     }
   };
 
   return (
     <ModalBox>
-      <Label>💊 약 이름</Label>
-      <Input
-        type="text"
-        value={medicationName}
-        onChange={(e) => setMedicationName(e.target.value)}
-        disabled={!!initialData}
-      />
-      <Label>🕓 복약 시간</Label>
-      <TimeInput
-        type="time"
-        value={selectedTime}
-        onChange={(e) => setSelectedTime(e.target.value)}
-      />
-      <Label>📅 복약 요일</Label>
-      <ButtonGroup>
-        {daysOfWeek.map((d) => (
-          <SelectButton
-            key={d.value}
-            selected={selectedDays.includes(d.value)}
-            onClick={() => toggleDay(d.value)}
-          >
-            {d.label}
-          </SelectButton>
-        ))}
-      </ButtonGroup>
-      <Label>📌 시작일</Label>
-      <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-      <Label>📌 종료일</Label>
-      <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-      <ButtonRow>
+      <ModalHeader>{initialData ? '💊 약 수정' : '💊 약 등록'}</ModalHeader>
+      <ModalBody>
+        <Label>💊 약 이름</Label>
+        <Input
+          type="text"
+          value={medicationName}
+          onChange={(e) => setMedicationName(e.target.value)}
+          disabled={!!initialData}
+        />
+
+        <Label>📅 복약 요일</Label>
+        <ButtonGroup>
+          {daysOfWeek.map((d) => (
+            <SelectButton
+              key={d.value}
+              selected={selectedDays.includes(d.value)}
+              onClick={() => toggleDay(d.value)}
+            >
+              {d.label}
+            </SelectButton>
+          ))}
+        </ButtonGroup>
+
+        <Label>⏰ 복용 끼니 선택</Label>
+        <ButtonGroup>
+          {mealOptions.map((m) => (
+            <SelectButton
+              key={m.value}
+              selected={selectedMeals.includes(m.value)}
+              onClick={() => toggleMeal(m.value)}
+            >
+              {m.label}
+            </SelectButton>
+          ))}
+        </ButtonGroup>
+
+        {selectedMeals.map((meal, idx) => {
+          const label = mealOptions.find((m) => m.value === meal)!.label;
+          return (
+            <div key={`${meal}-${idx}`} style={{ width: '80%' }}>
+              <Label>{label} 시간</Label>
+              <TimeInput
+                type="time"
+                value={mealTimes[meal]}
+                onChange={(e) =>
+                  setMealTimes((prev) => ({
+                    ...prev,
+                    [meal]: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          );
+        })}
+
+        <Label>📌 복용 시작일</Label>
+        <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+
+        <Label>📌 복용 종료일</Label>
+        <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+      </ModalBody>
+
+      <ModalFooter>
         <ActionButton onClick={onClose}>취소</ActionButton>
         <ActionButton onClick={handleSubmit}>{initialData ? '수정하기' : '등록하기'}</ActionButton>
-      </ButtonRow>
+      </ModalFooter>
     </ModalBox>
   );
 }

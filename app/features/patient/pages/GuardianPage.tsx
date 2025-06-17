@@ -25,6 +25,7 @@ const PageWrapper = styled.div`
   background: #f8f9fa;
   min-height: 100vh;
 `;
+
 const MainSection = styled.div`
   flex: 1;
   min-width: 0;
@@ -59,6 +60,7 @@ const AddCard = styled.button`
     background: #e9f0ff;
   }
 `;
+
 const SidebarBox = styled.div`
   width: 280px;
   background: #fff;
@@ -69,6 +71,7 @@ const SidebarBox = styled.div`
   flex-direction: column;
   align-items: center;
 `;
+
 const ProfileSection = styled.div`
   display: flex;
   flex-direction: column;
@@ -87,6 +90,14 @@ const ProfileName = styled.div`
 const ProfileRole = styled.div`
   color: #666;
   font-size: 1rem;
+`;
+
+const ProfileImage = styled.img`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
 `;
 
 const GuardianPage: React.FC = () => {

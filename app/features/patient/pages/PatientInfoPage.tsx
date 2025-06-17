@@ -9,17 +9,12 @@ import { patientSidebarItems } from '~/features/patient/constants/sidebarItems';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { getUserInfo, updateUserInfo } from '~/features/patient/api/userAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
+import type { User } from '~/types/user';
+import { SidebarContainer } from '~/components/styled/SidebarContainer';
+import { PageWrapper } from '~/components/styled/PageWrapper';
 
 // --- 스타일 정의 ---
-const PageBg = styled.div`
-  min-height: 100vh;
-  width: 100vw;
-  background: #f5f8fd;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  padding-top: 54px;
-`;
+const PageWrapperOne = PageWrapper;
 
 const FlexRow = styled.div`
   display: flex;
@@ -37,23 +32,21 @@ const MainSection = styled.section`
   max-width: 700px;
 `;
 
-const SidebarBox = styled.div`
-  width: 250px;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 4px 24px 0 rgba(34, 97, 187, 0.05);
-  padding: 32px 0 20px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-`;
+const SidebarBox = SidebarContainer;
 
 const ProfileSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+`;
+
+const ProfileImage = styled.img`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
 `;
 
 const ProfileEmoji = styled.div`
@@ -62,8 +55,8 @@ const ProfileEmoji = styled.div`
 `;
 
 const ProfileName = styled.div`
-  font-weight: bold;
-  font-size: 1.3rem;
+  font-weight: 700;
+  font-size: 1.5rem;
 `;
 
 const ProfileRole = styled.div`
@@ -166,6 +159,7 @@ const Footer = styled.div`
 const PatientInfoPage = () => {
   const { user, fetchMyInfo } = useLoginStore();
   const navigate = useNavigate();
+  const [userinfo, setUserinfo] = useState<User | null>(null);
 
   const [form, setForm] = useState({
     name: '',
@@ -182,7 +176,9 @@ const PatientInfoPage = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        await fetchMyInfo();
         const myInfo = await getUserInfo();
+        setUserinfo(myInfo);
         setForm({
           name: myInfo.name || '',
           email: myInfo.email || '',
@@ -245,90 +241,95 @@ const PatientInfoPage = () => {
 
   return (
     <>
-      <PageBg>
-        <FlexRow>
-          <SidebarBox>
-            {/* 프로필 영역 */}
-            <ProfileSection>
-              <ProfileEmoji>👵</ProfileEmoji>
-              <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
-              <ProfileRole>환자</ProfileRole>
-            </ProfileSection>
+      <PageWrapperOne>
+        <SidebarBox>
+          {/* 프로필 영역 */}
+          <ProfileSection>
+            {userinfo?.profileImageUrl ? (
+              <ProfileImage src={userinfo.profileImageUrl} alt="프로필 이미지" />
+            ) : (
+              <ProfileImage
+                src="https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png"
+                alt="기본 프로필"
+              />
+            )}
+            <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
+            <ProfileRole>환자</ProfileRole>
+          </ProfileSection>
 
-            {/* 메뉴 */}
-            <SidebarMenu
-              items={patientSidebarItems}
-              activeKey={'info'}
-              onChange={handleSidebarChange}
-            />
-          </SidebarBox>
+          {/* 메뉴 */}
+          <SidebarMenu
+            items={patientSidebarItems}
+            activeKey={'info'}
+            onChange={handleSidebarChange}
+          />
+        </SidebarBox>
 
-          <MainSection>
-            <PatientInfoHeader>
-              <Emoji>👵</Emoji>
-              <div>
-                <Name>{user?.name} 님</Name>
-              </div>
-            </PatientInfoHeader>
+        <MainSection>
+          <PatientInfoHeader>
+            <Emoji>👵</Emoji>
+            <div>
+              <Name>{user?.name} 님</Name>
+            </div>
+          </PatientInfoHeader>
 
-            <InfoFormBox onSubmit={handleSave}>
-              <InputRow>
-                <Label htmlFor="name">이름</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="이름 입력"
-                />
-              </InputRow>
-              <InputRow>
-                <Label htmlFor="email">이메일</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="이메일 입력"
-                />
-              </InputRow>
-              <InputRow>
-                <Label htmlFor="phone">전화번호</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="전화번호 입력"
-                />
-              </InputRow>
-              {/* 주소 검색 */}
-              <InputRow>
-                <Label>주소</Label>
-                <DaumPost
-                  address={form.address}
-                  setAddress={(newAddr) => setForm({ ...form, address: newAddr })}
-                />
-              </InputRow>
-              {/* 상세주소 입력 */}
-              <InputRow>
-                <Label htmlFor="detail">상세주소</Label>
-                <Input
-                  id="detail"
-                  name="detail"
-                  value={detailAddress}
-                  onChange={handleDetailAddressChange}
-                  placeholder="상세주소 입력"
-                />
-              </InputRow>
-              <SaveButton type="submit">저장</SaveButton>
-            </InfoFormBox>
+          <InfoFormBox onSubmit={handleSave}>
+            <InputRow>
+              <Label htmlFor="name">이름</Label>
+              <Input
+                id="name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="이름 입력"
+              />
+            </InputRow>
+            <InputRow>
+              <Label htmlFor="email">이메일</Label>
+              <Input
+                id="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="이메일 입력"
+              />
+            </InputRow>
+            <InputRow>
+              <Label htmlFor="phone">전화번호</Label>
+              <Input
+                id="phone"
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                placeholder="전화번호 입력"
+              />
+            </InputRow>
+            {/* 주소 검색 */}
+            <InputRow>
+              <Label>주소</Label>
+              <DaumPost
+                address={form.address}
+                setAddress={(newAddr) => setForm({ ...form, address: newAddr })}
+              />
+            </InputRow>
+            {/* 상세주소 입력 */}
+            <InputRow>
+              <Label htmlFor="detail">상세주소</Label>
+              <Input
+                id="detail"
+                name="detail"
+                value={detailAddress}
+                onChange={handleDetailAddressChange}
+                placeholder="상세주소 입력"
+              />
+            </InputRow>
+            <SaveButton type="submit">저장</SaveButton>
+          </InfoFormBox>
 
-            <Footer>
-              <span onClick={handleWithdrawClick}>회원탈퇴</span>
-            </Footer>
-          </MainSection>
-        </FlexRow>
+          <Footer>
+            <span onClick={handleWithdrawClick}>회원탈퇴</span>
+          </Footer>
+        </MainSection>
 
         {/* --- 탈퇴 1단계 모달 --- */}
         <ReusableModal open={showConfirm} onClose={handleConfirmCancel} hideCloseButton>
@@ -392,7 +393,7 @@ const PatientInfoPage = () => {
             안녕히 가세요!
           </div>
         </ReusableModal>
-      </PageBg>
+      </PageWrapperOne>
     </>
   );
 };

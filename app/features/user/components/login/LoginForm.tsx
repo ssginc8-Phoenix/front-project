@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import ErrorModal from '~/components/common/ErrorModal';
 import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 
 const Container = styled.div`
   display: flex;

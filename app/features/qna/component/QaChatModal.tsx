@@ -1,37 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useQnAchat } from '~/features/qna/hooks/useQnAchat';
 
 interface Props {
   qnaId: number;
   onClose: () => void;
-  showInput?: boolean;
+  showInput?: boolean; // 대기중 탭에서만 true
 }
 
 export default function QaChatModal({ qnaId, onClose, showInput = false }: Props) {
   const {
     detail,
-    isDetailLoading,
-    isDetailError,
     comments,
-    isCommentsLoading,
-    isCommentsError,
     draft,
     setDraft,
     submit,
+    update,
+    remove,
+    refetchComments,
+    isDetailLoading,
+    isCommentsLoading,
+    isDetailError,
+    isCommentsError,
     isSubmitting,
-  } = useQnAchat(qnaId);
+  } = useQnAchat(qnaId, onClose);
+
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editValue, setEditValue] = useState('');
+
+  useEffect(() => {
+    if (editingCommentId !== null) {
+      const target = comments?.find((c) => c.commentId === editingCommentId);
+      setEditValue(target?.content ?? '');
+    }
+  }, [editingCommentId]);
 
   return (
     <Overlay onClick={onClose}>
       <Modal onClick={(e) => e.stopPropagation()}>
         <Close onClick={onClose}>×</Close>
         <Header>💬 Q&A</Header>
-
         <Body>
-          {(isDetailLoading || isCommentsLoading) && <p>로딩 중…</p>}
-          {isDetailError && <p></p>}
-          {isCommentsError && <p></p>}
+          {isDetailLoading || isCommentsLoading ? <p>로딩 중…</p> : null}
+          {isDetailError && <p>질문을 불러오지 못했습니다.</p>}
+          {isCommentsError && <p>답변을 불러오지 못했습니다.</p>}
 
           {detail && (
             <MessageRow isDoctor={false}>
@@ -41,7 +53,36 @@ export default function QaChatModal({ qnaId, onClose, showInput = false }: Props
 
           {comments?.map((c) => (
             <MessageRow key={c.commentId} isDoctor>
-              <Bubble isDoctor>{c.content}</Bubble>
+              <Bubble isDoctor>
+                {editingCommentId === c.commentId ? (
+                  <>
+                    <EditTextarea
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                    />
+                    <EditButtonRow>
+                      <EditButton onClick={() => update(c.commentId, editValue)}>저장</EditButton>
+                      <EditButton onClick={() => setEditingCommentId(null)}>취소</EditButton>
+                    </EditButtonRow>
+                  </>
+                ) : (
+                  <>
+                    <span>{c.content}</span>
+                    {showInput === false && ( // showInput이 false → 완료 탭
+                      <EditButtonRow>
+                        <EditButton onClick={() => setEditingCommentId(c.commentId)}>
+                          수정
+                        </EditButton>
+                        <EditButton
+                          onClick={() => remove(c.commentId).then(() => refetchComments())}
+                        >
+                          삭제
+                        </EditButton>
+                      </EditButtonRow>
+                    )}
+                  </>
+                )}
+              </Bubble>
             </MessageRow>
           ))}
 
@@ -56,12 +97,9 @@ export default function QaChatModal({ qnaId, onClose, showInput = false }: Props
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder="여기에 답변을 작성하세요…"
-                disabled={Boolean(isSubmitting)}
+                disabled={isSubmitting}
               />
-              <SendButton
-                type="submit"
-                disabled={Boolean(isSubmitting) || draft.trim().length === 0}
-              >
+              <SendButton type="submit" disabled={isSubmitting || !draft.trim()}>
                 {isSubmitting ? '등록 중…' : '전송'}
               </SendButton>
             </Form>
@@ -72,7 +110,7 @@ export default function QaChatModal({ qnaId, onClose, showInput = false }: Props
   );
 }
 
-// --- styled-components ---
+/* --- styled-components --- */
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
@@ -81,6 +119,7 @@ const Overlay = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
 const Modal = styled.div`
   position: relative;
   background: #fff;
@@ -92,6 +131,7 @@ const Modal = styled.div`
   flex-direction: column;
   overflow: hidden;
 `;
+
 const Close = styled.button`
   position: absolute;
   top: 0.5rem;
@@ -100,19 +140,15 @@ const Close = styled.button`
   background: none;
   font-size: 1.5rem;
   cursor: pointer;
-  line-height: 1;
-  color: #999;
-  transition: color 0.2s;
-  &:hover {
-    color: #333;
-  }
 `;
+
 const Header = styled.h3`
   text-align: center;
   margin: 1rem 0 0.5rem;
   font-size: 1.25rem;
   color: #00499e;
 `;
+
 const Body = styled.div`
   flex: 1;
   padding: 0 1rem 1rem;
@@ -121,21 +157,26 @@ const Body = styled.div`
   flex-direction: column;
   gap: 0.75rem;
 `;
+
 const MessageRow = styled.div<{ isDoctor: boolean }>`
   display: flex;
-  justify-content: ${({ isDoctor }) => (isDoctor ? 'flex-end' : 'flex-start')};
+  justify-content: ${(p) => (p.isDoctor ? 'flex-end' : 'flex-start')};
 `;
+
 const Bubble = styled.div<{ isDoctor?: boolean }>`
   max-width: 70%;
   padding: 0.75rem 1rem;
-  background: ${({ isDoctor }) => (isDoctor ? '#daf1ff' : '#f0f0f0')};
+  background: ${(p) => (p.isDoctor ? '#daf1ff' : '#f0f0f0')};
   border-radius: 12px;
+  position: relative;
 `;
+
 const Form = styled.form`
   display: flex;
   padding: 0.75rem;
   border-top: 1px solid #e5e5e5;
 `;
+
 const TextArea = styled.textarea`
   flex: 1;
   padding: 0.5rem;
@@ -144,6 +185,7 @@ const TextArea = styled.textarea`
   resize: none;
   height: 60px;
 `;
+
 const SendButton = styled.button`
   margin-left: 0.5rem;
   padding: 0 0.75rem;
@@ -157,4 +199,27 @@ const SendButton = styled.button`
     opacity: 0.6;
     cursor: default;
   }
+`;
+
+const EditTextarea = styled.textarea`
+  width: 100%;
+  resize: vertical;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+`;
+
+const EditButtonRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+const EditButton = styled.button`
+  font-size: 0.75rem;
+  background: #e0eaff;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
 `;

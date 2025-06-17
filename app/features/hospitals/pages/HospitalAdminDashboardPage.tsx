@@ -2,19 +2,20 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router';
 import HospitalSidebarMenu from '~/features/hospitals/components/hospitalAdmin/HospitalSidebarMenu';
 import { hospitalSidebarItems } from '~/features/hospitals/components/constants/hospitalSidebarItems';
-import HospitalRegisterForm from '~/features/hospitals/components/hospitalAdmin/info/HospitalRegisterForm';
-import Header from '~/layout/Header';
+import HospitalUpdateForm from '~/features/hospitals/components/hospitalAdmin/info/HospitalUpdateForm';
 import useLoginStore from '~/features/user/stores/LoginStore';
+import { getMyHospital } from '~/features/hospitals/api/hospitalAPI';
+import { useQuery } from '@tanstack/react-query';
+import { getMyDoctorInfo } from '~/features/doctor/api/doctorAPI';
 
 // ------------------- 스타일 정의 -------------------
 const PageWrapper = styled.div`
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px; // <-- 통일
+  padding: 40px 20px;
   display: flex;
   gap: 48px;
-  background-color: #f8f9fa;
   min-height: 100vh;
 `;
 
@@ -30,6 +31,7 @@ const Title = styled.h2`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-left: 3rem;
   margin-bottom: 2rem; // <-- 여백 맞춤
 `;
 const ProfileSection = styled.div`
@@ -55,6 +57,7 @@ const ProfileRole = styled.div`
 `;
 const SidebarBox = styled.div`
   width: 200px;
+  height: 600px;
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -69,6 +72,12 @@ const SidebarBox = styled.div`
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useLoginStore();
+
+  const { data } = useQuery({
+    queryKey: ['myHospitalInfo'],
+    queryFn: getMyHospital,
+  });
+
   const handleSidebarChange = (key: string) => {
     const targetPath = `/hospitals/${key}`;
     if (window.location.pathname === targetPath) {
@@ -84,13 +93,29 @@ const AdminDashboard = () => {
         {/* 사이드바 */}
         <SidebarBox>
           <ProfileSection>
-            <ProfileEmoji>🏥️</ProfileEmoji>
+            <ProfileEmoji>
+              {data?.imageUrl ? (
+                <img
+                  src={data.imageUrl}
+                  alt="병원관리자 프로필"
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                  }}
+                />
+              ) : (
+                '🏥️'
+              )}
+            </ProfileEmoji>
+
             <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
             <ProfileRole>병원관리자</ProfileRole>
           </ProfileSection>
           <HospitalSidebarMenu
             items={hospitalSidebarItems}
-            activeKey=""
+            activeKey="info"
             onChange={handleSidebarChange}
           />
         </SidebarBox>
@@ -98,7 +123,7 @@ const AdminDashboard = () => {
         {/* 메인 콘텐츠 */}
         <MainSection>
           <Title>🏥 병원 대시보드</Title>
-          <HospitalRegisterForm />
+          <HospitalUpdateForm />
           {/* <ReviewSection /> */}
           {/* <WaitModal /> */}
         </MainSection>

@@ -3,14 +3,16 @@ import { useNavigate } from 'react-router';
 import styled, { keyframes } from 'styled-components';
 import Slider from 'react-slick';
 import useLoginStore from '~/features/user/stores/LoginStore';
-// import 'slick-carousel/slick/slick.css';
-// import 'slick-carousel/slick/slick-theme.css';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import { getMyInfo } from '~/features/user/api/UserAPI';
+
 
 const ads = ['/ads/ad1.png', '/ads/ad2.png', '/ads/ad3.png'];
 
 const features = [
-  { title: '주변 병원', route: '/hospitals', icon: '/location.png' },
-  { title: '진료 예약', route: '/appointments', icon: '/appointment.png' },
+  { title: '주변 병원', route: '/hospitals/search', icon: '/location.png' },
+  { title: '예약 관리', route: '/appointments/list', icon: '/appointment.png' },
   { title: '서류 발급', route: '/documents', icon: '/document.png' },
 ];
 
@@ -42,10 +44,19 @@ export default function MainPage() {
   const user = useLoginStore((s) => s.user);
 
   useEffect(() => {
-    if (!user) {
-      useLoginStore.getState().fetchMyInfo();
-    }
-  }, [user]);
+    getMyInfo()
+      .then((myInfo) => {
+        const role = myInfo.role?.toUpperCase();
+
+        if (role !== 'PATIENT' && role !== 'GUARDIAN') {
+          navigate('/hospital/main');
+        }
+      })
+      .catch((err) => {
+        console.error('사용자 정보 조회 실패:', err);
+        navigate('/login');
+      });
+  }, [navigate]);
 
   const sliderSettings = {
     dots: true,

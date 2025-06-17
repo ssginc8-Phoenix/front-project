@@ -9,7 +9,6 @@ const PageContainer = styled.div`
   display: flex;
   justify-content: center;
   padding: 3rem 2rem;
-  background-color: #f5f7fa;
 `;
 
 const ContentBox = styled.div`
@@ -189,7 +188,10 @@ export default function HospitalCalendar() {
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
 
-    const dateStr = date.toISOString().split('T')[0];
+    const kstOffsetMs = 9 * 60 * 60 * 1000;
+    const localDate = new Date(date.getTime() + kstOffsetMs);
+    const dateStr = localDate.toISOString().split('T')[0];
+
     const items = calendarData[dateStr];
     if (!items) return null;
 
@@ -315,7 +317,10 @@ export default function HospitalCalendar() {
               <strong>환자:</strong> {appointmentDetail.patientName}
             </p>
             <p>
-              <strong>진료 시간:</strong> {appointmentDetail.appointmentTime}
+              <strong>날짜:</strong> {appointmentDetail.appointmentTime.split('T')[0]}
+            </p>
+            <p>
+              <strong>시간:</strong> {appointmentDetail.appointmentTime.split('T')[1]}
             </p>
             <p>
               <strong>증상:</strong> {appointmentDetail.symptom}

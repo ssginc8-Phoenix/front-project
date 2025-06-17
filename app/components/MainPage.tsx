@@ -40,7 +40,13 @@ const infoItems = [
 
 export default function MainPage() {
   const navigate = useNavigate();
-  const user = useLoginStore((s) => s.user);
+  const { user, fetchMyInfo } = useLoginStore();
+
+  useEffect(() => {
+    if (!user) {
+      fetchMyInfo(); // 로그인 상태 유지 시도
+    }
+  }, [user, fetchMyInfo]);
 
   const sliderSettings = {
     dots: true,

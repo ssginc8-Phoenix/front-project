@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import Profile from '~/common/Profile';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { Link } from 'react-router-dom';
+import NotificationComponent from '~/features/notification/components/NotificationComponent';
 
 const HeaderBar = styled.header`
   padding: 1rem 2rem;
@@ -12,7 +13,7 @@ const HeaderBar = styled.header`
 `;
 
 const LogoLink = styled(Link)`
-  width: 11%;
+  width: 10%;
 `;
 
 const LogoImage = styled.img`
@@ -23,11 +24,6 @@ const RightGroup = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-`;
-
-const Notification = styled.div`
-  cursor: pointer;
-  font-size: 1.5rem;
 `;
 
 const AuthButton = styled.a`
@@ -58,8 +54,8 @@ const Header = () => {
       <RightGroup>
         {user ? (
           <>
+            <NotificationComponent />
             <Profile name={user.name} imageUrl={user.profileImageUrl} />
-            <Notification>🔔</Notification>
           </>
         ) : (
           <>

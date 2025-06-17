@@ -6,6 +6,7 @@ import Button from '~/components/styled/Button';
 import { RefreshButton } from '~/components/styled/RefreshButton';
 import { FiRefreshCw } from 'react-icons/fi';
 import { useAppointmentActions } from '~/features/appointment/hooks/useAppointmentActions';
+import { useNavigate } from 'react-router';
 
 const Overlay = styled.div`
   position: fixed;
@@ -103,8 +104,11 @@ const AppointmentUpdateModal = ({
     isRefetching,
   } = useAppointmentDetail(appointmentId);
 
+  const navigate = useNavigate();
+
   const { cancelAppointment, updateAppointmentStatus } = useAppointmentActions();
 
+  const canRequestPayment = appointment?.status === 'COMPLETED' && appointment.paymentType;
   const canConfirm = appointment?.status === 'REQUESTED';
   const canModify = appointment?.status === 'REQUESTED' || appointment?.status === 'CONFIRMED';
 
@@ -131,7 +135,7 @@ const AppointmentUpdateModal = ({
     if (!appointment) return;
     const success = await updateAppointmentStatus(appointment.appointmentId, 'COMPLETED');
     if (success) {
-      refetch();
+      navigate(`/payment/request?appointmentId=${appointment.appointmentId}`);
     }
   };
 
@@ -218,6 +222,19 @@ const AppointmentUpdateModal = ({
                   </Button>
                   <Button $variant="secondary" onClick={handleCancel}>
                     예약 취소
+                  </Button>
+                </ButtonGroup>
+              )}
+
+              {canRequestPayment && (
+                <ButtonGroup>
+                  <Button
+                    $variant="primary"
+                    onClick={() => {
+                      navigate(`/payment/request?appointmentId=${appointment.appointmentId}`);
+                    }}
+                  >
+                    결제 요청
                   </Button>
                 </ButtonGroup>
               )}

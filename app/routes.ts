@@ -68,8 +68,10 @@ export default [
     route('/reviews/:userId', 'features/reviews/pages/ReviewMyListPage.tsx'),
   ]),
 
+  route('/reset-password/set', 'routes/resetPassword.tsx'),
+
   /** Payments 영역 */
-  // route('/payment-request', 'layout/payments/paymentRequest.tsx'),
+  route('/payment/request', 'routes/payments/paymentRequest.tsx'),
 
   route('*', 'routes/NotFound.tsx'),
 ] satisfies RouteConfig;

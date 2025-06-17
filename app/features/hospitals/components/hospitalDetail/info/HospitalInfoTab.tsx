@@ -16,7 +16,7 @@ const Container = styled.div`
 const ImageWrapper = styled.div`
   position: relative;
   max-width: 100%;
-  aspect-ratio: 1100 / 480;
+  aspect-ratio: 1100 / 450;
   height: 480px;
   border-radius: 0.75rem;
   overflow: hidden;

@@ -11,14 +11,14 @@ export default [
 
   /** HOME  */
   route('', 'layout/MainPageLayout.tsx', [
-    index('routes/home.tsx'),
+    index('routes/main.tsx'),
     route('hospital/main', 'routes/hospital/HospitalMainPage.tsx'),
   ]),
 
   /** MainLayout 적용 */
   route('', 'layout/MainLayout.tsx', [
-    route('myPage', 'routes/myPage.tsx'), // 역할별 마이페이지
-    route('appointments/list', 'routes/appointmentDashboard.tsx'), // 역할별 예약 리스트 조회 페이지
+    route('myPage', 'routes/mypage.tsx'), // 역할별 마이페이지
+    route('appointments/list', 'routes/appointment/appointmentDashboard.tsx'), // 역할별 예약 리스트 조회 페이지
 
     /** PATIENT 환자 영역 */
     route('patients', 'routes/patient/emptyPage.tsx', [

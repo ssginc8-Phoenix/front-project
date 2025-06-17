@@ -16,7 +16,7 @@ export const useGlobalHospitalSearch = (
   query: string,
   page: number,
   size: number = 10,
-  searchTrigger: number = 0,
+  searchTrigger: string = '',
   enabled: boolean = true, // ✅ 추가
 ) => {
   const fetchHospitals = useCallback(async (): Promise<HospitalPage> => {

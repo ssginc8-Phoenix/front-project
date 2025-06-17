@@ -10,6 +10,8 @@ interface HospitalListProps {
   hospitals: Hospital[];
   loading: boolean;
   error: Error | null;
+  currentPage: number;
+  onPageChange: (page: number) => void;
   onHospitalSelect: (hospitalId: number, lat: number, lng: number) => void;
   selectedHospitalId?: number | null;
 }

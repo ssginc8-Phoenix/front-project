@@ -7,6 +7,8 @@ import HospitalInfoTab from '../components/hospitalDetail/info/HospitalInfoTab';
 import HospitalMap from '../components/hospitalDetail/map/HospitalMap';
 import HospitalReviews from '../components/hospitalDetail/review/HospitalReviews';
 import HospitalDoctor from '../components/hospitalDetail/doctor/HospitalDoctor';
+import { useNavigate } from 'react-router';
+import { ChevronLeft } from 'lucide-react';
 
 const Container = styled.div`
   width: 100%;
@@ -24,7 +26,42 @@ const TabBar = styled.div`
   margin-top: 2rem;
   border-bottom: 1px solid #e5e7eb;
 `;
+const BackButton = styled.button`
+  position: absolute;
+  top: 8rem;
+  left: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 
+  padding: 0.5rem 1rem;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1d4ed8;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
+
+  &:hover {
+    background: #eff6ff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    background: #e0e7ff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
+  }
+`;
 const Tab = styled.button.withConfig({
   shouldForwardProp: (prop) => prop !== 'active',
 })<{ active: boolean }>`
@@ -44,7 +81,8 @@ const Tab = styled.button.withConfig({
 `;
 
 const HospitalDetailPage = () => {
-  const { hospitalId } = useParams<{ hospitalId: string }>(); // 경로 param 이름과 맞춤
+  const { hospitalId } = useParams<{ hospitalId: string }>();
+  const navigate = useNavigate();
   const hospitalIdNum = hospitalId && !isNaN(Number(hospitalId)) ? Number(hospitalId) : undefined;
 
   if (!hospitalIdNum) {
@@ -69,6 +107,10 @@ const HospitalDetailPage = () => {
 
   return (
     <Container>
+      <BackButton onClick={() => navigate(-1)}>
+        <ChevronLeft size={16} />
+        뒤로가기
+      </BackButton>
       <HospitalInfoTab hospitalId={hospitalIdNum} selectedTab="location" />
 
       <TabBar>

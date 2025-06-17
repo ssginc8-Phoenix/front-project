@@ -40,6 +40,7 @@ const Title = styled.h2`
 
 const SidebarBox = styled.div`
   width: 200px;
+  height: 550px;
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -91,7 +92,7 @@ const HospitalAdminChartPage = () => {
     queryFn: getMyHospital,
   });
   const handleSidebarChange = (key: string) => {
-    const targetPath = `/hospitals/${key}`;
+    const targetPath = `/hospital/${key}`;
     if (window.location.pathname === targetPath) {
       navigate(0);
     } else {
@@ -124,7 +125,7 @@ const HospitalAdminChartPage = () => {
           </ProfileEmoji>
 
           <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
-          <ProfileRole>의사</ProfileRole>
+          <ProfileRole>병원관리자</ProfileRole>
         </ProfileSection>
         <HospitalSidebarMenu
           items={hospitalSidebarItems}

@@ -1,6 +1,7 @@
 import axios, { AxiosHeaders } from 'axios';
 import type { Hospital, HospitalPage, CreateScheduleRequest } from '../types/hospital';
 import type { HospitalSchedule } from '~/features/hospitals/types/hospitalSchedule';
+import type { pageResponse } from '~/types/pageResponse';
 
 // Axios 인스턴스 생성 및 설정
 const apiClient = axios.create({
@@ -60,7 +61,26 @@ export const getUser = async () => {
   const res = await apiClient.get('/api/v1/admin/users');
   return res.data;
 };
-
+export async function fetchHospitals(params: {
+  query?: string;
+  sortBy?: 'NAME' | 'DISTANCE' | 'REVIEW_COUNT';
+  latitude?: number;
+  longitude?: number;
+  page?: number;
+  size?: number;
+}): Promise<pageResponse<Hospital>> {
+  const response = await apiClient.get<pageResponse<Hospital>>('/api/v1/hospitals/search', {
+    params: {
+      query: params.query,
+      sortBy: params.sortBy,
+      latitude: params.latitude,
+      longitude: params.longitude,
+      page: params.page,
+      size: params.size,
+    },
+  });
+  return response.data;
+}
 // 병원 등록
 export const registerHospital = async (data: {
   userId: number;

@@ -1,14 +1,16 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+// src/pages/HospitalSearchPage.tsx
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
-import { useCurrentLocation } from '../hooks/useCurrentLocation';
-import SearchMenu from '../components/hospitalSearch/searchMenu/SearchMenu';
-import HospitalList from '../components/hospitalSearch/hospitalList/HospitalList';
-import AroundMap from '../components/hospitalSearch/map/AroundMap';
-import HospitalDetailPanel from '../components/hospitalSearch/hospitalList/HospitalDetailPanel';
-import { useHospitalSearchStore } from '../state/hospitalSearchStore';
+import { fetchHospitals } from '~/features/hospitals/api/hospitalAPI';
 import { useHospitalSearch } from '~/features/hospitals/hooks/useHospitalSearch';
 import { useGlobalHospitalSearch } from '~/features/hospitals/hooks/useGlobalHospitalSearch';
-import type { Hospital } from '../types/hospital';
+import AroundMap from '~/features/hospitals/components/hospitalSearch/map/AroundMap';
+import { useCurrentLocation } from '~/features/hospitals/hooks/useCurrentLocation';
+import type { Hospital } from '~/features/hospitals/types/hospital';
+import { useHospitalSearchStore } from '~/features/hospitals/state/hospitalSearchStore';
+import HospitalList from '~/features/hospitals/components/hospitalSearch/hospitalList/HospitalList';
+import HospitalDetailPanel from '~/features/hospitals/components/hospitalSearch/hospitalList/HospitalDetailPanel';
+import SearchMenu from '~/features/hospitals/components/hospitalSearch/searchMenu/SearchMenu';
 
 const MapContainer = styled.div`
   position: relative;
@@ -38,19 +40,61 @@ const SidePanel = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  overflow-x: hidden;
 `;
 
-const PAGE_SIZE = 1000;
-const RADIUS_KM = 5;
+const ToggleGroup = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+`;
 
+const ToggleButton = styled.button<{ active: boolean }>`
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: ${({ active }) => (active ? '#00499e' : '#eee')};
+  color: ${({ active }) => (active ? '#fff' : '#333')};
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+`;
+
+const PAGE_SIZE = 10;
+const RADIUS_KM = 5;
+type SortBy = 'NAME' | 'DISTANCE' | 'REVIEW_COUNT';
 const HospitalSearchPage: React.FC = () => {
   const { currentLocation } = useCurrentLocation();
   const { searchQuery, sortBy, setSearchQuery, setSortBy } = useHospitalSearchStore();
 
-  const [searchMode, setSearchMode] = useState<'nearby' | 'global'>('global');
-  const [selectedHospitalIdState, setSelectedHospitalIdState] = useState<number | null>(null);
+  const [page, setPage] = useState<number>(0);
+  const [mode, setMode] = useState<'global' | 'nearby'>('global');
+  const [radius, setRadius] = useState<number>(RADIUS_KM);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
+  // 1) 훅 호출: query, page, size, trigger, enabled
+  const globalRes = useGlobalHospitalSearch(
+    searchQuery,
+    page,
+    PAGE_SIZE,
+    `${searchQuery}|${sortBy}|${page}`, // string trigger
+    mode === 'global',
+  );
+
+  const nearbyRes = useHospitalSearch(
+    currentLocation?.latitude ?? 0,
+    currentLocation?.longitude ?? 0,
+    searchQuery,
+    sortBy,
+    radius,
+    `${searchQuery}|${sortBy}|${page}|${radius}`, // trigger
+    mode === 'nearby',
+  );
+
+  // 2) 수동 검색 상태
+  const [searchResults, setSearchResults] = useState<Hospital[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 3) map center 초기화
   const initialCenter = useMemo(
     () =>
       currentLocation
@@ -58,8 +102,13 @@ const HospitalSearchPage: React.FC = () => {
         : { lat: 35.159545, lng: 129.075633 },
     [currentLocation],
   );
-
   const [mapCenter, setMapCenter] = useState(initialCenter);
+
+  useEffect(() => {
+    // 모드 변경 시 페이지, 수동 결과 초기화
+    setPage(0);
+    setSearchResults(null);
+  }, [mode]);
 
   useEffect(() => {
     if (currentLocation) {
@@ -67,126 +116,129 @@ const HospitalSearchPage: React.FC = () => {
     }
   }, [currentLocation]);
 
-  const nearbySearchResult = useHospitalSearch(
-    currentLocation?.latitude ?? null,
-    currentLocation?.longitude ?? null,
-    searchQuery,
-    sortBy,
-    RADIUS_KM,
-    searchMode === 'nearby', // ✅ 실행 조건은 내부에서 처리
+  // 4) 수동 검색 함수 (글로벌 모드용 fetchHospitals)
+  const doFetch = useCallback(
+    async (q: string, s: SortBy, p: number) => {
+      setLoading(true);
+      setError(null);
+      try {
+        // fetchHospitals의 파라미터 정의에 맞춰 radius 제거
+        const params = {
+          query: q,
+          sortBy: s,
+          latitude: currentLocation?.latitude,
+          longitude: currentLocation?.longitude,
+          page: p,
+          size: PAGE_SIZE,
+        };
+        const resp = await fetchHospitals(params);
+        setSearchResults(resp.content);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        setError(message);
+        setSearchResults([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentLocation],
   );
 
-  const globalSearch = useGlobalHospitalSearch(
-    searchQuery,
-    0,
-    PAGE_SIZE,
-    0,
-    searchMode === 'global',
+  // 5) 검색 메뉴 제출 핸들러
+  const handleSearch = useCallback(
+    (q: string, s: SortBy, r: number) => {
+      setSearchQuery(q);
+      setSortBy(s);
+      setRadius(r);
+      setSelectedId(null);
+      // page는 0으로 리셋 후 검색
+      setPage(0);
+      doFetch(q, s, 0);
+    },
+    [doFetch, setSearchQuery, setSortBy],
   );
 
+  // 6) 페이지 변경 핸들러
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      setPage(newPage);
+      if (searchResults !== null) {
+        // 수동 검색 결과가 있으면 다시 fetch
+        doFetch(searchQuery, sortBy as SortBy, newPage);
+      }
+    },
+    [searchResults, searchQuery, sortBy, doFetch],
+  );
+
+  // 7) 최종 렌더링할 목록 결정
   const hospitals =
-    searchMode === 'nearby'
-      ? (nearbySearchResult.data?.content ?? [])
-      : (globalSearch.data?.content ?? []);
+    searchResults !== null
+      ? searchResults
+      : mode === 'global'
+        ? (globalRes.data?.content ?? [])
+        : (nearbyRes.data?.content ?? []);
 
-  const loading = searchMode === 'nearby' ? nearbySearchResult.loading : globalSearch.loading;
+  const isLoading = loading || (mode === 'global' ? globalRes.loading : nearbyRes.loading);
 
-  const error =
-    searchMode === 'nearby'
-      ? (nearbySearchResult.error as Error | null)
-      : (globalSearch.error as Error | null);
-
-  const handleHospitalSelect = useCallback((h: Hospital) => {
-    setSelectedHospitalIdState(h.hospitalId);
+  // 8) 마커/리스트 선택 핸들러
+  const selectHospital = useCallback((h: Hospital) => {
+    setSelectedId(h.hospitalId);
     setMapCenter({ lat: h.latitude, lng: h.longitude });
   }, []);
 
-  const handleMarkerClick = useCallback(
+  const onMarkerClick = useCallback(
     (id: number) => {
-      const h = hospitals.find((x) => x.hospitalId === id);
-      if (h) handleHospitalSelect(h);
+      const h = hospitals.find((h) => h.hospitalId === id);
+      if (h) selectHospital(h);
     },
-    [hospitals, handleHospitalSelect],
+    [hospitals, selectHospital],
   );
-
+  const errMsgStr: string | null =
+    error ?? (mode === 'global' ? globalRes.error : nearbyRes.error) ?? null;
+  // HospitalList 에 넘길 Error 객체
+  const errObj: Error | null = errMsgStr ? new Error(errMsgStr) : null;
   return (
     <MapContainer>
       <FullMap
         hospitals={hospitals}
         center={mapCenter}
         currentLocation={currentLocation}
-        onMarkerClick={handleMarkerClick}
+        onMarkerClick={onMarkerClick}
       />
 
       <SidePanel>
-        <div style={{ padding: '1rem', display: 'flex', gap: '1rem' }}>
-          <button
-            onClick={() => setSearchMode('global')}
-            style={{
-              background: searchMode === 'global' ? '#00499e' : '#eee',
-              color: searchMode === 'global' ? '#fff' : '#333',
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
+        <ToggleGroup>
+          <ToggleButton active={mode === 'global'} onClick={() => setMode('global')}>
             전체 검색
-          </button>
-          <button
-            onClick={() => {
-              setSearchMode('nearby');
-              if (currentLocation) {
-                setMapCenter({
-                  lat: currentLocation.latitude,
-                  lng: currentLocation.longitude,
-                });
-              }
-            }}
-            style={{
-              background: searchMode === 'nearby' ? '#00499e' : '#eee',
-              color: searchMode === 'nearby' ? '#fff' : '#333',
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
+          </ToggleButton>
+          <ToggleButton active={mode === 'nearby'} onClick={() => setMode('nearby')}>
             내 주변
-          </button>
-        </div>
+          </ToggleButton>
+        </ToggleGroup>
 
         <SearchMenu
-          currentSearchMode={searchMode}
-          onSearchModeChange={setSearchMode}
           initialQuery={searchQuery}
-          initialSortBy={sortBy}
-          onSearch={(q, s) => {
-            setSearchQuery(q);
-            setSortBy(s);
-            setSelectedHospitalIdState(null);
-          }}
+          initialSortBy={sortBy as SortBy}
+          initialRadius={radius}
+          onSearch={handleSearch}
         />
 
-        {selectedHospitalIdState == null ? (
+        {selectedId == null ? (
           <HospitalList
             hospitals={hospitals}
-            loading={loading}
-            error={error}
+            loading={isLoading}
+            error={errObj}
+            currentPage={page}
+            onPageChange={handlePageChange}
             onHospitalSelect={(id) => {
               const h = hospitals.find((x) => x.hospitalId === id);
-              if (h) handleHospitalSelect(h);
+              if (h) selectHospital(h);
             }}
-            selectedHospitalId={selectedHospitalIdState}
+            selectedHospitalId={undefined}
           />
         ) : (
-          <HospitalDetailPanel
-            hospitalId={selectedHospitalIdState}
-            onClose={() => setSelectedHospitalIdState(null)}
-          />
+          <HospitalDetailPanel hospitalId={selectedId} onClose={() => setSelectedId(null)} />
         )}
-
-        {/*/>*/}
       </SidePanel>
     </MapContainer>
   );

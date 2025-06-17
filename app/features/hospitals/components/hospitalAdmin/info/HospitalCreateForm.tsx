@@ -370,9 +370,11 @@ const HospitalCreateForm: React.FC = () => {
         <Label>병원 이미지</Label>
         <FileInput id="hospitalImage" type="file" accept="image/*" onChange={handleImageChange} />
         <FileLabel htmlFor="hospitalImage">이미지 선택</FileLabel>
-        <PreviewWrapper>
-          <PreviewImage src={previewUrl} alt="미리보기" />
-        </PreviewWrapper>
+        {previewUrl && (
+          <PreviewWrapper>
+            <PreviewImage src={previewUrl} alt="미리보기" />
+          </PreviewWrapper>
+        )}
       </FieldWrapper>
       <FieldWrapper>
         <Label>서비스 이름</Label>
@@ -425,16 +427,18 @@ const HospitalCreateForm: React.FC = () => {
             }}
           >
             {/* 요일 */}
-            <select
+            <Select
               value={row.dayOfWeek}
-              onChange={(e) => handleScheduleChange(idx, 'dayOfWeek', e.target.value)}
+              onChange={(value: typeof row.dayOfWeek) =>
+                handleScheduleChange(idx, 'dayOfWeek', value)
+              }
             >
               {Object.entries(reverseDayOfWeekMap).map(([eng, kor]) => (
-                <option key={eng} value={eng}>
+                <Select.Option key={eng} value={eng}>
                   {kor}
-                </option>
+                </Select.Option>
               ))}
-            </select>
+            </Select>
             {/* 진료시간 */}
             <Select
               value={row.open || undefined}

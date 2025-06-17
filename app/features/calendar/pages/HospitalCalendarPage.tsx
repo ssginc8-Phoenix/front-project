@@ -60,7 +60,7 @@ const HospitalCalendarPage = () => {
   const navigate = useNavigate();
 
   const handleSidebarChange = (key: string) => {
-    const targetPath = `/hospitals/${key}`;
+    const targetPath = `/hospital/${key}`;
     if (window.location.pathname === targetPath) {
       navigate(0); // 새로고침
     } else {

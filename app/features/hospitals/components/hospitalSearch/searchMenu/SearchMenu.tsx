@@ -58,43 +58,44 @@ const SearchButton = styled.button`
 `;
 
 interface SearchMenuProps {
-  onSearch: (query: string, sortBy: string) => void;
+  /**
+   * query, sortBy, radius(km) 를 부모로 전달합니다
+   */
+  onSearch: (query: string, sortBy: 'NAME' | 'DISTANCE' | 'REVIEW_COUNT', radius: number) => void;
   initialQuery: string;
-  initialSortBy: string;
-  onSearchModeChange?: (
-    value: ((prevState: 'nearby' | 'global') => 'nearby' | 'global') | 'nearby' | 'global',
-  ) => void;
-  currentSearchMode?: 'nearby' | 'global';
+  initialSortBy: 'NAME' | 'DISTANCE' | 'REVIEW_COUNT';
+  /** 반경 초기값 (km) — 없으면 5km */
+  initialRadius?: number;
 }
 
-const SPECIALIZATION_OPTIONS = [
-  { value: '', label: '전체 진료 과목' },
-  { value: '내과', label: '내과' },
-  { value: '외과', label: '외과' },
-  { value: '소아청소년과', label: '소아청소년과' },
-  { value: '정형외과', label: '정형외과' },
-  { value: '피부과', label: '피부과' },
-  { value: '안과', label: '안과' },
-  { value: '이비인후과', label: '이비인후과' },
+// sortBy 옵션 중 NAME 은 별도 추가하므로 DISTANCE/REVIEW_COUNT 만
+const SORT_OPTIONS = [{ value: 'DISTANCE', label: '거리순' }];
+
+// radius 선택 옵션
+const RADIUS_OPTIONS = [
+  { value: 3, label: '3km' },
+  { value: 5, label: '5km' },
+  { value: 10, label: '10km' },
 ];
 
-const SORT_OPTIONS = [
-  { value: 'DISTANCE', label: '거리순' },
-  { value: 'RATING', label: '평점순' },
-  { value: 'REVIEW_COUNT', label: '리뷰 많은 순' },
-];
-
-const SearchMenu = ({ onSearch, initialQuery, initialSortBy }: SearchMenuProps) => {
+const SearchMenu: React.FC<SearchMenuProps> = ({
+  onSearch,
+  initialQuery,
+  initialSortBy,
+  initialRadius = 5,
+}) => {
   const [query, setQuery] = useState(initialQuery);
   const [sortBy, setSortBy] = useState(initialSortBy);
+  const [radius, setRadius] = useState<number>(initialRadius);
 
   useLayoutEffect(() => {
     setQuery(initialQuery);
     setSortBy(initialSortBy);
-  }, [initialQuery, initialSortBy]);
+    setRadius(initialRadius);
+  }, [initialQuery, initialSortBy, initialRadius]);
 
   const handleSearch = () => {
-    onSearch(query, sortBy);
+    onSearch(query, sortBy, radius);
   };
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
@@ -106,6 +107,7 @@ const SearchMenu = ({ onSearch, initialQuery, initialSortBy }: SearchMenuProps) 
   return (
     <MenuWrapper>
       <InputGroup>
+        {/* 검색어 */}
         <SearchInput
           type="text"
           placeholder="병원 이름, 의사 이름 검색"
@@ -114,7 +116,12 @@ const SearchMenu = ({ onSearch, initialQuery, initialSortBy }: SearchMenuProps) 
           onKeyDown={handleKeyDown}
         />
 
-        <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+        {/* 정렬 기준 */}
+        <Select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as 'NAME' | 'DISTANCE' | 'REVIEW_COUNT')}
+        >
+          <option value="NAME">전체(이름순)</option>
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -122,6 +129,16 @@ const SearchMenu = ({ onSearch, initialQuery, initialSortBy }: SearchMenuProps) 
           ))}
         </Select>
 
+        {/* 반경 선택 */}
+        <Select value={radius} onChange={(e) => setRadius(Number(e.target.value))}>
+          {RADIUS_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </Select>
+
+        {/* 검색 버튼 */}
         <SearchButton onClick={handleSearch}>검색</SearchButton>
       </InputGroup>
     </MenuWrapper>

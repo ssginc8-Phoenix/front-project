@@ -15,7 +15,8 @@ const Container = styled.div`
 
 const ImageWrapper = styled.div`
   position: relative;
-  width: 1100px;
+  max-width: 100%;
+  aspect-ratio: 1100 / 480;
   height: 480px;
   border-radius: 0.75rem;
   overflow: hidden;
@@ -174,14 +175,14 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
       {isModalOpen && (
         <Overlay onClick={() => setIsModalOpen(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            <img src={hospital.imageUrl} alt="원본 이미지" />
+            <img src={hospital.imageUrl || '/hospital-default.png'} alt="원본 이미지" />
           </ModalContent>
         </Overlay>
       )}
 
       <Container>
         <ImageWrapper onClick={() => setIsModalOpen(true)}>
-          <Image src={hospital.imageUrl} alt={hospital.name} />
+          <Image src={hospital.imageUrl || '/hospital-default.png'} alt={hospital.name} />
         </ImageWrapper>
 
         <Header>
@@ -205,7 +206,8 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
 
         {hospital.notice && (
           <NoticeBox>
-            <p>📢 {hospital.notice}</p>
+            <p>📢 공지사항 </p>
+            {hospital.notice}
           </NoticeBox>
         )}
 

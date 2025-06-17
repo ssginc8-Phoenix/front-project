@@ -175,7 +175,7 @@ const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, o
         <SectionLabel>📌 공지사항</SectionLabel>
         <Text>{hospital.notice ?? '공지사항 없음'}</Text>
 
-        <DetailButton onClick={() => navigate(`/hospitals/${hospital.hospitalId}`)}>
+        <DetailButton onClick={() => navigate(`/hospital/${hospital.hospitalId}`)}>
           병원 상세 보기
         </DetailButton>
       </Panel>

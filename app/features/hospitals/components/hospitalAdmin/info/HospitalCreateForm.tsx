@@ -298,8 +298,8 @@ const HospitalCreateForm: React.FC = () => {
             let raw = e.target.value.replace(/\D/g, ''); // 숫자만
             let formatted = '';
 
-            // 4자리 국번 (0507 등): 0507-1234-1234 (12자리)
-            if (/^0507/.test(raw)) {
+            // 1) 0507: 0507-1234-1234 (4-4-4, 총 12자리 숫자)
+            if (raw.startsWith('0507')) {
               raw = raw.slice(0, 12);
               if (raw.length <= 4) {
                 formatted = raw;
@@ -309,9 +309,9 @@ const HospitalCreateForm: React.FC = () => {
                 formatted = `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8)}`;
               }
 
-              // 2자리 국번 (02): 02-123-1234 (최대 10자리)
-            } else if (/^02/.test(raw)) {
-              raw = raw.slice(0, 10);
+              // 2) 02: 02-123-1234 (2-3-4, 총 9자리 숫자)
+            } else if (raw.startsWith('02')) {
+              raw = raw.slice(0, 9);
               if (raw.length <= 2) {
                 formatted = raw;
               } else if (raw.length <= 5) {
@@ -320,8 +320,8 @@ const HospitalCreateForm: React.FC = () => {
                 formatted = `${raw.slice(0, 2)}-${raw.slice(2, 5)}-${raw.slice(5)}`;
               }
 
-              // 3자리 국번 (010, 051 등): 010-1234-5678 / 051-123-4567 (11자리)
-            } else if (/^0\d{2}/.test(raw)) {
+              // 3) 010: 010-1234-1234 (3-4-4, 총 11자리 숫자)
+            } else if (raw.startsWith('010')) {
               raw = raw.slice(0, 11);
               if (raw.length <= 3) {
                 formatted = raw;
@@ -330,8 +330,20 @@ const HospitalCreateForm: React.FC = () => {
               } else {
                 formatted = `${raw.slice(0, 3)}-${raw.slice(3, 7)}-${raw.slice(7)}`;
               }
+
+              // 4) 그 외 3자리 국번 (예: 051): 051-123-1234 (3-3-4, 총 10자리 숫자)
+            } else if (/^0\d{2}/.test(raw)) {
+              raw = raw.slice(0, 10);
+              if (raw.length <= 3) {
+                formatted = raw;
+              } else if (raw.length <= 6) {
+                formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
+              } else {
+                formatted = `${raw.slice(0, 3)}-${raw.slice(3, 6)}-${raw.slice(6)}`;
+              }
+
+              // 5) 나머지 잘못된 국번은 숫자만 자르고 하이픈 없이
             } else {
-              // 잘못된 국번 → 그냥 자르기
               raw = raw.slice(0, 11);
               formatted = raw;
             }
@@ -342,7 +354,6 @@ const HospitalCreateForm: React.FC = () => {
             }));
           }}
           placeholder="예: 010-1234-5678"
-          maxLength={13}
         />
 
         {formErrors.phoneNumber && <Error>{formErrors.phoneNumber}</Error>}

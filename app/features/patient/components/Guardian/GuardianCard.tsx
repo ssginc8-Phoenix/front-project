@@ -1,6 +1,8 @@
 import styled from 'styled-components';
+import React from 'react';
 
 const Card = styled.div`
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -8,11 +10,10 @@ const Card = styled.div`
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   background-color: #fff;
-  cursor: pointer; /* 📌 카드에 커서 추가 */
+  cursor: pointer;
   transition: box-shadow 0.2s;
-
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* 살짝 hover 효과 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 `;
 
@@ -38,41 +39,44 @@ const Name = styled.div`
   font-weight: 600;
 `;
 
-const EditIcon = styled.button`
+const DeleteBtn = styled.button`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
   border: none;
-  background: none;
-  color: #9ca3af;
+  font-size: 1.2rem;
+  color: #999;
   cursor: pointer;
-  font-size: 1rem;
-
   &:hover {
-    color: #4b5563;
+    color: #ff4646;
   }
 `;
 
 interface Props {
   name: string;
-  onClick?: () => void; // 📌 카드 클릭 핸들러 추가
-  onEdit?: () => void; // 📌 수정 버튼 핸들러
+  onClick?: () => void;
+  onDelete: () => void;
 }
 
-const GuardianCard = ({ name, onClick, onEdit }: Props) => {
-  const handleEditClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 📌 카드 클릭 이벤트 막기
-    onEdit?.();
-  };
-
-  return (
-    <Card onClick={onClick}>
-      <Info>
-        <Avatar />
-        <Texts>
-          <Name>{name}</Name>
-        </Texts>
-      </Info>
-      <EditIcon onClick={handleEditClick}>✏️</EditIcon>
-    </Card>
-  );
-};
+const GuardianCard: React.FC<Props> = ({ name, onClick, onDelete }) => (
+  <Card onClick={onClick}>
+    <Info>
+      <Avatar />
+      <Texts>
+        <Name>{name}</Name>
+      </Texts>
+    </Info>
+    <DeleteBtn
+      onClick={(e) => {
+        e.stopPropagation();
+        onDelete();
+      }}
+      aria-label="삭제"
+    >
+      ×
+    </DeleteBtn>
+  </Card>
+);
 
 export default GuardianCard;

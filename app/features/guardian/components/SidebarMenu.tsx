@@ -17,8 +17,11 @@ interface SidebarMenuProps {
 }
 
 // Styled-components
+
 const Sidebar = styled.nav`
   width: 100%;
+  padding: 0 1rem; /* SidebarBox의 내부 패딩과 조화되도록 조정 */
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
 `;
 
 const SidebarMenuUl = styled.ul`
@@ -32,11 +35,12 @@ const SidebarMenuItem = styled.li<{ $active?: boolean }>`
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 8px 14px 18px;
-  font-size: 1.13rem;
+  padding: 14px 16px; /* 좌우 패딩을 SidebarBox의 좌우 패딩에 맞춤 */
+  font-size: 1.05rem;
   font-weight: 500;
-  color: ${({ $active }) => ($active ? '#1646a0' : '#222')};
-  background: ${({ $active }) => ($active ? '#f3f6fa' : 'none')};
+  /* 캘린더 관리 페이지의 활성 스타일 (파란 배경, 흰 텍스트)을 따름 */
+  color: ${({ $active }) => ($active ? 'white' : '#2c2c2c')}; /* 활성 시 흰색 텍스트 */
+  background: ${({ $active }) => ($active ? '#00499e' : 'none')}; /* 활성 시 파란색 배경 */
   border-radius: 10px;
   cursor: pointer;
   margin: 4px 0;
@@ -45,8 +49,16 @@ const SidebarMenuItem = styled.li<{ $active?: boolean }>`
     color 0.12s;
 
   &:hover {
-    background: #eef3fa;
-    color: #1646a0;
+    /* 호버 시에는 활성 배경색과 유사하게 유지하되 약간 밝게 */
+    background: ${({ $active }) => ($active ? '#003a7a' : '#eef3fa')};
+    color: ${({ $active }) => ($active ? 'white' : '#00499e')}; /* 호버 시 파란색 텍스트 (비활성) */
+  }
+
+  span {
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 `;
 
@@ -68,7 +80,7 @@ export const SidebarMenu: React.FC<SidebarMenuProps> = ({
           $active={item.key === activeKey}
           onClick={() => onChange(item.key)}
         >
-          <span style={{ fontSize: '1.29rem' }}>{item.icon}</span>
+          <span>{item.icon}</span>
           {item.label}
         </SidebarMenuItem>
       ))}

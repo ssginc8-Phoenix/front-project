@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import SidebarMenu from '~/features/patient/components/SidebarMenu';
+import SidebarMenu from '~/features/guardian/components/SidebarMenu'; // Patient SidebarMenu 사용
 import { guardianSidebarItems } from '~/features/guardian/constants/sidebarItems';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import {
@@ -10,24 +10,24 @@ import {
   deleteGuardianPatient,
   type PatientSummary,
 } from '~/features/guardian/api/guardianAPI';
-import ReusableModal from '~/features/patient/components/ReusableModal';
+import ReusableModal from '~/features/patient/components/ReusableModal'; // ReusableModal 경로 통일
 
 // --- 스타일 정의 ---
 const PageWrapper = styled.div`
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  display: flex;
-  gap: 48px;
-  background-color: #f8f9fa;
-  min-height: 100vh;
+  display: flex; /* CalendarPage와 동일 */
+  min-height: 100vh; /* CalendarPage와 동일 */
+  //background-color: #f0f4f8; /* CalendarPage와 동일 */
+  font-family: 'Segoe UI', sans-serif; /* CalendarPage와 동일 */
+  /* width, max-width, margin, padding, gap 제거. flex 컨테이너 역할만 */
 `;
 
 const MainSection = styled.div`
-  flex: 1;
+  flex: 1; /* CalendarPage의 ContentWrapper와 동일 */
+  padding: 2rem; /* CalendarPage의 ContentWrapper와 동일 */
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  position: relative;
+  margin-left: 48px; /* CalendarPage의 ContentWrapper와 동일한 간격 */
 `;
 
 const TitleWrapper = styled.div`
@@ -55,6 +55,9 @@ const InviteButton = styled.button`
   font-size: 1rem;
   cursor: pointer;
   font-weight: 500;
+  &:hover {
+    background: #003a7a; /* 호버 색상 추가 */
+  }
 `;
 
 const ListWrapper = styled.div`
@@ -64,7 +67,7 @@ const ListWrapper = styled.div`
 `;
 
 const Card = styled.div`
-  position: relative; /* 삭제 버튼 위치용 */
+  position: relative;
   background: #fff;
   border-radius: 12px;
   padding: 20px;
@@ -98,39 +101,41 @@ const PatientInfo = styled.div`
   color: #555;
 `;
 
+// SidebarBox 스타일 CalendarPage와 통일
 const SidebarBox = styled.div`
-  width: 280px;
-  background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 32px 0 20px 0;
+  width: 260px; /* CalendarPage와 동일한 너비 */
+  background: white;
+  border-right: 1px solid #e0e0e0; /* CalendarPage와 동일한 border */
+  padding: 2rem 1rem; /* CalendarPage와 동일한 패딩 */
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex-shrink: 0;
+  border-radius: 0 20px 20px 0; /* CalendarPage와 동일한 border-radius */
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05); /* CalendarPage와 동일한 box-shadow */
+  flex-shrink: 0; /* CalendarPage와 동일 */
 `;
 
 const ProfileSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 2rem; /* CalendarPage와 동일 */
 `;
 
 const ProfileEmoji = styled.div`
-  font-size: 5rem;
-  margin-bottom: 8px;
+  font-size: 4rem; /* CalendarPage와 동일 */
+  margin-bottom: 0.5rem; /* CalendarPage와 동일 */
 `;
 
 const ProfileName = styled.div`
-  font-weight: 700;
-  font-size: 1.5rem;
-  color: #333;
+  font-weight: bold; /* CalendarPage와 동일 */
+  font-size: 1.3rem; /* CalendarPage와 동일 */
+  color: #333; /* CalendarPage와 유사 */
 `;
 
 const ProfileRole = styled.div`
-  color: #666;
-  font-size: 1rem;
+  color: #777; /* CalendarPage와 동일 */
+  font-size: 1rem; /* CalendarPage와 동일 */
 `;
 
 const Input = styled.input`
@@ -151,11 +156,14 @@ const SubmitButton = styled.button`
   border-radius: 8px;
   font-size: 1.05rem;
   cursor: pointer;
+  &:hover {
+    background: #003a7a; /* 호버 색상 추가 */
+  }
 `;
 
 const ProfileImage = styled.img`
-  width: 5rem;
-  height: 5rem;
+  width: 80px; /* CalendarPage와 동일 */
+  height: 80px; /* CalendarPage와 동일 */
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 8px;
@@ -213,15 +221,8 @@ export const GuardianPatientPage = () => {
   const handleConfirmDelete = async () => {
     if (selectedPatientId == null) return;
     try {
-      // 1) 백엔드에서 soft‑delete
       await deleteGuardianPatient(selectedPatientId);
-
-      // 2) 로컬 상태에서 해당 환자만 필터링
       setPatients((prev) => prev.filter((p) => p.patientId !== selectedPatientId));
-
-      // (선택) 전체 다시 불러오고 싶다면:
-      // const updated = await getGuardianPatients();
-      // setPatients(updated);
     } catch (error) {
       console.error('삭제 실패', error);
       alert('삭제에 실패했습니다.');
@@ -304,8 +305,40 @@ export const GuardianPatientPage = () => {
             정말 이 환자 연결을 해제하시겠습니까?
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
-            <button onClick={() => setDeleteModalOpen(false)}>취소</button>
-            <button onClick={handleConfirmDelete}>삭제하기</button>
+            <button
+              onClick={() => setDeleteModalOpen(false)}
+              style={{
+                background: '#f3f3f3',
+                borderRadius: 16,
+                border: 'none',
+                padding: '10px 24px',
+                color: '#555',
+                fontWeight: 500,
+                fontSize: '1.05rem',
+                cursor: 'pointer',
+                transition: 'background 0.16s',
+                '&:hover': { background: '#e0e0e0' },
+              }}
+            >
+              취소
+            </button>
+            <button
+              onClick={handleConfirmDelete}
+              style={{
+                background: '#ff4646',
+                borderRadius: 16,
+                border: 'none',
+                padding: '10px 24px',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: '1.05rem',
+                cursor: 'pointer',
+                transition: 'background 0.16s',
+                '&:hover': { background: '#cc3737' },
+              }}
+            >
+              삭제하기
+            </button>
           </div>
         </ReusableModal>
       </PageWrapper>

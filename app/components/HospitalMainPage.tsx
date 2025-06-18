@@ -5,6 +5,8 @@ import Slider from 'react-slick';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import { useMyHospitalId } from '~/features/hospitals/hooks/useMyHospitalId';
+import ReviewSummaryCard from '~/features/reviews/component/common/ReviewSummaryCard';
 
 const ads = ['/ads/ad1.png', '/ads/ad2.png', '/ads/ad3.png'];
 
@@ -40,6 +42,7 @@ const infoItems = [
 export default function HospitalMainPage() {
   const navigate = useNavigate();
   const user = useLoginStore((s) => s.user);
+  const { hospitalId, loading, error } = useMyHospitalId();
 
   const sliderSettings = {
     dots: true,
@@ -79,6 +82,16 @@ export default function HospitalMainPage() {
           </Card>
         ))}
       </FeatureGrid>
+
+      {/* 🔹 리뷰 요약 AI 카드 */}
+      {loading && <p>병원 정보를 불러오는 중...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {hospitalId && (
+        <>
+          <SectionTitle>리뷰 요약</SectionTitle>
+          <ReviewSummaryCard hospitalId={hospitalId} />
+        </>
+      )}
 
       {/* 정보 카드 섹션 (연회색 배경) */}
       <InfoSectionContainer>
@@ -229,4 +242,11 @@ const InfoTitle = styled.p`
   font-weight: 500;
   color: #737373;
   line-height: 1.4;
+`;
+
+const SectionTitle = styled.h4`
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
 `;

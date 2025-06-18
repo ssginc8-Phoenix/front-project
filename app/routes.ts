@@ -11,6 +11,7 @@ export default [
 
   /** 결제  */
   route('/payments/request', 'routes/payments/paymentRequest.tsx'),
+  route('/payments/history', 'routes/payments/paymentHistory.tsx'),
 
   /** HOME  */
   route('', 'layout/MainPageLayout.tsx', [

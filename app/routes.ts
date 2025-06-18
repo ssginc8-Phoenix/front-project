@@ -9,6 +9,9 @@ export default [
   route('/reset-password', 'routes/passwordResetVerify.tsx'),
   route('/reset-password/set', 'routes/resetPassword.tsx'),
 
+  /** 결제  */
+  route('/payments/request', 'routes/payments/paymentRequest.tsx'),
+
   /** HOME  */
   route('', 'layout/MainPageLayout.tsx', [
     index('routes/main.tsx'),
@@ -23,7 +26,7 @@ export default [
     /** PATIENT 환자 영역 */
     route('patients', 'routes/patient/emptyPage.tsx', [
       route('info', 'routes/patient/patientInfoPage.tsx'),
-      route('guardian', 'routes/patient/guardian.tsx'),
+      // route('guardian', 'routes/patient/guardian.tsx'),
       route('calendar', 'routes/calendar/patientCalendar.tsx'),
     ]),
 

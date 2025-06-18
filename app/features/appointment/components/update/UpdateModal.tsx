@@ -2,6 +2,7 @@ import { useAppointmentDetail } from '~/features/appointment/hooks/useAppointmen
 import LoadingIndicator from '~/components/common/LoadingIndicator';
 import ErrorMessage from '~/components/common/ErrorMessage';
 import Button from '~/components/styled/Button';
+import styled from 'styled-components';
 import { RefreshButton } from '~/components/styled/RefreshButton';
 import { FiRefreshCw } from 'react-icons/fi';
 import { useAppointmentActions } from '~/features/appointment/hooks/useAppointmentActions';
@@ -18,13 +19,28 @@ import {
   Title,
   TitleRow,
 } from '../common/AppointmentModal.styles';
-import ButtonGroup from 'antd/es/button/button-group';
+import { useNavigate } from 'react-router';
 
 interface AppointmentUpdateModalProps {
   appointmentId: number;
   isOpen: boolean;
   onClose: () => void;
 }
+
+const ButtonStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 2rem;
+`;
+
+const ButtonRowCenter = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+`;
 
 const AppointmentUpdateModal = ({
   appointmentId,
@@ -39,17 +55,20 @@ const AppointmentUpdateModal = ({
     isRefetching,
   } = useAppointmentDetail(appointmentId);
 
+  const navigate = useNavigate();
   const { cancelAppointment, updateAppointmentStatus } = useAppointmentActions();
 
   const canConfirm = appointment?.status === 'REQUESTED';
   const canModify = appointment?.status === 'REQUESTED' || appointment?.status === 'CONFIRMED';
+  let canRequestPayment =
+    appointment?.paymentType === 'ONLINE' && appointment?.status === 'COMPLETED';
 
   /** 예약 취소 */
   const handleCancel = async () => {
     if (!appointment) return;
     const success = await cancelAppointment(appointment.appointmentId);
     if (success) {
-      refetch();
+      await refetch();
     }
   };
 
@@ -58,7 +77,7 @@ const AppointmentUpdateModal = ({
     if (!appointment) return;
     const success = await updateAppointmentStatus(appointment.appointmentId, 'CONFIRMED');
     if (success) {
-      refetch();
+      await refetch();
     }
   };
 
@@ -67,8 +86,16 @@ const AppointmentUpdateModal = ({
     if (!appointment) return;
     const success = await updateAppointmentStatus(appointment.appointmentId, 'COMPLETED');
     if (success) {
-      refetch();
+      await refetch();
+      if (appointment?.paymentType === 'ONLINE') {
+        canRequestPayment = true;
+      }
     }
+  };
+
+  /** 결제 요청 페이지로 이동 */
+  const handlePaymentRequest = () => {
+    navigate(`/payments/request?appointmentId=${appointment?.appointmentId}`);
   };
 
   return (
@@ -142,27 +169,36 @@ const AppointmentUpdateModal = ({
                 <InfoText>{appointment.paymentType}</InfoText>
               </Section>
 
-              {canModify && (
-                <ButtonGroup>
-                  {canConfirm && (
-                    <Button $variant="secondary" onClick={handleConfirm}>
-                      예약 승인
+              <ButtonStack>
+                <ButtonRowCenter>
+                  {canModify && (
+                    <>
+                      <Button $variant="secondary" onClick={handleCancel}>
+                        예약 취소
+                      </Button>
+                      {canConfirm && (
+                        <Button $variant="secondary" onClick={handleConfirm}>
+                          예약 승인
+                        </Button>
+                      )}
+                      <Button $variant="secondary" onClick={handleComplete}>
+                        예약 완료
+                      </Button>
+                    </>
+                  )}
+                </ButtonRowCenter>
+
+                <ButtonRowCenter>
+                  {canRequestPayment && (
+                    <Button $variant="primary" onClick={handlePaymentRequest}>
+                      결제 요청
                     </Button>
                   )}
-                  <Button $variant="secondary" onClick={handleComplete}>
-                    예약 완료
+                  <Button $variant="primary" onClick={onClose}>
+                    닫기
                   </Button>
-                  <Button $variant="secondary" onClick={handleCancel}>
-                    예약 취소
-                  </Button>
-                </ButtonGroup>
-              )}
-
-              <ButtonGroup>
-                <Button $variant="primary" onClick={onClose}>
-                  닫기
-                </Button>
-              </ButtonGroup>
+                </ButtonRowCenter>
+              </ButtonStack>
             </>
           )}
         </Modal>

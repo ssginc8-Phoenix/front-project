@@ -18,6 +18,7 @@ interface SidebarMenuProps {
 
 // Styled-components
 
+// Sidebar 자체는 SidebarBox 내부에 있으므로, Sidebar의 너비는 100%로 설정하는 것이 적절합니다.
 const Sidebar = styled.nav`
   width: 100%;
   padding: 0 1rem; /* SidebarBox의 내부 패딩과 조화되도록 조정 */
@@ -35,12 +36,13 @@ const SidebarMenuItem = styled.li<{ $active?: boolean }>`
   display: flex;
   align-items: center;
   gap: 12px;
+  /* SidebarBox의 좌우 패딩이 1rem(16px)이므로, item 자체의 좌우 패딩을 조정하여 일관성 유지 */
   padding: 14px 16px; /* 좌우 패딩을 SidebarBox의 좌우 패딩에 맞춤 */
-  font-size: 1.05rem;
+  font-size: 1.05rem; /* 폰트 크기 미세 조정 (기존 1.13rem -> 1.05rem) */
   font-weight: 500;
-  /* 캘린더 관리 페이지의 활성 스타일 (파란 배경, 흰 텍스트)을 따름 */
-  color: ${({ $active }) => ($active ? 'white' : '#2c2c2c')}; /* 활성 시 흰색 텍스트 */
-  background: ${({ $active }) => ($active ? '#00499e' : 'none')}; /* 활성 시 파란색 배경 */
+  color: ${({ $active }) =>
+    $active ? '#00499e' : '#2c2c2c'}; /* 활성 색상 통일, 비활성 색상 조정 */
+  background: ${({ $active }) => ($active ? '#e0edff' : 'none')}; /* 활성 배경색 통일 */
   border-radius: 10px;
   cursor: pointer;
   margin: 4px 0;
@@ -49,14 +51,13 @@ const SidebarMenuItem = styled.li<{ $active?: boolean }>`
     color 0.12s;
 
   &:hover {
-    /* 호버 시에는 활성 배경색과 유사하게 유지하되 약간 밝게 */
-    background: ${({ $active }) => ($active ? '#003a7a' : '#eef3fa')};
-    color: ${({ $active }) => ($active ? 'white' : '#00499e')}; /* 호버 시 파란색 텍스트 (비활성) */
+    background: #eef3fa; /* 호버 배경색 조정 */
+    color: #00499e; /* 호버 텍스트 색상 통일 */
   }
 
   span {
-    font-size: 1.25rem;
-    display: flex;
+    font-size: 1.25rem; /* 아이콘 크기 미세 조정 (기존 1.29rem -> 1.25rem) */
+    display: flex; /* 아이콘 중앙 정렬을 위해 flex 추가 */
     align-items: center;
     justify-content: center;
   }
@@ -72,7 +73,7 @@ export const SidebarMenu: React.FC<SidebarMenuProps> = ({
   children,
 }) => (
   <Sidebar>
-    {children}
+    {children} {/* 프로필 섹션 등 외부에서 넘겨주는 children 렌더링 */}
     <SidebarMenuUl>
       {items.map((item) => (
         <SidebarMenuItem
@@ -80,6 +81,7 @@ export const SidebarMenu: React.FC<SidebarMenuProps> = ({
           $active={item.key === activeKey}
           onClick={() => onChange(item.key)}
         >
+          {/* 아이콘에 직접 스타일을 적용하지 않고, SidebarMenuItem 내부 span에 스타일 적용 */}
           <span>{item.icon}</span>
           {item.label}
         </SidebarMenuItem>

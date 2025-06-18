@@ -16,7 +16,7 @@ import ReusableModal from '~/features/patient/components/ReusableModal'; // Reus
 const PageWrapper = styled.div`
   display: flex; /* CalendarPage와 동일 */
   min-height: 100vh; /* CalendarPage와 동일 */
-  //background-color: #f0f4f8; /* CalendarPage와 동일 */
+  background-color: #f0f4f8; /* CalendarPage와 동일 */
   font-family: 'Segoe UI', sans-serif; /* CalendarPage와 동일 */
   /* width, max-width, margin, padding, gap 제거. flex 컨테이너 역할만 */
 `;

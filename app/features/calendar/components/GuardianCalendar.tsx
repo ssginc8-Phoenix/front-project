@@ -4,11 +4,13 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import styled from 'styled-components';
 import { getGuardianCalendar } from '~/features/calendar/api/CalendarAPI';
-import { getMedicationSchedule } from '~/features/medication/api/medicationAPI';
+import {
+  getMedicationSchedule,
+  deleteMedicationSchedule,
+} from '~/features/medication/api/medicationAPI';
 import CommonModal from '~/components/common/CommonModal';
 import MedicationRegisterModal from '~/features/medication/components/MedicationRegisterModal';
 import { getMyGuardianInfo } from '~/features/guardian/api/guardianAPI';
-import { deleteMedicationSchedule } from '~/features/medication/api/medicationAPI';
 import { Overlay } from '~/features/hospitals/components/waiting/WaitingModal';
 
 const PageContainer = styled.div`
@@ -91,11 +93,11 @@ const CalendarWrapper = styled.div`
   .react-calendar__tile {
     border-radius: 12px;
     padding: 0.75rem 0.5rem;
-    transition: background 0.2s ease;
     min-height: 100px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    transition: background 0.2s ease;
   }
   .react-calendar__tile--now {
     background: #e3f2fd;
@@ -105,7 +107,6 @@ const CalendarWrapper = styled.div`
     background: #90caf9 !important;
     color: white;
   }
-
   .calendar-day-wrapper {
     display: flex;
     flex-direction: column;
@@ -130,7 +131,6 @@ const CalendarWrapper = styled.div`
     background-color: #e0f0ff;
     color: #1a5da2;
   }
-
   .react-calendar__month-view__days__day:nth-child(7n) {
     color: black !important;
   }
@@ -144,6 +144,7 @@ const AddMedicationButton = styled.button`
   color: #1d4ed8;
   border-radius: 8px;
   background: #fff;
+  cursor: pointer;
   &:hover {
     background-color: #e0edff;
   }
@@ -158,13 +159,17 @@ export default function GuardianCalendar() {
     name: string;
     patientGuardianId: number;
   } | null>(null);
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeDate, setActiveDate] = useState(new Date());
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalItems, setModalItems] = useState<any[]>([]);
   const [modalDate, setModalDate] = useState('');
+
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [itemDetailOpen, setItemDetailOpen] = useState(false);
+
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const [guardianUserId, setGuardianUserId] = useState<number | null>(null);
 
@@ -180,7 +185,10 @@ export default function GuardianCalendar() {
     setFullList(res.calendarItemLists);
     const names = res.calendarItemLists
       .filter((it: any) => it.name)
-      .map((it: any) => ({ name: it.name, patientGuardianId: it.patientGuardianId }));
+      .map((it: any) => ({
+        name: it.name,
+        patientGuardianId: it.patientGuardianId,
+      }));
     setPatientList(names);
 
     if (names.length === 1) {
@@ -210,22 +218,18 @@ export default function GuardianCalendar() {
           ? calendarItems.map((i: any) => ({ ...i, name: pname }))
           : [],
     );
-    const grouped = flat.reduce((acc: Record<string, any[]>, item: any) => {
-      (acc[item.date] ||= []).push(item);
-      return acc;
-    }, {});
+
+    const grouped: Record<string, any[]> = {};
+    flat.forEach((item) => {
+      (grouped[item.date] ||= []).push(item);
+    });
     setCalendarData(grouped);
   };
 
   const openDetail = async (item: any) => {
     if (item.itemType === 'MEDICATION') {
-      try {
-        const detail = await getMedicationSchedule(item.relatedId);
-        setSelectedItem({ ...item, ...detail });
-      } catch {
-        alert('상세 정보를 불러오는 데 실패했습니다.');
-        return;
-      }
+      const detail = await getMedicationSchedule(item.relatedId);
+      setSelectedItem({ ...item, ...detail });
     } else {
       setSelectedItem(item);
     }
@@ -234,6 +238,7 @@ export default function GuardianCalendar() {
 
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
+
     const ds = getLocalDateString(date);
     const items = (calendarData[ds] || []).filter((it: any) => {
       if (it.itemType === 'MEDICATION') {
@@ -264,6 +269,7 @@ export default function GuardianCalendar() {
             {item.itemType === 'MEDICATION' ? '💊' : '🏥'} {item.title}
           </div>
         ))}
+
         {items.length > 3 && (
           <div
             style={{ fontSize: '0.7rem', color: '#888', cursor: 'pointer' }}
@@ -295,6 +301,7 @@ export default function GuardianCalendar() {
               <span>약 복용</span>
             </div>
           </Legend>
+
           <PatientSelector>
             <PatientButton
               className={selectedName === '전체' ? 'active' : ''}
@@ -306,6 +313,7 @@ export default function GuardianCalendar() {
             >
               전체
             </PatientButton>
+
             {patientList.map((p) => (
               <PatientButton
                 key={p.patientGuardianId}
@@ -386,7 +394,7 @@ export default function GuardianCalendar() {
         {/* 날짜별 리스트 모달 */}
         {modalOpen && (
           <CommonModal
-            title={`${modalDate} 일정`}
+            title={`${modalDate} 일정 전체보기`}
             buttonText="닫기"
             onClose={() => setModalOpen(false)}
           >
@@ -414,7 +422,7 @@ export default function GuardianCalendar() {
           </CommonModal>
         )}
 
-        {/* 상세정보 모달 (환자 이름+약복용 스타일 복원) */}
+        {/* 상세정보 모달 (수정·삭제 버튼 포함) */}
         {itemDetailOpen && selectedItem && (
           <CommonModal
             title={`${selectedItem.date} 상세정보`}
@@ -463,9 +471,16 @@ export default function GuardianCalendar() {
               </p>
               <p>
                 <strong>시간:</strong>{' '}
-                {`아침 ${selectedItem.times?.find((t: any) => t.meal === 'morning')?.time.slice(0, 5) ?? '--:--'} : `}
-                {`점심 ${selectedItem.times?.find((t: any) => t.meal === 'lunch')?.time.slice(0, 5) ?? '--:--'} : `}
-                {`저녁 ${selectedItem.times?.find((t: any) => t.meal === 'dinner')?.time.slice(0, 5) ?? '--:--'}`}
+                {['morning', 'lunch', 'dinner']
+                  .map((meal) => {
+                    // 해당 끼니 데이터만 꺼내오기
+                    const t = selectedItem.times?.find((x: any) => x.meal === meal);
+                    if (!t) return null;
+                    const label = meal === 'morning' ? '아침' : meal === 'lunch' ? '점심' : '저녁';
+                    return `${label} ${t.time.slice(0, 5)}`;
+                  })
+                  .filter(Boolean) // 선택된 끼니만
+                  .join(' | ')}{' '}
               </p>
               <p>
                 <strong>복용 시작일:</strong> {selectedItem.startDate}
@@ -473,6 +488,48 @@ export default function GuardianCalendar() {
               <p>
                 <strong>복용 종료일:</strong> {selectedItem.endDate}
               </p>
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  justifyContent: 'flex-end',
+                  marginTop: '1rem',
+                }}
+              >
+                <button
+                  onClick={() => {
+                    setItemDetailOpen(false);
+                    setRegisterModalOpen(true);
+                  }}
+                  style={{
+                    background: '#e0e7ff',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    border: 'none',
+                  }}
+                >
+                  수정
+                </button>
+                <button
+                  onClick={async () => {
+                    if (window.confirm('정말 삭제하시겠습니까?')) {
+                      await deleteMedicationSchedule(selectedItem.relatedId);
+                      setItemDetailOpen(false);
+                      await fetchData();
+                    }
+                  }}
+                  style={{
+                    background: '#fee2e2',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    border: 'none',
+                    color: '#b91c1c',
+                  }}
+                >
+                  삭제
+                </button>
+              </div>
             </div>
           </CommonModal>
         )}

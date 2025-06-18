@@ -1,4 +1,4 @@
-// MedicationRegisterModal.tsx
+// src/features/medication/components/MedicationRegisterModal.tsx
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import {
@@ -52,6 +52,14 @@ const Label = styled.div`
   margin-top: 1.2rem;
   margin-bottom: 0.5rem;
   font-weight: bold;
+`;
+
+const Select = styled.select`
+  width: 50%;
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
 `;
 
 const Input = styled.input`
@@ -120,9 +128,17 @@ interface MedicationData {
   times?: { meal: 'morning' | 'lunch' | 'dinner'; time: string }[];
 }
 
+interface PatientInfo {
+  name: string;
+  patientGuardianId: number;
+}
+
 interface Props {
   date: string;
-  patientGuardianId: number;
+  // 선택된 단일 환자 (수정 모드)
+  patientGuardianId?: number;
+  // 전체 모드용 환자 리스트
+  patients: PatientInfo[];
   initialData?: MedicationData;
   onClose: () => void;
 }
@@ -136,10 +152,17 @@ const mealOptions = [
 export default function MedicationRegisterModal({
   date,
   patientGuardianId,
+  patients,
   initialData,
   onClose,
 }: Props) {
   const { user } = useLoginStore();
+
+  // 드롭다운 선택값: 'all' 혹은 환자ID (문자열)
+  const [selectedTarget, setSelectedTarget] = useState<string>(
+    initialData ? String(patientGuardianId!) : 'all',
+  );
+
   const [medicationName, setMedicationName] = useState('');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [startDate, setStartDate] = useState(date);
@@ -153,21 +176,17 @@ export default function MedicationRegisterModal({
 
   useEffect(() => {
     if (!initialData) return;
-
     setMedicationName(initialData.medicationName);
     setSelectedDays(initialData.days);
     setStartDate(initialData.startDate);
     setEndDate(initialData.endDate);
-
-    const times = initialData.times ?? [];
-    const meals = Array.from(new Set(times.map((t) => t.meal)));
+    const meals = Array.from(new Set(initialData.times?.map((t) => t.meal) || []));
     setSelectedMeals(meals);
-
-    const timesMap: Record<string, string> = {};
-    times.forEach((t) => {
-      timesMap[t.meal] = t.time.slice(0, 5);
+    const map: Record<string, string> = {};
+    initialData.times?.forEach((t) => {
+      map[t.meal] = t.time.slice(0, 5);
     });
-    setMealTimes((prev) => ({ ...prev, ...timesMap }));
+    setMealTimes((prev) => ({ ...prev, ...map }));
   }, [initialData]);
 
   const toggleDay = (day: string) => {
@@ -183,6 +202,11 @@ export default function MedicationRegisterModal({
   };
 
   const handleSubmit = async () => {
+    // 전체 혹은 하나 선택 검사
+    if (!initialData && selectedTarget === '') {
+      alert('환자를 선택해주세요.');
+      return;
+    }
     if (!medicationName.trim()) {
       alert('약 이름을 입력해주세요.');
       return;
@@ -199,6 +223,7 @@ export default function MedicationRegisterModal({
 
     try {
       if (initialData) {
+        // 수정 모드 (단일)
         await updateMedicationSchedule(initialData.medicationId, {
           newTimes: timesPayload,
           newDays: selectedDays,
@@ -207,16 +232,28 @@ export default function MedicationRegisterModal({
         });
         alert('수정되었습니다.');
       } else {
-        await postMedicationSchedule({
-          userId: user?.userId ?? 0,
-          patientGuardianId,
-          medicationName: medicationName.trim(),
-          times: timesPayload,
-          days: selectedDays,
-          startDate,
-          endDate,
-        });
-        alert('등록되었습니다.');
+        // 등록 모드
+        const targets =
+          selectedTarget === 'all'
+            ? patients.map((p) => p.patientGuardianId)
+            : [Number(selectedTarget)];
+
+        for (const pid of targets) {
+          await postMedicationSchedule({
+            userId: user?.userId ?? 0,
+            patientGuardianId: pid,
+            medicationName: medicationName.trim(),
+            times: timesPayload,
+            days: selectedDays,
+            startDate,
+            endDate,
+          });
+        }
+        alert(
+          selectedTarget === 'all'
+            ? '모든 환자에게 등록되었습니다.'
+            : '선택된 환자에게 등록되었습니다.',
+        );
       }
       onClose();
     } catch {
@@ -228,6 +265,21 @@ export default function MedicationRegisterModal({
     <ModalBox>
       <ModalHeader>{initialData ? '💊 약 수정' : '💊 약 등록'}</ModalHeader>
       <ModalBody>
+        {/* 전체 모드일 때만 드롭다운 */}
+        {!initialData && (
+          <>
+            <Label>👤 환자 선택</Label>
+            <Select value={selectedTarget} onChange={(e) => setSelectedTarget(e.target.value)}>
+              <option value="all">전체</option>
+              {patients.map((p) => (
+                <option key={p.patientGuardianId} value={String(p.patientGuardianId)}>
+                  {p.name}
+                </option>
+              ))}
+            </Select>
+          </>
+        )}
+
         <Label>💊 약 이름</Label>
         <Input
           type="text"
@@ -262,24 +314,16 @@ export default function MedicationRegisterModal({
           ))}
         </ButtonGroup>
 
-        {selectedMeals.map((meal, idx) => {
-          const label = mealOptions.find((m) => m.value === meal)!.label;
-          return (
-            <div key={`${meal}-${idx}`} style={{ width: '80%' }}>
-              <Label>{label} 시간</Label>
-              <TimeInput
-                type="time"
-                value={mealTimes[meal]}
-                onChange={(e) =>
-                  setMealTimes((prev) => ({
-                    ...prev,
-                    [meal]: e.target.value,
-                  }))
-                }
-              />
-            </div>
-          );
-        })}
+        {selectedMeals.map((meal) => (
+          <div key={meal} style={{ width: '80%' }}>
+            <Label>{mealOptions.find((x) => x.value === meal)!.label} 시간</Label>
+            <TimeInput
+              type="time"
+              value={mealTimes[meal]}
+              onChange={(e) => setMealTimes((prev) => ({ ...prev, [meal]: e.target.value }))}
+            />
+          </div>
+        ))}
 
         <Label>📌 복용 시작일</Label>
         <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
@@ -287,7 +331,6 @@ export default function MedicationRegisterModal({
         <Label>📌 복용 종료일</Label>
         <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
       </ModalBody>
-
       <ModalFooter>
         <ActionButton onClick={onClose}>취소</ActionButton>
         <ActionButton onClick={handleSubmit}>{initialData ? '수정하기' : '등록하기'}</ActionButton>

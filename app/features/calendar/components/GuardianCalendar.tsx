@@ -1,4 +1,4 @@
-// GuardianCalendar.tsx
+// src/features/calendar/pages/GuardianCalendar.tsx
 import { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -120,6 +120,7 @@ const CalendarWrapper = styled.div`
     align-items: center;
     gap: 4px;
     word-break: keep-all;
+    cursor: pointer;
   }
   .medication {
     background-color: #e6fbe5;
@@ -216,7 +217,6 @@ export default function GuardianCalendar() {
     setCalendarData(grouped);
   };
 
-  // 상세 모달 열기 전에 times 정보를 백엔드에서 가져옵니다.
   const openDetail = async (item: any) => {
     if (item.itemType === 'MEDICATION') {
       try {
@@ -260,7 +260,6 @@ export default function GuardianCalendar() {
               e.stopPropagation();
               openDetail(item);
             }}
-            style={{ cursor: 'pointer' }}
           >
             {item.itemType === 'MEDICATION' ? '💊' : '🏥'} {item.title}
           </div>
@@ -325,11 +324,6 @@ export default function GuardianCalendar() {
 
         <AddMedicationButton
           onClick={() => {
-            if (!selectedPatient) {
-              alert('환자 정보를 확인해주세요.');
-              return;
-            }
-            // ❗ 기존 선택 항목 초기화
             setSelectedItem(null);
             setRegisterModalOpen(true);
           }}
@@ -360,12 +354,13 @@ export default function GuardianCalendar() {
         </CalendarWrapper>
 
         {/* 등록/수정 모달 */}
-        {registerModalOpen && selectedPatient && guardianUserId !== null && (
+        {registerModalOpen && guardianUserId !== null && (
           <Overlay onClick={() => setRegisterModalOpen(false)}>
             <div onClick={(e) => e.stopPropagation()}>
               <MedicationRegisterModal
                 date={selectedDate.toISOString().slice(0, 10)}
-                patientGuardianId={selectedPatient.patientGuardianId}
+                patientGuardianId={selectedPatient?.patientGuardianId}
+                patients={patientList}
                 initialData={
                   selectedItem?.itemType === 'MEDICATION'
                     ? {
@@ -419,7 +414,7 @@ export default function GuardianCalendar() {
           </CommonModal>
         )}
 
-        {/* 상세정보 모달 */}
+        {/* 상세정보 모달 (환자 이름+약복용 스타일 복원) */}
         {itemDetailOpen && selectedItem && (
           <CommonModal
             title={`${selectedItem.date} 상세정보`}
@@ -450,97 +445,34 @@ export default function GuardianCalendar() {
                 </span>
                 <span
                   style={{
-                    border: '2px solid #000',
+                    border: '2px solid #003458',
                     backgroundColor: '#003458',
-                    padding: '2px 10px',
                     color: '#ECEAE4',
+                    padding: '2px 10px',
                     borderRadius: '12px',
                     fontSize: '0.8rem',
                     fontWeight: 600,
                   }}
                 >
-                  {selectedItem.itemType === 'MEDICATION' ? '약 복용' : '일반진료'}
+                  약 복용
                 </span>
               </div>
 
               <p>
                 <strong>제목:</strong> {selectedItem.title}
               </p>
-
-              {/* 아침 : 점심 : 저녁 요약 */}
-              {selectedItem.itemType === 'MEDICATION' && (
-                <p>
-                  <strong>시간:</strong>{' '}
-                  {['morning', 'lunch', 'dinner'].map((m, i) => {
-                    const e = selectedItem.times?.find((t: any) => t.meal === m);
-                    const lb = m === 'morning' ? '아침' : m === 'lunch' ? '점심' : '저녁';
-                    const ts = e ? e.time.slice(0, 5) : '--:--';
-                    return (
-                      <span key={`${m}-${i}`}>
-                        {lb} {ts}
-                        {i < 2 ? ' : ' : ''}
-                      </span>
-                    );
-                  })}
-                </p>
-              )}
-
-              {/* 복용 시작/종료일 */}
-              {selectedItem.itemType === 'MEDICATION' && (
-                <>
-                  <p>
-                    <strong>복용 시작일:</strong> {selectedItem.startDate}
-                  </p>
-                  <p>
-                    <strong>복용 종료일:</strong> {selectedItem.endDate}
-                  </p>
-                </>
-              )}
-
-              {/* 수정/삭제 버튼 */}
-              {selectedItem.itemType === 'MEDICATION' && (
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '1rem',
-                    justifyContent: 'flex-end',
-                    marginTop: '1rem',
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      setItemDetailOpen(false);
-                      setRegisterModalOpen(true);
-                    }}
-                    style={{
-                      background: '#e0e7ff',
-                      padding: '0.5rem 1rem',
-                      borderRadius: '8px',
-                      border: 'none',
-                    }}
-                  >
-                    수정
-                  </button>
-                  <button
-                    onClick={async () => {
-                      if (window.confirm('정말 삭제하시겠습니까?')) {
-                        await deleteMedicationSchedule(selectedItem.relatedId);
-                        setItemDetailOpen(false);
-                        await fetchData();
-                      }
-                    }}
-                    style={{
-                      background: '#fee2e2',
-                      padding: '0.5rem 1rem',
-                      borderRadius: '8px',
-                      border: 'none',
-                      color: '#b91c1c',
-                    }}
-                  >
-                    삭제
-                  </button>
-                </div>
-              )}
+              <p>
+                <strong>시간:</strong>{' '}
+                {`아침 ${selectedItem.times?.find((t: any) => t.meal === 'morning')?.time.slice(0, 5) ?? '--:--'} : `}
+                {`점심 ${selectedItem.times?.find((t: any) => t.meal === 'lunch')?.time.slice(0, 5) ?? '--:--'} : `}
+                {`저녁 ${selectedItem.times?.find((t: any) => t.meal === 'dinner')?.time.slice(0, 5) ?? '--:--'}`}
+              </p>
+              <p>
+                <strong>복용 시작일:</strong> {selectedItem.startDate}
+              </p>
+              <p>
+                <strong>복용 종료일:</strong> {selectedItem.endDate}
+              </p>
             </div>
           </CommonModal>
         )}

@@ -202,11 +202,19 @@ export default function GuardianCalendar() {
   }, [activeDate]);
 
   const updateCalendarData = (lists: any[], name: string) => {
-    const flat = lists.flatMap(({ name: pname, calendarItems }: any) =>
+    const flat = lists.flatMap(({ name: pname, patientGuardianId, calendarItems }: any) =>
       name === '전체'
-        ? calendarItems.map((i: any) => ({ ...i, name: pname }))
+        ? calendarItems.map((i: any) => ({
+            ...i,
+            name: pname,
+            patientGuardianId, // ← 여기에 ID 추가
+          }))
         : pname === name
-          ? calendarItems.map((i: any) => ({ ...i, name: pname }))
+          ? calendarItems.map((i: any) => ({
+              ...i,
+              name: pname,
+              patientGuardianId, // ← 여기에 ID 추가
+            }))
           : [],
     );
     const grouped = flat.reduce((acc: Record<string, any[]>, item: any) => {
@@ -360,12 +368,17 @@ export default function GuardianCalendar() {
         </CalendarWrapper>
 
         {/* 등록/수정 모달 */}
-        {registerModalOpen && selectedPatient && guardianUserId !== null && (
+        {registerModalOpen && guardianUserId !== null && (selectedPatient || selectedItem) && (
           <Overlay onClick={() => setRegisterModalOpen(false)}>
             <div onClick={(e) => e.stopPropagation()}>
               <MedicationRegisterModal
                 date={selectedDate.toISOString().slice(0, 10)}
-                patientGuardianId={selectedPatient.patientGuardianId}
+                // selectedPatient가 없으면 selectedItem.patientGuardianId 사용
+                patientGuardianId={
+                  selectedPatient
+                    ? selectedPatient.patientGuardianId
+                    : selectedItem.patientGuardianId
+                }
                 initialData={
                   selectedItem?.itemType === 'MEDICATION'
                     ? {

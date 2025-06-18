@@ -1,21 +1,22 @@
-// src/features/qna/pages/DoctorQnaListPage.tsx
-
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useDoctorQnAs } from '~/features/qna/hooks/useDoctorQnAs';
 import QaChatModal from '~/features/qna/component/QaChatModal';
+import Pagination from '~/components/common/Pagination';
 
 export const DoctorQnaListPage: React.FC = () => {
   const [tab, setTab] = useState<'PENDING' | 'COMPLETED'>('PENDING');
   const [page, setPage] = useState(0);
   const size = 10;
 
-  // 각각의 상태별 전체 개수만 조회
   const pendingQuery = useDoctorQnAs('PENDING', 0, 1);
   const completedQuery = useDoctorQnAs('COMPLETED', 0, 1);
-
-  // 현재 선택된 탭에 대한 데이터 조회
-  const { data, isLoading, isError } = useDoctorQnAs(tab, page, size);
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch, // 여기 refetch 추가
+  } = useDoctorQnAs(tab, page, size);
 
   const [openId, setOpenId] = useState<number | null>(null);
 
@@ -24,7 +25,7 @@ export const DoctorQnaListPage: React.FC = () => {
 
   return (
     <Container>
-      <Header>💬 의사 Q&A </Header>
+      <Header>💬 의사 Q&A</Header>
 
       <TabBar>
         <Tab
@@ -60,20 +61,26 @@ export const DoctorQnaListPage: React.FC = () => {
         </List>
       )}
 
-      <Pagination>
-        <PageButton disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
-          이전
-        </PageButton>
-        <PageInfo>
-          {page + 1} / {data.totalPages}
-        </PageInfo>
-        <PageButton disabled={page + 1 >= data.totalPages} onClick={() => setPage((p) => p + 1)}>
-          다음
-        </PageButton>
-      </Pagination>
+      <PaginationWrapper>
+        <Pagination
+          currentPage={page}
+          totalPages={data.totalPages}
+          onPageChange={(newPage) => setPage(newPage)}
+        />
+      </PaginationWrapper>
 
       {openId !== null && (
-        <QaChatModal qnaId={openId} onClose={() => setOpenId(null)} showInput={tab === 'PENDING'} />
+        <QaChatModal
+          qnaId={openId}
+          onClose={() => {
+            setOpenId(null); // 모달 닫기
+            setTab('PENDING'); // 대기중 탭으로 강제 이동
+            setPage(0); // 첫 페이지로 이동
+            refetch(); // 리스트 갱신
+          }}
+          showInput={tab === 'PENDING'}
+          isDoctor={true}
+        />
       )}
     </Container>
   );
@@ -140,26 +147,8 @@ const Meta = styled.div`
   color: #888;
 `;
 
-const Pagination = styled.div`
+const PaginationWrapper = styled.div`
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin-top: 24px;
-`;
-
-const PageButton = styled.button`
-  padding: 6px 12px;
-  border: none;
-  background: #eee;
-  cursor: pointer;
-  &:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-`;
-
-const PageInfo = styled.span`
-  font-size: 0.875rem;
-  color: #555;
+  margin-top: 2rem;
 `;

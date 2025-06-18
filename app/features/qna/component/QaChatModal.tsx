@@ -5,10 +5,18 @@ import { useQnAchat } from '~/features/qna/hooks/useQnAchat';
 interface Props {
   qnaId: number;
   onClose: () => void;
-  showInput?: boolean; // 대기중 탭에서만 true
+  onChange?: () => void; // ✅ 추가: 외부에서 QnA 리스트 갱신 콜백
+  showInput?: boolean;
+  isDoctor?: boolean;
 }
 
-export default function QaChatModal({ qnaId, onClose, showInput = false }: Props) {
+export default function QaChatModal({
+  qnaId,
+  onClose,
+  onChange,
+  showInput = false,
+  isDoctor = false,
+}: Props) {
   const {
     detail,
     comments,
@@ -61,20 +69,34 @@ export default function QaChatModal({ qnaId, onClose, showInput = false }: Props
                       onChange={(e) => setEditValue(e.target.value)}
                     />
                     <EditButtonRow>
-                      <EditButton onClick={() => update(c.commentId, editValue)}>저장</EditButton>
+                      <EditButton
+                        onClick={async () => {
+                          await update(c.commentId, editValue);
+                          setEditingCommentId(null);
+                          await refetchComments();
+                        }}
+                      >
+                        저장
+                      </EditButton>
                       <EditButton onClick={() => setEditingCommentId(null)}>취소</EditButton>
                     </EditButtonRow>
                   </>
                 ) : (
                   <>
                     <span>{c.content}</span>
-                    {showInput === false && ( // showInput이 false → 완료 탭
+                    {isDoctor && !showInput && (
                       <EditButtonRow>
                         <EditButton onClick={() => setEditingCommentId(c.commentId)}>
                           수정
                         </EditButton>
                         <EditButton
-                          onClick={() => remove(c.commentId).then(() => refetchComments())}
+                          onClick={() =>
+                            remove(c.commentId).then(() => {
+                              // 모달 닫기
+                              onClose();
+                              // 대기중 탭에서 새로고침하도록 외부에서 처리
+                            })
+                          }
                         >
                           삭제
                         </EditButton>
@@ -110,7 +132,7 @@ export default function QaChatModal({ qnaId, onClose, showInput = false }: Props
   );
 }
 
-/* --- styled-components --- */
+/* styled-components 생략 없이 그대로 아래에 포함 */
 const Overlay = styled.div`
   position: fixed;
   inset: 0;

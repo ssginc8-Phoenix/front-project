@@ -21,14 +21,11 @@ export const getDoctorQnAs = async (
   page: number,
   size: number,
 ): Promise<Page<QaPostResponse>> => {
-  const res = await axios.get<{
-    success: boolean;
-    data: Page<QaPostResponse>;
-  }>(`${host}/doctor/posts`, {
+  const res = await axios.get<Page<QaPostResponse>>(`${host}/doctor/posts`, {
     params: { status, page, size },
     withCredentials: true,
   });
-  console.log('doctorQnAs 응답:', res.data);
+
   return res.data;
 };
 

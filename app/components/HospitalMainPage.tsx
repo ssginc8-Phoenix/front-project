@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router';
 import styled, { keyframes } from 'styled-components';
 import Slider from 'react-slick';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { getMyInfo } from '~/features/user/api/UserAPI';
 
 const ads = ['/ads/ad1.png', '/ads/ad2.png', '/ads/ad3.png'];
 
@@ -38,22 +37,9 @@ const infoItems = [
   },
 ];
 
-export default function MainPage() {
+export default function HospitalMainPage() {
   const navigate = useNavigate();
   const user = useLoginStore((s) => s.user);
-
-  useEffect(() => {
-    getMyInfo()
-      .then((myInfo) => {
-        const role = myInfo.role?.toUpperCase();
-        if (role === 'HOSPITAL_ADMIN' || role === 'ADMIN') {
-          navigate('/hospital/main');
-        }
-      })
-      .catch((err) => {
-        console.error('getMyInfo 오류', err);
-      });
-  }, [navigate]);
 
   const sliderSettings = {
     dots: true,

@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { changeStatus, reschedule } from '~/features/appointment/api/appointmentAPI';
+import {
+  changeStatus,
+  reschedule,
+  cancelAppointment as cancelAppointmentAPI,
+} from '~/features/appointment/api/appointmentAPI';
 
 export const useAppointmentActions = () => {
   const [isLoading, setLoading] = useState(false);
@@ -13,7 +17,7 @@ export const useAppointmentActions = () => {
     setError(null);
 
     try {
-      await cancelAppointment(appointmentId);
+      await cancelAppointmentAPI(appointmentId);
       alert('에약이 취소되었습니다.');
       return true;
     } catch (err: any) {

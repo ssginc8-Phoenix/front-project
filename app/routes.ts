@@ -9,15 +9,23 @@ export default [
   route('/reset-password', 'routes/passwordResetVerify.tsx'),
   route('/reset-password/set', 'routes/resetPassword.tsx'),
 
+  /** 결제  */
+  route('/payments/request', 'routes/payments/paymentRequest.tsx'),
+  route('/payments/history', 'routes/payments/paymentHistory.tsx'),
+  route('/sandbox/success', 'routes/payments/success.tsx'),
+  route('/sandbox/fail', 'routes/payments/fail.tsx'),
+
   /** HOME  */
   route('', 'layout/MainPageLayout.tsx', [
-    index('routes/home.tsx'),
+    index('routes/main.tsx'),
     route('hospital/main', 'routes/hospital/HospitalMainPage.tsx'),
   ]),
 
   /** MainLayout 적용 */
   route('', 'layout/MainLayout.tsx', [
+
     route('myPage', 'routes/myPage.tsx'), // 역할별 마이페이지
+
     route('appointments/list', 'routes/appointment/appointmentDashboard.tsx'), // 역할별 예약 리스트 조회 페이지
 
     /** PATIENT 환자 영역 */

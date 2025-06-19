@@ -121,7 +121,6 @@ const AppointmentDetailModal = ({
     if (!appointment) return;
     const success = await cancelAppointment(appointment.appointmentId);
     if (success) {
-      refetch();
       onRefreshList();
     }
   };

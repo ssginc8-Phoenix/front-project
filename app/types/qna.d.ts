@@ -14,4 +14,5 @@ export interface QaPostResponse {
   createdAt: string;
   updatedAt: string;
   answered: boolean;
+  status: 'PENDING' | 'COMPLETED';
 }

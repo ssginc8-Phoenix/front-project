@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage } from '@firebase/messaging';
+import { getMessaging, getToken, onMessage, type Messaging } from '@firebase/messaging';
 
 /** Firebase 프로젝트 설정 정보 */
 const firebaseConfig = {
@@ -15,7 +15,7 @@ const firebaseConfig = {
 /** Firebase 앱 초기화 (앱에서 Firebase 기능 사용 가능해짐) */
 const app = initializeApp(firebaseConfig);
 
-let messaging;
+let messaging: Messaging | undefined;
 
 /** Messaging 객체 가져오기*/
 if (typeof window !== 'undefined') {

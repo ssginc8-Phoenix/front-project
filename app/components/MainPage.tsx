@@ -7,7 +7,6 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { getMyInfo } from '~/features/user/api/UserAPI';
 
-
 const ads = ['/ads/ad1.png', '/ads/ad2.png', '/ads/ad3.png'];
 
 const features = [
@@ -41,22 +40,13 @@ const infoItems = [
 
 export default function MainPage() {
   const navigate = useNavigate();
-  const user = useLoginStore((s) => s.user);
+  const { user, fetchMyInfo } = useLoginStore();
 
   useEffect(() => {
-    getMyInfo()
-      .then((myInfo) => {
-        const role = myInfo.role?.toUpperCase();
-
-        if (role !== 'PATIENT' && role !== 'GUARDIAN') {
-          navigate('/hospital/main');
-        }
-      })
-      .catch((err) => {
-        console.error('사용자 정보 조회 실패:', err);
-        navigate('/login');
-      });
-  }, [navigate]);
+    if (!user) {
+      fetchMyInfo(); // 로그인 상태 유지 시도
+    }
+  }, [user, fetchMyInfo]);
 
   const sliderSettings = {
     dots: true,
@@ -84,7 +74,16 @@ export default function MainPage() {
 
       {/* 인사말 */}
       <Greeting>
-        <strong>{user?.name}</strong> 님, 안녕하세요!
+        {user ? ( // user 객체가 존재하면 (로그인 상태)
+          <>
+            <strong>{user?.name}</strong> 님, 안녕하세요!
+          </>
+        ) : (
+          // user 객체가 존재하지 않으면 (로그아웃 상태)
+          <>
+            <strong>게스트</strong>님, 안녕하세요!
+          </>
+        )}
       </Greeting>
 
       {/* 기능 카드 */}

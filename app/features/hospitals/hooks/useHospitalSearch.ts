@@ -19,6 +19,7 @@ export const useHospitalSearch = (
   searchQuery: string,
   sortBy: string,
   radius: number = 5,
+  trigger: unknown,
   isNearbyMode: boolean,
 ) => {
   const fetchHospitals = useCallback(async (): Promise<HospitalPage> => {
@@ -58,7 +59,7 @@ export const useHospitalSearch = (
     if (isNearbyMode && latitude !== null && longitude !== null) {
       execute();
     }
-  }, [execute, latitude, longitude, searchQuery, sortBy, radius, isNearbyMode]);
+  }, [execute, latitude, longitude, searchQuery, sortBy, radius, isNearbyMode, trigger]);
 
   return { data, loading, error, refetch: execute };
 };

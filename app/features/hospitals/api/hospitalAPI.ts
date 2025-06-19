@@ -1,6 +1,7 @@
 import axios, { AxiosHeaders } from 'axios';
 import type { Hospital, HospitalPage, CreateScheduleRequest } from '../types/hospital';
 import type { HospitalSchedule } from '~/features/hospitals/types/hospitalSchedule';
+import type { pageResponse } from '~/types/pageResponse';
 
 // Axios 인스턴스 생성 및 설정
 const apiClient = axios.create({
@@ -60,9 +61,28 @@ export const getUser = async () => {
   const res = await apiClient.get('/api/v1/admin/users');
   return res.data;
 };
-
+export async function fetchHospitals(params: {
+  query?: string;
+  sortBy?: 'NAME' | 'DISTANCE' | 'REVIEW_COUNT';
+  latitude?: number;
+  longitude?: number;
+  page?: number;
+  size?: number;
+}): Promise<pageResponse<Hospital>> {
+  const response = await apiClient.get<pageResponse<Hospital>>('/api/v1/hospitals/search', {
+    params: {
+      query: params.query,
+      sortBy: params.sortBy,
+      latitude: params.latitude,
+      longitude: params.longitude,
+      page: params.page,
+      size: params.size,
+    },
+  });
+  return response.data;
+}
 // 병원 등록
-export const registerHospital = async (data: {
+export interface CreateHospitalRequest {
   userId: number;
   name: string;
   address: string;
@@ -73,48 +93,26 @@ export const registerHospital = async (data: {
   notice: string;
   businessRegistrationNumber: string;
   serviceNames: string[];
-  file?: File;
-}) => {
-  const formData = new FormData();
-  formData.append('userId', String(data.userId));
-  formData.append('name', data.name);
-  formData.append('address', data.address);
-  formData.append('latitude', String(data.latitude));
-  formData.append('longitude', String(data.longitude));
-  formData.append('phone', data.phone);
-  formData.append('introduction', data.introduction);
-  formData.append('notice', data.notice);
-  formData.append('businessRegistrationNumber', data.businessRegistrationNumber);
-  data.serviceNames.forEach((service) => formData.append('serviceName', service));
-  if (data.file) formData.append('file', data.file);
+  files?: File[]; // ← 단일 file → files 배열
+  existingFileIds?: number[];
+}
 
+// apiClient 정의 생략…
+
+// 병원 등록
+export const registerHospital = async (formData: FormData) => {
   const res = await apiClient.post('/api/v1/hospitals', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-    withCredentials: true, // axios에서는 credentials → withCredentials
+    withCredentials: true,
+    // headers: axios 가 자동으로 multipart/form-data 헤더를 붙여줍니다.
   });
-
-  return { hospitalId: res.data };
+  return res.data;
 };
-
 // 병원 정보 수정
-export const updateHospital = async (
-  hospitalId: number,
-  data: {
-    name: string;
-    address: string;
-    latitude: number;
-    longitude: number;
-    phone: string;
-    introduction: string;
-    notice: string;
-    businessRegistrationNumber: string;
-    serviceNames: string[];
-    fileId?: number;
-  },
-) => {
-  const res = await apiClient.patch(`/api/v1/hospitals/${hospitalId}`, data);
+export const updateHospital = async (hospitalId: number, formData: FormData) => {
+  const res = await apiClient.patch(`/api/v1/hospitals/${hospitalId}`, formData, {
+    // headers: { 'Content-Type': 'multipart/form-data' },
+    withCredentials: true,
+  });
   return res.data;
 };
 
@@ -134,6 +132,7 @@ export const createHospitalSchedule = async (hospitalId: number, data: CreateSch
 // 내 병원 정보 조회
 export const getMyHospital = async (): Promise<Hospital> => {
   const res = await apiClient.get('/api/v1/hospitals/me');
+  console.log('백엔드에서 받은 hospital:', res.data);
   return res.data;
 };
 

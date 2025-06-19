@@ -10,6 +10,8 @@ interface HospitalListProps {
   hospitals: Hospital[];
   loading: boolean;
   error: Error | null;
+  currentPage: number;
+  onPageChange: (page: number) => void;
   onHospitalSelect: (hospitalId: number, lat: number, lng: number) => void;
   selectedHospitalId?: number | null;
 }
@@ -42,7 +44,7 @@ const Card = styled.li<{ selected: boolean }>`
   flex: 0 0 auto;
   width: 325px;
 
-  height: 100px;
+  height: 120px;
   &:hover {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   }

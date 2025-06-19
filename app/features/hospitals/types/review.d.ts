@@ -1,7 +1,6 @@
-// types/review.d.ts
+// src/types/review.d.ts
 
 export type Category = 'MEDICAL_SERVICE' | 'FACILITY_ENV' | 'COST_ADMIN';
-
 export type Polarity = 'POSITIVE' | 'NEGATIVE';
 
 export interface KeywordTypeInfo {
@@ -11,7 +10,7 @@ export interface KeywordTypeInfo {
   weight: number;
 }
 
-// KeywordType 문자열 리터럴 (enum 대신 union type 사용)
+// KeywordType 문자열 리터럴
 export type KeywordType =
   | 'THOROUGH'
   | 'FRIENDLY_DOCTOR'
@@ -51,18 +50,18 @@ export type KeywordType =
   | 'INSURANCE_BUREAUCRACY'
   | 'LATE_RECEIPT';
 
-// KeywordType 별 상세 정보 매핑 객체
-
 // 리뷰 인터페이스
 export interface Review {
   name: string;
   reviewId: number;
-  userId: number; // 실제 User 객체가 아니라 userId만 포함 가능
+  userId: number;
   hospitalId: number;
   doctorId: number;
   appointmentId: number;
   contents: string;
   reportCount: number;
-  keywords: KeywordType[]; // keyword는 문자열 배열로
-  createdAt: string; // 생성 날짜 (ISO 문자열)
+  keywords: KeywordType[];
+  createdAt: string;
 }
+
+// KeywordType 별 라벨 매핑

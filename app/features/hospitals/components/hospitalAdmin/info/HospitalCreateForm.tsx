@@ -5,14 +5,11 @@ import { X, Plus } from 'lucide-react';
 import { Select } from 'antd';
 import { registerHospital, createHospitalSchedule } from '~/features/hospitals/api/hospitalAPI';
 import HospitalDaumPost from '~/features/hospitals/components/hospitalAdmin/info/HospitalDaumPost';
-import type {
-  CreateScheduleRequest,
-  CreateHospitalRequest,
-} from '~/features/hospitals/types/hospital';
+import type { CreateScheduleRequest } from '~/features/hospitals/types/hospital';
 import useHospitalStore from '~/features/hospitals/state/hospitalStore';
 import { useNavigate } from 'react-router';
 import useLoginStore from '~/features/user/stores/LoginStore';
-import { resizeImage } from '~/features/hospitals/components/common/resizeImage';
+import Resizer from 'react-image-file-resizer';
 
 const dayOfWeekMap: Record<string, CreateScheduleRequest['dayOfWeek']> = {
   월요일: 'MONDAY',
@@ -49,8 +46,8 @@ const HospitalCreateForm: React.FC = () => {
     serviceName: [] as string[],
   });
   const [coords, setCoords] = useState({ lat: 0, lng: 0 });
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState('');
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [newService, setNewService] = useState('');
   const { user } = useLoginStore.getState();
   const navigate = useNavigate();
@@ -76,27 +73,50 @@ const HospitalCreateForm: React.FC = () => {
     };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
 
-    const fileSizeMB = file.size / (1024 * 1024);
-    if (fileSizeMB > 2) {
-      alert('2MB 이하의 이미지만 업로드할 수 있습니다.');
-      return;
+    const urls: string[] = [];
+    const resizedFiles: File[] = [];
+
+    for (const file of files) {
+      // 포맷 검사
+      if (!['image/jpeg', 'image/png', 'image/svg+xml'].includes(file.type)) {
+        alert('JPEG, PNG, SVG만 허용됩니다.');
+        continue;
+      }
+
+      // 2MB 제한
+      if (file.size / 1024 / 1024 > 2) {
+        alert(`${file.name}은(는) 2MB 이하만 허용됩니다.`);
+        continue;
+      }
+
+      // Resizer.imageFileResizer 를 Promise 로 감싸기
+      const resizedDataUrl: string = await new Promise((resolve) => {
+        Resizer.imageFileResizer(
+          file, // 원본 File 객체
+          500, // 최대 width
+          500, // 최대 height
+          'JPEG', // output 포맷: JPEG / PNG / WEBP / ...
+          90, // quality (0–100)
+          0, // rotation (0–360)
+          (uri) => resolve(uri as string),
+          'base64', // output type: 'base64' 또는 'blob'
+        );
+      });
+
+      // base64 string → File 객체로 변환(필요 시)
+      const blob = await fetch(resizedDataUrl).then((res) => res.blob());
+      const resizedFile = new File([blob], file.name, { type: blob.type });
+
+      resizedFiles.push(resizedFile);
+      urls.push(resizedDataUrl);
     }
 
-    // ✅ 이미지 리사이즈
-    const resized = await resizeImage(file, 500);
-    setSelectedImage(resized);
-
-    // 미리보기
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setPreviewUrl(reader.result);
-      }
-    };
-    reader.readAsDataURL(resized);
+    // state 업데이트
+    setSelectedImages(resizedFiles);
+    setPreviewUrls(urls);
   };
 
   const handleAddSchedule = () => {
@@ -195,26 +215,39 @@ const HospitalCreateForm: React.FC = () => {
       return;
     }
     try {
-      const hospitalPayload: CreateHospitalRequest = {
-        userId: user?.userId,
-        name: form.name,
-        address: `${form.address} ${form.detailAddress}`,
-        latitude: coords.lat,
-        longitude: coords.lng,
-        phone: form.phoneNumber,
-        introduction: form.intro,
-        notice: form.notice,
-        businessRegistrationNumber: form.businessNumber,
-        serviceNames: form.serviceName,
-        file: selectedImage ?? undefined,
-      };
+      const fd = new FormData();
 
-      const created = await registerHospital({
-        ...hospitalPayload,
-        file: hospitalPayload.file ?? undefined,
+      // 2) JSON 부분을 Blob 으로 감싸서 `data` 파트로 추가
+      const dataBlob = new Blob(
+        [
+          JSON.stringify({
+            userId: user!.userId,
+            name: form.name,
+            address: `${form.address} ${form.detailAddress}`,
+            latitude: coords.lat,
+            longitude: coords.lng,
+            phone: form.phoneNumber,
+            introduction: form.intro,
+            notice: form.notice,
+            businessRegistrationNumber: form.businessNumber,
+            serviceNames: form.serviceName,
+          }),
+        ],
+        { type: 'application/json' },
+      );
+      fd.append('data', dataBlob);
+
+      // 3) 이미지 파일이 있으면 `files` 파트로 추가
+      selectedImages.forEach((file) => {
+        fd.append('files', file);
       });
 
-      const hospitalId = created.hospitalId;
+      // 4) FormData 를 통째로 보내기
+      const created = await registerHospital(fd);
+      console.log('🏥 created hospital:', created);
+
+      const hospitalId = typeof created === 'number' ? created : created.hospitalId;
+
       setHospitalId(created.hospitalId);
       const schedulePayloads = businessHours.map(
         ({ dayOfWeek, open, close, lunchStart, lunchEnd }) => ({
@@ -298,8 +331,8 @@ const HospitalCreateForm: React.FC = () => {
             let raw = e.target.value.replace(/\D/g, ''); // 숫자만
             let formatted = '';
 
-            // 4자리 국번 (0507 등): 0507-1234-1234 (12자리)
-            if (/^0507/.test(raw)) {
+            // 1) 0507: 0507-1234-1234 (4-4-4, 총 12자리 숫자)
+            if (raw.startsWith('0507')) {
               raw = raw.slice(0, 12);
               if (raw.length <= 4) {
                 formatted = raw;
@@ -309,9 +342,9 @@ const HospitalCreateForm: React.FC = () => {
                 formatted = `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8)}`;
               }
 
-              // 2자리 국번 (02): 02-123-1234 (최대 10자리)
-            } else if (/^02/.test(raw)) {
-              raw = raw.slice(0, 10);
+              // 2) 02: 02-123-1234 (2-3-4, 총 9자리 숫자)
+            } else if (raw.startsWith('02')) {
+              raw = raw.slice(0, 9);
               if (raw.length <= 2) {
                 formatted = raw;
               } else if (raw.length <= 5) {
@@ -320,8 +353,8 @@ const HospitalCreateForm: React.FC = () => {
                 formatted = `${raw.slice(0, 2)}-${raw.slice(2, 5)}-${raw.slice(5)}`;
               }
 
-              // 3자리 국번 (010, 051 등): 010-1234-5678 / 051-123-4567 (11자리)
-            } else if (/^0\d{2}/.test(raw)) {
+              // 3) 010: 010-1234-1234 (3-4-4, 총 11자리 숫자)
+            } else if (raw.startsWith('010')) {
               raw = raw.slice(0, 11);
               if (raw.length <= 3) {
                 formatted = raw;
@@ -330,8 +363,20 @@ const HospitalCreateForm: React.FC = () => {
               } else {
                 formatted = `${raw.slice(0, 3)}-${raw.slice(3, 7)}-${raw.slice(7)}`;
               }
+
+              // 4) 그 외 3자리 국번 (예: 051): 051-123-1234 (3-3-4, 총 10자리 숫자)
+            } else if (/^0\d{2}/.test(raw)) {
+              raw = raw.slice(0, 10);
+              if (raw.length <= 3) {
+                formatted = raw;
+              } else if (raw.length <= 6) {
+                formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
+              } else {
+                formatted = `${raw.slice(0, 3)}-${raw.slice(3, 6)}-${raw.slice(6)}`;
+              }
+
+              // 5) 나머지 잘못된 국번은 숫자만 자르고 하이픈 없이
             } else {
-              // 잘못된 국번 → 그냥 자르기
               raw = raw.slice(0, 11);
               formatted = raw;
             }
@@ -342,7 +387,6 @@ const HospitalCreateForm: React.FC = () => {
             }));
           }}
           placeholder="예: 010-1234-5678"
-          maxLength={13}
         />
 
         {formErrors.phoneNumber && <Error>{formErrors.phoneNumber}</Error>}
@@ -357,11 +401,21 @@ const HospitalCreateForm: React.FC = () => {
       </FieldWrapper>
       <FieldWrapper>
         <Label>병원 이미지</Label>
-        <FileInput id="hospitalImage" type="file" accept="image/*" onChange={handleImageChange} />
+        <FileInput
+          id="hospitalImage"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleImageChange}
+        />
         <FileLabel htmlFor="hospitalImage">이미지 선택</FileLabel>
-        <PreviewWrapper>
-          <PreviewImage src={previewUrl} alt="미리보기" />
-        </PreviewWrapper>
+        {previewUrls.length > 0 && (
+          <PreviewWrapper>
+            {previewUrls.map((url, i) => (
+              <PreviewImage key={i} src={url} alt={`미리보기 ${i + 1}`} />
+            ))}
+          </PreviewWrapper>
+        )}
       </FieldWrapper>
       <FieldWrapper>
         <Label>서비스 이름</Label>
@@ -414,16 +468,18 @@ const HospitalCreateForm: React.FC = () => {
             }}
           >
             {/* 요일 */}
-            <select
+            <Select
               value={row.dayOfWeek}
-              onChange={(e) => handleScheduleChange(idx, 'dayOfWeek', e.target.value)}
+              onChange={(value: typeof row.dayOfWeek) =>
+                handleScheduleChange(idx, 'dayOfWeek', value)
+              }
             >
               {Object.entries(reverseDayOfWeekMap).map(([eng, kor]) => (
-                <option key={eng} value={eng}>
+                <Select.Option key={eng} value={eng}>
                   {kor}
-                </option>
+                </Select.Option>
               ))}
-            </select>
+            </Select>
             {/* 진료시간 */}
             <Select
               value={row.open || undefined}
@@ -520,15 +576,21 @@ const Input = styled.input`
   font-size: 1rem;
 `;
 const PreviewWrapper = styled.div`
-  width: 150px;
-  height: 150px;
-  margin-top: 1rem;
-  border-radius: 0.5rem;
-  background-color: #fff;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  /* 고정 크기 제거, 가로 스크롤 허용 */
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+`;
+
+const PreviewImage = styled.img`
+  flex: 0 0 auto;
+  width: 100px;
+  height: 100px;
+  border-radius: 0.5rem;
+  object-fit: cover;
 `;
 const FileInput = styled.input`
   display: none;
@@ -547,14 +609,6 @@ const FileLabel = styled.label`
   }
 `;
 
-const PreviewImage = styled.img`
-  width: 150px;
-  height: 150px;
-  margin-top: 1rem;
-  border-radius: 0.5rem;
-  object-fit: cover;
-  background-color: #fff;
-`;
 const BigTextArea = styled.textarea`
   padding: 0.5rem;
   border: 1px solid #ccc;

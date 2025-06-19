@@ -1,3 +1,4 @@
+// src/features/hospitals/components/hospitalDetail/review/KeywordStatsChart.tsx
 import React from 'react';
 import styled from 'styled-components';
 import {
@@ -10,47 +11,97 @@ import {
   CartesianGrid,
   PieChart,
   Pie,
+  Legend,
   Cell,
 } from 'recharts';
-import type { Review } from '../../../types/review';
+import type { KeywordType, Review } from '~/features/hospitals/types/review';
 
 const Card = styled.div`
-  display: flex;
+  width: 94%;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  width: 100%;
-  height: 400px;
   margin-top: 2rem;
-  padding: 1rem;
-  background: white;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+`;
+
+const Title = styled.h3`
+  grid-column: 1 / -1;
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  color: #222;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 `;
 
 const ChartWrapper = styled.div`
-  flex: 1;
-  height: 100%;
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
 `;
 
 const COLORS = [
+  '#2563eb',
   '#3b82f6',
   '#60a5fa',
   '#93c5fd',
   '#bfdbfe',
-  '#dbeafe',
-  '#2563eb',
-  '#1e40af',
-  '#1e3a8a',
-  '#1e40af',
-  '#3b82f6',
+  '#10b981',
+  '#34d399',
+  '#6ee7b7',
+  '#d1fae5',
+  '#facc15',
 ];
 
-interface KeywordStat {
-  keyword: string;
-  weightSum: number;
-}
+const keywordLabelMap: Record<KeywordType, string> = {
+  THOROUGH: '진료가 꼼꼼',
+  FRIENDLY_DOCTOR: '친절한 의사',
+  FAST: '진료가 빨라요',
+  SHORT_WAIT: '대기 짧아요',
+  PROFESSIONAL: '전문성 높아요',
+  SENIOR_FRIENDLY: '노인 배려',
+  CLEAN_HOSPITAL: '청결해요',
+  NICE_FACILITY: '좋은 시설',
+  EASY_PARKING: '주차 편해요',
+  GOOD_LOCATION: '위치 좋음',
+  COMFORTABLE_ATMOS: '분위기 편안',
+  FAIR_PRICE: '합리적 비용',
+  EASY_INSURANCE: '보험 편해요',
+  FAST_RESULTS: '빠른 결과',
+  ENOUGH_CONSULT: '충분한 상담',
+  WANT_RETURN: '재방문 의향',
+  FAST_PAYMENT: '빠른 수납',
+  UNFRIENDLY_EXAM: '불친절해요',
+  LACK_EXPLANATION: '설명 부족',
+  POOR_COMMUNICATION: '소통 부족',
+  NO_EFFECT_TREAT: '효과 없음',
+  LONG_WAIT: '기다림 길어요',
+  WAIT_AFTER_BOOK: '예약 후 대기',
+  LACK_GUIDE: '안내 부족',
+  COMPLEX_PAYMENT: '수납 복잡',
+  DIRTY_HOSPITAL: '지저분해요',
+  WORRY_CLEAN: '청결 걱정',
+  TIGHT_WAIT_AREA: '대기실 좁아요',
+  NO_PARKING_SPACE: '주차 부족',
+  CONFUSING_SIGNAGE: '표지판 헷갈림',
+  NO_WHEELCHAIR_ACCESS: '휠체어 불편',
+  NO_GUARDIAN_SPACE: '보호자 공간 부족',
+  EXPENSIVE: '비싸요',
+  PUSH_UNNECESSARY: '과잉 권유',
+  LACK_FEE_EXPLAN: '비용 설명 부족',
+  INSURANCE_BUREAUCRACY: '보험 번거로워요',
+  LATE_RECEIPT: '영수증 지연',
+};
 
-const keywordWeightMap: Record<string, number> = {
-  // ... (기존 keywordWeightMap 동일하게 유지)
+const keywordWeightMap: Record<KeywordType, number> = {
   THOROUGH: 5,
   FRIENDLY_DOCTOR: 5,
   FAST: 3,
@@ -90,72 +141,73 @@ const keywordWeightMap: Record<string, number> = {
   LATE_RECEIPT: 3,
 };
 
-function calculateKeywordStats(reviews: Review[]): KeywordStat[] {
-  const statsMap: Record<string, number> = {};
-
-  reviews.forEach(({ keywords }) => {
-    keywords.forEach((kw) => {
-      const weight = keywordWeightMap[kw] ?? 1;
-      statsMap[kw] = (statsMap[kw] || 0) + weight;
-    });
-  });
-
-  return Object.entries(statsMap)
-    .map(([keyword, weightSum]) => ({ keyword, weightSum }))
-    .sort((a, b) => b.weightSum - a.weightSum);
+interface KeywordStat {
+  keyword: KeywordType;
+  label: string;
+  weightSum: number;
 }
 
-interface KeywordStatsChartProps {
+function calculateKeywordStats(reviews: Review[]): KeywordStat[] {
+  const map = new Map<KeywordType, number>();
+  reviews.forEach(({ keywords }) =>
+    keywords.forEach((kw) => map.set(kw, (map.get(kw) || 0) + (keywordWeightMap[kw] || 1))),
+  );
+
+  return Array.from(map.entries())
+    .map(([keyword, weightSum]) => ({ keyword, label: keywordLabelMap[keyword], weightSum }))
+    .sort((a, b) => b.weightSum - a.weightSum)
+    .slice(0, 8);
+}
+
+interface Props {
   reviews: Review[];
 }
 
-const KeywordStatsChart: React.FC<KeywordStatsChartProps> = ({ reviews }) => {
+const KeywordStatsChart: React.FC<Props> = ({ reviews }) => {
   const data = calculateKeywordStats(reviews);
-
-  if (data.length === 0) return <p>통계 낼 리뷰 키워드가 없습니다.</p>;
+  if (!data.length) return <p>키워드가 없습니다.</p>;
 
   return (
     <Card>
+      {/* Pie Chart */}
       <ChartWrapper>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer>
           <PieChart>
             <Pie
               data={data}
               dataKey="weightSum"
-              nameKey="keyword"
+              nameKey="label"
               cx="50%"
               cy="50%"
-              outerRadius={120}
-              fill="#8884d8"
-              label={({ keyword }) => keyword}
+              innerRadius={40}
+              outerRadius={80}
+              cornerRadius={6}
+              paddingAngle={2}
+              label={({ payload }) => payload.label}
             >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              {data.map((_, i) => (
+                <Cell key={i} fill={COLORS[i]} />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip formatter={(val) => [val, '합계']} />
+            <Legend verticalAlign="bottom" height={36} />
           </PieChart>
         </ResponsiveContainer>
       </ChartWrapper>
 
+      {/* Bar Chart */}
       <ChartWrapper>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            layout="vertical"
-            data={data}
-            margin={{ top: 20, right: 30, left: 50, bottom: 20 }}
-          >
+        <ResponsiveContainer>
+          <BarChart data={data} layout="vertical" barCategoryGap="25%">
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" />
-            <YAxis
-              dataKey="keyword"
-              type="category"
-              interval={0}
-              width={150}
-              tick={{ fontSize: 12 }}
-            />
-            <Tooltip />
-            <Bar dataKey="weightSum" fill="#3b82f6" />
+            <XAxis type="number" tickLine={false} axisLine={false} />
+            <YAxis dataKey="label" type="category" width={120} tickLine={false} />
+            <Tooltip formatter={(val) => [val, '합계']} />
+            <Bar dataKey="weightSum" radius={[4, 4, 4, 4]}>
+              {data.map((_, i) => (
+                <Cell key={i} fill={COLORS[i]} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </ChartWrapper>

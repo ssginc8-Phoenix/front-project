@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import type { ProfileProps } from '~/types/user';
 import useLoginStore from '~/features/user/stores/LoginStore';
+import { useNavigate } from 'react-router';
 
 const UserProfile = styled.div`
   position: relative;
@@ -57,6 +58,7 @@ const Profile = ({ name, imageUrl }: ProfileProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const { logout } = useLoginStore();
+  const navigate = useNavigate();
 
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
@@ -64,7 +66,11 @@ const Profile = ({ name, imageUrl }: ProfileProps) => {
 
   const handleLogout = async () => {
     await logout();
-    window.location.href = '/login';
+    navigate('/');
+  };
+
+  const handleMyPage = () => {
+    navigate('/mypage');
   };
 
   useEffect(() => {
@@ -84,6 +90,7 @@ const Profile = ({ name, imageUrl }: ProfileProps) => {
 
       {isOpen && (
         <Dropdown>
+          <DropdownItem onClick={handleMyPage}>마이페이지</DropdownItem>
           <DropdownItem onClick={handleLogout}>로그아웃</DropdownItem>
         </Dropdown>
       )}

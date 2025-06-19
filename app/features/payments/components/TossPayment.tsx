@@ -98,7 +98,7 @@ const TossPayment = ({ paymentRequestId, amount, name, email, onClose }: TossPay
       await updatePaymentRequestInfo({
         paymentRequestId: paymentRequestId,
         orderId: orderId,
-        clientKey: clientKey,
+        customerKey: 'ANONYMOUS',
       });
 
       await widgets?.requestPayment({

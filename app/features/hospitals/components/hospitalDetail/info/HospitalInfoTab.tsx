@@ -150,7 +150,6 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
 
   const navigate = useNavigate();
 
-
   if (loading) return <p style={{ textAlign: 'center' }}>로딩 중...</p>;
   if (error) return <p style={{ textAlign: 'center', color: 'red' }}>{String(error)}</p>;
   if (!hospital) return <p style={{ textAlign: 'center' }}>병원 정보를 찾을 수 없습니다.</p>;
@@ -179,7 +178,6 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
           </ModalContent>
         </Overlay>
       )}
-
 
       <Container>
         <ImageWrapper onClick={() => setIsModalOpen(true)}>
@@ -211,14 +209,13 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
           </NoticeBox>
         )}
 
-
-      <ButtonGroup>
-        <ActionButton onClick={() => navigate(`/appointments/request?hospitalId=${hospitalId}`)}>
-          🏥 대면 진료 접수
-        </ActionButton>
-      </ButtonGroup>
-    </Container>
-
+        <ButtonGroup>
+          <ActionButton onClick={() => navigate(`/appointments/request?hospitalId=${hospitalId}`)}>
+            🏥 대면 진료 접수
+          </ActionButton>
+        </ButtonGroup>
+      </Container>
+    </>
   );
 };
 

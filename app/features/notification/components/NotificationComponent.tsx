@@ -6,6 +6,7 @@ import {
   markNotificationAsRead,
 } from '~/features/notification/api/notificationAPI';
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { onMessage } from '@firebase/messaging';
 import type { NotificationList } from '~/types/notification';
 import { messaging } from '~/features/fcm/firebase';
@@ -29,6 +30,8 @@ const Audio = styled.audio`
 `;
 
 const NotificationComponent = () => {
+  const navigate = useNavigate();
+
   const user = LoginStore((state) => state.user); //로그인된 사용자 정보 가져오기
 
   const [visible, setVisible] = useState(false); // 알림 드롭다운 표시 여부 상태
@@ -145,15 +148,28 @@ const NotificationComponent = () => {
               </MessageContent>
             </NotificationItem>
           ) : (
-            notifications.map((data) => (
-              <NotificationItem key={data.notificationId} isRead={data.isRead}>
-                <MessageContent>
-                  <Title>{data.type}</Title>
-                  <Content>{data.content}</Content>
-                  <DateTime>{data.createdAt}</DateTime>
-                </MessageContent>
-              </NotificationItem>
-            ))
+            notifications.map((data) => {
+              const handleClick = () => {
+                if (data.type === 'PAYMENT_REQUEST' && data.referenceId) {
+                  navigate(`/payments/history?paymentRequestId=${data.referenceId}`);
+                }
+              };
+
+              return (
+                <NotificationItem
+                  key={data.notificationId}
+                  isRead={data.isRead}
+                  onClick={handleClick}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <MessageContent>
+                    <Title>{data.type}</Title>
+                    <Content>{data.content}</Content>
+                    <DateTime>{data.createdAt}</DateTime>
+                  </MessageContent>
+                </NotificationItem>
+              );
+            })
           )}
         </NotificationBox>
       )}

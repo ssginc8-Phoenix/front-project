@@ -8,26 +8,27 @@ import {
   getHospitalSchedules,
   updateHospitalSchedules,
   createHospitalSchedule,
-  deleteHospitalSchedule,
   createWaiting,
 } from '~/features/hospitals/api/hospitalAPI';
 import HospitalDaumPost from '~/features/hospitals/components/hospitalAdmin/info/HospitalDaumPost';
 
-import type {
-  CreateScheduleRequest,
-  CreateHospitalRequest,
-} from '~/features/hospitals/types/hospital';
+import type { CreateScheduleRequest, HospitalForm } from '~/features/hospitals/types/hospital';
 import WaitModal from '~/features/hospitals/components/RegisterWaitModal';
+import type { ScheduleDTO } from '~/features/hospitals/types/hospitalSchedule';
 
 interface HourRow {
-  scheduleId?: number;
+  hospitalScheduleId?: number;
   day: string;
   open: string;
   close: string;
   lunchStart: string;
   lunchEnd: string;
 }
-
+interface PreviewItem {
+  id?: number; // 서버에 이미 저장된 파일이면 id
+  file?: File; // 새로 선택한 파일이면 file
+  url: string; // 미리보기 URL
+}
 const dayOfWeekMap: Record<string, CreateScheduleRequest['dayOfWeek']> = {
   월요일: 'MONDAY',
   화요일: 'TUESDAY',
@@ -59,11 +60,14 @@ export const ServiceInputChips: React.FC<{
   return (
     <ChipsWrapper>
       {services.map((s, i) => (
-        <Chip key={i}>
+        <Chip key={s}>
           {s}
           <RemoveButton
             type="button"
-            onClick={() => onChange(services.filter((_, idx) => idx !== i))}
+            onClick={() =>
+              // i번째 서비스만 삭제
+              onChange(services.filter((_, idx) => idx !== i))
+            }
           >
             <X size={14} />
           </RemoveButton>
@@ -91,9 +95,9 @@ const FileInput = styled.input`
 `;
 
 const PreviewImage = styled.img`
-  width: 100%;
+  width: 150px;
   max-height: 200px;
-  object-fit: contain;
+  object-fit: cover;
   margin-top: 0.5rem;
   border-radius: 0.5rem;
   background: #fff;
@@ -103,22 +107,30 @@ const HospitalUpdateForm: React.FC = () => {
   const [hospitalId, setHospitalId] = useState<string | null>(null);
   const [isEdit, setIsEdit] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [, setExistingFileId] = useState<number | null>(null);
+  const [, setExistingFileIds] = useState<number[]>([]);
+  const [, setPreviewUrls] = useState<string[]>([]);
+  const [deletedFileIds, setDeletedFileIds] = useState<number[]>([]);
+  const [previewItems, setPreviewItems] = useState<PreviewItem[]>([]);
   const nameRef = useRef<HTMLInputElement>(null);
   const businessNumberRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
-  const [selectedImage, setSelectedImage] = useState<File | undefined>(undefined);
-  const [previewUrl, setPreviewUrl] = useState<string>('');
   const [form, setForm] = useState({
     name: '',
     address: '',
+    detailAddress: '',
     phoneNumber: '',
     businessNumber: '',
     intro: '',
     notice: '',
     serviceName: [] as string[],
-    waiting: '',
+    imageUrls: [] as string[],
+  });
+  const [formErrors, setFormErrors] = useState({
+    name: '',
+    businessNumber: '',
+    address: '',
+    phoneNumber: '',
   });
   const [coords, setCoords] = useState({ lat: 0, lng: 0 });
   const [businessHours, setBusinessHours] = useState<HourRow[]>(
@@ -130,83 +142,18 @@ const HospitalUpdateForm: React.FC = () => {
       lunchEnd: '',
     })),
   );
-
-  useEffect(() => {
-    const fetchHospitalAndSchedules = async () => {
-      try {
-        const data = await getMyHospital();
-
-        if (!data) return;
-
-        setHospitalId(String(data.hospitalId));
-        setIsEdit(true);
-        setForm({
-          name: data.name || '',
-          address: data.address || '',
-          phoneNumber: data.phone || '',
-          businessNumber: data.businessRegistrationNumber || '',
-          intro: data.introduction || '',
-          notice: data.notice || '',
-          serviceName: data.serviceNames || [],
-          waiting: data.waiting?.toString() || '',
-        });
-        setCoords({ lat: data.latitude || 0, lng: data.longitude || 0 });
-        // 수정된 코드
-        if (data.imageUrl) {
-          setPreviewUrl(data.imageUrl);
-        }
-
-        if (data.fileId) setExistingFileId(data.fileId);
-
-        const schedules = await getHospitalSchedules(data.hospitalId);
-        setBusinessHours((prev) =>
-          prev.map((row) => {
-            const match = schedules.find((s) => mapDayOfWeekBack(s.dayOfWeek) === row.day);
-            return match
-              ? {
-                  scheduleId: match.hospitalScheduleId,
-                  day: row.day,
-                  open: match.openTime.slice(0, 5),
-                  close: match.closeTime.slice(0, 5),
-                  lunchStart: match.lunchStart.slice(0, 5),
-                  lunchEnd: match.lunchEnd.slice(0, 5),
-                }
-              : { ...row, lunchStart: '', lunchEnd: '' };
-          }),
-        );
-      } catch (err) {
-        console.error(err);
+  // 이미지 삭제 시
+  const handleRemoveImage = (idx: number) => {
+    setPreviewItems((prev) => {
+      const removed = prev[idx];
+      if (removed.id != null) {
+        setDeletedFileIds((ids) => Array.from(new Set([...ids, removed.id!])));
       }
-    };
-    fetchHospitalAndSchedules();
-  }, []);
-  const handleRegisterWaiting = async (count: number) => {
-    if (!hospitalId) return;
-    try {
-      await createWaiting(Number(hospitalId), count);
-      alert(`대기 인원 ${count}명 등록 완료`);
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedImage(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') setPreviewUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+      return prev.filter((_, i) => i !== idx);
+    });
   };
 
-  const handleChange =
-    (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((prev) => ({ ...prev, [key]: e.target.value }));
-    };
-
+  // 2) 스케줄 변경 핸들러: businessHours 배열의 idx번째 HourRow에서 key(open/close/lunchStart/lunchEnd)만 바꿔줌
   const handleScheduleChange = (idx: number, key: keyof HourRow, value: string) => {
     setBusinessHours((prev) => {
       const updated = [...prev];
@@ -214,145 +161,158 @@ const HospitalUpdateForm: React.FC = () => {
       return updated;
     });
   };
+  // 3) 대기 인원 등록 핸들러: 모달에서 입력받은 숫자를 API로 보내고 모달 닫기
+  const handleRegisterWaiting = async (count: number) => {
+    if (!hospitalId) return;
+    try {
+      await createWaiting(Number(hospitalId), count);
+      alert(`대기 인원 ${count}명 등록 완료`);
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error('대기 등록 에러', err);
+      alert('대기 등록에 실패했습니다.');
+    }
+  };
+  const handleChange =
+    (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setForm((prev) => ({ ...prev, [key]: e.target.value }));
+    };
+  useEffect(() => {
+    (async () => {
+      const d = await getMyHospital();
+      const oldItems: PreviewItem[] = (d.imageUrls ?? []).map((url, i) => ({
+        id: d.fileIds?.[i],
+        url,
+      }));
+      setPreviewItems(oldItems);
+      if (!d) return;
 
-  const [formErrors, setFormErrors] = useState({
-    name: '',
-    businessNumber: '',
-    address: '',
-    phoneNumber: '',
-  });
+      setPreviewItems(oldItems);
+      setHospitalId(String(d.hospitalId));
+      setIsEdit(true);
+      const [addr, detail] = splitAddr(d.address || '');
+      setForm({
+        name: d.name || '',
+        address: addr,
+        detailAddress: detail,
+        phoneNumber: d.phone || '',
+        businessNumber: d.businessRegistrationNumber || '',
+        intro: d.introduction || '',
+        notice: d.notice || '',
+        serviceName: d.serviceNames || [],
+        imageUrls: d.imageUrls || [],
+      });
+      setCoords({ lat: d.latitude || 0, lng: d.longitude || 0 });
+      setExistingFileIds(d.fileIds || []);
+      setPreviewUrls(d.imageUrls || []);
+      const sch = await getHospitalSchedules(d.hospitalId);
+      console.log('[getMyHospital] raw schedules:', sch);
+      setBusinessHours(mapSchedules(sch));
+    })();
+  }, []);
 
+  // 파일 선택 핸들러
+  const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const newItems = Array.from(e.target.files).map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+    setPreviewItems((prev) => [...prev, ...newItems]);
+  };
+
+  const handleAddressChange = (full: string) => {
+    const [addr, detail] = splitAddr(full); // splitAddr은 "xxx) 상세" 식으로 나눠주는 유틸
+    setForm((prev) => ({
+      ...prev,
+      address: addr,
+      detailAddress: detail,
+    }));
+  };
+  const buildFormData = () => {
+    const fd = new FormData();
+    const dataBlob = new Blob(
+      [
+        JSON.stringify({
+          userId: localStorage.getItem('userId'),
+          name: form.name,
+          address: `${form.address} ${form.detailAddress}`,
+          latitude: coords.lat,
+          longitude: coords.lng,
+          phone: form.phoneNumber,
+          introduction: form.intro,
+          notice: form.notice,
+          serviceNames: form.serviceName,
+          businessRegistrationNumber: form.businessNumber,
+          existingFileIds: previewItems.filter((i) => i.id).map((i) => i.id),
+          deletedFileIds,
+        }),
+      ],
+      { type: 'application/json' },
+    );
+    fd.append('data', dataBlob);
+    previewItems.filter((i) => i.file).forEach((i) => fd.append('files', i.file!));
+    return fd;
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateHours(businessHours)) return;
+    const errs = validateForm(form);
+    if (Object.values(errs).some(Boolean)) {
+      setFormErrors(errs);
 
-    for (const { day, open, close, lunchStart, lunchEnd } of businessHours) {
-      // ① 빈 데이터(오픈/종료 둘 다 빈 값)는 건너뛰기
-      if (!open && !close && !lunchStart && !lunchEnd) {
-        continue;
-      }
-
-      // ② 진료 시작/종료는 둘 다 있어야 함
-      if (!open || !close) {
-        alert(`${day}의 진료 시작·종료 시간을 모두 입력해주세요.`);
-        return;
-      }
-
-      // ③ 진료 시작 < 종료
-      if (open >= close) {
-        alert(`${day} 진료 시작시간은 종료시간보다 빠르게 입력해야 합니다.`);
-        return;
-      }
-
-      // ④ 점심이 있으면 진료시간 내부에 있어야 함
-      if (lunchStart) {
-        if (lunchStart < open || lunchStart >= close) {
-          alert(`${day} 점심 시작시간은 진료시간(${open}~${close}) 안에 있어야 합니다.`);
-          return;
-        }
-      }
-      if (lunchEnd) {
-        if (lunchEnd <= open || lunchEnd > close) {
-          alert(`${day} 점심 종료시간은 진료시간(${open}~${close}) 안에 있어야 합니다.`);
-          return;
-        }
+      // 에러 필드에 포커스
+      if (errs.name) {
+        nameRef.current?.focus();
+      } else if (errs.businessNumber) {
+        businessNumberRef.current?.focus();
+      } else if (errs.address) {
+        // HospitalDaumPost 내부 input에 ref 전달이 안 돼 있으면,
+        // 해당 컴포넌트에 `inputRef={addressRef}` 같은 prop을 추가해 주세요.
+        addressRef.current?.focus();
+      } else if (errs.phoneNumber) {
+        phoneRef.current?.focus();
       }
 
-      // ⑤ 점심 시작 < 점심 종료
-      if (lunchStart && lunchEnd && lunchStart >= lunchEnd) {
-        alert(`${day} 점심 시작시간은 점심 종료시간보다 빠르게 입력해야 합니다.`);
-        return;
-      }
+      return;
     }
-
-    if (selectedImage) {
-      const formData = new FormData();
-      formData.append('file', selectedImage);
-      const res = await fetch('http://localhost:8080/api/v1/file/upload?category=HOSPITAL', {
-        method: 'POST',
-        body: formData,
-      });
-      if (!res.ok) {
-        alert('이미지 업로드 실패');
-        return;
-      }
-      const data = await res.json();
-
-      setExistingFileId(data.fileId);
-    }
-
-    const newErrors = {
-      name: form.name.trim() ? '' : '병원명은 필수 입력 항목입니다.',
-      businessNumber: form.businessNumber.trim() ? '' : '사업자번호는 필수 입력 항목입니다.',
-      address: form.address.trim() ? '' : '주소는 필수 입력 항목입니다.',
-      phoneNumber: form.phoneNumber.trim() ? '' : '전화번호는 필수 입력 항목입니다.',
-    };
-    setFormErrors(newErrors);
-    if (Object.values(newErrors).some(Boolean)) return;
-
-    const hospitalPayload: CreateHospitalRequest = {
-      userId: Number(localStorage.getItem('userId') || '0'),
-      name: form.name,
-      address: form.address,
-      latitude: coords.lat,
-      longitude: coords.lng,
-      phone: form.phoneNumber,
-      introduction: form.intro,
-      notice: form.notice,
-      businessRegistrationNumber: form.businessNumber,
-      serviceNames: form.serviceName,
-      file: selectedImage,
-    };
-
-    const schedulePayloads = businessHours
-      .filter(({ open, close }) => open && close)
-      .map(({ scheduleId, day, open, close, lunchStart, lunchEnd }) => {
-        const dayOfWeek = dayOfWeekMap[day];
-        return {
-          hospitalScheduleId: scheduleId,
-          dayOfWeek,
-          openTime: `${open}:00`,
-          closeTime: `${close}:00`,
-          lunchStart: lunchStart ? `${lunchStart}:00` : '',
-          lunchEnd: lunchEnd ? `${lunchEnd}:00` : '',
-        };
-      });
-
-    const [toUpdate, toCreate] = [
-      schedulePayloads.filter((s) => s.hospitalScheduleId),
-      schedulePayloads.filter((s) => !s.hospitalScheduleId),
-    ];
-
+    const fd = buildFormData();
     try {
       let id = Number(hospitalId);
       if (isEdit) {
-        await updateHospital(id, hospitalPayload);
+        await updateHospital(id, fd);
       } else {
-        const created = await registerHospital(hospitalPayload);
-        id = created.hospitalId;
+        const { hospitalId: newId } = await registerHospital(fd);
+        id = newId;
         setHospitalId(String(id));
         setIsEdit(true);
       }
 
-      if (toUpdate.length) await updateHospitalSchedules(id, toUpdate);
-      if (toCreate.length) {
-        await Promise.all(toCreate.map(({ ...rest }) => createHospitalSchedule(id, rest)));
-      }
-
+      const [up, cr] = splitSchedules(businessHours);
+      if (up.length) await updateHospitalSchedules(id, up);
+      if (cr.length) await Promise.all(cr.map((c) => createHospitalSchedule(id, c)));
       alert(isEdit ? '수정 완료' : '등록 완료');
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert('저장 중 오류가 발생했습니다.');
     }
-  };
-  const handleRemoveSchedule = async (idx: number) => {
-    const target = businessHours[idx];
-    if (target.scheduleId && hospitalId) {
-      try {
-        await deleteHospitalSchedule(Number(hospitalId), target.scheduleId);
-      } catch (error) {
-        console.error('스케줄 삭제 실패', error);
-      }
+    console.group('%c[HospitalUpdate] Request payload', 'color: #4f46e5; font-weight: bold;');
+    console.log(
+      '  • 유지할 기존 파일 IDs:',
+      previewItems.filter((i) => i.id).map((i) => i.id),
+    );
+    console.log('  • 삭제할 파일 IDs:', deletedFileIds);
+    console.log(
+      '  • 업로드할 새 파일 객체들:',
+      previewItems.filter((i) => i.file).map((i) => i.file),
+    );
+    console.log('  • raw FormData entries:');
+    for (const [key, value] of fd.entries()) {
+      console.log(`     – ${key}:`, value);
     }
+    console.groupEnd();
+  };
+
+  const handleRemoveSchedule = (idx: number) => {
     setBusinessHours((prev) => prev.filter((_, i) => i !== idx));
   };
 
@@ -362,7 +322,7 @@ const HospitalUpdateForm: React.FC = () => {
       (d) => !used.includes(d),
     );
     if (!available) return alert('모든 요일이 이미 등록되었습니다.');
-    const kor = Object.entries(dayOfWeekMap).find(([, val]) => val === available)?.[0] ?? '';
+    const kor = Object.entries(dayOfWeekMap).find(([, val]) => val === available)?.[0] || '';
     setBusinessHours((prev) => [
       ...prev,
       { day: kor, open: '', close: '', lunchStart: '', lunchEnd: '' },
@@ -372,9 +332,38 @@ const HospitalUpdateForm: React.FC = () => {
     <Form onSubmit={handleSubmit}>
       <FieldWrapper>
         <Label>병원 이미지</Label>
-        <FileInput id="hospitalImage" type="file" accept="image/*" onChange={handleImageChange} />
+        <FileInput
+          id="hospitalImage"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFilesChange}
+        />
         <FileLabel htmlFor="hospitalImage">이미지 선택</FileLabel>
-        {previewUrl && <PreviewImage src={previewUrl} alt="미리보기" />}
+        <ThumbnailsRow>
+          {previewItems.map((item, idx) => (
+            <ThumbnailWrapper
+              key={idx}
+              onClick={() => {
+                if (item.id != null) {
+                  alert(`File ID: ${item.id}`);
+                } else {
+                  alert('새로 업로드된 파일입니다.');
+                }
+              }}
+            >
+              <PreviewImage src={item.url} />
+              <RemoveThumbnailButton
+                onClick={(e) => {
+                  e.stopPropagation(); // 클릭 전파 막기
+                  handleRemoveImage(idx);
+                }}
+              >
+                ×
+              </RemoveThumbnailButton>
+            </ThumbnailWrapper>
+          ))}
+        </ThumbnailsRow>
       </FieldWrapper>
       <FieldWrapper>
         <Label>병원 명</Label>
@@ -400,32 +389,77 @@ const HospitalUpdateForm: React.FC = () => {
       <FieldWrapper>
         <Label>주소</Label>
         <HospitalDaumPost
-          ref={addressRef}
           address={form.address}
-          setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
+          setAddress={handleAddressChange}
           setCoords={setCoords}
         />
         {formErrors.address && <ErrorMessage>{formErrors.address}</ErrorMessage>}
       </FieldWrapper>
       <FieldWrapper>
+        <Label>상세주소</Label>
+        <Input
+          value={form.detailAddress}
+          onChange={(e) => setForm((prev) => ({ ...prev, detailAddress: e.target.value }))}
+        />
+      </FieldWrapper>
+      <FieldWrapper>
         <Label>전화번호</Label>
         <Input
           ref={phoneRef}
-          value={form.phoneNumber}
           inputMode="numeric"
+          value={form.phoneNumber}
           onChange={(e) => {
-            let value = e.target.value.replace(/\D/g, ''); // 숫자만 추출
-
-            // 숫자만 기준으로 11자리 이상 못 쓰게 자름
-            value = value.slice(0, 10); // 3+3+4 = 10자리 숫자 (051-123-4567)
-
+            let raw = e.target.value.replace(/\D/g, ''); // 숫자만
             let formatted = '';
-            if (value.length <= 3) {
-              formatted = value;
-            } else if (value.length <= 6) {
-              formatted = `${value.slice(0, 3)}-${value.slice(3)}`;
+
+            // 1) 0507: 0507-1234-1234 (4-4-4, 총 12자리 숫자)
+            if (raw.startsWith('0507')) {
+              raw = raw.slice(0, 12);
+              if (raw.length <= 4) {
+                formatted = raw;
+              } else if (raw.length <= 8) {
+                formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+              } else {
+                formatted = `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8)}`;
+              }
+
+              // 2) 02: 02-123-1234 (2-3-4, 총 9자리 숫자)
+            } else if (raw.startsWith('02')) {
+              raw = raw.slice(0, 9);
+              if (raw.length <= 2) {
+                formatted = raw;
+              } else if (raw.length <= 5) {
+                formatted = `${raw.slice(0, 2)}-${raw.slice(2)}`;
+              } else {
+                formatted = `${raw.slice(0, 2)}-${raw.slice(2, 5)}-${raw.slice(5)}`;
+              }
+
+              // 3) 010: 010-1234-1234 (3-4-4, 총 11자리 숫자)
+            } else if (raw.startsWith('010')) {
+              raw = raw.slice(0, 11);
+              if (raw.length <= 3) {
+                formatted = raw;
+              } else if (raw.length <= 7) {
+                formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
+              } else {
+                formatted = `${raw.slice(0, 3)}-${raw.slice(3, 7)}-${raw.slice(7)}`;
+              }
+
+              // 4) 그 외 3자리 국번 (예: 051): 051-123-1234 (3-3-4, 총 10자리 숫자)
+            } else if (/^0\d{2}/.test(raw)) {
+              raw = raw.slice(0, 10);
+              if (raw.length <= 3) {
+                formatted = raw;
+              } else if (raw.length <= 6) {
+                formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
+              } else {
+                formatted = `${raw.slice(0, 3)}-${raw.slice(3, 6)}-${raw.slice(6)}`;
+              }
+
+              // 5) 나머지 잘못된 국번은 숫자만 자르고 하이픈 없이
             } else {
-              formatted = `${value.slice(0, 3)}-${value.slice(3, 6)}-${value.slice(6)}`;
+              raw = raw.slice(0, 11);
+              formatted = raw;
             }
 
             setForm((prev) => ({
@@ -433,8 +467,7 @@ const HospitalUpdateForm: React.FC = () => {
               phoneNumber: formatted,
             }));
           }}
-          maxLength={13} // 하이픈 포함 최대 길이
-          placeholder="예: 051-123-4567"
+          placeholder="예: 010-1234-5678"
         />
 
         {formErrors.phoneNumber && <ErrorMessage>{formErrors.phoneNumber}</ErrorMessage>}
@@ -552,6 +585,131 @@ const HospitalUpdateForm: React.FC = () => {
 };
 
 export default HospitalUpdateForm;
+
+function splitAddr(full: string): [string, string] {
+  const i = full.lastIndexOf(')');
+  return i >= 0 ? [full.slice(0, i + 1), full.slice(i + 1).trim()] : [full, ''];
+}
+function mapSchedules(raw: ScheduleDTO[]): HourRow[] {
+  // 1) raw 를 "목요일" 같은 한글 요일별로 묶기
+  const grouped = raw.reduce<Record<string, ScheduleDTO[]>>(
+    (acc, m) => {
+      const kor = mapDayOfWeekBack(m.dayOfWeek); // "THURSDAY" → "목요일"
+      if (!acc[kor]) acc[kor] = [];
+      acc[kor].push(m);
+      return acc;
+    },
+    {} as Record<string, ScheduleDTO[]>,
+  );
+
+  // 2) 전체 한글 요일 배열
+  const week = Object.keys(dayOfWeekMap); // ["월요일","화요일",…,"일요일"]
+
+  // 3) flatMap 으로 각 요일마다 하나 이상 → 각각 매핑, 0개 → 빈 Row 하나
+  return week.flatMap((korDay) => {
+    const list = grouped[korDay] ?? [null];
+    return (list as (ScheduleDTO | null)[]).map((m) =>
+      m
+        ? {
+            hospitalScheduleId: m.hospitalScheduleId,
+            day: korDay,
+            open: m.openTime.slice(0, 5),
+            close: m.closeTime.slice(0, 5),
+            lunchStart: m.lunchStart ? m.lunchStart.slice(0, 5) : '',
+            lunchEnd: m.lunchEnd ? m.lunchEnd.slice(0, 5) : '',
+          }
+        : {
+            day: korDay,
+            open: '',
+            close: '',
+            lunchStart: '',
+            lunchEnd: '',
+          },
+    );
+  });
+}
+function validateHours(rows: HourRow[]): boolean {
+  for (const r of rows) {
+    // (1) 전부 빈칸이면 스킵
+    if (!r.open && !r.close && !r.lunchStart && !r.lunchEnd) continue;
+
+    // (2) 진료시간 필수 검사
+    if (!r.open || !r.close) {
+      alert(`${r.day} 진료 시작·종료 시간을 모두 입력해주세요.`);
+      return false;
+    }
+    if (r.open >= r.close) {
+      alert(`${r.day} 진료 시작시간은 종료시간보다 빠르게 입력해야 합니다.`);
+      return false;
+    }
+
+    // (3) 점심시간은 둘 다 입력하거나, 둘 다 비워야 함
+    const hasLunchStart = Boolean(r.lunchStart);
+    const hasLunchEnd = Boolean(r.lunchEnd);
+    if (hasLunchStart !== hasLunchEnd) {
+      alert(`${r.day} 점심 시작·종료 시간을 모두 입력하거나, 모두 비워두세요.`);
+      return false;
+    }
+
+    // (4) 점심시간을 입력하지 않았으면 더 이상 검사할 필요 없음
+    if (!hasLunchStart && !hasLunchEnd) continue;
+
+    // (5) 점심시간 순서 및 범위 검사
+    if (r.lunchStart < r.open || r.lunchStart >= r.close) {
+      alert(`${r.day} 점심 시작시간은 진료시간(${r.open}~${r.close}) 안에 있어야 합니다.`);
+      return false;
+    }
+    if (r.lunchEnd <= r.open || r.lunchEnd > r.close) {
+      alert(`${r.day} 점심 종료시간은 진료시간(${r.open}~${r.close}) 안에 있어야 합니다.`);
+      return false;
+    }
+    if (r.lunchStart >= r.lunchEnd) {
+      alert(`${r.day} 점심 시작시간은 점심 종료시간보다 빠르게 입력해야 합니다.`);
+      return false;
+    }
+  }
+  return true;
+}
+function validateForm(f: HospitalForm) {
+  return {
+    name: f.name.trim() ? '' : '병원명은 필수입니다.',
+    businessNumber: f.businessNumber.trim() ? '' : '사업자번호는 필수입니다.',
+    address: f.address.trim() ? '' : '주소는 필수입니다.',
+    phoneNumber: f.phoneNumber.trim() ? '' : '전화번호는 필수입니다.',
+  };
+}
+function splitSchedules(rows: HourRow[]): [CreateScheduleRequest[], CreateScheduleRequest[]] {
+  const payloads: CreateScheduleRequest[] = rows
+    .filter((r) => r.open && r.close)
+    .map((r) => {
+      // 필수 필드 먼저 설정
+      const req: CreateScheduleRequest = {
+        hospitalScheduleId: r.hospitalScheduleId,
+        dayOfWeek: dayOfWeekMap[r.day],
+        openTime: `${r.open}:00`,
+        closeTime: `${r.close}:00`,
+        lunchStart: r.lunchStart ? `${r.lunchStart}:00` : '', // 빈 문자열 혹은 "00:00:00"
+        lunchEnd: r.lunchEnd ? `${r.lunchEnd}:00` : '',
+      };
+
+      // lunchStart가 있으면 추가
+      if (r.lunchStart) {
+        req.lunchStart = `${r.lunchStart}:00`;
+      }
+      // lunchEnd가 있으면 추가
+      if (r.lunchEnd) {
+        req.lunchEnd = `${r.lunchEnd}:00`;
+      }
+
+      return req;
+    });
+
+  // hospitalScheduleId 유무로 업데이트 / 생성 분리
+  return [
+    payloads.filter((p) => p.hospitalScheduleId != null),
+    payloads.filter((p) => p.hospitalScheduleId == null),
+  ];
+}
 
 const ChipsWrapper = styled.div`
   display: flex;
@@ -716,4 +874,35 @@ const StyledTimeSelect = styled.select`
   padding: 0.4rem;
   border: 1px solid #ccc;
   border-radius: 0.375rem;
+`;
+const ThumbnailsRow = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+`;
+const ThumbnailWrapper = styled.div`
+  position: relative;
+  width: 120px;
+  height: 150px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+`;
+
+const RemoveThumbnailButton = styled.button.attrs({ type: 'button' })`
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
 `;

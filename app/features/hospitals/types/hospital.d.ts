@@ -1,7 +1,7 @@
 // types/hospital.ts (예시)
 export interface Hospital {
   schedules: HospitalSchedules;
-  imageUrl?: never;
+  imageUrls?: string[];
   name: string;
   waiting: number;
   hospitalId: number;
@@ -18,7 +18,7 @@ export interface Hospital {
   serviceNames: string[];
   notice: string;
   introduction: string;
-  fileId?: number;
+  fileIds?: number[];
 }
 
 export interface HospitalPage {
@@ -56,9 +56,17 @@ export type DayOfWeek =
 
 // 스케줄 생성/수정을 위한 요청 DTO
 export interface CreateScheduleRequest {
+  hospitalScheduleId: number | undefined;
   dayOfWeek: DayOfWeek;
   openTime: string; // "HH:mm:ss" 포맷 (예: "09:00:00")
   closeTime: string; // "HH:mm:ss"
   lunchStart: string; // "HH:mm:ss"
   lunchEnd: string; // "HH:mm:ss"
+}
+export interface HospitalForm {
+  name: string;
+  businessNumber: string;
+  address: string;
+  phoneNumber: string;
+  // 필요하다면 다른 필드도 추가…
 }

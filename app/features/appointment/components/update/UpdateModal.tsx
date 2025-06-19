@@ -89,6 +89,7 @@ const AppointmentUpdateModal = ({
       await refetch();
       if (appointment?.paymentType === 'ONLINE') {
         canRequestPayment = true;
+        navigate(`/payments/request?appointmentId=${appointment?.appointmentId}`);
       }
     }
   };

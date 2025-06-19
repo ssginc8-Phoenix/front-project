@@ -8,7 +8,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import { useMyHospitalId } from '~/features/hospitals/hooks/useMyHospitalId';
 import ReviewSummaryCard from '~/features/reviews/component/common/ReviewSummaryCard';
 
-const ads = ['/ads/ad1.png', '/ads/ad2.png', '/ads/ad3.png'];
+const ads = ['H_Banner.png', '/ads/ad2.png', '/ads/ad3.png'];
 
 const features = [
   { title: '', route: '/hospitals/search', icon: '/location.png' },

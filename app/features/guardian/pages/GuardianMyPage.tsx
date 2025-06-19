@@ -553,13 +553,6 @@ export const GuardianMyPage = () => {
               ))}
             </DashboardGrid>
           </DashboardSection>
-
-          <CenterSection>
-            <CenterButton type="button" onClick={() => alert('실시간 고객센터 연결')}>
-              <span style={{ fontSize: '1.35rem' }}>💬</span>
-              실시간 고객센터 연결
-            </CenterButton>
-          </CenterSection>
         </MainContentWrapper>
 
         <PasswordModal

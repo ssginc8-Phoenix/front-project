@@ -1,6 +1,7 @@
 import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
+  /** 로그인, 회원가입 관련  */
   route('/login', 'routes/login.tsx'),
   route('/signup', 'routes/signup.tsx'),
   route('/signup/form', 'routes/signupForm.tsx'),

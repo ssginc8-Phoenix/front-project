@@ -5,6 +5,7 @@ import LoadingIndicator from '~/components/common/LoadingIndicator';
 import ErrorMessage from '~/components/common/ErrorMessage';
 import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 import { usePatientListByGuardian } from '~/features/guardian/hooks/usePatientListByGuardian';
+import { data } from 'react-router';
 
 const Wrapper = styled.div`
   display: flex;
@@ -59,7 +60,7 @@ const PatientSelector = () => {
             key={patient.patientId}
             name={patient.name}
             residentRegistrationNumber={patient.residentRegistrationNumber}
-            imageUrl={patient.imageUrl}
+            imageUrl={patient.profileImageUrl}
             isSelected={patientId === patient.patientId}
             onSelect={() => {
               if (patientId === patient.patientId) {

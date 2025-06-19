@@ -38,7 +38,7 @@ const DoctorSelector = ({ hospitalId }: DoctorSelectorProps) => {
   const { doctorId, setDoctorId, doctorName, setDoctorName } = useAppointmentStore();
 
   /* 디버깅용 코드 추후 삭제 예정 */
-  useEffect(() => {}, [doctorId]);
+  useEffect(() => {}, []);
 
   return (
     <Wrapper>

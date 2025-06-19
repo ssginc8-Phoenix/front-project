@@ -5,7 +5,7 @@ import type { Doctor } from '~/types/doctor';
 export const useDoctorList = (hospitalId: number) => {
   const { data, loading, error } = useAsync<Doctor[]>(
     () => getDoctorList(hospitalId),
-    [hospitalId], // hospitalId가 바뀌면 다시 요청
+    [hospitalId],
   );
   return { data: data ?? [], loading, error };
 };

@@ -9,6 +9,7 @@ import type {
   ReviewUpdateRequest,
   ReviewAllListResponse,
   HospitalReviewResponse,
+  ReviewSummaryResponse,
 } from '~/features/reviews/types/review';
 
 const host = 'http://localhost:8080/api/v1/reviews';
@@ -84,4 +85,13 @@ export async function reportReview(reviewId: number, reason: string): Promise<vo
     params: { reason },
     withCredentials: true,
   });
+}
+
+// 병원 리뷰 AI 요약
+export async function getReviewSummary(hospitalId: number): Promise<ReviewSummaryResponse> {
+  const url = `http://localhost:8080/api/v1/hospitals/${hospitalId}/reviews/summary`;
+  const res = await axios.get<ReviewSummaryResponse>(url, {
+    withCredentials: true,
+  });
+  return res.data;
 }

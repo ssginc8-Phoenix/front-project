@@ -16,14 +16,11 @@ export default [
   route('/sandbox/success', 'routes/payments/success.tsx'),
   route('/sandbox/fail', 'routes/payments/fail.tsx'),
 
-  /** HOME  */
-  route('', 'layout/MainPageLayout.tsx', [
-    index('routes/main.tsx'),
-    route('hospital/main', 'routes/hospital/HospitalMainPage.tsx'),
-  ]),
-
   /** MainLayout 적용 */
   route('', 'layout/MainLayout.tsx', [
+    /** HOME */
+    index('routes/main.tsx'),
+    route('hospital/main', 'routes/hospital/HospitalMainPage.tsx'),
 
     route('myPage', 'routes/myPage.tsx'), // 역할별 마이페이지
 
@@ -64,19 +61,15 @@ export default [
     route('appointments', 'routes/appointment/emptyPage.tsx', [
       route('request', 'routes/appointment/appointmentRequest.tsx'),
     ]),
-  ]),
 
-  /** QNAS 영역 */
-  route('', 'layout/QnALayout.tsx', [
+    /** QNA 큐앤에이 영역 */
     route('qna', 'routes/qna/QnAListPage.tsx', [route(':qnaId', 'routes/qna/QnADetailPage.tsx')]),
     route('doctor/qna', 'routes/doctor/Qna.tsx', [route(':qnaId', 'routes/doctor/QnaDetail.tsx')]),
-  ]),
 
-  /** REVIEWS 리뷰 영역 */
-  route('', 'layout/ReviewLayout.tsx', [
-    route('/reviews/admin', 'features/reviews/pages/ReviewAdminPage.tsx'),
-    route('/reviews/hospital/:hospitalId', 'features/reviews/pages/ReviewHospitalPage.tsx'),
-    route('/reviews/:userId', 'features/reviews/pages/ReviewMyListPage.tsx'),
+    /** REVIEW 리뷰 영역 */
+    route('reviews/admin', 'features/reviews/pages/ReviewAdminPage.tsx'),
+    route('reviews/hospital/:hospitalId', 'features/reviews/pages/ReviewHospitalPage.tsx'),
+    route('reviews/:userId', 'features/reviews/pages/ReviewMyListPage.tsx'),
   ]),
 
   route('*', 'routes/NotFound.tsx'),

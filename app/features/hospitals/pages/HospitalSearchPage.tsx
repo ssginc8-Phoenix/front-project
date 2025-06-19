@@ -45,7 +45,7 @@ const SidePanel = styled.div`
 const ToggleGroup = styled.div`
   display: flex;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 0.5rem;
 `;
 
 const ToggleButton = styled.button<{ active: boolean }>`

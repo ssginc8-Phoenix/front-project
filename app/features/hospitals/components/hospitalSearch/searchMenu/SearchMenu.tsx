@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 const MenuWrapper = styled.div`
   background-color: #ffffff;
-  padding: 1.5rem;
+  padding: 0.5rem;
   border-bottom: 1px solid #e0e0e0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
@@ -23,9 +23,9 @@ const InputGroup = styled.div`
 `;
 
 const SearchInput = styled.input`
-  flex: 1 1 200px;
+  flex: 1 1 300px;
   max-width: 250px;
-  min-width: 120px;
+  min-width: 290px;
   padding: 0.8rem 1rem;
   border: 1px solid #ccc;
   border-radius: 4px;

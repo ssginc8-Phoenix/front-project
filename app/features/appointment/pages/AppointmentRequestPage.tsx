@@ -13,6 +13,7 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import LoginStore from '~/features/user/stores/LoginStore';
+import { useNavigate } from 'react-router';
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -39,6 +40,7 @@ const AppointmentRequestPage = () => {
     reset,
   } = useAppointmentStore();
   const { user } = LoginStore();
+  const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -91,7 +93,7 @@ const AppointmentRequestPage = () => {
     try {
       const result = await createAppointment(payload);
       alert('예약이 접수되었습니다.');
-
+      navigate('/appointments/list');
       reset();
     } catch (error) {
       console.error('예약 실패: ', error);

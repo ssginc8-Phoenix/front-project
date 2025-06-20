@@ -108,11 +108,9 @@ const ActionButton = styled.button`
   &:hover {
     background-color: #1d4ed8;
   }
-
   &:first-child {
     background-color: #e5e7eb;
     color: #333;
-
     &:hover {
       background-color: #d1d5db;
     }
@@ -135,9 +133,9 @@ interface PatientInfo {
 
 interface Props {
   date: string;
-  // 수정 모드일 때 전달되는 patientGuardianId
+  // 수정 모드일 때 단일 ID
   patientGuardianId?: number;
-  // 전체 등록 모드용
+  // 전체 모드용 리스트
   patients: PatientInfo[];
   initialData?: MedicationData;
   onClose: () => void;
@@ -158,10 +156,13 @@ export default function MedicationRegisterModal({
 }: Props) {
   const { user } = useLoginStore();
 
-  // 'all' 또는 개별 patientGuardianId
-  const [selectedTarget, setSelectedTarget] = useState<string>(
-    initialData ? String(patientGuardianId!) : 'all',
-  );
+  // 수정 모드면 그 ID, 아니면 "전체" 혹은 선택된 환자 ID
+  const initialTarget = initialData
+    ? String(patientGuardianId!)
+    : patientGuardianId !== undefined
+      ? String(patientGuardianId)
+      : 'all';
+  const [selectedTarget, setSelectedTarget] = useState<string>(initialTarget);
 
   const [medicationName, setMedicationName] = useState('');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -176,18 +177,18 @@ export default function MedicationRegisterModal({
 
   useEffect(() => {
     if (!initialData) return;
+
     setMedicationName(initialData.medicationName);
     setSelectedDays(initialData.days);
     setStartDate(initialData.startDate);
     setEndDate(initialData.endDate);
 
-    // 끼니 순서는 mealOptions 에서 고정
+    // mealOptions 순서대로 끼니 로드
     const meals = mealOptions
       .map((m) => m.value)
       .filter((v) => initialData.times?.some((t) => t.meal === v));
     setSelectedMeals(meals);
 
-    // 시간 세팅
     const map: Record<string, string> = {};
     initialData.times?.forEach((t) => {
       map[t.meal] = t.time.slice(0, 5);
@@ -200,7 +201,6 @@ export default function MedicationRegisterModal({
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
     );
   };
-
   const toggleMeal = (meal: string) => {
     setSelectedMeals((prev) =>
       prev.includes(meal) ? prev.filter((m) => m !== meal) : [...prev, meal],
@@ -216,7 +216,7 @@ export default function MedicationRegisterModal({
       alert('약 이름을 입력해주세요.');
       return;
     }
-    if (selectedDays.length === 0 || selectedMeals.length === 0) {
+    if (!selectedDays.length || !selectedMeals.length) {
       alert('요일과 끼니를 모두 선택해주세요.');
       return;
     }
@@ -228,7 +228,7 @@ export default function MedicationRegisterModal({
 
     try {
       if (initialData) {
-        // 수정 모드
+        // 수정
         await updateMedicationSchedule(initialData.medicationId, {
           newTimes: timesPayload,
           newDays: selectedDays,
@@ -237,7 +237,7 @@ export default function MedicationRegisterModal({
         });
         alert('수정되었습니다.');
       } else {
-        // 등록 모드: 전체 or 선택 환자 반복 호출
+        // 등록: 전체 or 선택된 환자
         const targets =
           selectedTarget === 'all'
             ? patients.map((p) => p.patientGuardianId)
@@ -270,7 +270,7 @@ export default function MedicationRegisterModal({
     <ModalBox>
       <ModalHeader>{initialData ? '💊 약 수정' : '💊 약 등록'}</ModalHeader>
       <ModalBody>
-        {/* 수정이 아닐 때만 환자 드롭다운 */}
+        {/* 수정 모드가 아닐 때만 환자 선택 */}
         {!initialData && (
           <>
             <Label>👤 환자 선택</Label>
@@ -319,7 +319,7 @@ export default function MedicationRegisterModal({
           ))}
         </ButtonGroup>
 
-        {/* 입력창도 mealOptions 순서대로 필터 */}
+        {/* mealOptions 순서대로 시간 입력 */}
         {mealOptions
           .filter((m) => selectedMeals.includes(m.value))
           .map((m) => (
@@ -328,7 +328,12 @@ export default function MedicationRegisterModal({
               <TimeInput
                 type="time"
                 value={mealTimes[m.value]}
-                onChange={(e) => setMealTimes((prev) => ({ ...prev, [m.value]: e.target.value }))}
+                onChange={(e) =>
+                  setMealTimes((prev) => ({
+                    ...prev,
+                    [m.value]: e.target.value,
+                  }))
+                }
               />
             </div>
           ))}

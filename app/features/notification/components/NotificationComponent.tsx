@@ -150,7 +150,7 @@ const NotificationComponent = () => {
           ) : (
             notifications.map((data) => {
               const handleClick = () => {
-                if (data.type === 'PAYMENT_REQUEST' && data.referenceId) {
+                if (data.type === '결제 요청' && data.referenceId) {
                   navigate(`/payments/history?paymentRequestId=${data.referenceId}`);
                 }
               };

@@ -2,7 +2,7 @@ import { useAsync } from '~/hooks/useAsync';
 import { getAppointmentList } from '~/features/appointment/api/appointmentAPI';
 import type { AppointmentListPage } from '~/types/appointment';
 
-export const useAppointmentList = (page: number, size: number = 5) => {
+export const useAppointmentList = (page: number, size: number) => {
   const { data, loading, error } = useAsync<AppointmentListPage>(
     () => getAppointmentList(page, size),
     [page, size],

@@ -78,14 +78,25 @@ const PaymentForm = ({ appointment, onSubmit }: PaymentFormProps) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isRequestComplete, setIsRequestComplete] = useState(false);
 
+  const formatAmount = (value: string) => {
+    const numeric = value.replace(/[^0-9]/g, '');
+    if (!numeric) return '';
+    return Number(numeric).toLocaleString();
+  };
+
+  const unformatAmount = (value: string) => {
+    return value.replace(/,/g, '');
+  };
+
   const handleSubmit = () => {
-    if (!amount || isNaN(Number(amount))) {
+    const numericAmount = Number(unformatAmount(amount));
+    if (!numericAmount || isNaN(numericAmount)) {
       setErrorMessage('올바른 금액을 입력해주세요.');
       return;
     }
 
     setErrorMessage('');
-    onSubmit(Number(amount));
+    onSubmit(numericAmount);
     setIsRequestComplete(true);
   };
 
@@ -112,11 +123,12 @@ const PaymentForm = ({ appointment, onSubmit }: PaymentFormProps) => {
       <Section>
         <Label>결제 금액 (원)</Label>
         <AmountInput
-          type="number"
+          type="text"
           placeholder="금액을 입력하세요"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={(e) => setAmount(formatAmount(e.target.value))}
         />
+
         {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
       </Section>
 

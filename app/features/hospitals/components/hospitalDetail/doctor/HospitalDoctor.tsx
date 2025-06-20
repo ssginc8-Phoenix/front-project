@@ -1,54 +1,42 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useDoctor } from '../../../hooks/useDoctor';
-import type { Doctor, Specialization } from '../../../types/doctor.d';
+import type { Doctor } from '../../../types/doctor.d';
 
-// Grid layout for cards
-const CardGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+const List = styled.div`
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
   padding: 1rem 0;
 `;
 
-// Individual card styling
 const DoctorCard = styled.div`
-  background: #ffffff;
+  display: flex;
+  align-items: center;
+  background: #f3f4f6; /* 전체 배경 */
   border-radius: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  text-align: center;
   padding: 1rem;
-  transition: transform 0.2s;
-  cursor: pointer;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
 `;
 
-// Profile image at top
 const ProfileImage = styled.img`
-  width: 80px;
-  height: 80px;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 0.75rem;
 `;
 
-// Name and specialization
-const DoctorName = styled.h4`
-  font-size: 1rem;
+const Info = styled.div`
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+  flex: 1;
+`;
+
+const Name = styled.span`
+  font-size: 1.125rem;
   font-weight: 600;
   color: #111827;
-  margin: 0.25rem 0;
-`;
-
-const DoctorSpec = styled.p`
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin: 0;
 `;
 
 const TabContent = styled.div`
@@ -71,21 +59,16 @@ const HospitalDoctor: React.FC<HospitalDoctorProps> = ({ hospitalId }) => {
       {doctorsList.length === 0 ? (
         <p>등록된 의사가 없습니다.</p>
       ) : (
-        <CardGrid>
+        <List>
           {doctorsList.map((doctor) => (
             <DoctorCard key={doctor.doctorId}>
-              <ProfileImage
-                src={
-                  // 프로필 이미지 URL이 있을 경우 사용, 없으면 기본 아바타
-                  doctor.imageUrl || '/default-avatar.png'
-                }
-                alt={doctor.name}
-              />
-              <DoctorName>{doctor.name}</DoctorName>
-              <DoctorSpec>{doctor.specialization}</DoctorSpec>
+              <ProfileImage src={doctor.imageUrl || '/default-avatar.png'} alt={doctor.name} />
+              <Info>
+                <Name>{doctor.name}</Name>
+              </Info>
             </DoctorCard>
           ))}
-        </CardGrid>
+        </List>
       )}
     </TabContent>
   );

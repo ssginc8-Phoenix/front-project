@@ -18,6 +18,7 @@ const SectionTitle = styled.h3`
   font-size: 1.5rem;
   font-weight: bold;
   color: #111827;
+  text-align: center;
 `;
 
 const ReviewList = styled.ul`
@@ -123,7 +124,7 @@ const HospitalReviews: React.FC<HospitalReviewsProps> = ({ hospitalId }) => {
   //    - 로딩 중엔 텍스트
   const renderStats = () => {
     if (loading) return <SectionTitle>키워드 통계 로딩...</SectionTitle>;
-    if (reviews.length === 0) return <SectionTitle>키워드 통계 데이터가 없습니다</SectionTitle>;
+    if (reviews.length === 0) return <SectionTitle>아직 리뷰가 등록되지 않았습니다.</SectionTitle>;
 
     return (
       <>

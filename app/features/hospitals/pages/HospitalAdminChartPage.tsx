@@ -87,10 +87,7 @@ const HospitalAdminChartPage = () => {
   const navigate = useNavigate();
   const { hospitalId, loading } = useMyHospitalId();
   const { user } = useLoginStore();
-  const { data } = useQuery({
-    queryKey: ['myHospitalInfo'],
-    queryFn: getMyHospital,
-  });
+
   const handleSidebarChange = (key: string) => {
     const targetPath = `/hospital/${key}`;
     if (window.location.pathname === targetPath) {
@@ -108,9 +105,9 @@ const HospitalAdminChartPage = () => {
       <SidebarBox>
         <ProfileSection>
           <ProfileEmoji>
-            {data?.imageUrl ? (
+            {user?.profileImageUrl ? (
               <img
-                src={data.imageUrl}
+                src={user.profileImageUrl}
                 alt="의사 프로필"
                 style={{
                   width: '80px',

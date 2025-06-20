@@ -1,8 +1,8 @@
 // 병원 등록 전용 페이지: HospitalCreateForm.tsx
 import React, { useRef, useState } from 'react';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { X, Plus } from 'lucide-react';
-import { Select } from 'antd';
+import { Copy } from 'lucide-react';
 import { registerHospital, createHospitalSchedule } from '~/features/hospitals/api/hospitalAPI';
 import HospitalDaumPost from '~/features/hospitals/components/hospitalAdmin/info/HospitalDaumPost';
 import type { CreateScheduleRequest } from '~/features/hospitals/types/hospital';
@@ -155,13 +155,50 @@ const HospitalCreateForm: React.FC = () => {
   const handleRemoveSchedule = (idx: number) => {
     setBusinessHours((prev) => prev.filter((_, i) => i !== idx));
   };
+  const WEEKDAYS: CreateScheduleRequest['dayOfWeek'][] = [
+    'MONDAY',
+    'TUESDAY',
+    'WEDNESDAY',
+    'THURSDAY',
+    'FRIDAY',
+    'SATURDAY',
+    'SUNDAY',
+  ];
+  const handleCopySchedule = (idx: number) => {
+    setBusinessHours((prev) => {
+      const baseDay = prev[idx].dayOfWeek;
+      const baseIdx = WEEKDAYS.indexOf(baseDay);
+      if (baseIdx < 0) return prev;
 
-  const timeOptions = Array.from({ length: 24 * 2 }, (_, i) => {
-    const hour = String(Math.floor(i / 2)).padStart(2, '0');
-    const minute = i % 2 === 0 ? '00' : '30';
-    const label = `${hour}:${minute}`;
-    return { label, value: label };
-  });
+      // 원본 행 바로 아래부터 연속으로 몇 개 복사했는지 센다
+      let copiedCount = 0;
+      for (let i = idx + 1; i < prev.length; i++) {
+        // 기대하는 다음 요일
+        const expectedNext = WEEKDAYS[baseIdx + copiedCount + 1];
+        if (prev[i].dayOfWeek === expectedNext) {
+          copiedCount++;
+        } else {
+          break;
+        }
+      }
+
+      const nextDayIdx = baseIdx + copiedCount + 1;
+      // 이미 일요일(SUNDAY)이거나 그 이후라면 복사 안 함
+      if (nextDayIdx >= WEEKDAYS.length) {
+        return prev;
+      }
+
+      // 새로운 행은 원본을 복사하되 dayOfWeek만 다음 요일로 바꿈
+      const newRow: HourRow = {
+        ...prev[idx],
+        dayOfWeek: WEEKDAYS[nextDayIdx],
+      };
+
+      // 삽입 위치: 원본 idx + (지금까지 복사된 개수) + 1
+      const insertPos = idx + copiedCount + 1;
+      return [...prev.slice(0, insertPos), newRow, ...prev.slice(insertPos)];
+    });
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     for (const { dayOfWeek, open, close, lunchStart, lunchEnd } of businessHours) {
@@ -209,6 +246,22 @@ const HospitalCreateForm: React.FC = () => {
       phoneNumber: form.phoneNumber.trim() ? '' : '전화번호는 필수 입력 항목입니다.',
     };
     setFormErrors(errors);
+    if (errors.name) {
+      nameRef.current?.focus();
+      return;
+    }
+    if (errors.businessNumber) {
+      businessNumberRef.current?.focus();
+      return;
+    }
+    if (errors.address) {
+      addressRef.current?.focus();
+      return;
+    }
+    if (errors.phoneNumber) {
+      phoneRef.current?.focus();
+      return;
+    }
     if (Object.values(errors).some(Boolean)) return;
     if (!user || user.userId === undefined) {
       alert('로그인이 필요합니다.');
@@ -270,281 +323,257 @@ const HospitalCreateForm: React.FC = () => {
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <FieldWrapper>
-        <Label>병원 명</Label>
-        <Input ref={nameRef} value={form.name} onChange={handleChange('name')} />
-        {formErrors.name && <Error>{formErrors.name}</Error>}
-      </FieldWrapper>
-      <FieldWrapper>
-        <Label>사업자 번호</Label>
-        <Input
-          ref={businessNumberRef}
-          inputMode="numeric"
-          maxLength={12} // 하이픈 포함 12자
-          value={form.businessNumber}
-          onChange={(e) => {
-            const value = e.target.value;
+    <>
+      <GlobalStyle />
+      <Form onSubmit={handleSubmit}>
+        <FieldWrapper>
+          <Label>병원 명</Label>
+          <Input ref={nameRef} value={form.name} onChange={handleChange('name')} />
+          {formErrors.name && <Error>{formErrors.name}</Error>}
+        </FieldWrapper>
+        <FieldWrapper>
+          <Label>사업자 번호</Label>
+          <Input
+            ref={businessNumberRef}
+            inputMode="numeric"
+            maxLength={12} // 하이픈 포함 12자
+            value={form.businessNumber}
+            onChange={(e) => {
+              const value = e.target.value;
 
-            // 숫자만 남김
-            const numeric = value.replace(/\D/g, '');
+              // 숫자만 남김
+              const numeric = value.replace(/\D/g, '');
 
-            // 하이픈 포맷 적용
-            let formatted = '';
-            if (numeric.length <= 3) {
-              formatted = numeric;
-            } else if (numeric.length <= 5) {
-              formatted = `${numeric.slice(0, 3)}-${numeric.slice(3)}`;
-            } else {
-              formatted = `${numeric.slice(0, 3)}-${numeric.slice(3, 5)}-${numeric.slice(5, 10)}`;
-            }
-
-            setForm((prev) => ({
-              ...prev,
-              businessNumber: formatted,
-            }));
-          }}
-        />
-        {formErrors.businessNumber && <Error>{formErrors.businessNumber}</Error>}
-      </FieldWrapper>
-      <FieldWrapper>
-        <Label>주소</Label>
-        <HospitalDaumPost
-          ref={addressRef}
-          address={form.address}
-          setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
-          setCoords={setCoords}
-        />
-        {formErrors.address && <Error>{formErrors.address}</Error>}
-      </FieldWrapper>
-      <FieldWrapper>
-        <Label>상세주소</Label>
-        <Input value={form.detailAddress} onChange={handleChange('detailAddress')} />
-      </FieldWrapper>
-      <FieldWrapper>
-        <Label>전화번호</Label>
-        <Input
-          ref={phoneRef}
-          inputMode="numeric"
-          value={form.phoneNumber}
-          onChange={(e) => {
-            let raw = e.target.value.replace(/\D/g, ''); // 숫자만
-            let formatted = '';
-
-            // 1) 0507: 0507-1234-1234 (4-4-4, 총 12자리 숫자)
-            if (raw.startsWith('0507')) {
-              raw = raw.slice(0, 12);
-              if (raw.length <= 4) {
-                formatted = raw;
-              } else if (raw.length <= 8) {
-                formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+              // 하이픈 포맷 적용
+              let formatted = '';
+              if (numeric.length <= 3) {
+                formatted = numeric;
+              } else if (numeric.length <= 5) {
+                formatted = `${numeric.slice(0, 3)}-${numeric.slice(3)}`;
               } else {
-                formatted = `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8)}`;
+                formatted = `${numeric.slice(0, 3)}-${numeric.slice(3, 5)}-${numeric.slice(5, 10)}`;
               }
 
-              // 2) 02: 02-123-1234 (2-3-4, 총 9자리 숫자)
-            } else if (raw.startsWith('02')) {
-              raw = raw.slice(0, 9);
-              if (raw.length <= 2) {
-                formatted = raw;
-              } else if (raw.length <= 5) {
-                formatted = `${raw.slice(0, 2)}-${raw.slice(2)}`;
-              } else {
-                formatted = `${raw.slice(0, 2)}-${raw.slice(2, 5)}-${raw.slice(5)}`;
-              }
-
-              // 3) 010: 010-1234-1234 (3-4-4, 총 11자리 숫자)
-            } else if (raw.startsWith('010')) {
-              raw = raw.slice(0, 11);
-              if (raw.length <= 3) {
-                formatted = raw;
-              } else if (raw.length <= 7) {
-                formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
-              } else {
-                formatted = `${raw.slice(0, 3)}-${raw.slice(3, 7)}-${raw.slice(7)}`;
-              }
-
-              // 4) 그 외 3자리 국번 (예: 051): 051-123-1234 (3-3-4, 총 10자리 숫자)
-            } else if (/^0\d{2}/.test(raw)) {
-              raw = raw.slice(0, 10);
-              if (raw.length <= 3) {
-                formatted = raw;
-              } else if (raw.length <= 6) {
-                formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
-              } else {
-                formatted = `${raw.slice(0, 3)}-${raw.slice(3, 6)}-${raw.slice(6)}`;
-              }
-
-              // 5) 나머지 잘못된 국번은 숫자만 자르고 하이픈 없이
-            } else {
-              raw = raw.slice(0, 11);
-              formatted = raw;
-            }
-
-            setForm((prev) => ({
-              ...prev,
-              phoneNumber: formatted,
-            }));
-          }}
-          placeholder="예: 010-1234-5678"
-        />
-
-        {formErrors.phoneNumber && <Error>{formErrors.phoneNumber}</Error>}
-      </FieldWrapper>
-      <FieldWrapper>
-        <Label>소개글</Label>
-        <BigTextArea value={form.intro} onChange={handleChange('intro')} />
-      </FieldWrapper>
-      <FieldWrapper>
-        <Label>공지사항</Label>
-        <BigTextArea value={form.notice} onChange={handleChange('notice')} />
-      </FieldWrapper>
-      <FieldWrapper>
-        <Label>병원 이미지</Label>
-        <FileInput
-          id="hospitalImage"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleImageChange}
-        />
-        <FileLabel htmlFor="hospitalImage">이미지 선택</FileLabel>
-        {previewUrls.length > 0 && (
-          <PreviewWrapper>
-            {previewUrls.map((url, i) => (
-              <PreviewImage key={i} src={url} alt={`미리보기 ${i + 1}`} />
-            ))}
-          </PreviewWrapper>
-        )}
-      </FieldWrapper>
-      <FieldWrapper>
-        <Label>서비스 이름</Label>
-        <ServiceInputWrapper>
-          {form.serviceName.map((name, i) => (
-            <ServiceChip key={i}>
-              {name}
-              <RemoveButton
-                type="button"
-                onClick={() =>
-                  setForm((prev) => ({
-                    ...prev,
-                    serviceName: prev.serviceName.filter((_, idx) => idx !== i),
-                  }))
-                }
-              >
-                <X size={14} />
-              </RemoveButton>
-            </ServiceChip>
-          ))}
-          <ServiceInput
-            type="text"
-            placeholder="서비스 추가"
-            value={newService}
-            onChange={(e) => setNewService(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && newService.trim()) {
-                e.preventDefault();
-                setForm((prev) => ({
-                  ...prev,
-                  serviceName: [...prev.serviceName, newService.trim()],
-                }));
-                setNewService('');
-              }
+              setForm((prev) => ({
+                ...prev,
+                businessNumber: formatted,
+              }));
             }}
           />
-        </ServiceInputWrapper>
-      </FieldWrapper>
-      <FieldWrapper>
-        <Label>진료시간</Label>
-        {businessHours.map((row, idx) => (
-          <div
-            key={idx}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              flexWrap: 'wrap',
-              marginBottom: '1rem',
-            }}
-          >
-            {/* 요일 */}
-            <Select
-              value={row.dayOfWeek}
-              onChange={(value: typeof row.dayOfWeek) =>
-                handleScheduleChange(idx, 'dayOfWeek', value)
-              }
-            >
-              {Object.entries(reverseDayOfWeekMap).map(([eng, kor]) => (
-                <Select.Option key={eng} value={eng}>
-                  {kor}
-                </Select.Option>
-              ))}
-            </Select>
-            {/* 진료시간 */}
-            <Select
-              value={row.open || undefined}
-              onChange={(val: string) => handleScheduleChange(idx, 'open', val)}
-              placeholder="시작"
-              style={{ width: 100 }}
-            >
-              {timeOptions.map((opt) => (
-                <Select.Option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </Select.Option>
-              ))}
-            </Select>
-            ~
-            <Select
-              value={row.close || undefined}
-              onChange={(val: string) => handleScheduleChange(idx, 'close', val)}
-              placeholder="종료"
-              style={{ width: 100 }}
-            >
-              {timeOptions.map((opt) => (
-                <Select.Option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </Select.Option>
-              ))}
-            </Select>
-            점심:
-            <Select
-              value={row.lunchStart || undefined}
-              onChange={(val: string) => handleScheduleChange(idx, 'lunchStart', val)}
-              placeholder="시작"
-              style={{ width: 100 }}
-            >
-              {timeOptions.map((opt) => (
-                <Select.Option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </Select.Option>
-              ))}
-            </Select>
-            ~
-            <Select
-              value={row.lunchEnd || undefined}
-              onChange={(val: string) => handleScheduleChange(idx, 'lunchEnd', val)}
-              placeholder="종료"
-              style={{ width: 100 }}
-            >
-              {timeOptions.map((opt) => (
-                <Select.Option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </Select.Option>
-              ))}
-            </Select>
-            {/* 삭제 버튼 */}
-            <button type="button" onClick={() => handleRemoveSchedule(idx)}>
-              <X size={16} />
-            </button>
-          </div>
-        ))}
+          {formErrors.businessNumber && <Error>{formErrors.businessNumber}</Error>}
+        </FieldWrapper>
+        <FieldWrapper>
+          <Label>주소</Label>
+          <HospitalDaumPost
+            ref={addressRef}
+            address={form.address}
+            setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
+            setCoords={setCoords}
+          />
+          {formErrors.address && <Error>{formErrors.address}</Error>}
+        </FieldWrapper>
+        <FieldWrapper>
+          <Label>상세주소</Label>
+          <Input value={form.detailAddress} onChange={handleChange('detailAddress')} />
+        </FieldWrapper>
+        <FieldWrapper>
+          <Label>전화번호</Label>
+          <Input
+            ref={phoneRef}
+            inputMode="numeric"
+            value={form.phoneNumber}
+            onChange={(e) => {
+              let raw = e.target.value.replace(/\D/g, ''); // 숫자만
+              let formatted = '';
 
-        <AddScheduleButton type="button" onClick={handleAddSchedule}>
-          <Plus size={16} style={{ marginRight: '4px' }} /> 진료시간 추가
-        </AddScheduleButton>
-      </FieldWrapper>
-      <Button type="submit">병원 등록</Button>
-    </Form>
+              // 1) 0507: 0507-1234-1234 (4-4-4, 총 12자리 숫자)
+              if (raw.startsWith('0507')) {
+                raw = raw.slice(0, 12);
+                if (raw.length <= 4) {
+                  formatted = raw;
+                } else if (raw.length <= 8) {
+                  formatted = `${raw.slice(0, 4)}-${raw.slice(4)}`;
+                } else {
+                  formatted = `${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8)}`;
+                }
+
+                // 2) 02: 02-123-1234 (2-3-4, 총 9자리 숫자)
+              } else if (raw.startsWith('02')) {
+                raw = raw.slice(0, 9);
+                if (raw.length <= 2) {
+                  formatted = raw;
+                } else if (raw.length <= 5) {
+                  formatted = `${raw.slice(0, 2)}-${raw.slice(2)}`;
+                } else {
+                  formatted = `${raw.slice(0, 2)}-${raw.slice(2, 5)}-${raw.slice(5)}`;
+                }
+
+                // 3) 010: 010-1234-1234 (3-4-4, 총 11자리 숫자)
+              } else if (raw.startsWith('010')) {
+                raw = raw.slice(0, 11);
+                if (raw.length <= 3) {
+                  formatted = raw;
+                } else if (raw.length <= 7) {
+                  formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
+                } else {
+                  formatted = `${raw.slice(0, 3)}-${raw.slice(3, 7)}-${raw.slice(7)}`;
+                }
+
+                // 4) 그 외 3자리 국번 (예: 051): 051-123-1234 (3-3-4, 총 10자리 숫자)
+              } else if (/^0\d{2}/.test(raw)) {
+                raw = raw.slice(0, 10);
+                if (raw.length <= 3) {
+                  formatted = raw;
+                } else if (raw.length <= 6) {
+                  formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
+                } else {
+                  formatted = `${raw.slice(0, 3)}-${raw.slice(3, 6)}-${raw.slice(6)}`;
+                }
+
+                // 5) 나머지 잘못된 국번은 숫자만 자르고 하이픈 없이
+              } else {
+                raw = raw.slice(0, 11);
+                formatted = raw;
+              }
+
+              setForm((prev) => ({
+                ...prev,
+                phoneNumber: formatted,
+              }));
+            }}
+            placeholder="예: 010-1234-5678"
+          />
+
+          {formErrors.phoneNumber && <Error>{formErrors.phoneNumber}</Error>}
+        </FieldWrapper>
+        <FieldWrapper>
+          <Label>소개글</Label>
+          <BigTextArea value={form.intro} onChange={handleChange('intro')} />
+        </FieldWrapper>
+        <FieldWrapper>
+          <Label>공지사항</Label>
+          <BigTextArea value={form.notice} onChange={handleChange('notice')} />
+        </FieldWrapper>
+        <FieldWrapper>
+          <Label>병원 이미지</Label>
+          <FileInput
+            id="hospitalImage"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageChange}
+          />
+          <FileLabel htmlFor="hospitalImage">이미지 선택</FileLabel>
+          {previewUrls.length > 0 && (
+            <PreviewWrapper>
+              {previewUrls.map((url, i) => (
+                <PreviewImage key={i} src={url} alt={`미리보기 ${i + 1}`} />
+              ))}
+            </PreviewWrapper>
+          )}
+        </FieldWrapper>
+        <FieldWrapper>
+          <Label>서비스 이름</Label>
+          <ServiceInputWrapper>
+            {form.serviceName.map((name, i) => (
+              <ServiceChip key={i}>
+                {name}
+                <RemoveButton
+                  type="button"
+                  onClick={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      serviceName: prev.serviceName.filter((_, idx) => idx !== i),
+                    }))
+                  }
+                >
+                  <X size={14} />
+                </RemoveButton>
+              </ServiceChip>
+            ))}
+            <ServiceInput
+              type="text"
+              placeholder="서비스 추가"
+              value={newService}
+              onChange={(e) => setNewService(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newService.trim()) {
+                  e.preventDefault();
+                  setForm((prev) => ({
+                    ...prev,
+                    serviceName: [...prev.serviceName, newService.trim()],
+                  }));
+                  setNewService('');
+                }
+              }}
+            />
+          </ServiceInputWrapper>
+        </FieldWrapper>
+
+        <FieldWrapper>
+          <Label>진료시간</Label>
+          {businessHours.map((row, idx) => (
+            <ScheduleRow key={idx}>
+              <SelectDay
+                value={row.dayOfWeek}
+                onChange={(e) => handleScheduleChange(idx, 'dayOfWeek', e.target.value)}
+              >
+                {Object.entries(reverseDayOfWeekMap).map(([eng, kor]) => (
+                  <option key={eng} value={eng}>
+                    {kor}
+                  </option>
+                ))}
+              </SelectDay>
+
+              <InputTime
+                type="time"
+                step="1800" /* 30분 단위 */
+                value={row.open}
+                onChange={(e) => handleScheduleChange(idx, 'open', e.target.value)}
+              />
+
+              <Separator>~</Separator>
+
+              <InputTime
+                type="time"
+                step="1800"
+                value={row.close}
+                onChange={(e) => handleScheduleChange(idx, 'close', e.target.value)}
+              />
+
+              <LunchLabel>점심:</LunchLabel>
+
+              <InputTime
+                type="time"
+                step="1800"
+                value={row.lunchStart}
+                onChange={(e) => handleScheduleChange(idx, 'lunchStart', e.target.value)}
+              />
+
+              <Separator>~</Separator>
+
+              <InputTime
+                type="time"
+                step="1800"
+                value={row.lunchEnd}
+                onChange={(e) => handleScheduleChange(idx, 'lunchEnd', e.target.value)}
+              />
+              <CopyScheduleButton onClick={() => handleCopySchedule(idx)} title="이 행 복사">
+                <Copy size={16} />
+              </CopyScheduleButton>
+              <RemoveScheduleButton onClick={() => handleRemoveSchedule(idx)}>
+                <X size={16} />
+              </RemoveScheduleButton>
+            </ScheduleRow>
+          ))}
+
+          <AddScheduleButton onClick={handleAddSchedule}>
+            <Plus size={16} /> 진료시간 추가
+          </AddScheduleButton>
+        </FieldWrapper>
+        <Button type="submit">병원 등록</Button>
+      </Form>
+    </>
   );
 };
 
@@ -575,6 +604,29 @@ const Input = styled.input`
   border-radius: 0.375rem;
   font-size: 1rem;
 `;
+const SelectDay = styled.select`
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+`;
+const InputTime = styled.input`
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background: white;
+  font-size: 1rem;
+
+  /* iOS Safari, Chrome on Android 등의 기본 시계 스타일 유지하면서 */
+  /* Firefox 에서는 placeholder 폰트 크기 조정이 필요할 수 있습니다 */
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  }
+`;
 const PreviewWrapper = styled.div`
   display: flex;
   gap: 0.5rem;
@@ -583,6 +635,26 @@ const PreviewWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
   padding-bottom: 0.5rem;
+`;
+const RemoveScheduleButton = styled.button`
+  background: transparent;
+  border: none;
+  color: #e11d48;
+  cursor: pointer;
+`;
+const ScheduleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+`;
+const Separator = styled.span`
+  font-size: 1.2rem;
+  color: #333;
+`;
+const LunchLabel = styled.span`
+  font-weight: 500;
 `;
 
 const PreviewImage = styled.img`
@@ -678,4 +750,27 @@ const ServiceInput = styled.input`
   font-size: 0.875rem;
   outline: none;
   width: 140px;
+`;
+const GlobalStyle = createGlobalStyle`
+  /* TimePicker 휠 패널 너비/높이 조정 */
+  .custom-wheel-timepicker .ant-picker-time-panel-column {
+    width: 4rem !important;
+    max-height: 250px !important;
+  }
+  .custom-wheel-timepicker .ant-picker-time-panel-cell-inner {
+    font-size: 1rem;
+    padding: 0.25rem 0;
+  }
+`;
+const CopyScheduleButton = styled.button`
+  background: transparent;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  &:hover {
+    color: #2563eb;
+  }
 `;

@@ -9,7 +9,7 @@ const Title = styled.h2`
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 2rem;
-  margin-left: 37rem;
+  margin-left: 30rem;
 `;
 
 const HospitalCreatePage = () => {

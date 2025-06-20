@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import CommonModal from '~/components/common/CommonModal';
@@ -6,9 +6,9 @@ import {
   checkEmailDuplicate,
   submitEmailSignup,
   submitPatientInfo,
+  login,
 } from '~/features/user/api/UserAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
-import { login } from '~/features/user/api/UserAPI';
 
 const Wrapper = styled.div`
   display: flex;
@@ -56,6 +56,7 @@ const Input = styled.input`
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 8px;
+  flex: 1;
 
   &:focus {
     outline: none;
@@ -91,10 +92,6 @@ const FileLabel = styled.label`
 const FileName = styled.span`
   font-size: 0.95rem;
   color: #333;
-`;
-
-const FileInput = styled(Input).attrs({ type: 'file' })`
-  padding: 6px;
 `;
 
 const Button = styled.button`
@@ -155,65 +152,37 @@ const Notice = styled.div`
   line-height: 1.6;
 `;
 
-const validatePassword = (password: string): string => {
-  if (!password || password.length < 8) {
-    return '비밀번호는 최소 8자 이상이어야 합니다.';
-  }
-
-  let typeCount = 0;
-  if (/[A-Z]/.test(password)) typeCount++;
-  if (/[a-z]/.test(password)) typeCount++;
-  if (/[0-9]/.test(password)) typeCount++;
-  if (/[!@#$%^&*()_+\-={}|\[\]:";'<>?,./`~]/.test(password)) typeCount++;
-
-  if (typeCount < 2) {
-    return '비밀번호는 영문 대소문자, 숫자, 특수문자 중 2가지 이상을 포함해야 합니다.';
-  }
-
-  const badSequences = [
-    'abcdefghijklmnopqrstuvwxyz',
-    'qwertyuiop',
-    'asdfghjkl',
-    'zxcvbnm',
-    '0123456789',
-  ];
-  const lower = password.toLowerCase();
-  for (const seq of badSequences) {
-    for (let i = 0; i < seq.length - 3; i++) {
-      if (lower.includes(seq.slice(i, i + 4))) {
-        return '비밀번호에 연속된 문자열을 사용할 수 없습니다.';
-      }
-    }
-  }
-
-  if (/(.)\1{2,}/.test(password)) {
-    return '비밀번호에 동일한 문자를 3번 이상 연속 사용할 수 없습니다.';
-  }
-
-  return '';
-};
-
 const UserSignupForm = () => {
   const [searchParams] = useSearchParams();
   const role = searchParams.get('role') || '';
   const navigate = useNavigate();
 
+  // Input 상태
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [detailAddress, setDetailAddress] = useState('');
   const [residentRegistrationNumber, setResidentRegistrationNumber] = useState('');
   const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [isSignupComplete, setIsSignupComplete] = useState(false);
+
+  // 검증 상태
+  const [passwordError, setPasswordError] = useState('');
   const [emailChecked, setEmailChecked] = useState(false);
   const [emailCheckMessage, setEmailCheckMessage] = useState('');
   const [isEmailCheckSuccess, setIsEmailCheckSuccess] = useState(false);
   const [phoneError, setPhoneError] = useState('');
   const [rrnError, setRrnError] = useState('');
+
+  // ref들
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const confirmPasswordRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const rrnRef = useRef<HTMLInputElement>(null);
 
   const isEmailValid = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isValidPhone = (phone: string) => /^01[016789]\d{7,8}$/.test(phone);
@@ -225,10 +194,34 @@ const UserSignupForm = () => {
     return value;
   };
 
+  const validatePassword = (password: string): string => {
+    if (!password || password.length < 8) return '비밀번호는 최소 8자 이상이어야 합니다.';
+    let typeCount = 0;
+    if (/[A-Z]/.test(password)) typeCount++;
+    if (/[a-z]/.test(password)) typeCount++;
+    if (/[0-9]/.test(password)) typeCount++;
+    if (/[!@#$%^&*()_+\-={}[\]:;"'<>,.?/]/.test(password)) typeCount++;
+    if (typeCount < 2) return '영문 대소문자, 숫자, 특수문자 중 2가지 이상을 포함해야 합니다.';
+    const badSequences = [
+      'abcdefghijklmnopqrstuvwxyz',
+      'qwertyuiop',
+      'asdfghjkl',
+      'zxcvbnm',
+      '0123456789',
+    ];
+    const lower = password.toLowerCase();
+    for (const seq of badSequences) {
+      for (let i = 0; i < seq.length - 3; i++) {
+        if (lower.includes(seq.slice(i, i + 4))) return '연속된 문자열은 사용할 수 없습니다.';
+      }
+    }
+    if (/(.)\1{2,}/.test(password)) return '동일한 문자를 3번 이상 연속 사용할 수 없습니다.';
+    return '';
+  };
+
   const formatRRN = (value: string) => {
     const digits = value.replace(/[^0-9]/g, '').slice(0, 13);
-    if (digits.length <= 6) return digits;
-    return digits.slice(0, 6) + '-' + digits.slice(6);
+    return digits.length <= 6 ? digits : digits.slice(0, 6) + '-' + digits.slice(6);
   };
 
   const roleTitleMap: Record<string, string> = {
@@ -242,6 +235,7 @@ const UserSignupForm = () => {
       setEmailCheckMessage('이메일 형식이 올바르지 않습니다.');
       setIsEmailCheckSuccess(false);
       setEmailChecked(false);
+      emailRef.current?.focus();
       return;
     }
 
@@ -254,6 +248,7 @@ const UserSignupForm = () => {
       setEmailCheckMessage('이미 사용 중인 이메일입니다.');
       setIsEmailCheckSuccess(false);
       setEmailChecked(false);
+      emailRef.current?.focus();
     }
   };
 
@@ -263,34 +258,34 @@ const UserSignupForm = () => {
     if (!emailChecked) {
       setEmailCheckMessage('이메일 중복 확인을 해주세요.');
       setIsEmailCheckSuccess(false);
+      emailRef.current?.focus();
       return;
     }
 
     if (password !== confirmPassword) {
       setPasswordError('비밀번호가 일치하지 않습니다.');
+      confirmPasswordRef.current?.focus();
       return;
     }
 
     if (!isValidPhone(phone)) {
-      setPhoneError('휴대폰 번호 형식이 올바르지 않습니다. (예: 010-1234-5678)');
+      setPhoneError('휴대폰 번호 형식이 올바르지 않습니다.');
+      phoneRef.current?.focus();
       return;
     }
-
-    setPhoneError('');
 
     if (role === 'PATIENT' && !isValidRRN(residentRegistrationNumber)) {
-      setRrnError('주민등록번호 형식이 올바르지 않습니다. (예: 900101-1234567)');
+      setRrnError('주민등록번호 형식이 올바르지 않습니다.');
+      rrnRef.current?.focus();
       return;
     }
-    setRrnError('');
 
     const passwordValidationMsg = validatePassword(password);
     if (passwordValidationMsg) {
       setPasswordError(passwordValidationMsg);
+      passwordRef.current?.focus();
       return;
     }
-
-    setPasswordError('');
 
     const formData = new FormData();
     formData.append('email', email);
@@ -307,13 +302,12 @@ const UserSignupForm = () => {
       await submitPatientInfo({ userId: response.userId, residentRegistrationNumber });
     }
 
-    // 회원가입 후 로그인 자동 수행
     try {
       await login({ email, password });
-      navigate('/'); // 또는 '/patients/mypage' 등 역할별로 분기 가능
+      navigate('/');
     } catch (err) {
       console.error('자동 로그인 실패:', err);
-      navigate('/login'); // 실패 시 로그인 페이지로 fallback
+      navigate('/login');
     }
   };
 
@@ -326,14 +320,13 @@ const UserSignupForm = () => {
             <Label>이메일</Label>
             <InputWithActionButtonGroup>
               <Input
+                ref={emailRef}
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                style={{ flex: 1 }}
               />
               <ActionButton type="button" onClick={handleEmailCheck}>
-                {' '}
                 중복 확인
               </ActionButton>
             </InputWithActionButtonGroup>
@@ -342,11 +335,9 @@ const UserSignupForm = () => {
 
           <FieldGroup>
             <Label>비밀번호</Label>
-            <Notice>
-              - 8~15자 이내로 입력해주세요.
-              <br />- 영문 대/소문자, 숫자, 특수문자 2가지 이상을 포함해주세요.
-            </Notice>
+            <Notice>8자 이상, 영문/숫자/특수문자 중 2가지 이상 포함</Notice>
             <Input
+              ref={passwordRef}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -357,6 +348,7 @@ const UserSignupForm = () => {
           <FieldGroup>
             <Label>비밀번호 확인</Label>
             <Input
+              ref={confirmPasswordRef}
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -367,14 +359,22 @@ const UserSignupForm = () => {
 
           <FieldGroup>
             <Label>이름</Label>
-            <Input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+            <Input
+              ref={nameRef}
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
           </FieldGroup>
 
           <FieldGroup>
             <Label>휴대폰 번호</Label>
             <Input
+              ref={phoneRef}
               type="tel"
               value={formatPhoneNumber(phone)}
+              placeholder="010-1234-1234 (-를 빼고 입력해주세요)"
               onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
               required
             />
@@ -399,15 +399,16 @@ const UserSignupForm = () => {
             <FieldGroup>
               <Label>주민등록번호</Label>
               <Input
+                ref={rrnRef}
                 type="text"
+                placeholder="123456-1234567 (-를 빼고 입력해주세요)"
                 value={formatRRN(residentRegistrationNumber)}
                 onChange={(e) => {
-                  const onlyDigits = e.target.value.replace(/[^0-9]/g, '').slice(0, 13);
-                  setResidentRegistrationNumber(formatRRN(onlyDigits));
+                  const digits = e.target.value.replace(/[^0-9]/g, '').slice(0, 13);
+                  setResidentRegistrationNumber(formatRRN(digits));
                 }}
                 required
               />
-
               {rrnError && <ErrorMessage>{rrnError}</ErrorMessage>}
             </FieldGroup>
           )}
@@ -427,14 +428,6 @@ const UserSignupForm = () => {
 
           <Button type="submit">회원가입</Button>
         </Form>
-
-        {isSignupComplete && (
-          <CommonModal
-            title="회원가입이 완료되었습니다!"
-            buttonText="로그인 하러 가기"
-            onClose={() => navigate('/login')}
-          />
-        )}
       </FormContainer>
     </Wrapper>
   );

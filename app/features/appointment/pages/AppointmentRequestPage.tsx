@@ -13,7 +13,6 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import LoginStore from '~/features/user/stores/LoginStore';
-import { useLocation } from 'react-router';
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -23,15 +22,12 @@ const ButtonGroup = styled.div`
 `;
 
 const AppointmentRequestPage = () => {
-  // URL 쿼리 파라미터 (나중에 zustand로 바꿀수도 있음)
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
-  const hospitalId = Number(params.get('hospitalId'));
-
   const {
     patientId,
     patientName,
     rrn,
+    hospitalId,
+    hospitalName,
     doctorId,
     doctorName,
     date,
@@ -108,7 +104,7 @@ const AppointmentRequestPage = () => {
   return (
     <>
       <PatientSelector />
-      <DoctorSelector hospitalId={hospitalId} />
+      <DoctorSelector hospitalId={hospitalId!} />
       <SymptomSelector />
       <DateTimeSelector doctorId={doctorId} patientId={patientId} />
       <QuestionInput />
@@ -128,7 +124,7 @@ const AppointmentRequestPage = () => {
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleSubmit}
         dateTime={dateTime ?? ''}
-        hospitalName=""
+        hospitalName={hospitalName ?? ''}
         doctorName={doctorName ?? ''}
         patientName={patientName ?? ''}
         residentRegistrationNumber={rrn ?? ''}

@@ -4,6 +4,7 @@ import { useHospitalDetail } from '../../../hooks/useHospitalDetail';
 import type { HospitalSchedule } from '../../../types/hospitalSchedule';
 import { useNavigate } from 'react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 
 const Container = styled.div`
   width: 100%;
@@ -163,6 +164,8 @@ interface HospitalInfoTabProps {
 
 const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
   const { data: hospital, loading, error } = useHospitalDetail(hospitalId);
+  const { setHospitalId, setHospitalName } = useAppointmentStore();
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [current, setCurrent] = useState(0);
@@ -175,7 +178,15 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
     };
   }, [isModalOpen]);
 
-  const navigate = useNavigate();
+  /**
+   * 진료 접수 버튼 클릭 핸들러
+   */
+  const handleAppointmentClick = () => {
+    if (!hospital) return null;
+    setHospitalId(hospital.hospitalId);
+    setHospitalName(hospital.name);
+    navigate(`/appointments/request`);
+  };
 
   if (loading) return <p style={{ textAlign: 'center' }}>로딩 중...</p>;
   if (error) return <p style={{ textAlign: 'center', color: 'red' }}>{String(error)}</p>;
@@ -263,9 +274,7 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
         )}
 
         <ButtonGroup>
-          <ActionButton onClick={() => navigate(`/appointments/request?hospitalId=${hospitalId}`)}>
-            🏥 진료 접수
-          </ActionButton>
+          <ActionButton onClick={handleAppointmentClick}>🏥 진료 접수</ActionButton>
         </ButtonGroup>
       </Container>
     </>

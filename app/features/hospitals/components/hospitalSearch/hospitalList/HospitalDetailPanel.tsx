@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useHospitalDetail } from '~/features/hospitals/hooks/useHospitalDetail';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface HospitalDetailPanelProps {
   hospitalId: number;
@@ -18,8 +19,8 @@ const Panel = styled.div`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   gap: 0.25rem;
   font-family: 'Pretendard', sans-serif;
-  max-height: calc(100vh - 32px); /* SidePanel 여유 포함 */
-  overflow-y: auto; /* 패널 전체를 스크롤 */
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
 `;
@@ -85,73 +86,6 @@ const Text = styled.div`
   color: #555;
 `;
 
-const DetailButton = styled.button`
-  margin-top: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-`;
-const ThumbnailsWrapper = styled.div`
-  display: grid;
-  /* 좌우 2:1 비율, 위아래 2줄 */
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: repeat(2, 1fr);
-  /* 영역 이름 정의 */
-  grid-template-areas:
-    'big thumb1'
-    'big thumb2';
-  gap: 0.5rem;
-  height: 35vh; /* 필요에 따라 조절 */
-`;
-const Thumb = styled.div<{
-  area: 'big' | 'thumb1' | 'thumb2';
-  large?: boolean;
-}>`
-  grid-area: ${({ area }) => area};
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-
-  /* large면 그리드 영역 100% 높이, 
-     아니면 정사각형(aspect-ratio) 유지 */
-  ${({ large }) =>
-    large
-      ? `
-    height: 100%;
-  `
-      : `
-    aspect-ratio: 1 / 1;
-  `}
-  width: 100%;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-`;
-
-const MoreOverlay = styled.div`
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 2rem;
-  font-weight: bold;
-`;
 const ServiceTag = styled.span`
   display: inline-block;
   background-color: #3b82f6;
@@ -174,21 +108,105 @@ const CloseButton = styled.button`
   cursor: pointer;
 `;
 
+const ActionGroup = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+`;
+
+const PrimaryButton = styled.button`
+  flex: 1;
+  padding: 0.6rem 1.2rem;
+  background-color: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background-color: #2563eb;
+  }
+`;
+
+const SecondaryButton = styled.button`
+  flex: 1;
+  padding: 0.6rem 1.2rem;
+  background-color: #e5e7eb;
+  color: #374151;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background-color: #d1d5db;
+  }
+`;
+
+/* ↓ 여기가 슬라이더 스타일 ↓ */
+const SliderContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 35vh;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  border-radius: 0.75rem;
+`;
+
+const SlideImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 화면을 꽉 채우며 중앙 크롭 */
+  cursor: pointer;
+`;
+
+const ArrowButton = styled.button`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.6);
+  }
+`;
+
+const PrevButton = styled(ArrowButton)`
+  left: 0.5rem;
+`;
+const NextButton = styled(ArrowButton)`
+  right: 0.5rem;
+`;
+/* ↑ 슬라이더 스타일 끝 ↑ */
+
 const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, onClose }) => {
   const { data: hospital, loading, error } = useHospitalDetail(hospitalId);
   const navigate = useNavigate();
   const panelRef = useRef<HTMLDivElement>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [current, setCurrent] = useState(0);
+
   useEffect(() => {
-    if (panelRef.current) {
-      panelRef.current.scrollTop = 0;
-    }
+    if (panelRef.current) panelRef.current.scrollTop = 0;
   }, [hospitalId]);
+
   if (loading) return <div>로딩 중...</div>;
   if (error || !hospital) return <div>정보를 불러오지 못했습니다.</div>;
-  const images = hospital.imageUrls?.length
-    ? hospital.imageUrls
-    : ['https://via.placeholder.com/300x160'];
+
+  const images = hospital.imageUrls ?? [];
+
   return (
     <>
       {selectedImage && (
@@ -200,33 +218,28 @@ const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, o
       )}
 
       <Panel ref={panelRef}>
-        <ThumbnailsWrapper>
-          {/* 왼쪽 큰 사진 */}
-          {images[0] && (
-            <Thumb
-              area="big"
-              large /* <- 이 한 줄이 중요합니다! */
-              onClick={() => setSelectedImage(images[0])}
-            >
-              <img src={images[0]} alt={`병원 사진 1`} />
-            </Thumb>
-          )}
+        {/* 슬라이더 */}
+        {images.length > 0 && (
+          <SliderContainer>
+            {images.length > 1 && (
+              <PrevButton onClick={() => setCurrent((current - 1 + images.length) % images.length)}>
+                <ChevronLeft size={24} />
+              </PrevButton>
+            )}
+            <SlideImage
+              src={images[current]}
+              alt={`병원 사진 ${current + 1}`}
+              onClick={() => setSelectedImage(images[current])}
+            />
+            {images.length > 1 && (
+              <NextButton onClick={() => setCurrent((current + 1) % images.length)}>
+                <ChevronRight size={24} />
+              </NextButton>
+            )}
+          </SliderContainer>
+        )}
 
-          {/* 오른쪽 위 */}
-          {images[1] && (
-            <Thumb area="thumb1" onClick={() => setSelectedImage(images[1])}>
-              <img src={images[1]} alt={`병원 사진 2`} />
-            </Thumb>
-          )}
-
-          {/* 오른쪽 아래 (+n 오버레이) */}
-          {images[2] && (
-            <Thumb area="thumb2" onClick={() => setSelectedImage(images[2])}>
-              <img src={images[2]} alt={`병원 사진 3`} />
-              {images.length > 3 && <MoreOverlay>+{images.length - 3}</MoreOverlay>}
-            </Thumb>
-          )}
-        </ThumbnailsWrapper>
+        {/* 헤더 & 기본 정보 */}
         <Header>
           <HospitalName>{hospital.name}</HospitalName>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -235,21 +248,22 @@ const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, o
           </div>
         </Header>
 
-        <div>
-          {hospital.serviceNames?.map((serviceName, idx) => (
-            <ServiceTag key={idx}>{serviceName}</ServiceTag>
-          ))}
-        </div>
-
         <SectionLabel>📍 병원 소개</SectionLabel>
-        <Text>{hospital.introduction ?? '소개 정보 없음'}</Text>
+        <Text>{hospital.introduction || '소개 정보 없음'}</Text>
 
         <SectionLabel>📌 공지사항</SectionLabel>
-        <Text>{hospital.notice ?? '공지사항 없음'}</Text>
+        <Text>{hospital.notice || '공지사항 없음'}</Text>
 
-        <DetailButton onClick={() => navigate(`/hospital/${hospital.hospitalId}`)}>
-          병원 상세 보기
-        </DetailButton>
+        <div>{hospital.serviceNames?.map((svc, i) => <ServiceTag key={i}>{svc}</ServiceTag>)}</div>
+
+        <ActionGroup>
+          <PrimaryButton onClick={() => navigate(`/appointments/request?hospitalId=${hospitalId}`)}>
+            바로 접수
+          </PrimaryButton>
+          <SecondaryButton onClick={() => navigate(`/hospital/${hospitalId}`)}>
+            상세 보기
+          </SecondaryButton>
+        </ActionGroup>
       </Panel>
     </>
   );

@@ -10,7 +10,7 @@ import HospitalDoctor from '../components/hospitalDetail/doctor/HospitalDoctor';
 
 const Container = styled.div`
   width: 100%;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 2rem;
   background-color: #ffffff;
@@ -74,7 +74,7 @@ const HospitalDetailPage = () => {
 
       <TabBar>
         <Tab active={selectedTab === 'location'} onClick={() => setSelectedTab('location')}>
-          위치 정보
+          상세 정보
         </Tab>
         <Tab active={selectedTab === 'Doctor'} onClick={() => setSelectedTab('Doctor')}>
           의사 정보

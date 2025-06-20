@@ -68,16 +68,15 @@ export const completeMedication = async (medicationId: number, status: 'TAKEN' |
 export const updateMedicationSchedule = async (
   medicationId: number,
   data: {
-    newTimeToTake?: string;
+    newTimes?: { meal: 'morning' | 'lunch' | 'dinner'; time: string }[];
     newDays?: string[];
     newStartDate?: string;
     newEndDate?: string;
   },
 ) => {
-  // body에 undefined 필드가 들어가지 않도록 필터링할 수도 있고,
-  // 백엔드가 nullable 허용하면 그대로 보내도 됩니다.
+  // 새로운 페이로드를 만듭니다. undefined 인 필드는 보내지 않아요.
   const payload: Record<string, any> = {};
-  if (data.newTimeToTake !== undefined) payload.newTimeToTake = data.newTimeToTake;
+  if (data.newTimes !== undefined) payload.newTimes = data.newTimes;
   if (data.newDays !== undefined) payload.newDays = data.newDays;
   if (data.newStartDate !== undefined) payload.newStartDate = data.newStartDate;
   if (data.newEndDate !== undefined) payload.newEndDate = data.newEndDate;

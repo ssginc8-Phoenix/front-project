@@ -8,9 +8,10 @@ import {
   getMyDoctorInfo,
   updateDoctorSchedule,
 } from '~/features/doctor/api/doctorAPI';
-import type { DoctorSchedule } from '~/types/doctor';
+
 import type { HospitalSchedule } from '~/features/hospitals/types/hospitalSchedule';
 import { getHospitalSchedules } from '~/features/hospitals/api/hospitalAPI';
+import type { DoctorSchedule } from '~/types/doctor';
 
 const dayOfWeekMap: Record<string, string> = {
   월요일: 'MONDAY',
@@ -21,9 +22,6 @@ const dayOfWeekMap: Record<string, string> = {
   토요일: 'SATURDAY',
   일요일: 'SUNDAY',
 };
-const reverseDayOfWeekMap = Object.fromEntries(
-  Object.entries(dayOfWeekMap).map(([kor, eng]) => [eng, kor] as [string, string]),
-);
 
 const timeOptions = Array.from({ length: 48 }, (_, i) => {
   const hour = String(Math.floor(i / 2)).padStart(2, '0');
@@ -52,24 +50,27 @@ const DoctorScheduleForm: React.FC = () => {
       setDoctorId(doc.doctorId);
 
       const hospSched = await getHospitalSchedules(doc.hospitalId);
+      console.log('getHospitalSchedules response:', hospSched);
       setHospitalHours(hospSched);
 
-      const sched = await getDoctorSchedules(doc.doctorId);
+      const sched: DoctorSchedule[] = await getDoctorSchedules(doc.doctorId);
+      console.log('getDoctorSchedules response:', sched);
 
       // 1) 한글요일 배열
       const korDays = Object.keys(dayOfWeekMap) as (keyof typeof dayOfWeekMap)[];
 
       // 2) 각 요일에 대해, 기존 스케줄이 있으면 그 값으로, 아니면 빈 칸으로 초기화
+      // 초기 Rows 생성부
       const initialRows: HourRow[] = korDays.map((kor) => {
         const eng = dayOfWeekMap[kor];
-        const found = sched.find((s: DoctorSchedule) => s.dayOfWeek === eng);
+        const found = sched.find((s) => s.dayOfWeek === eng);
         return {
           scheduleId: found?.scheduleId,
           day: kor,
-          open: found ? found.startTime.slice(0, 5) : '',
-          close: found ? found.endTime.slice(0, 5) : '',
-          lunchStart: found ? found.lunchStart.slice(0, 5) : '',
-          lunchEnd: found ? found.lunchEnd.slice(0, 5) : '',
+          open: found?.startTime.slice(0, 5) ?? '',
+          close: found?.endTime.slice(0, 5) ?? '',
+          lunchStart: found?.lunchStart?.slice(0, 5) ?? '',
+          lunchEnd: found?.lunchEnd?.slice(0, 5) ?? '',
         };
       });
 
@@ -103,13 +104,7 @@ const DoctorScheduleForm: React.FC = () => {
     }
 
     // — 보낼 유효한 로우만 걸러내기 —
-    const validRows = businessHours.filter(
-      (b) =>
-        b.open.trim() !== '' &&
-        b.close.trim() !== '' &&
-        b.lunchStart.trim() !== '' &&
-        b.lunchEnd.trim() !== '',
-    );
+    const validRows = businessHours.filter((b) => b.open.trim() !== '' && b.close.trim() !== '');
 
     // 생성할 것 / 업데이트할 것 분리
     const toCreate = validRows.filter((b) => !b.scheduleId);
@@ -120,16 +115,18 @@ const DoctorScheduleForm: React.FC = () => {
     // 새로 추가된 스케줄 생성
     if (toCreate.length) {
       try {
-        await createDoctorSchedules(
-          doctorId,
-          toCreate.map((b) => ({
+        const payload = toCreate.map((b) => {
+          return {
             dayOfWeek: dayOfWeekMap[b.day],
             startTime: `${b.open}:00`,
             endTime: `${b.close}:00`,
-            lunchStart: `${b.lunchStart}:00`,
-            lunchEnd: `${b.lunchEnd}:00`,
-          })),
-        );
+            // lunchStart/lunchEnd이 빈 문자열이면 null로
+            lunchStart: b.lunchStart ? `${b.lunchStart}:00` : null,
+            lunchEnd: b.lunchEnd ? `${b.lunchEnd}:00` : null,
+          };
+        });
+
+        await createDoctorSchedules(doctorId, payload);
       } catch (e) {
         console.error(e);
         errorOccurred = true;
@@ -146,8 +143,8 @@ const DoctorScheduleForm: React.FC = () => {
               dayOfWeek: dayOfWeekMap[b.day],
               startTime: `${b.open}:00`,
               endTime: `${b.close}:00`,
-              lunchStart: `${b.lunchStart}:00`,
-              lunchEnd: `${b.lunchEnd}:00`,
+              lunchStart: b.lunchStart ? `${b.lunchStart}:00` : null,
+              lunchEnd: b.lunchEnd ? `${b.lunchEnd}:00` : null,
             });
           } catch (e) {
             console.error(e);
@@ -169,7 +166,7 @@ const DoctorScheduleForm: React.FC = () => {
       <BusinessHoursWrapper>
         {businessHours.map((row, idx) => {
           // ① 해당 요일 병원 스케줄 찾기
-          const eng = dayOfWeekMap[row.day] as keyof typeof reverseDayOfWeekMap;
+          const eng = dayOfWeekMap[row.day] as keyof typeof dayOfWeekMap;
           const hs = hospitalHours.find((h) => h.dayOfWeek === eng);
           const isDisabled = !hs;
           // ② 허용되는 값 집합
@@ -178,23 +175,21 @@ const DoctorScheduleForm: React.FC = () => {
               ? timeOptions
                   .filter(
                     (o) =>
-                      o.value >= hs.openTime &&
-                      o.value <= hs.closeTime &&
-                      (o.value < hs.lunchStart || o.value >= hs.lunchEnd),
+                      o.value >= hs.openTime.slice(0, 5) && o.value <= hs.closeTime.slice(0, 5),
                   )
                   .map((o) => o.value)
               : timeOptions.map((o) => o.value),
           );
           const allowedLunchSet = new Set(
-            hs
+            hs && hs.lunchStart && hs.lunchEnd
               ? (() => {
-                  const start = hs.lunchStart.slice(0, 5); // "12:00:00" -> "12:00"
-                  const end = hs.lunchEnd.slice(0, 5); // "13:00:00" -> "13:00"
+                  const start = hs.lunchStart.slice(0, 5);
+                  const end = hs.lunchEnd.slice(0, 5);
                   return timeOptions
                     .filter((o) => o.value >= start && o.value <= end)
                     .map((o) => o.value);
                 })()
-              : [],
+              : Array.from(allowedSet), // null일 땐 영업시간 전체 허용
           );
 
           return (

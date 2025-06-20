@@ -16,19 +16,19 @@ import useLoginStore from '~/features/user/stores/LoginStore';
 import ReusableModal from '~/features/patient/components/ReusableModal';
 
 const PageWrapper = styled.div`
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
   display: flex;
-  gap: 48px;
-  background: #f8f9fa;
   min-height: 100vh;
+  //background-color: #f0f4f8;
+  font-family: 'Segoe UI', sans-serif;
 `;
 
 const MainSection = styled.div`
   flex: 1;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+  margin-left: 48px; /* 사이드바와의 간격 유지 */
 `;
 const Title = styled.h2`
   font-size: 2.2rem;
@@ -62,33 +62,35 @@ const AddCard = styled.button`
 `;
 
 const SidebarBox = styled.div`
-  width: 280px;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 32px 0 20px;
+  width: 260px;
+  background: white;
+  border-right: 1px solid #e0e0e0;
+  padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+  border-radius: 0 20px 20px 0;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
 `;
 
 const ProfileSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 2rem;
 `;
 const ProfileEmoji = styled.div`
-  font-size: 5rem;
-  margin-bottom: 8px;
+  font-size: 4rem;
+  margin-bottom: 0.5rem;
 `;
 const ProfileName = styled.div`
-  font-weight: 700;
-  font-size: 1.5rem;
+  font-weight: bold;
+  font-size: 1.3rem;
   color: #333;
 `;
 const ProfileRole = styled.div`
-  color: #666;
+  color: #777;
   font-size: 1rem;
 `;
 
@@ -102,7 +104,7 @@ const ProfileImage = styled.img`
 
 const GuardianPage: React.FC = () => {
   const [guardians, setGuardians] = useState<Guardian[]>([]);
-  const [userinfo, setUserinfo] = useState<{ name: string } | null>(null);
+  const [userinfo, setUserinfo] = useState<{ name: string; profileImageUrl?: string } | null>(null);
   const [patientInfo, setPatientInfo] = useState<{ patientId: number } | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [newGuardianEmail, setNewGuardianEmail] = useState('');
@@ -121,10 +123,11 @@ const GuardianPage: React.FC = () => {
 
       const p = await getPatientInfo();
       setPatientInfo(p);
-      setGuardians(await getGuardians(p.patientId));
 
-      const list = await getGuardians(p.patientId);
-      setGuardians(list);
+      if (p?.patientId) {
+        const list = await getGuardians(p.patientId);
+        setGuardians(list);
+      }
     })();
   }, [fetchMyInfo]);
 
@@ -148,8 +151,10 @@ const GuardianPage: React.FC = () => {
     setInviteCode(res.inviteCode);
     closeInvite();
     setShowSuccessModal(true);
-    const updated = await getGuardians(patientInfo.patientId);
-    setGuardians(updated);
+    if (patientInfo?.patientId) {
+      const updated = await getGuardians(patientInfo.patientId);
+      setGuardians(updated);
+    }
   };
 
   const closeSuccess = () => {
@@ -161,7 +166,14 @@ const GuardianPage: React.FC = () => {
     <PageWrapper>
       <SidebarBox>
         <ProfileSection>
-          <ProfileEmoji>👵</ProfileEmoji>
+          {userinfo?.profileImageUrl ? (
+            <ProfileImage src={userinfo.profileImageUrl} alt="프로필 이미지" />
+          ) : (
+            <ProfileImage
+              src="https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png"
+              alt="기본 프로필"
+            />
+          )}
           <ProfileName>{userinfo?.name ?? '로딩 중'} 님</ProfileName>
           <ProfileRole>환자</ProfileRole>
         </ProfileSection>

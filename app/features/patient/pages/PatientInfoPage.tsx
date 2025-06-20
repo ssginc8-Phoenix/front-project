@@ -10,35 +10,53 @@ import useLoginStore from '~/features/user/stores/LoginStore';
 import { getUserInfo, updateUserInfo } from '~/features/patient/api/userAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
 import type { User } from '~/types/user';
-import { SidebarContainer } from '~/components/styled/SidebarContainer';
-import { PageWrapper } from '~/components/styled/PageWrapper';
 
-// --- 스타일 정의 ---
-const PageWrapperOne = PageWrapper;
+// 전화번호 3-4-4 포맷 함수
+const formatPhoneNumber = (value: string) => {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  const part1 = digits.slice(0, 3);
+  const part2 = digits.slice(3, 7);
+  const part3 = digits.slice(7, 11);
+  if (digits.length > 7) return `${part1}-${part2}-${part3}`;
+  if (digits.length > 3) return `${part1}-${part2}`;
+  return part1;
+};
 
-const FlexRow = styled.div`
+const PatientPageWrapper = styled.div`
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  padding-left: 48px;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  min-height: 100vh;
+  //background-color: #f0f4f8;
+  font-family: 'Segoe UI', sans-serif;
 `;
 
 const MainSection = styled.section`
   flex: 1;
-  min-width: 420px;
-  max-width: 700px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 900px;
+  margin-left: 48px; /* 사이드바와의 간격 유지 */
 `;
 
-const SidebarBox = SidebarContainer;
+const SidebarBox = styled.div`
+  width: 260px;
+  background: white;
+  border-right: 1px solid #e0e0e0;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 0 20px 20px 0;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+`;
 
 const ProfileSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 2rem;
 `;
 
 const ProfileImage = styled.img`
@@ -49,14 +67,18 @@ const ProfileImage = styled.img`
   margin-bottom: 8px;
 `;
 
-const ProfileEmoji = styled.div`
-  font-size: 4rem;
-  margin-bottom: 8px;
+const MainHeaderProfileImage = styled.img`
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
 `;
 
 const ProfileName = styled.div`
-  font-weight: 700;
-  font-size: 1.5rem;
+  font-weight: bold;
+  font-size: 1.3rem;
+  color: #333;
 `;
 
 const ProfileRole = styled.div`
@@ -67,23 +89,22 @@ const ProfileRole = styled.div`
 const PatientInfoHeader = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 24px;
-`;
-
-const Emoji = styled.div`
-  font-size: 48px;
-  margin-right: 16px;
+  margin-bottom: 2rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #00499e;
 `;
 
 const Name = styled.div`
-  font-size: 1.5rem;
+  font-size: 2.2rem;
   font-weight: 700;
+  color: #00499e;
 `;
 
 const InfoFormBox = styled.form`
-  margin: 0 auto;
+  margin: 0;
   width: 100%;
-  max-width: 600px;
+  max-width: none;
   padding: 38px 28px 32px 28px;
   background: #fff;
   border-radius: 22px;
@@ -99,10 +120,15 @@ const InputRow = styled.div`
   gap: 22px;
 `;
 
+const AddressWrapper = styled.div`
+  flex: 1;
+`;
+
 const Label = styled.label`
   font-size: 1.07rem;
   color: #2c2c2c;
   width: 88px;
+  flex-shrink: 0;
 `;
 
 const Input = styled.input`
@@ -121,8 +147,8 @@ const Input = styled.input`
 const SaveButton = styled.button`
   margin: 28px auto 0 auto;
   padding: 12px 52px;
-  background: #bfd6fa;
-  color: #1646a0;
+  background: #00499e;
+  color: #fff;
   font-weight: 700;
   font-size: 1.13rem;
   border-radius: 19px;
@@ -130,7 +156,7 @@ const SaveButton = styled.button`
   cursor: pointer;
   transition: background 0.16s;
   &:hover {
-    background: #a7c7f7;
+    background: #003a7a;
   }
 `;
 
@@ -142,7 +168,7 @@ const Footer = styled.div`
   letter-spacing: 0.04rem;
 
   span {
-    color: #2261bb;
+    color: #00499e;
     cursor: pointer;
     border: none;
     background: none;
@@ -167,11 +193,11 @@ const PatientInfoPage = () => {
     phone: '',
     address: '',
   });
+  const [detailAddress, setDetailAddress] = useState('');
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
   const [showByeModal, setShowByeModal] = useState(false);
-  const [detailAddress, setDetailAddress] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -179,28 +205,46 @@ const PatientInfoPage = () => {
         await fetchMyInfo();
         const myInfo = await getUserInfo();
         setUserinfo(myInfo);
+
+        const raw = myInfo.address || '';
+        let main = raw;
+        let detail = '';
+        const m = raw.match(/^(.*\))\s*(.*)$/);
+        if (m) {
+          main = m[1];
+          detail = m[2];
+        }
+
         setForm({
           name: myInfo.name || '',
           email: myInfo.email || '',
-          phone: myInfo.phone || '',
-          address: myInfo.address || '',
+          phone: formatPhoneNumber(myInfo.phone || ''),
+          address: main,
         });
+        setDetailAddress(detail);
       } catch (error) {
-        console.error('Failed to fetch user info', error);
+        console.error('사용자 정보 가져오기 실패', error);
       }
     };
 
     fetchUser();
-  }, []);
+  }, [fetchMyInfo]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, phone: formatPhoneNumber(e.target.value) });
+  };
+  const handleDetailAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDetailAddress(e.target.value);
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const fullAddress = form.address + (detailAddress ? ' ' + detailAddress : '');
-      await updateUserInfo({
-        ...form,
-        address: fullAddress, // ✅ 주소 + 상세주소 합쳐서 보내기
-      });
+      await updateUserInfo({ ...form, address: fullAddress });
       alert('정보가 성공적으로 저장되었습니다.');
     } catch (error) {
       console.error('정보 저장 실패', error);
@@ -208,18 +252,9 @@ const PatientInfoPage = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleDetailAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDetailAddress(e.target.value);
-  };
-
   const handleSidebarChange = (key: string) => {
     navigate(`/patients/${key}`);
   };
-
   const handleWithdrawClick = () => setShowConfirm(true);
   const handleConfirmCancel = () => setShowConfirm(false);
   const handleConfirmOk = () => {
@@ -227,13 +262,11 @@ const PatientInfoPage = () => {
     setShowPwModal(true);
   };
   const handlePwModalClose = () => setShowPwModal(false);
-
   const handlePwSuccess = async () => {
     setShowPwModal(false);
     alert('회원 탈퇴 완료 (가짜)');
     setShowByeModal(true);
   };
-
   const handleByeClose = () => {
     setShowByeModal(false);
     navigate('/');
@@ -241,9 +274,8 @@ const PatientInfoPage = () => {
 
   return (
     <>
-      <PageWrapperOne>
+      <PatientPageWrapper>
         <SidebarBox>
-          {/* 프로필 영역 */}
           <ProfileSection>
             {userinfo?.profileImageUrl ? (
               <ProfileImage src={userinfo.profileImageUrl} alt="프로필 이미지" />
@@ -257,72 +289,67 @@ const PatientInfoPage = () => {
             <ProfileRole>환자</ProfileRole>
           </ProfileSection>
 
-          {/* 메뉴 */}
           <SidebarMenu
             items={patientSidebarItems}
             activeKey={'info'}
             onChange={handleSidebarChange}
           />
         </SidebarBox>
-
         <MainSection>
           <PatientInfoHeader>
-            <Emoji>👵</Emoji>
-            <div>
-              <Name>{user?.name} 님</Name>
-            </div>
+            {userinfo?.profileImageUrl ? (
+              <MainHeaderProfileImage src={userinfo.profileImageUrl} alt="프로필 이미지" />
+            ) : (
+              <MainHeaderProfileImage
+                src="https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png"
+                alt="기본 프로필"
+              />
+            )}
+            <Name>{user?.name} 님 정보</Name>
           </PatientInfoHeader>
 
           <InfoFormBox onSubmit={handleSave}>
             <InputRow>
               <Label htmlFor="name">이름</Label>
-              <Input
-                id="name"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="이름 입력"
-              />
+              <Input id="name" name="name" value={form.name} readOnly />
             </InputRow>
+
             <InputRow>
               <Label htmlFor="email">이메일</Label>
-              <Input
-                id="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="이메일 입력"
-              />
+              <Input id="email" name="email" value={form.email} readOnly />
             </InputRow>
+
             <InputRow>
               <Label htmlFor="phone">전화번호</Label>
               <Input
                 id="phone"
                 name="phone"
                 value={form.phone}
-                onChange={handleChange}
-                placeholder="전화번호 입력"
+                onChange={handlePhoneChange}
+                placeholder="010-1234-5678"
               />
             </InputRow>
-            {/* 주소 검색 */}
+
             <InputRow>
               <Label>주소</Label>
-              <DaumPost
-                address={form.address}
-                setAddress={(newAddr) => setForm({ ...form, address: newAddr })}
-              />
+              <AddressWrapper>
+                <DaumPost
+                  address={form.address}
+                  setAddress={(newAddr) => setForm({ ...form, address: newAddr })}
+                />
+              </AddressWrapper>
             </InputRow>
-            {/* 상세주소 입력 */}
+
             <InputRow>
-              <Label htmlFor="detail">상세주소</Label>
+              <Label htmlFor="detailAddress">상세주소</Label>
               <Input
-                id="detail"
-                name="detail"
+                id="detailAddress"
                 value={detailAddress}
                 onChange={handleDetailAddressChange}
-                placeholder="상세주소 입력"
+                placeholder="상세 주소를 입력하세요. 예: 111동 1234호"
               />
             </InputRow>
+
             <SaveButton type="submit">저장</SaveButton>
           </InfoFormBox>
 
@@ -330,70 +357,87 @@ const PatientInfoPage = () => {
             <span onClick={handleWithdrawClick}>회원탈퇴</span>
           </Footer>
         </MainSection>
+      </PatientPageWrapper>
 
-        {/* --- 탈퇴 1단계 모달 --- */}
-        <ReusableModal open={showConfirm} onClose={handleConfirmCancel} hideCloseButton>
-          <div style={{ fontSize: '1.13rem', fontWeight: 600, marginBottom: 24 }}>
-            정말 탈퇴하시겠습니까?
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
-            <button
-              onClick={handleConfirmCancel}
-              style={{
-                background: '#f3f3f3',
-                borderRadius: 16,
-                border: 'none',
-                padding: '8px 22px',
-                color: '#555',
-                fontWeight: 500,
-                fontSize: '1.05rem',
-                cursor: 'pointer',
-              }}
-            >
-              취소
-            </button>
-            <button
-              onClick={handleConfirmOk}
-              style={{
-                background: '#ffd6d6',
-                borderRadius: 16,
-                border: 'none',
-                padding: '8px 22px',
-                color: '#ff4646',
-                fontWeight: 600,
-                fontSize: '1.05rem',
-                cursor: 'pointer',
-              }}
-            >
-              탈퇴하기
-            </button>
-          </div>
-        </ReusableModal>
-
-        {/* --- 탈퇴 2단계 비밀번호 모달 --- */}
-        <PasswordModal
-          open={showPwModal}
-          onClose={handlePwModalClose}
-          onSuccess={handlePwSuccess}
-        />
-
-        {/* --- 탈퇴 3단계 완료 모달 --- */}
-        <ReusableModal open={showByeModal} onClose={handleByeClose} hideCloseButton>
-          <div
+      <ReusableModal open={showConfirm} onClose={handleConfirmCancel} hideCloseButton>
+        <div
+          style={{ fontSize: '1.13rem', fontWeight: 600, marginBottom: 24, textAlign: 'center' }}
+        >
+          정말 탈퇴하시겠습니까?
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
+          <button
+            onClick={handleConfirmCancel}
             style={{
-              color: '#2261bb',
-              fontWeight: 700,
-              fontSize: '1.11rem',
-              marginBottom: 2,
-              whiteSpace: 'pre-line',
+              background: '#f3f3f3',
+              borderRadius: 16,
+              border: 'none',
+              padding: '10px 24px',
+              color: '#555',
+              fontWeight: 500,
+              fontSize: '1.05rem',
+              cursor: 'pointer',
+              transition: 'background 0.16s',
+              '&:hover': { background: '#e0e0e0' },
             }}
           >
-            그동안 닥투를 이용해주셔서 감사합니다.
-            <br />
-            안녕히 가세요!
-          </div>
-        </ReusableModal>
-      </PageWrapperOne>
+            취소
+          </button>
+          <button
+            onClick={handleConfirmOk}
+            style={{
+              background: '#ff4646',
+              borderRadius: 16,
+              border: 'none',
+              padding: '10px 24px',
+              color: '#fff',
+              fontWeight: 600,
+              fontSize: '1.05rem',
+              cursor: 'pointer',
+              transition: 'background 0.16s',
+              '&:hover': { background: '#cc3737' },
+            }}
+          >
+            탈퇴하기
+          </button>
+        </div>
+      </ReusableModal>
+
+      <PasswordModal open={showPwModal} onClose={handlePwModalClose} onSuccess={handlePwSuccess} />
+
+      <ReusableModal open={showByeModal} onClose={handleByeClose} hideCloseButton>
+        <div
+          style={{
+            color: '#00499e',
+            fontWeight: 700,
+            fontSize: '1.2rem',
+            marginBottom: 20,
+            whiteSpace: 'pre-line',
+            textAlign: 'center',
+          }}
+        >
+          그동안 닥투를 이용해주셔서 감사합니다.
+          <br />
+          안녕히 가세요!
+        </div>
+        <button
+          onClick={handleByeClose}
+          style={{
+            marginTop: 20,
+            padding: '12px 24px',
+            backgroundColor: '#00499e',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 8,
+            cursor: 'pointer',
+            width: '100%',
+            maxWidth: '150px',
+            margin: '20px auto 0 auto',
+          }}
+        >
+          확인
+        </button>
+      </ReusableModal>
     </>
   );
 };

@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { useDoctor } from '../../../hooks/useDoctor';
 import type { Doctor, Specialization } from '../../../types/doctor.d';
-import { SpecializationKoreanMap } from '../../../types/doctor.d';
 
 // Grid layout for cards
 const CardGrid = styled.div`
@@ -83,9 +82,7 @@ const HospitalDoctor: React.FC<HospitalDoctorProps> = ({ hospitalId }) => {
                 alt={doctor.name}
               />
               <DoctorName>{doctor.name}</DoctorName>
-              <DoctorSpec>
-                {SpecializationKoreanMap[doctor.specialization as Specialization]}
-              </DoctorSpec>
+              <DoctorSpec>{doctor.specialization}</DoctorSpec>
             </DoctorCard>
           ))}
         </CardGrid>

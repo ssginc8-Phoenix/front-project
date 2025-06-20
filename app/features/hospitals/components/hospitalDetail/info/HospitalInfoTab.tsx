@@ -13,24 +13,6 @@ const Container = styled.div`
   border-radius: 1rem;
 `;
 
-const ImageWrapper = styled.div`
-  position: relative;
-  width: 1100px;
-  height: 480px;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-`;
-
-const Image = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-
 const Overlay = styled.div`
   position: fixed;
   top: 0;
@@ -100,13 +82,38 @@ const NoticeBox = styled.div`
     color: #1f2937;
   }
 `;
-
+const GalleryGrid = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* 좌:우 = 2:1 */
+  grid-template-rows: 1fr 1fr; /* 위:아래 = 1:1 */
+  grid-template-areas:
+    'big thumb1'
+    'big thumb2';
+  gap: 0.75rem;
+  height: 400px; /* 필요에 따라 조정 */
+  margin-bottom: 1.5rem;
+`;
 const ButtonGroup = styled.div`
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
 `;
 
+// 각 썸네일
+const GridThumb = styled.div<{ area: 'big' | 'thumb1' | 'thumb2' }>`
+  grid-area: ${({ area }) => area};
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+`;
 const ActionButton = styled.button`
   padding: 10px 16px;
   border-radius: 8px;
@@ -138,8 +145,9 @@ interface HospitalInfoTabProps {
 
 const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
   const { data: hospital, loading, error } = useHospitalDetail(hospitalId);
-
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const formatTime = (time: string) => time.substring(0, 5);
   useEffect(() => {
     document.body.style.overflow = isModalOpen ? 'hidden' : '';
@@ -150,11 +158,10 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
 
   const navigate = useNavigate();
 
-
   if (loading) return <p style={{ textAlign: 'center' }}>로딩 중...</p>;
   if (error) return <p style={{ textAlign: 'center', color: 'red' }}>{String(error)}</p>;
   if (!hospital) return <p style={{ textAlign: 'center' }}>병원 정보를 찾을 수 없습니다.</p>;
-
+  const images = hospital.imageUrls ?? [];
   const dayOfWeekMap: Record<number, string> = {
     0: 'SUNDAY',
     1: 'MONDAY',
@@ -172,19 +179,52 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
 
   return (
     <>
-      {isModalOpen && (
+      {isModalOpen && selectedImage && (
         <Overlay onClick={() => setIsModalOpen(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            <img src={hospital.imageUrl} alt="원본 이미지" />
+            <img src={selectedImage} alt="원본 이미지" />
           </ModalContent>
         </Overlay>
       )}
 
-
       <Container>
-        <ImageWrapper onClick={() => setIsModalOpen(true)}>
-          <Image src={hospital.imageUrl} alt={hospital.name} />
-        </ImageWrapper>
+        {/* 전체 뷰용 메인 이미지 */}
+        {images && images.length >= 3 && (
+          <GalleryGrid>
+            {/* 왼쪽 큰 이미지 */}
+            <GridThumb
+              area="big"
+              onClick={() => {
+                setSelectedImage(images[0]);
+                setIsModalOpen(true);
+              }}
+            >
+              <img src={images[0]} alt={`${hospital.name} 사진 1`} />
+            </GridThumb>
+
+            {/* 오른쪽 위 작은 이미지 */}
+            <GridThumb
+              area="thumb1"
+              onClick={() => {
+                setSelectedImage(images[1]);
+                setIsModalOpen(true);
+              }}
+            >
+              <img src={images[1]} alt={`${hospital.name} 사진 2`} />
+            </GridThumb>
+
+            {/* 오른쪽 아래 작은 이미지 */}
+            <GridThumb
+              area="thumb2"
+              onClick={() => {
+                setSelectedImage(images[2]);
+                setIsModalOpen(true);
+              }}
+            >
+              <img src={images[2]} alt={`${hospital.name} 사진 3`} />
+            </GridThumb>
+          </GalleryGrid>
+        )}
 
         <Header>
           <TitleRow>
@@ -207,18 +247,18 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
 
         {hospital.notice && (
           <NoticeBox>
-            <p>📢 {hospital.notice}</p>
+            <p>📢 공지사항 </p>
+            {hospital.notice}
           </NoticeBox>
         )}
 
-
-      <ButtonGroup>
-        <ActionButton onClick={() => navigate(`/appointments/request?hospitalId=${hospitalId}`)}>
-          🏥 대면 진료 접수
-        </ActionButton>
-      </ButtonGroup>
-    </Container>
-
+        <ButtonGroup>
+          <ActionButton onClick={() => navigate(`/appointments/request?hospitalId=${hospitalId}`)}>
+            🏥 대면 진료 접수
+          </ActionButton>
+        </ButtonGroup>
+      </Container>
+    </>
   );
 };
 

@@ -18,6 +18,6 @@ export default defineConfig({
     },
   },
   ssr: {
-    noExternal: ['styled-components'],
+    noExternal: ['styled-components', 'react-image-file-resizer'],
   },
 });

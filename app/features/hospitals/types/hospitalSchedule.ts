@@ -1,3 +1,5 @@
+import type { CreateScheduleRequest } from '~/features/hospitals/types/hospital';
+
 export interface HospitalSchedule {
   dayOfWeek: 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
   openTime: string; // 예: "08:30"
@@ -5,6 +7,15 @@ export interface HospitalSchedule {
   lunchStart: string; // 예: "12:30"
   lunchEnd: string; // 예: "13:30"
   hospitalScheduleId: number;
+}
+
+export interface ScheduleDTO {
+  hospitalScheduleId: number;
+  dayOfWeek: CreateScheduleRequest['dayOfWeek'];
+  openTime: string; // "10:30:00"
+  closeTime: string; // "20:00:00"
+  lunchStart?: string | null;
+  lunchEnd?: string | null;
 }
 
 export type HospitalSchedules = HospitalSchedule[];

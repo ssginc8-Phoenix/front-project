@@ -12,6 +12,7 @@ export const getDoctorList = async (hospitalId: number) => {
     params: { hospitalId },
     withCredentials: true,
   });
+
   return res.data;
 };
 

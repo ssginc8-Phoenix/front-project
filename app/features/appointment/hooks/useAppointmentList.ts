@@ -5,7 +5,7 @@ import type { AppointmentListPage } from '~/types/appointment';
 export const useAppointmentList = (page: number, size: number = 5) => {
   const { data, loading, error } = useAsync<AppointmentListPage>(
     () => getAppointmentList(page, size),
-    [page, size], // 의존성 배열에 page, size 포함 -> 변경 시 자동 재호출
+    [page, size],
   );
 
   return {

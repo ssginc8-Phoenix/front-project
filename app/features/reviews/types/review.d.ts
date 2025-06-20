@@ -62,3 +62,9 @@ export interface Page<T> {
   number: number;
   size: number;
 }
+
+export interface ReviewSummaryResponse {
+  hospitalId: number;
+  reviewCount: number;
+  summary: string;
+}

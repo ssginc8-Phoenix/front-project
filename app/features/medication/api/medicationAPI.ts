@@ -53,12 +53,19 @@ export const getMyMedicationLogs = async (page: number = 0, size: number = 10) =
 /**
  * 복약 완료 처리
  */
-export const completeMedication = async (medicationId: number, status: 'TAKEN' | 'MISSED') => {
-  const res = await axios.patch(
-    `${HOST}/medications/${medicationId}/complete`,
-    { status },
-    { withCredentials: true },
-  );
+export const completeMedication = async (
+  medicationId: number,
+  medicationAlertTimeId: number,
+  completedAt: string,
+) => {
+  const body = {
+    medicationAlertTimeId: medicationAlertTimeId,
+    completedAt: completedAt,
+  };
+
+  const res = await axios.post(`${HOST}/medications/${medicationId}/taken`, body, {
+    withCredentials: true,
+  });
   return res.data;
 };
 

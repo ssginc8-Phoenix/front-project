@@ -6,7 +6,6 @@ import {
   markNotificationAsRead,
 } from '~/features/notification/api/notificationAPI';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { onMessage } from '@firebase/messaging';
 import type { NotificationList } from '~/types/notification';
 import { messaging } from '~/features/fcm/firebase';

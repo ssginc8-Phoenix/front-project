@@ -56,7 +56,7 @@ export type DayOfWeek =
 
 // 스케줄 생성/수정을 위한 요청 DTO
 export interface CreateScheduleRequest {
-  hospitalScheduleId: number | undefined;
+  hospitalScheduleId?: number | undefined;
   dayOfWeek: DayOfWeek;
   openTime: string; // "HH:mm:ss" 포맷 (예: "09:00:00")
   closeTime: string; // "HH:mm:ss"

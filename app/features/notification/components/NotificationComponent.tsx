@@ -23,6 +23,7 @@ import {
   DeleteButton,
 } from '~/features/notification/components/Notification.styels';
 import { Bell, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router';
 
 const Audio = styled.audio`
   display: none;

@@ -8,6 +8,7 @@ import {
   submitPatientInfo,
 } from '~/features/user/api/UserAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
+import { login } from '~/features/user/api/UserAPI';
 
 const Wrapper = styled.div`
   display: flex;
@@ -304,11 +305,15 @@ const UserSignupForm = () => {
 
     if (role === 'PATIENT') {
       await submitPatientInfo({ userId: response.userId, residentRegistrationNumber });
-      setIsSignupComplete(true);
-    } else if (role === 'HOSPITAL_ADMIN') {
-      navigate('/login');
-    } else {
-      setIsSignupComplete(true);
+    }
+
+    // 회원가입 후 로그인 자동 수행
+    try {
+      await login({ email, password });
+      navigate('/'); // 또는 '/patients/mypage' 등 역할별로 분기 가능
+    } catch (err) {
+      console.error('자동 로그인 실패:', err);
+      navigate('/login'); // 실패 시 로그인 페이지로 fallback
     }
   };
 

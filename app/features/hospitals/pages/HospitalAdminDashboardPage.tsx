@@ -4,9 +4,6 @@ import HospitalSidebarMenu from '~/features/hospitals/components/hospitalAdmin/H
 import { hospitalSidebarItems } from '~/features/hospitals/components/constants/hospitalSidebarItems';
 import HospitalUpdateForm from '~/features/hospitals/components/hospitalAdmin/info/HospitalUpdateForm';
 import useLoginStore from '~/features/user/stores/LoginStore';
-import { getMyHospital } from '~/features/hospitals/api/hospitalAPI';
-import { useQuery } from '@tanstack/react-query';
-import { getMyDoctorInfo } from '~/features/doctor/api/doctorAPI';
 
 // ------------------- 스타일 정의 -------------------
 const PageWrapper = styled.div`
@@ -31,7 +28,6 @@ const Title = styled.h2`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-left: 3rem;
   margin-bottom: 2rem; // <-- 여백 맞춤
 `;
 const ProfileSection = styled.div`
@@ -73,11 +69,6 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useLoginStore();
 
-  const { data } = useQuery({
-    queryKey: ['myHospitalInfo'],
-    queryFn: getMyHospital,
-  });
-
   const handleSidebarChange = (key: string) => {
     const targetPath = `/hospital/${key}`;
     if (window.location.pathname === targetPath) {
@@ -94,9 +85,9 @@ const AdminDashboard = () => {
         <SidebarBox>
           <ProfileSection>
             <ProfileEmoji>
-              {data?.imageUrl ? (
+              {user?.profileImageUrl ? (
                 <img
-                  src={data.imageUrl}
+                  src={user.profileImageUrl}
                   alt="병원관리자 프로필"
                   style={{
                     width: '80px',

@@ -53,7 +53,13 @@ export const createDoctor = async (data: DoctorSaveRequest): Promise<number> => 
  */
 export const createDoctorSchedules = async (
   doctorId: number,
-  schedules: DoctorScheduleRequest[],
+  schedules: {
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
+    lunchStart: string | null;
+    lunchEnd: string | null;
+  }[],
 ): Promise<void> => {
   await axios.post(`/api/v1/doctors/${doctorId}/schedules`, schedules);
 };
@@ -64,7 +70,13 @@ export const createDoctorSchedules = async (
 export const updateDoctorSchedule = async (
   doctorId: number,
   scheduleId: number,
-  schedule: DoctorScheduleRequest,
+  schedule: {
+    dayOfWeek: string;
+    startTime: `${string}:00`;
+    endTime: `${string}:00`;
+    lunchStart: string | null;
+    lunchEnd: string | null;
+  },
 ): Promise<DoctorScheduleRequest> => {
   const res = await axios.patch(`/api/v1/doctors/${doctorId}/schedules/${scheduleId}`, schedule);
   return res.data;

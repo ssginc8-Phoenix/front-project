@@ -525,39 +525,37 @@ const HospitalUpdateForm: React.FC = () => {
               ))}
             </StyledSelect>
             <span style={{ fontWeight: 500 }}>진료:</span>
-            {/* 오픈/종료 */}
-            {(['open', 'close'] as const).map((key) => (
-              <StyledTimeSelect
-                key={key}
-                value={row[key]}
-                onChange={(e) => handleScheduleChange(idx, key, e.target.value)}
-              >
-                <option value="">시간 선택</option>
-                {timeOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </StyledTimeSelect>
-            ))}
+            {/* 오픈/종료 (input type="time" 적용) */}
+            <InputTime
+              type="time"
+              step="1800"
+              value={row.open}
+              onChange={(e) => handleScheduleChange(idx, 'open', e.target.value)}
+            />
+            <Separator>~</Separator>
+            <InputTime
+              type="time"
+              step="1800"
+              value={row.close}
+              onChange={(e) => handleScheduleChange(idx, 'close', e.target.value)}
+            />
 
             <span style={{ fontWeight: 500 }}>점심:</span>
 
-            {/* 점심 시작/종료 */}
-            {(['lunchStart', 'lunchEnd'] as const).map((key) => (
-              <StyledTimeSelect
-                key={key}
-                value={row[key]}
-                onChange={(e) => handleScheduleChange(idx, key, e.target.value)}
-              >
-                <option value="">시간 선택</option>
-                {timeOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </StyledTimeSelect>
-            ))}
+            {/* 점심 시작/종료 (input type="time" 적용) */}
+            <InputTime
+              type="time"
+              step="1800"
+              value={row.lunchStart}
+              onChange={(e) => handleScheduleChange(idx, 'lunchStart', e.target.value)}
+            />
+            <Separator>~</Separator>
+            <InputTime
+              type="time"
+              step="1800"
+              value={row.lunchEnd}
+              onChange={(e) => handleScheduleChange(idx, 'lunchEnd', e.target.value)}
+            />
 
             <RemoveScheduleButton type="button" onClick={() => handleRemoveSchedule(idx)}>
               <X size={16} />
@@ -754,6 +752,10 @@ const AddButton = styled.button`
     background: #2563eb;
   }
 `;
+const Separator = styled.span`
+  font-size: 1.2rem;
+  color: #333;
+`;
 const NewServiceInput = styled.input`
   border: 1px solid #d1d5db;
   border-radius: 9999px;
@@ -763,15 +765,15 @@ const NewServiceInput = styled.input`
   width: 120px;
 `;
 const Form = styled.form`
-  max-width: 48rem;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 2rem auto;
   padding: 2rem;
-  background: white;
+  background: #fff;
   border-radius: 1rem;
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 `;
 const FileLabel = styled.label`
   display: inline-block;
@@ -869,11 +871,23 @@ const StyledSelect = styled.select`
   border-radius: 0.375rem;
 `;
 
-const StyledTimeSelect = styled.select`
-  width: 100px;
-  padding: 0.4rem;
-  border: 1px solid #ccc;
+const InputTime = styled.input`
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
   border-radius: 0.375rem;
+  background: white;
+  font-size: 1rem;
+
+  /* iOS Safari, Chrome on Android 등의 기본 시계 스타일 유지하면서 */
+  /* Firefox 에서는 placeholder 폰트 크기 조정이 필요할 수 있습니다 */
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  }
 `;
 const ThumbnailsRow = styled.div`
   display: flex;

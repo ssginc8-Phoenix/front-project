@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useHospitalDetail } from '~/features/hospitals/hooks/useHospitalDetail';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 
 interface HospitalDetailPanelProps {
   hospitalId: number;
@@ -193,6 +194,7 @@ const NextButton = styled(ArrowButton)`
 
 const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, onClose }) => {
   const { data: hospital, loading, error } = useHospitalDetail(hospitalId);
+  const { setHospitalId, setHospitalName } = useAppointmentStore();
   const navigate = useNavigate();
   const panelRef = useRef<HTMLDivElement>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -206,6 +208,15 @@ const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, o
   if (error || !hospital) return <div>정보를 불러오지 못했습니다.</div>;
 
   const images = hospital.imageUrls ?? [];
+
+  /**
+   * 진료 접수 버튼 클릭 핸들러
+   */
+  const handleAppointmentClick = () => {
+    setHospitalId(hospital.hospitalId);
+    setHospitalName(hospital.name);
+    navigate(`/appointments/request`);
+  };
 
   return (
     <>
@@ -257,9 +268,7 @@ const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, o
         <div>{hospital.serviceNames?.map((svc, i) => <ServiceTag key={i}>{svc}</ServiceTag>)}</div>
 
         <ActionGroup>
-          <PrimaryButton onClick={() => navigate(`/appointments/request?hospitalId=${hospitalId}`)}>
-            바로 접수
-          </PrimaryButton>
+          <PrimaryButton onClick={handleAppointmentClick}>진료 접수</PrimaryButton>
           <SecondaryButton onClick={() => navigate(`/hospital/${hospitalId}`)}>
             상세 보기
           </SecondaryButton>

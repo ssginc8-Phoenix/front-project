@@ -58,7 +58,6 @@ interface AppointmentConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-
   dateTime: string;
   hospitalName: string;
   doctorName: string;

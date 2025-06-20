@@ -8,6 +8,11 @@ interface AppointmentState {
   rrn: string | null;
   setRrn: (rrn: string | null) => void;
 
+  hospitalId: number | null;
+  setHospitalId: (hospitalId: number | undefined) => void;
+  hospitalName: string | null;
+  setHospitalName: (hospitalName: string | null) => void;
+
   doctorId: number | null;
   setDoctorId: (doctorId: number | null) => void;
   doctorName: string | null;
@@ -42,6 +47,11 @@ const useAppointmentStore = create<AppointmentState>((set) => ({
   rrn: null,
   setRrn: (rrn: string | null) => set({ rrn: rrn }),
 
+  hospitalId: null,
+  setHospitalId: (id: number | null) => set({ hospitalId: id }),
+  hospitalName: null,
+  setHospitalName: (name: string | null) => set({ hospitalName: name }),
+
   doctorId: null,
   setDoctorId: (id: number | null) => set({ doctorId: id }),
   doctorName: null,
@@ -69,6 +79,8 @@ const useAppointmentStore = create<AppointmentState>((set) => ({
     set({
       patientId: null,
       patientName: null,
+      hospitalId: null,
+      hospitalName: null,
       doctorId: null,
       selectedSymptoms: [],
       extraSymptom: '',

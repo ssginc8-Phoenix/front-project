@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useHospitalDetail } from '../../../hooks/useHospitalDetail';
 import type { HospitalSchedule } from '../../../types/hospitalSchedule';
 import { useNavigate } from 'react-router';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Container = styled.div`
   width: 100%;
@@ -82,38 +83,13 @@ const NoticeBox = styled.div`
     color: #1f2937;
   }
 `;
-const GalleryGrid = styled.div`
-  display: grid;
-  grid-template-columns: 2fr 1fr; /* 좌:우 = 2:1 */
-  grid-template-rows: 1fr 1fr; /* 위:아래 = 1:1 */
-  grid-template-areas:
-    'big thumb1'
-    'big thumb2';
-  gap: 0.75rem;
-  height: 400px; /* 필요에 따라 조정 */
-  margin-bottom: 1.5rem;
-`;
+
 const ButtonGroup = styled.div`
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
 `;
 
-// 각 썸네일
-const GridThumb = styled.div<{ area: 'big' | 'thumb1' | 'thumb2' }>`
-  grid-area: ${({ area }) => area};
-  position: relative;
-  overflow: hidden;
-  border-radius: 0.75rem;
-  cursor: pointer;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
-  }
-`;
 const ActionButton = styled.button`
   padding: 10px 16px;
   border-radius: 8px;
@@ -137,7 +113,49 @@ const ServiceTag = styled.span`
   margin-right: 8px;
   margin-bottom: 8px;
 `;
+const SliderContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 400px; /* 원하시는 높이로 설정 */
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  border-radius: 0.75rem;
+`;
 
+const SlideImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  display: block;
+`;
+
+const ArrowButton = styled.button`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.6);
+  }
+`;
+
+const PrevButton = styled(ArrowButton)`
+  left: 1rem;
+`;
+const NextButton = styled(ArrowButton)`
+  right: 1rem;
+`;
 interface HospitalInfoTabProps {
   hospitalId: number;
   selectedTab: 'location' | 'doctors' | 'reviews';
@@ -147,6 +165,7 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
   const { data: hospital, loading, error } = useHospitalDetail(hospitalId);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [current, setCurrent] = useState(0);
 
   const formatTime = (time: string) => time.substring(0, 5);
   useEffect(() => {
@@ -189,41 +208,32 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
 
       <Container>
         {/* 전체 뷰용 메인 이미지 */}
-        {images && images.length >= 3 && (
-          <GalleryGrid>
-            {/* 왼쪽 큰 이미지 */}
-            <GridThumb
-              area="big"
-              onClick={() => {
-                setSelectedImage(images[0]);
-                setIsModalOpen(true);
-              }}
-            >
-              <img src={images[0]} alt={`${hospital.name} 사진 1`} />
-            </GridThumb>
+        {images.length > 0 && (
+          <SliderContainer>
+            {/* 이전 버튼 */}
+            {images.length > 1 && (
+              <PrevButton onClick={() => setCurrent((current - 1 + images.length) % images.length)}>
+                <ChevronLeft size={24} />
+              </PrevButton>
+            )}
 
-            {/* 오른쪽 위 작은 이미지 */}
-            <GridThumb
-              area="thumb1"
+            {/* 현재 이미지 */}
+            <SlideImage
+              src={images[current]}
+              alt={`병원 사진 ${current + 1}`}
               onClick={() => {
-                setSelectedImage(images[1]);
+                setSelectedImage(images[current]);
                 setIsModalOpen(true);
               }}
-            >
-              <img src={images[1]} alt={`${hospital.name} 사진 2`} />
-            </GridThumb>
+            />
 
-            {/* 오른쪽 아래 작은 이미지 */}
-            <GridThumb
-              area="thumb2"
-              onClick={() => {
-                setSelectedImage(images[2]);
-                setIsModalOpen(true);
-              }}
-            >
-              <img src={images[2]} alt={`${hospital.name} 사진 3`} />
-            </GridThumb>
-          </GalleryGrid>
+            {/* 다음 버튼 */}
+            {images.length > 1 && (
+              <NextButton onClick={() => setCurrent((current + 1) % images.length)}>
+                <ChevronRight size={24} />
+              </NextButton>
+            )}
+          </SliderContainer>
         )}
 
         <Header>
@@ -254,7 +264,7 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
 
         <ButtonGroup>
           <ActionButton onClick={() => navigate(`/appointments/request?hospitalId=${hospitalId}`)}>
-            🏥 대면 진료 접수
+            🏥 진료 접수
           </ActionButton>
         </ButtonGroup>
       </Container>

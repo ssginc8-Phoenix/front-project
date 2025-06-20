@@ -44,7 +44,7 @@ const AppointmentListComponent = ({
 }: AppointmentListProps) => {
   const [page, setPage] = useState(0);
 
-  const { list, pagination, loading, error } = useAppointmentList(page, 5);
+  const { list, pagination, loading, error } = useAppointmentList(page, 6);
 
   useEffect(() => {}, [refreshTrigger]);
 
@@ -55,23 +55,26 @@ const AppointmentListComponent = ({
       {loading && <LoadingIndicator />}
       {error && <ErrorMessage message={error} />}
 
-      <Grid>
-        {list?.map((appointment: AppointmentList) => (
-          <AppointmentCard
-            key={appointment.appointmentId}
-            appointment={appointment}
-            onClick={() => onSelectAppointment(appointment.appointmentId)}
-          />
-        ))}
-      </Grid>
-
-      <PaginationWrapper>
-        <Pagination
-          totalPages={pagination.totalPages}
-          currentPage={pagination.currentPage}
-          onPageChange={setPage}
-        />
-      </PaginationWrapper>
+      {!loading && !error && (
+        <>
+          <Grid>
+            {list?.map((appointment: AppointmentList) => (
+              <AppointmentCard
+                key={appointment.appointmentId}
+                appointment={appointment}
+                onClick={() => onSelectAppointment(appointment.appointmentId)}
+              />
+            ))}
+          </Grid>
+          <PaginationWrapper>
+            <Pagination
+              totalPages={pagination.totalPages}
+              currentPage={pagination.currentPage}
+              onPageChange={setPage}
+            />
+          </PaginationWrapper>
+        </>
+      )}
     </Wrapper>
   );
 };

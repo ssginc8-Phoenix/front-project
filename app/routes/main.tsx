@@ -10,8 +10,7 @@ export default function Main() {
   return (
     <>
       {/* 로그인 여부와 관계없이 항상 기본 MainPage를 렌더링 */}
-      <MainPage />
-
+      {(role === null || role === 'PATIENT' || role === 'GUARDIAN') && <MainPage />}
       {role && (
         <>
           {role === 'DOCTOR' && <HospitalMainPage />}

@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import styled, { keyframes } from 'styled-components';
 import Slider from 'react-slick';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import HeroSection from '~/components/HeroSection';
+import ChatBotComponent from '~/features/chatbot/components/ChatBotComponent';
 
 const ads = ['Banner.png', '', '/ads/ad3.png'];
 
@@ -40,6 +42,7 @@ const infoItems = [
 export default function MainPage() {
   const navigate = useNavigate();
   const { user, fetchMyInfo } = useLoginStore();
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -60,7 +63,6 @@ export default function MainPage() {
 
   return (
     <PageWrapper>
-      {/* 광고 슬라이더 */}
       <AdCarousel>
         <Slider {...sliderSettings}>
           {ads.map((src) => (
@@ -71,21 +73,18 @@ export default function MainPage() {
         </Slider>
       </AdCarousel>
 
-      {/* 인사말 */}
       <Greeting>
-        {user ? ( // user 객체가 존재하면 (로그인 상태)
+        {user ? (
           <>
             <strong>{user?.name}</strong> 님, 안녕하세요!
           </>
         ) : (
-          // user 객체가 존재하지 않으면 (로그아웃 상태)
           <>
             <strong>게스트</strong>님, 안녕하세요!
           </>
         )}
       </Greeting>
 
-      {/* 기능 카드 */}
       <FeatureGrid>
         {features.map(({ title, route, icon }) => (
           <Card key={title} onClick={() => navigate(route)}>
@@ -95,7 +94,8 @@ export default function MainPage() {
         ))}
       </FeatureGrid>
 
-      {/* 정보 카드 섹션 (연회색 배경) */}
+      <HeroSection />
+
       <InfoSectionContainer>
         <InfoSection>
           {infoItems.map(({ title, imgSrc, url }) => (
@@ -106,6 +106,16 @@ export default function MainPage() {
           ))}
         </InfoSection>
       </InfoSectionContainer>
+
+      {/* 챗봇 버튼 및 모달 */}
+      <ChatButton onClick={() => setIsChatOpen(true)}>💬</ChatButton>
+      {isChatOpen && (
+        <ModalOverlay onClick={() => setIsChatOpen(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ChatBotComponent />
+          </ModalContent>
+        </ModalOverlay>
+      )}
     </PageWrapper>
   );
 }
@@ -138,7 +148,6 @@ const Greeting = styled.h3`
   font-size: 1.5rem;
   font-weight: 400;
   color: #1f2937;
-
   & > strong {
     font-weight: 600;
   }
@@ -153,12 +162,8 @@ const FeatureGrid = styled.div`
 `;
 
 const bounce = keyframes`
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 `;
 
 const Card = styled.div`
@@ -173,10 +178,8 @@ const Card = styled.div`
   cursor: pointer;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.2s;
-
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
     img {
       animation: ${bounce} 0.5s ease-in-out;
     }
@@ -218,11 +221,9 @@ const InfoCard = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: center;
-
   max-width: 440px;
   width: 100%;
   margin: 0 auto;
-
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
@@ -234,7 +235,6 @@ const InfoImage = styled.img`
   object-fit: cover;
   border-radius: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
   margin-top: 14px;
 `;
 
@@ -244,4 +244,42 @@ const InfoTitle = styled.p`
   font-weight: 500;
   color: #737373;
   line-height: 1.4;
+`;
+
+const ChatButton = styled.button`
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #4a90e2;
+  color: white;
+  font-size: 24px;
+  padding: 16px;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  z-index: 999;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 998;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ModalContent = styled.div`
+  width: 100%;
+  max-width: 480px;
+  height: 90vh;
+  background-color: white;
+  border-radius: 16px;
+  overflow: hidden;
+  z-index: 999;
 `;

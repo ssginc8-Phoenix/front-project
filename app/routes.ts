@@ -70,6 +70,9 @@ export default [
     route('reviews/admin', 'features/reviews/pages/ReviewAdminPage.tsx'),
     route('reviews/hospital/:hospitalId', 'features/reviews/pages/ReviewHospitalPage.tsx'),
     route('reviews/:userId', 'features/reviews/pages/ReviewMyListPage.tsx'),
+
+    /** CHATBOT 챗봇  */
+    route('chatbot', 'routes/chatbot/ChatbotPage.tsx'),
   ]),
 
   route('*', 'routes/NotFound.tsx'),

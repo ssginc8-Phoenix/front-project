@@ -297,14 +297,6 @@ const PatientInfoPage = () => {
         </SidebarBox>
         <MainSection>
           <PatientInfoHeader>
-            {userinfo?.profileImageUrl ? (
-              <MainHeaderProfileImage src={userinfo.profileImageUrl} alt="프로필 이미지" />
-            ) : (
-              <MainHeaderProfileImage
-                src="https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png"
-                alt="기본 프로필"
-              />
-            )}
             <Name>{user?.name} 님 정보</Name>
           </PatientInfoHeader>
 

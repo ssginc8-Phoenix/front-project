@@ -1,6 +1,16 @@
 import React from 'react';
-
-import { Wrapper, Card, Title, SummaryText, Footer, Skeleton } from './ReviewSummaryStyles';
+import {
+  Wrapper,
+  Card,
+  Header,
+  Icon,
+  TitleBox,
+  Title,
+  SubTitle,
+  SummaryText,
+  Footer,
+  Skeleton,
+} from './ReviewSummaryStyles';
 import { useReviewSummary } from '~/features/reviews/hooks/useReviewSummary';
 
 interface Props {
@@ -15,7 +25,7 @@ const ReviewSummaryCard: React.FC<Props> = ({ hospitalId }) => {
       <Card>
         {isLoading && (
           <>
-            <Skeleton w="60%" h="1.2rem" />
+            <Skeleton w="40%" h="1.2rem" />
             <Skeleton />
             <Skeleton />
           </>
@@ -29,7 +39,14 @@ const ReviewSummaryCard: React.FC<Props> = ({ hospitalId }) => {
 
         {data && !isLoading && (
           <>
-            <Title>AI 리뷰 요약</Title>
+            <Header>
+              <Icon>🧠</Icon>
+              <TitleBox>
+                <Title>AI 브리핑</Title>
+                <SubTitle>사용자 리뷰를 기반으로 요약된 내용입니다</SubTitle>
+              </TitleBox>
+            </Header>
+
             <SummaryText>{data.summary}</SummaryText>
             <Footer>총 리뷰 수: {data.reviewCount}개</Footer>
           </>

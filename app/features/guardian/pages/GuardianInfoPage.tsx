@@ -93,13 +93,13 @@ const GuardianInfoHeader = styled.div`
   color: #00499e; /* PatientInfoPage와 통일 */
 `;
 
-const ProfileInfo = styled.img`
-  width: 2.5rem; /* PatientInfoPage의 MainHeaderProfileImage와 통일 */
-  height: 2.5rem; /* PatientInfoPage의 MainHeaderProfileImage와 통일 */
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 12px; /* PatientInfoPage의 MainHeaderProfileImage와 통일 */
-`;
+// const ProfileInfo = styled.img`
+//   width: 2.5rem; /* PatientInfoPage의 MainHeaderProfileImage와 통일 */
+//   height: 2.5rem; /* PatientInfoPage의 MainHeaderProfileImage와 통일 */
+//   border-radius: 50%;
+//   object-fit: cover;
+//   margin-right: 12px; /* PatientInfoPage의 MainHeaderProfileImage와 통일 */
+// `;
 
 const Name = styled.div`
   font-size: 2.2rem; /* PatientInfoPage와 통일 */
@@ -318,14 +318,7 @@ const GuardianInfoPage = () => {
 
         <MainSection>
           <GuardianInfoHeader>
-            <ProfileInfo
-              src={
-                user?.profileImageUrl ??
-                'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png'
-              }
-              alt="프로필"
-            />
-            <Name>{user?.name} 님 정보</Name> {/* PatientInfoPage와 통일 */}
+            <Name>{user?.name}님 정보</Name> {/* PatientInfoPage와 통일 */}
           </GuardianInfoHeader>
 
           <InfoFormBox onSubmit={handleSave}>

@@ -15,7 +15,9 @@ interface CalendarItem {
   startDate?: string;
   endDate?: string;
   times?: { meal: 'morning' | 'lunch' | 'dinner'; time: string }[];
+  time?: string;
   relatedId?: number;
+  patientName?: string;
 }
 
 const Wrapper = styled.div`
@@ -177,15 +179,22 @@ const StyledItem = styled.li<{ itemType: 'MEDICATION' | 'APPOINTMENT' }>`
   }
 `;
 
+const mealLabel = (meal: string) => {
+  const map: Record<string, string> = {
+    morning: '아침',
+    lunch: '점심',
+    dinner: '저녁',
+  };
+  return map[meal] ?? meal;
+};
+
 export default function PatientCalendar() {
   const [calendarData, setCalendarData] = useState<Record<string, CalendarItem[]>>({});
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeDate, setActiveDate] = useState<Date>(new Date());
-
   const [modalOpen, setModalOpen] = useState(false);
   const [modalItems, setModalItems] = useState<CalendarItem[]>([]);
   const [modalDate, setModalDate] = useState<string>('');
-
   const [selectedItem, setSelectedItem] = useState<CalendarItem | null>(null);
   const [itemDetailOpen, setItemDetailOpen] = useState(false);
 
@@ -223,6 +232,7 @@ export default function PatientCalendar() {
           startDate: detail.startDate,
           endDate: detail.endDate,
           times: detail.times,
+          patientName: detail.patientName,
         });
       } catch {
         alert('상세 정보를 불러오는 데 실패했습니다.');
@@ -327,24 +337,29 @@ export default function PatientCalendar() {
             {selectedItem.itemType === 'MEDICATION' ? (
               <>
                 <p>
-                  <strong>제목:</strong> {selectedItem.title}
+                  <strong>복약명:</strong> {selectedItem.title}
                 </p>
                 <p>
-                  <strong>시간:</strong>{' '}
-                  {`아침 ${selectedItem.times?.find((t) => t.meal === 'morning')?.time.slice(0, 5) ?? '--:--'} : `}
-                  {`점심 ${selectedItem.times?.find((t) => t.meal === 'lunch')?.time.slice(0, 5) ?? '--:--'} : `}
-                  {`저녁 ${selectedItem.times?.find((t) => t.meal === 'dinner')?.time.slice(0, 5) ?? '--:--'}`}
+                  <strong>복약 기간:</strong> {selectedItem.startDate} ~ {selectedItem.endDate}
                 </p>
                 <p>
-                  <strong>복용 시작일:</strong> {selectedItem.startDate}
-                </p>
-                <p>
-                  <strong>복용 종료일:</strong> {selectedItem.endDate}
+                  <strong>복용 시간:</strong>{' '}
+                  {selectedItem.times && selectedItem.times.length > 0
+                    ? selectedItem.times
+                        .map((t) => `${mealLabel(t.meal)} ${t.time.slice(0, 5)}`)
+                        .join(', ')
+                    : '시간 정보 없음'}
                 </p>
               </>
             ) : (
               <p>
                 <strong>일반진료:</strong> {selectedItem.title}
+                <p>
+                  <strong>진료일:</strong> {selectedItem.date}
+                </p>
+                <p>
+                  <strong>시간:</strong> {selectedItem.time}
+                </p>
               </p>
             )}
           </div>

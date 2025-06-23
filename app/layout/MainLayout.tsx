@@ -7,7 +7,6 @@ const LayoutContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f8f9fa; /* 전체 배경색을 약간 밝게 설정하여 컨텐츠와 구분 */
 `;
 
 const ContentWrapper = styled.main`

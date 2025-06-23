@@ -94,40 +94,54 @@ const AppointmentConfirmationModal = ({
     return `${front}-${backFirst}******`;
   };
 
+  const getPaymentMethodInKorean = (method: string) => {
+    switch (method) {
+      case 'ONSITE':
+        return '현장 수납';
+      case 'ONLINE':
+        return '앱 내 결제';
+      default:
+        return method;
+    }
+  };
+
+  const formatDateTimeWithOutSeconds = (dt: string) => {
+    const lastColonIndex = dt.lastIndexOf(':');
+    if (lastColonIndex > -1 && dt.substring(lastColonIndex + 1, lastColonIndex + 3) === '00') {
+      return dt.slice(0, lastColonIndex);
+    }
+    return dt;
+  };
+
   return (
     <Overlay>
       <Modal>
         <Title>대면 진료 접수 완료하시겠습니까?</Title>
-        <DateText>{dateTime}</DateText>
+        <DateText>{formatDateTimeWithOutSeconds(dateTime)}</DateText>
 
         <InfoBox>
           <SectionTitle>병원 정보</SectionTitle>
           {hospitalName}
           <br />
-          {doctorName}
-
+          {doctorName} 의사
           <SectionTitle>환자 정보</SectionTitle>
           {patientName}
           <br />
           {maskRrn(residentRegistrationNumber)}
-
           <SectionTitle>진료 항목</SectionTitle>
           {appointmentType === 'SCHEDULED' || appointmentType === 'IMMEDIATE'
             ? '일반 진료'
             : appointmentType}
-
           <SectionTitle>진료 정보</SectionTitle>
           {symptoms}
-
           {question && (
             <>
               <SectionTitle>원장님께 하고 싶은 말</SectionTitle>
               {question}
             </>
           )}
-
           <SectionTitle>수납 방법</SectionTitle>
-          {paymentMethod}
+          {getPaymentMethodInKorean(paymentMethod)}
         </InfoBox>
 
         <ButtonGroup>

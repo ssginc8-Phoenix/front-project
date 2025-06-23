@@ -54,8 +54,29 @@ const AuthButton = styled.a`
   }
 `;
 
+const NavBtn = styled.button`
+  all: unset;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #444;
+  padding: 8px 12px;
+  border-radius: 4px;
+  &:hover {
+    background: #f5f5f5;
+  }
+`;
+
 const Header = () => {
   const user = useLoginStore((state) => state.user);
+
+  const scrollToSection = (id: string) => {
+    if (location.pathname !== '/') {
+      window.location.href = `/#${id}`;
+      return;
+    }
+    const target = document.getElementById(id);
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <HeaderBar>
@@ -64,6 +85,9 @@ const Header = () => {
           <LogoImage src="/logo.png" alt="logo" />
         </LogoLink>
         <RightGroup>
+          <NavBtn onClick={() => scrollToSection('about-section')}>서비스 소개</NavBtn>
+          <NavBtn onClick={() => scrollToSection('tel-section')}>고객센터</NavBtn>
+
           {user ? (
             <>
               <NotificationComponent />

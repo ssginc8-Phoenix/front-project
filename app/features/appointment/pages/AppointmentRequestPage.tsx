@@ -44,7 +44,8 @@ const AppointmentRequestPage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fullSymptom = [...selectedSymptoms, extraSymptom].filter(Boolean).join(', ');
+  const filteredSymptoms = selectedSymptoms.filter((symptom) => symptom !== '직접 입력');
+  const fullSymptom = [...filteredSymptoms, extraSymptom].filter(Boolean).join(', ');
 
   const appointmentType = dayjs(date).isSame(dayjs(), 'day') ? 'IMMEDIATE' : 'SCHEDULED';
 

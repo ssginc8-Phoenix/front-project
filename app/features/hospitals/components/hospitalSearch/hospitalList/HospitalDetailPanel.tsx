@@ -215,7 +215,7 @@ const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, o
   const handleAppointmentClick = () => {
     setHospitalId(hospital.hospitalId);
     setHospitalName(hospital.name);
-    navigate(`/appointments/request`);
+    navigate(`/appointment`);
   };
 
   return (

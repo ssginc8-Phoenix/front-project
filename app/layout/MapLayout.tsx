@@ -1,7 +1,7 @@
-import styled from 'styled-components';
 import { Outlet } from 'react-router';
 import Header from '~/layout/Header';
 import Footer from '~/layout/Footer';
+import styled from 'styled-components';
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -12,7 +12,7 @@ const LayoutContainer = styled.div`
 const ContentWrapper = styled.main`
   flex: 1;
   padding: 2rem 1rem; /* 좌우 패딩을 조금 줄이거나, 나중에 max-width와 함께 조정 */
-  max-width: 1400px; /* 최대 너비 설정: 화면이 아무리 커져도 컨텐츠가 너무 넓어지지 않게 함 */
+  max-width: 2000px; /* 최대 너비 설정: 화면이 아무리 커져도 컨텐츠가 너무 넓어지지 않게 함 */
   width: 100%;
   margin: 0 auto;
 
@@ -25,7 +25,7 @@ const ContentWrapper = styled.main`
   }
 `;
 
-const MainLayout = () => {
+const MapLayout = () => {
   return (
     <LayoutContainer>
       <Header />
@@ -37,4 +37,4 @@ const MainLayout = () => {
   );
 };
 
-export default MainLayout;
+export default MapLayout;

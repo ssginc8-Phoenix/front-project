@@ -3,12 +3,12 @@ import styled from 'styled-components';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import SidebarMenu from '~/features/guardian/components/SidebarMenu'; // Patient SidebarMenu 사용 (스타일 통일)
-import { guardianSidebarItems } from '~/features/guardian/constants/sidebarItems';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { getUserInfo, updateUserInfo } from '~/features/patient/api/userAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
 import ReusableModal from '~/features/patient/components/ReusableModal'; // ReusableModal 경로 통일
 import { PasswordModal } from '~/features/patient/components/PasswordModal';
+import { guardianSidebarItems } from '~/constants/sidebarItems';
 
 // 전화번호 3-4-4 포맷 함수 추가 (필요시)
 const formatPhoneNumber = (value: string) => {

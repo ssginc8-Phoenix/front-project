@@ -145,6 +145,17 @@ const AppointmentDetailModal = ({
     }
   };
 
+  const getPaymentMethodInKorean = (method: string) => {
+    switch (method) {
+      case 'ONSITE':
+        return '현장 수납';
+      case 'ONLINE':
+        return '앱 내 결제';
+      default:
+        return method;
+    }
+  };
+
   return (
     <>
       <Overlay>
@@ -212,7 +223,7 @@ const AppointmentDetailModal = ({
 
               <Section>
                 <SectionTitle>수납 방법</SectionTitle>
-                <InfoText>{appointment.paymentType}</InfoText>
+                <InfoText>{getPaymentMethodInKorean(appointment.paymentType)}</InfoText>
               </Section>
 
               {canModify && (

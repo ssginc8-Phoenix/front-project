@@ -14,8 +14,7 @@ import SearchMenu from '~/features/hospitals/components/hospitalSearch/searchMen
 
 const MapContainer = styled.div`
   position: relative;
-  width: 91vw;
-  height: 100vh;
+  height: 90vh;
   overflow-x: hidden;
 `;
 
@@ -197,6 +196,7 @@ const HospitalSearchPage: React.FC = () => {
     error ?? (mode === 'global' ? globalRes.error : nearbyRes.error) ?? null;
   // HospitalList 에 넘길 Error 객체
   const errObj: Error | null = errMsgStr ? new Error(errMsgStr) : null;
+
   return (
     <MapContainer>
       <FullMap

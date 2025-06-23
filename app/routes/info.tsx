@@ -1,16 +1,16 @@
 import LoginStore from '~/features/user/stores/LoginStore';
-import PatientManagementPage from '~/features/guardian/pages/PatientManagementPage';
+import PatientInfoPage from '~/features/patient/pages/PatientInfoPage';
+import GuardianInfoPage from '~/features/guardian/pages/GuardianInfoPage';
 import DoctorInfoPage from '~/features/doctor/page/DoctorInfoPage';
 import HospitalAdminDashboardPage from '~/features/hospitals/pages/HospitalAdminDashboardPage';
-import GuardianManagementPage from '~/features/patient/pages/GuardianManagementPage';
 
 export default function myPage() {
   const role = LoginStore().user?.role;
 
   return (
     <>
-      {role === 'PATIENT' && <GuardianManagementPage />}
-      {role === 'GUARDIAN' && <PatientManagementPage />}
+      {role === 'PATIENT' && <PatientInfoPage />}
+      {role === 'GUARDIAN' && <GuardianInfoPage />}
       {role === 'DOCTOR' && <DoctorInfoPage />}
       {role === 'HOSPITAL_ADMIN' && <HospitalAdminDashboardPage />}
     </>

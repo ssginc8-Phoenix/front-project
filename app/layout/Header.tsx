@@ -5,8 +5,17 @@ import { Link } from 'react-router-dom';
 import NotificationComponent from '~/features/notification/components/NotificationComponent';
 
 const HeaderBar = styled.header`
-  padding: 1rem 2rem;
+  padding: 1rem 3rem;
   border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+`;
+
+const HeaderContent = styled.div`
+  width: 100%;
+  max-width: 1600px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -14,6 +23,8 @@ const HeaderBar = styled.header`
 
 const LogoLink = styled(Link)`
   width: 10%;
+  min-width: 80px;
+  max-width: 120px;
 `;
 
 const LogoImage = styled.img`
@@ -43,27 +54,53 @@ const AuthButton = styled.a`
   }
 `;
 
+const NavBtn = styled.button`
+  all: unset;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #444;
+  padding: 8px 12px;
+  border-radius: 4px;
+  &:hover {
+    background: #f5f5f5;
+  }
+`;
+
 const Header = () => {
   const user = useLoginStore((state) => state.user);
 
+  const scrollToSection = (id: string) => {
+    if (location.pathname !== '/') {
+      window.location.href = `/#${id}`;
+      return;
+    }
+    const target = document.getElementById(id);
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <HeaderBar>
-      <LogoLink to="/">
-        <LogoImage src="/logo.png" alt="logo" />
-      </LogoLink>
-      <RightGroup>
-        {user ? (
-          <>
-            <NotificationComponent />
-            <Profile name={user.name} imageUrl={user.profileImageUrl} />
-          </>
-        ) : (
-          <>
-            <AuthButton href="/login">로그인</AuthButton>
-            <AuthButton href="/signup">회원가입</AuthButton>
-          </>
-        )}
-      </RightGroup>
+      <HeaderContent>
+        <LogoLink to="/">
+          <LogoImage src="/logo.png" alt="logo" />
+        </LogoLink>
+        <RightGroup>
+          <NavBtn onClick={() => scrollToSection('about-section')}>서비스 소개</NavBtn>
+          <NavBtn onClick={() => scrollToSection('tel-section')}>고객센터</NavBtn>
+
+          {user ? (
+            <>
+              <NotificationComponent />
+              <Profile name={user.name} imageUrl={user.profileImageUrl} />
+            </>
+          ) : (
+            <>
+              <AuthButton href="/login">로그인</AuthButton>
+              <AuthButton href="/signup">회원가입</AuthButton>
+            </>
+          )}
+        </RightGroup>
+      </HeaderContent>
     </HeaderBar>
   );
 };

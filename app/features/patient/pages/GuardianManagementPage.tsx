@@ -2,8 +2,6 @@ import styled from 'styled-components';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import GuardianCard from '~/features/patient/components/Guardian/GuardianCard';
-import SidebarMenu from '~/features/patient/components/SidebarMenu';
-import { patientSidebarItems } from '~/features/patient/constants/sidebarItems';
 import {
   getGuardians,
   deletePatientGuardian,
@@ -14,12 +12,15 @@ import { getUserInfo } from '~/features/patient/api/userAPI';
 import { getPatientInfo } from '~/features/patient/api/patientAPI';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import ReusableModal from '~/features/patient/components/ReusableModal';
+import Sidebar from '~/common/Sidebar';
+
+/**
+ * 환자 마이페이지
+ */
 
 const PageWrapper = styled.div`
   display: flex;
   min-height: 100vh;
-  //background-color: #f0f4f8;
-  font-family: 'Segoe UI', sans-serif;
 `;
 
 const MainSection = styled.div`
@@ -61,48 +62,7 @@ const AddCard = styled.button`
   }
 `;
 
-const SidebarBox = styled.div`
-  width: 260px;
-  background: white;
-  border-right: 1px solid #e0e0e0;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 0 20px 20px 0;
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
-  flex-shrink: 0;
-`;
-
-const ProfileSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem;
-`;
-const ProfileEmoji = styled.div`
-  font-size: 4rem;
-  margin-bottom: 0.5rem;
-`;
-const ProfileName = styled.div`
-  font-weight: bold;
-  font-size: 1.3rem;
-  color: #333;
-`;
-const ProfileRole = styled.div`
-  color: #777;
-  font-size: 1rem;
-`;
-
-const ProfileImage = styled.img`
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 8px;
-`;
-
-const GuardianPage: React.FC = () => {
+const GuardianManagementPage: React.FC = () => {
   const [guardians, setGuardians] = useState<Guardian[]>([]);
   const [userinfo, setUserinfo] = useState<{ name: string; profileImageUrl?: string } | null>(null);
   const [patientInfo, setPatientInfo] = useState<{ patientId: number } | null>(null);
@@ -164,25 +124,7 @@ const GuardianPage: React.FC = () => {
 
   return (
     <PageWrapper>
-      <SidebarBox>
-        <ProfileSection>
-          {userinfo?.profileImageUrl ? (
-            <ProfileImage src={userinfo.profileImageUrl} alt="프로필 이미지" />
-          ) : (
-            <ProfileImage
-              src="https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png"
-              alt="기본 프로필"
-            />
-          )}
-          <ProfileName>{userinfo?.name ?? '로딩 중'} 님</ProfileName>
-          <ProfileRole>환자</ProfileRole>
-        </ProfileSection>
-        <SidebarMenu
-          items={patientSidebarItems}
-          activeKey="guardian"
-          onChange={handleSidebarChange}
-        />
-      </SidebarBox>
+      <Sidebar />
 
       <MainSection>
         <Title>🧑‍🤝‍🧑 보호자 관리</Title>
@@ -288,4 +230,4 @@ const GuardianPage: React.FC = () => {
   );
 };
 
-export default GuardianPage;
+export default GuardianManagementPage;

@@ -15,6 +15,7 @@ const FooterBar = styled.footer`
   color: #fff;
   display: flex;
   justify-content: center;
+  box-sizing: border-box;
 `;
 
 const FooterContent = styled.div`

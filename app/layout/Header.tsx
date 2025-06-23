@@ -15,7 +15,7 @@ const HeaderBar = styled.header`
 
 const HeaderContent = styled.div`
   width: 100%;
-  max-width: 1200px; /* MainLayout의 max-width와 동일하게 설정 */
+  max-width: 1600px; /* MainLayout의 max-width와 동일하게 설정 */
   display: flex;
   justify-content: space-between; /* 내부 컨텐츠는 양 끝 정렬 */
   align-items: center;

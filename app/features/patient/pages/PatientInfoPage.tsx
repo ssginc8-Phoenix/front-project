@@ -4,12 +4,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import ReusableModal from '~/features/patient/components/ReusableModal';
 import { PasswordModal } from '~/features/patient/components/PasswordModal';
-import SidebarMenu from '~/features/patient/components/SidebarMenu';
-import { patientSidebarItems } from '~/features/patient/constants/sidebarItems';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { getUserInfo, updateUserInfo } from '~/features/patient/api/userAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
 import type { User } from '~/types/user';
+import Sidebar from '~/common/Sidebar';
 
 // 전화번호 3-4-4 포맷 함수
 const formatPhoneNumber = (value: string) => {
@@ -37,53 +36,6 @@ const MainSection = styled.section`
   min-width: 0;
   max-width: 900px;
   margin-left: 48px; /* 사이드바와의 간격 유지 */
-`;
-
-const SidebarBox = styled.div`
-  width: 260px;
-  background: white;
-  border-right: 1px solid #e0e0e0;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 0 20px 20px 0;
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
-  flex-shrink: 0;
-`;
-
-const ProfileSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem;
-`;
-
-const ProfileImage = styled.img`
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 8px;
-`;
-
-const MainHeaderProfileImage = styled.img`
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 12px;
-`;
-
-const ProfileName = styled.div`
-  font-weight: bold;
-  font-size: 1.3rem;
-  color: #333;
-`;
-
-const ProfileRole = styled.div`
-  color: #777;
-  font-size: 1rem;
 `;
 
 const PatientInfoHeader = styled.div`
@@ -275,26 +227,8 @@ const PatientInfoPage = () => {
   return (
     <>
       <PatientPageWrapper>
-        <SidebarBox>
-          <ProfileSection>
-            {userinfo?.profileImageUrl ? (
-              <ProfileImage src={userinfo.profileImageUrl} alt="프로필 이미지" />
-            ) : (
-              <ProfileImage
-                src="https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png"
-                alt="기본 프로필"
-              />
-            )}
-            <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
-            <ProfileRole>환자</ProfileRole>
-          </ProfileSection>
+        <Sidebar />
 
-          <SidebarMenu
-            items={patientSidebarItems}
-            activeKey={'info'}
-            onChange={handleSidebarChange}
-          />
-        </SidebarBox>
         <MainSection>
           <PatientInfoHeader>
             <Name>{user?.name} 님 정보</Name>

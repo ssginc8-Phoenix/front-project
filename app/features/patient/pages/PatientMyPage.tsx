@@ -5,18 +5,12 @@ import { PasswordModal } from '~/features/patient/components/PasswordModal';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import type { User } from '~/types/user';
 import { getUserInfo } from '~/features/patient/api/userAPI';
-// SidebarMenu는 이제 사용하지 않으므로 제거합니다.
-// import SidebarMenu from '~/features/patient/components/SidebarMenu';
-
 // PatientCalendar.tsx에서 가져온 타입과 API를 활용
 import { getPatientCalendar } from '~/features/calendar/api/CalendarAPI';
 import { getMedicationSchedule } from '~/features/medication/api/medicationAPI';
-
 // GuardianPage.tsx에서 가져온 API 및 타입 활용
 import { getGuardians, getPatientInfo } from '~/features/patient/api/patientAPI';
-
-// patientSidebarItems는 버튼을 렌더링하는 데 계속 사용하므로 유지합니다.
-import { patientSidebarItems } from '~/features/patient/constants/sidebarItems';
+import { patientSidebarItems } from '~/constants/sidebarItems';
 
 // === Guardian 타입에 responded_at 추가 ===
 interface Guardian {

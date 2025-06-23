@@ -2,8 +2,8 @@ import styled from 'styled-components';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import GuardianCalendar from '~/features/calendar/components/GuardianCalendar';
 import SidebarMenu from '~/features/guardian/components/SidebarMenu';
-import { guardianSidebarItems } from '~/features/guardian/constants/sidebarItems';
 import { useNavigate } from 'react-router';
+import { guardianSidebarItems } from '~/constants/sidebarItems';
 
 const PageWrapper = styled.div`
   display: flex;

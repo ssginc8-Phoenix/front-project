@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import AppointmentDetailModal from '~/features/appointment/components/detail/AppointmentDetailModal';
 import AppointmentListComponent from '~/features/appointment/components/list/AppointmentList';
+import Sidebar from '~/common/Sidebar';
 
 const AppointmentListPage = () => {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
@@ -12,6 +13,7 @@ const AppointmentListPage = () => {
 
   return (
     <>
+      <Sidebar />
       <AppointmentListComponent
         onSelectAppointment={(id) => setSelectedAppointmentId(id)}
         refreshTrigger={refreshListTrigger}

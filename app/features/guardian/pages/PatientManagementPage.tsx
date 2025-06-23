@@ -1,8 +1,6 @@
 import styled from 'styled-components';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import SidebarMenu from '~/features/guardian/components/SidebarMenu'; // Patient SidebarMenu 사용
-import { guardianSidebarItems } from '~/features/guardian/constants/sidebarItems';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import {
   acceptGuardianInvite,
@@ -10,7 +8,8 @@ import {
   deleteGuardianPatient,
   type PatientSummary,
 } from '~/features/guardian/api/guardianAPI';
-import ReusableModal from '~/features/patient/components/ReusableModal'; // ReusableModal 경로 통일
+import ReusableModal from '~/features/patient/components/ReusableModal';
+import Sidebar from '~/common/Sidebar'; // ReusableModal 경로 통일
 
 // --- 스타일 정의 ---
 const PageWrapper = styled.div`
@@ -101,43 +100,6 @@ const PatientInfo = styled.div`
   color: #555;
 `;
 
-// SidebarBox 스타일 CalendarPage와 통일
-const SidebarBox = styled.div`
-  width: 260px; /* CalendarPage와 동일한 너비 */
-  background: white;
-  border-right: 1px solid #e0e0e0; /* CalendarPage와 동일한 border */
-  padding: 2rem 1rem; /* CalendarPage와 동일한 패딩 */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 0 20px 20px 0; /* CalendarPage와 동일한 border-radius */
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05); /* CalendarPage와 동일한 box-shadow */
-  flex-shrink: 0; /* CalendarPage와 동일 */
-`;
-
-const ProfileSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem; /* CalendarPage와 동일 */
-`;
-
-const ProfileEmoji = styled.div`
-  font-size: 4rem; /* CalendarPage와 동일 */
-  margin-bottom: 0.5rem; /* CalendarPage와 동일 */
-`;
-
-const ProfileName = styled.div`
-  font-weight: bold; /* CalendarPage와 동일 */
-  font-size: 1.3rem; /* CalendarPage와 동일 */
-  color: #333; /* CalendarPage와 유사 */
-`;
-
-const ProfileRole = styled.div`
-  color: #777; /* CalendarPage와 동일 */
-  font-size: 1rem; /* CalendarPage와 동일 */
-`;
-
 const Input = styled.input`
   width: 100%;
   padding: 12px;
@@ -161,16 +123,8 @@ const SubmitButton = styled.button`
   }
 `;
 
-const ProfileImage = styled.img`
-  width: 80px; /* CalendarPage와 동일 */
-  height: 80px; /* CalendarPage와 동일 */
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 8px;
-`;
-
 // --- 컴포넌트 ---
-export const GuardianPatientPage = () => {
+export const PatientManagementPage = () => {
   const [patients, setPatients] = useState<PatientSummary[]>([]);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
@@ -192,10 +146,6 @@ export const GuardianPatientPage = () => {
     };
     fetchData();
   }, [fetchMyInfo]);
-
-  const handleSidebarChange = (key: string) => {
-    navigate(`/guardians/${key}`);
-  };
 
   const maskRRN = (rrn: string) =>
     rrn ? rrn.substring(0, 6) + '-' + rrn.substring(7, 8) + '******' : '';
@@ -235,25 +185,7 @@ export const GuardianPatientPage = () => {
   return (
     <>
       <PageWrapper>
-        <SidebarBox>
-          <ProfileSection>
-            <ProfileImage
-              src={
-                user?.profileImageUrl ??
-                'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png'
-              }
-              alt="프로필 사진"
-            />
-            <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
-            <ProfileRole>보호자</ProfileRole>
-          </ProfileSection>
-
-          <SidebarMenu
-            items={guardianSidebarItems}
-            activeKey="patients"
-            onChange={handleSidebarChange}
-          />
-        </SidebarBox>
+        <Sidebar />
 
         <MainSection>
           <TitleWrapper>
@@ -346,4 +278,4 @@ export const GuardianPatientPage = () => {
   );
 };
 
-export default GuardianPatientPage;
+export default PatientManagementPage;

@@ -185,7 +185,7 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
     if (!hospital) return null;
     setHospitalId(hospital.hospitalId);
     setHospitalName(hospital.name);
-    navigate(`/appointments/request`);
+    navigate(`/appointment`);
   };
 
   if (loading) return <p style={{ textAlign: 'center' }}>로딩 중...</p>;

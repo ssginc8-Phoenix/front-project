@@ -1,9 +1,6 @@
 import styled from 'styled-components';
 import HospitalCalendar from '~/features/calendar/components/HospitalCalendar';
-import useLoginStore from '~/features/user/stores/LoginStore';
-import HospitalSidebarMenu from '~/features/hospitals/components/hospitalAdmin/HospitalSidebarMenu';
-import { hospitalSidebarItems } from '~/features/hospitals/components/constants/hospitalSidebarItems';
-import { useNavigate } from 'react-router';
+import Sidebar from '~/common/Sidebar';
 
 const PageWrapper = styled.div`
   display: flex;
@@ -32,55 +29,11 @@ const ContentWrapper = styled.div`
   flex-direction: column;
 `;
 
-const ProfileSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2.5rem;
-`;
-
-const ProfileEmoji = styled.div`
-  font-size: 3.5rem;
-  margin-bottom: 0.75rem;
-`;
-
-const ProfileName = styled.div`
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: #222;
-`;
-
-const ProfileRole = styled.div`
-  color: #888;
-  font-size: 0.95rem;
-`;
-
 const HospitalCalendarPage = () => {
-  const { user } = useLoginStore();
-  const navigate = useNavigate();
-
-  const handleSidebarChange = (key: string) => {
-    const targetPath = `/hospital/${key}`;
-    if (window.location.pathname === targetPath) {
-      navigate(0); // 새로고침
-    } else {
-      navigate(targetPath);
-    }
-  };
-
   return (
     <PageWrapper>
       <SidebarBox>
-        <ProfileSection>
-          <ProfileEmoji>🏥</ProfileEmoji>
-          <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
-          <ProfileRole>병원 관리자</ProfileRole>
-        </ProfileSection>
-        <HospitalSidebarMenu
-          items={hospitalSidebarItems}
-          activeKey="calendar"
-          onChange={handleSidebarChange}
-        />
+        <Sidebar />
       </SidebarBox>
 
       <ContentWrapper>

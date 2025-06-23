@@ -14,7 +14,7 @@ import { getGuardianPatients } from '~/features/guardian/api/guardianAPI'; // �
 // --- 대시보드 아이템 (기존과 동일)
 const dashboardItems = [
   { label: '환자 관리', icon: '👵️', key: 'patients' },
-  { label: '캘린더 관리', icon: '🗓️', key: 'calendar' },
+  { label: '캘린더', icon: '🗓️', key: 'calendar' },
   { label: '정보 관리', icon: '⚙️', key: 'info' },
   { label: 'Q&A', icon: '💬', key: 'qna' },
   { label: '리뷰 관리', icon: '📝', key: 'review' },

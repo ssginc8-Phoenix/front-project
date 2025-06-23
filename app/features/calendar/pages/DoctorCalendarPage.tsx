@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import DoctorCalendar from '~/features/calendar/components/DoctorCalendar';
-import useLoginStore from '~/features/user/stores/LoginStore';
+import Sidebar from '~/common/Sidebar';
 
 const PageWrapper = styled.div`
   display: flex;
@@ -18,28 +18,6 @@ const SidebarBox = styled.div`
   align-items: center;
 `;
 
-const ProfileSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem;
-`;
-
-const ProfileEmoji = styled.div`
-  font-size: 4rem;
-  margin-bottom: 0.5rem;
-`;
-
-const ProfileName = styled.div`
-  font-weight: bold;
-  font-size: 1.3rem;
-`;
-
-const ProfileRole = styled.div`
-  color: #777;
-  font-size: 1rem;
-`;
-
 const ContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
@@ -47,16 +25,10 @@ const ContentWrapper = styled.div`
 `;
 
 const DoctorCalendarPage = () => {
-  const { user } = useLoginStore();
-
   return (
     <PageWrapper>
       <SidebarBox>
-        <ProfileSection>
-          <ProfileEmoji>🧑‍⚕️</ProfileEmoji>
-          <ProfileName>{user?.name ?? '이름 로딩 중'} 님</ProfileName>
-          <ProfileRole>의사</ProfileRole>
-        </ProfileSection>
+        <Sidebar />
       </SidebarBox>
 
       <ContentWrapper>

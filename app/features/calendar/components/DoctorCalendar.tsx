@@ -49,7 +49,7 @@ const Legend = styled.div`
 const CalendarWrapper = styled.div`
   .react-calendar {
     width: 100%;
-    background: white;
+    background: #fff;
     border-radius: 16px;
     padding: 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
@@ -62,11 +62,12 @@ const CalendarWrapper = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    transition: background 0.2s ease;
   }
   .calendar-day-wrapper {
-    width: 100%;
     display: flex;
     flex-direction: column;
+    width: 100%;
   }
   .calendar-event {
     font-size: 0.7rem;
@@ -80,11 +81,38 @@ const CalendarWrapper = styled.div`
     gap: 4px;
     cursor: pointer;
   }
-  .react-calendar__month-view__days__day:nth-child(7n) {
-    color: black !important;
+  .react-calendar__tile--now {
+    background: #e3f2fd;
+    font-weight: bold;
+  }
+  .react-calendar__tile--active {
+    background: #90caf9 !important;
+    color: #fff;
   }
 `;
 
+/* Modal list styling (보호자 캘린더와 통일) */
+const StyledList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+const StyledItem = styled.li`
+  padding: 1rem;
+  background: #f6f9fe;
+  border-left: 6px solid #2563eb;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+`;
+
+/* ----------------------------- 타입 정의 ----------------------------- */
 interface AppointmentDetail {
   appointmentId: number;
   appointmentTime: string;
@@ -102,55 +130,59 @@ interface AppointmentDetail {
   symptom: string;
 }
 
+/* ----------------------------- 컴포넌트 ----------------------------- */
 export default function DoctorCalendar() {
   const [calendarData, setCalendarData] = useState<Record<string, any[]>>({});
-  const [fullList, setFullList] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeDate, setActiveDate] = useState<Date>(new Date());
+
+  // 모달 관련 state
   const [modalOpen, setModalOpen] = useState(false);
   const [modalItems, setModalItems] = useState<any[]>([]);
-  const [modalDate, setModalDate] = useState<string>('');
-  const [itemDetailOpen, setItemDetailOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [modalDate, setModalDate] = useState('');
+
+  // 상세 정보
+  const [detailOpen, setDetailOpen] = useState(false);
   const [appointmentDetail, setAppointmentDetail] = useState<AppointmentDetail | null>(null);
 
-  const formatDate = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  };
+  /* util */
+  const formatDate = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
+  /* 데이터 로드 */
   useEffect(() => {
     const year = activeDate.getFullYear();
     const month = activeDate.getMonth() + 1;
-
-    const fetchData = async () => {
+    (async () => {
       const res = await getDoctorCalendar(year, month);
-
-      setFullList(res.calendarItems);
-      updateCalendarData(res.calendarItems);
-    };
-    fetchData();
+      const grouped: Record<string, any[]> = {};
+      res.calendarItems.forEach((it: any) => {
+        const key = formatDate(new Date(it.date));
+        (grouped[key] ||= []).push(it);
+      });
+      setCalendarData(grouped);
+    })();
   }, [activeDate]);
 
-  const updateCalendarData = (items: any[]) => {
-    const grouped: Record<string, any[]> = {};
-    items.forEach((item) => {
-      const key = formatDate(new Date(item.date));
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(item);
-    });
-    setCalendarData(grouped);
+  /* 일정 전체 보기 */
+  const openFullList = (dateStr: string) => {
+    setModalDate(dateStr);
+    setModalItems(calendarData[dateStr] || []);
+    setModalOpen(true);
   };
 
-  const handleAppointmentClick = async (item: any) => {
-    setSelectedItem(item);
-    setItemDetailOpen(true);
-    const detail = await getAppointmentDetail(item.relatedId);
-    setAppointmentDetail(detail);
+  /* 예약 상세 보기 */
+  const openDetail = async (item: any) => {
+    try {
+      const detail = await getAppointmentDetail(item.relatedId);
+      setAppointmentDetail(detail);
+      setDetailOpen(true);
+    } catch (err) {
+      console.error('상세 조회 실패', err);
+    }
   };
 
+  /* 캘린더 타일 렌더링 */
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
     const dateStr = formatDate(date);
@@ -158,44 +190,34 @@ export default function DoctorCalendar() {
     if (!items) return null;
 
     return (
-      <div className="calendar-day-wrapper">
+      <div className="calendar-day-wrapper" onClick={() => openFullList(dateStr)}>
         {items.slice(0, 3).map((item, idx) => (
           <div
             key={idx}
             className="calendar-event"
             onClick={(e) => {
-              e.stopPropagation();
-              handleAppointmentClick(item);
+              e.stopPropagation(); // 날짜 셀 클릭 방지
+              openFullList(dateStr);
             }}
           >
             🏥 {item.name} - {item.title}
           </div>
         ))}
         {items.length > 3 && (
-          <div
-            style={{ fontSize: '0.7rem', color: '#888', cursor: 'pointer' }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setModalItems(items);
-              setModalDate(dateStr);
-              setModalOpen(true);
-            }}
-          >
-            +{items.length - 3}개 더보기
-          </div>
+          <div style={{ fontSize: '0.7rem', color: '#888' }}>+{items.length - 3}개 더보기</div>
         )}
       </div>
     );
   };
 
+  /* ----------------------------- JSX ----------------------------- */
   return (
     <PageContainer>
       <ContentBox>
         <Header>
           <Legend>
             <div className="legend-item">
-              <div className="dot appointment-dot" />
-              <span>진료 일정</span>
+              <div className="dot appointment-dot" /> 진료 일정
             </div>
           </Legend>
         </Header>
@@ -204,7 +226,7 @@ export default function DoctorCalendar() {
           <Calendar
             locale="en-US"
             value={selectedDate}
-            onChange={(date) => date instanceof Date && setSelectedDate(date)}
+            onChange={(d) => d instanceof Date && setSelectedDate(d)}
             tileContent={renderTileContent}
             onActiveStartDateChange={({ activeStartDate }) =>
               activeStartDate && setActiveDate(activeStartDate)
@@ -213,37 +235,31 @@ export default function DoctorCalendar() {
         </CalendarWrapper>
       </ContentBox>
 
+      {/* 날짜별 전체 목록 모달 */}
       {modalOpen && (
-        <CommonModal title={modalDate} buttonText="닫기" onClose={() => setModalOpen(false)}>
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        <CommonModal
+          title={`${modalDate} 진료 전체보기`}
+          buttonText="닫기"
+          onClose={() => setModalOpen(false)}
+        >
+          <StyledList>
             {modalItems.map((item, idx) => (
-              <li
-                key={idx}
-                onClick={() => handleAppointmentClick(item)}
-                style={{
-                  padding: '0.5rem',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s',
-                }}
-              >
+              <StyledItem key={idx} onClick={() => openDetail(item)}>
                 🏥 {item.name} - {item.title} ({item.time})
-              </li>
+              </StyledItem>
             ))}
-          </ul>
+          </StyledList>
         </CommonModal>
       )}
 
-      {itemDetailOpen && appointmentDetail && (
+      {/* 예약 상세 모달 */}
+      {detailOpen && appointmentDetail && (
         <CommonModal
           title={`${appointmentDetail.appointmentTime.split('T')[0]} 예약 상세`}
           buttonText="확인"
-          onClose={() => {
-            setItemDetailOpen(false);
-            setAppointmentDetail(null);
-          }}
+          onClose={() => setDetailOpen(false)}
         >
-          <div style={{ textAlign: 'left', lineHeight: '1.6' }}>
+          <div style={{ textAlign: 'left', lineHeight: 1.6 }}>
             <p>
               <strong>환자:</strong> {appointmentDetail.patientName}
             </p>

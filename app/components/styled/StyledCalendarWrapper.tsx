@@ -61,4 +61,19 @@ export const StyledCalendarWrapper = styled.div`
     color: white !important;
     font-weight: 700;
   }
+
+  .react-calendar__tile.non-working-day-calendar {
+    background-color: transparent;
+    color: #c0c0c0;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+
+  /* 선택된 날짜와 휴진일 스타일이 겹칠 경우를 대비 (필요시) */
+  /* 예를 들어, 휴진일인데 실수로 클릭해서 selected-day 클래스가 붙더라도 휴진일 스타일이 우선하도록 */
+  .react-calendar__tile.non-working-day-calendar.selected-day {
+    background-color: #e0e0e0 !important; /* 다른 색상으로 변경하여 구별 */
+    color: #808080 !important;
+    text-decoration: line-through !important;
+  }
 `;

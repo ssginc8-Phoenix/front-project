@@ -57,9 +57,21 @@ const DateTimeSelector = ({ doctorId, patientId }: DateTimeSelectorProps) => {
   // date를 YYYY-MM-DD 문자열로 변환 (useTimeSlots는 string 타입 date 필요)
   const dateString = date ? dayjs(date).format('YYYY-MM-DD') : null;
 
-  // useTimeSlots 훅으로 가능한 시간대 불러오기
-  const { list: timeSlots, loading, error } = useTimeSlots(doctorId, patientId, dateString);
+  // useDoctorSchedule 훅으로 의사의 근무 요일 정보 불러오기
+  const { data: doctorScheduleData, isLoading: isScheduleLoading } = useDoctorSchedule(doctorId);
+  const workingDays = doctorScheduleData?.workingDays || [];
 
+  // 선택한 날짜가 의사의 근무일인지 확인
+  const isDoctorWorkingOnSelectedDate = date ? workingDays.includes(dayjs(date).day()) : false;
+
+  // useTimeSlots 훅으로 가능한 시간대 불러오기
+  const {
+    list: timeSlots,
+    loading,
+    error,
+  } = useTimeSlots(doctorId, patientId, dateString, {
+    enabled: !!doctorId && !!dateString && isDoctorWorkingOnSelectedDate,
+  });
   return (
     <Wrapper>
       <div>
@@ -67,16 +79,25 @@ const DateTimeSelector = ({ doctorId, patientId }: DateTimeSelectorProps) => {
         <SectionTitle>날짜 선택</SectionTitle>
         <StyledCalendarWrapper>
           <Calendar
-            onChange={(date) => {
-              setDate(date as Date);
+            onChange={(selectedDate) => {
+              setDate(selectedDate as Date);
               setTime('');
             }}
             value={date}
             minDate={new Date()}
             calendarType="gregory"
             tileClassName={({ date: d, view }) => {
-              if (view === 'month' && date) {
+              if (view === 'month') {
+                // 1. 현재 선택된 날짜 강조
                 if (dayjs(d).isSame(date, 'day')) return 'selected-day';
+
+                if (
+                  !isScheduleLoading &&
+                  doctorScheduleData &&
+                  !workingDays.includes(dayjs(d).day())
+                ) {
+                  return 'non-working-day-calendar';
+                }
               }
               return '';
             }}
@@ -87,7 +108,9 @@ const DateTimeSelector = ({ doctorId, patientId }: DateTimeSelectorProps) => {
       {date && (
         <div>
           <SectionTitle>시간 선택</SectionTitle>
-          {loading ? (
+          {!isDoctorWorkingOnSelectedDate ? (
+            <p>해당 날자는 휴진일입니다.</p>
+          ) : loading ? (
             <p>시간 정보를 불러오는 중...</p>
           ) : error ? (
             <p>오류가 발생했습니다: {error}</p>

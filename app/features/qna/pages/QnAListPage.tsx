@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import styled from 'styled-components';
-import Pagination from '~/components/common/Pagination';
 
+import Sidebar from '~/common/Sidebar';
+import Pagination from '~/components/common/Pagination';
 import { useMyAppointmentList } from '../hooks/useMyAppointmentList';
 import type { AppointmentList, Appointment } from '~/types/appointment';
 import QaChatModal from '~/features/qna/component/QaChatModal';
@@ -14,7 +15,7 @@ interface AppointmentWithQna extends Appointment {
   qnaStatus: 'PENDING' | 'COMPLETED';
 }
 
-export default function QnAListPage() {
+const QnAListPage = () => {
   const [page, setPage] = useState(0);
   const size = 4;
 
@@ -34,6 +35,7 @@ export default function QnAListPage() {
 
   useEffect(() => {
     if (!listPage) return;
+
     setLoadingDetails(true);
     setErrorDetails(null);
 
@@ -46,7 +48,6 @@ export default function QnAListPage() {
             })
             .then((res) => res.data);
 
-          // QnA 상태 따로 조회
           let qnaStatus: 'PENDING' | 'COMPLETED' = 'PENDING';
           try {
             const qna = await axios
@@ -55,23 +56,19 @@ export default function QnAListPage() {
               })
               .then((res) => res.data);
 
-            if (qna?.status === 'COMPLETED') {
-              qnaStatus = 'COMPLETED';
-            }
-          } catch (err) {
-            // QnA 없거나 204 No Content 시 무시하고 PENDING 유지
-          }
+            if (qna?.status === 'COMPLETED') qnaStatus = 'COMPLETED';
+          } catch {}
 
           return { ...appointment, qnaStatus };
-        } catch (e) {
-          console.error('상세 조회 실패:', e);
+        } catch (err) {
+          console.error('상세 조회 실패:', err);
           return null;
         }
       }),
     )
       .then((results) => setItems(results.filter(Boolean) as AppointmentWithQna[]))
-      .catch((e) => {
-        console.error(e);
+      .catch((err) => {
+        console.error(err);
         setErrorDetails('세부 정보 로드 중 오류가 발생했습니다.');
       })
       .finally(() => setLoadingDetails(false));
@@ -81,11 +78,10 @@ export default function QnAListPage() {
     try {
       await deleteQaPost(qnaId);
       await refetch();
-    } catch (e) {
-      console.error('질문 삭제 실패:', e);
+    } catch (err) {
+      console.error('질문 삭제 실패:', err);
     }
   };
-
   const handleAndCloseDelete = async () => {
     if (confirmId === null) return;
     await handleDelete(confirmId);
@@ -98,94 +94,111 @@ export default function QnAListPage() {
   if (errorDetails) return <CenterText>{errorDetails}</CenterText>;
 
   return (
-    <PageWrapper>
-      <Header>
-        <Title>💬Q&A</Title>
-      </Header>
-      <Divider />
+    <Layout>
+      <Sidebar />
 
-      {items.length > 0 ? (
-        <List>
-          {items.map((appt) => {
-            if (!appt.question) return null;
+      {/* 오른쪽 본문 */}
+      <Content>
+        <Header>
+          <Title>💬 Q&A</Title>
+        </Header>
+        <Divider />
 
-            const qnaStatus = appt.qnaStatus === 'COMPLETED' ? '답변완료' : '대기중';
-            const questionContent = appt.question;
+        {items.length > 0 ? (
+          <List>
+            {items.map((appt) => {
+              if (!appt.question) return null;
 
-            return (
-              <Card key={appt.appointmentId} onClick={() => setOpenId(appt.appointmentId)}>
-                <DeleteBtn
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setConfirmId(appt.appointmentId);
-                  }}
-                  title="질문 삭제"
-                >
-                  x
-                </DeleteBtn>
+              const qnaStatus = appt.qnaStatus === 'COMPLETED' ? '답변완료' : '대기중';
+              return (
+                <Card key={appt.appointmentId} onClick={() => setOpenId(appt.appointmentId)}>
+                  <DeleteBtn
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setConfirmId(appt.appointmentId);
+                    }}
+                    title="질문 삭제"
+                  >
+                    ×
+                  </DeleteBtn>
 
-                <HospitalName>{appt.hospitalName}</HospitalName>
-                <DoctorName>{appt.doctorName} 의사</DoctorName>
-                <MetaInfo>
-                  {format(new Date(appt.appointmentTime), 'yyyy.MM.dd')}{' '}
-                  {maskName(appt.patientName)} 방문
-                </MetaInfo>
-                <Badge $status={qnaStatus}>{qnaStatus}</Badge>
-                <QuestionText>{questionContent}</QuestionText>
-              </Card>
-            );
-          })}
-        </List>
-      ) : (
-        <CenterText>질문이 없습니다.</CenterText>
-      )}
+                  <HospitalName>{appt.hospitalName}</HospitalName>
+                  <DoctorName>{appt.doctorName} 의사</DoctorName>
+                  <MetaInfo>
+                    {format(new Date(appt.appointmentTime), 'yyyy.MM.dd')}{' '}
+                    {maskName(appt.patientName)} 방문
+                  </MetaInfo>
+                  <Badge $status={qnaStatus}>{qnaStatus}</Badge>
+                  <QuestionText>{appt.question}</QuestionText>
+                </Card>
+              );
+            })}
+          </List>
+        ) : (
+          <CenterText>질문이 없습니다.</CenterText>
+        )}
 
-      <PaginationContainer>
-        <Pagination
-          currentPage={page}
-          totalPages={listPage.totalPages}
-          onPageChange={(newPage) => setPage(newPage)}
-        />
-      </PaginationContainer>
+        <PaginationContainer>
+          <Pagination
+            currentPage={page}
+            totalPages={listPage.totalPages}
+            onPageChange={(newPage) => setPage(newPage)}
+          />
+        </PaginationContainer>
+      </Content>
 
+      {/* 모달들 */}
       {openId !== null && (
         <QaChatModal qnaId={openId} onClose={() => setOpenId(null)} showInput={false} />
       )}
-
       {confirmId !== null && (
         <CommonModal title="질문 삭제" buttonText="삭제" onClose={handleAndCloseDelete}>
           이 질문을 정말 삭제하시겠습니까?
         </CommonModal>
       )}
-    </PageWrapper>
+    </Layout>
   );
-}
+};
+
+export default QnAListPage;
 
 function maskName(name: string) {
   if (!name || name.length < 2) return name;
   return name[0] + '*'.repeat(name.length - 1);
 }
 
-const PageWrapper = styled.div`
-  max-width: 800px;
-  margin: 0 auto;
+const Layout = styled.div`
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+`;
+
+const Content = styled.main`
+  flex: 1;
   padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Header = styled.div`
+  text-align: center;
+  margin-bottom: 1rem;
 `;
 
 const Title = styled.h1`
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 1.6rem;
+  font-weight: 700;
   color: #00499e;
-  text-align: center;
 `;
 
-const CenterText = styled.p`
-  text-align: center;
-  color: #6b7280;
-  margin: 2rem 0;
+const Divider = styled.hr`
+  margin: 0.75rem 0 2rem;
 `;
 
 const List = styled.div`
+  width: 100%;
+  max-width: 1000px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -196,8 +209,7 @@ const Card = styled.div`
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
-  padding: 1rem;
-  text-align: left;
+  padding: 1.25rem;
   cursor: pointer;
   transition:
     transform 0.1s ease,
@@ -205,7 +217,7 @@ const Card = styled.div`
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 `;
 
@@ -215,9 +227,9 @@ const DeleteBtn = styled.button`
   right: 0.5rem;
   background: none;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  opacity: 0.6;
+  opacity: 0.65;
 
   &:hover {
     opacity: 1;
@@ -225,14 +237,14 @@ const DeleteBtn = styled.button`
 `;
 
 const HospitalName = styled.div`
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: #6b7280;
 `;
 
 const DoctorName = styled.div`
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  margin: 0.25rem 0;
+  margin: 0.2rem 0 0.4rem;
 `;
 
 const MetaInfo = styled.div`
@@ -247,8 +259,8 @@ const QuestionText = styled.p`
 
 const Badge = styled.span<{ $status: string }>`
   font-size: 0.75rem;
-  font-weight: bold;
-  background-color: ${({ $status }) => ($status === '답변완료' ? '#d1fae5' : '#e0f2fe')};
+  font-weight: 600;
+  background: ${({ $status }) => ($status === '답변완료' ? '#d1fae5' : '#e0f2fe')};
   color: ${({ $status }) => ($status === '답변완료' ? '#065f46' : '#0369a1')};
   padding: 0.25rem 0.5rem;
   border-radius: 9999px;
@@ -258,14 +270,13 @@ const Badge = styled.span<{ $status: string }>`
 const PaginationContainer = styled.div`
   display: flex;
   justify-content: center;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
 `;
 
-const Divider = styled.hr`
-  margin: 1rem 0;
-`;
-
-const Header = styled.div`
-  text-align: center;
-  margin-bottom: 1rem;
+const CenterText = styled.p`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
 `;

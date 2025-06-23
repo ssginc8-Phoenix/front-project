@@ -16,6 +16,8 @@ const Card = styled.div`
   justify-content: space-between;
   min-height: 180px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  background-color: white;
+  max-width: 380px;
 `;
 
 const TopRow = styled.div`

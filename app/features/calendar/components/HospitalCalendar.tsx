@@ -86,12 +86,13 @@ const CalendarWrapper = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    transition: background 0.2s ease;
   }
 
   .calendar-day-wrapper {
-    width: 100%;
     display: flex;
     flex-direction: column;
+    width: 100%;
   }
 
   .calendar-event {
@@ -106,8 +107,35 @@ const CalendarWrapper = styled.div`
     gap: 4px;
     cursor: pointer;
   }
-  .react-calendar__month-view__days__day:nth-child(7n) {
-    color: black !important;
+
+  .react-calendar__tile--now {
+    background: #e3f2fd;
+    font-weight: bold;
+  }
+
+  .react-calendar__tile--active {
+    background: #90caf9 !important;
+    color: white;
+  }
+`;
+
+const StyledList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+const StyledItem = styled.li`
+  padding: 1rem;
+  background: #f6f9fe;
+  border-left: 6px solid #2563eb;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   }
 `;
 
@@ -139,20 +167,17 @@ export default function HospitalCalendar() {
   const [modalItems, setModalItems] = useState<any[]>([]);
   const [modalDate, setModalDate] = useState<string>('');
   const [itemDetailOpen, setItemDetailOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [appointmentDetail, setAppointmentDetail] = useState<AppointmentDetail | null>(null);
 
   useEffect(() => {
     const year = activeDate.getFullYear();
     const month = activeDate.getMonth() + 1;
-
     const fetchData = async () => {
       const res = await getHospitalCalendar(year, month);
       setFullList(res.calendarItemLists);
       setDoctorNames(res.calendarItemLists.map((d: any) => d.name));
       updateCalendarData(res.calendarItemLists, '전체');
     };
-
     fetchData();
   }, [activeDate]);
 
@@ -174,12 +199,18 @@ export default function HospitalCalendar() {
     setCalendarData(grouped);
   };
 
+  const openFullList = (dateStr: string) => {
+    const items = calendarData[dateStr] || [];
+    setModalItems(items);
+    setModalDate(dateStr);
+    setModalOpen(true);
+  };
+
   const handleAppointmentClick = async (item: any) => {
-    setSelectedItem(item);
-    setItemDetailOpen(true);
     try {
       const detail = await getAppointmentDetail(item.relatedId);
       setAppointmentDetail(detail);
+      setItemDetailOpen(true);
     } catch (error) {
       console.error('예약 상세 조회 실패:', error);
     }
@@ -187,40 +218,28 @@ export default function HospitalCalendar() {
 
   const renderTileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return null;
-
     const kstOffsetMs = 9 * 60 * 60 * 1000;
     const localDate = new Date(date.getTime() + kstOffsetMs);
     const dateStr = localDate.toISOString().split('T')[0];
-
     const items = calendarData[dateStr];
     if (!items) return null;
 
     return (
-      <div className="calendar-day-wrapper">
+      <div className="calendar-day-wrapper" onClick={() => openFullList(dateStr)}>
         {items.slice(0, 3).map((item, idx) => (
           <div
             key={idx}
             className="calendar-event"
             onClick={(e) => {
-              e.stopPropagation();
-              handleAppointmentClick(item);
+              e.stopPropagation(); // prevent date select
+              openFullList(dateStr);
             }}
           >
             🏥 {item.name} - {item.title}
           </div>
         ))}
         {items.length > 3 && (
-          <div
-            style={{ fontSize: '0.7rem', color: '#888', cursor: 'pointer' }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setModalItems(items);
-              setModalDate(dateStr);
-              setModalOpen(true);
-            }}
-          >
-            +{items.length - 3}개 더보기
-          </div>
+          <div style={{ fontSize: '0.7rem', color: '#888' }}>+{items.length - 3}개 더보기</div>
         )}
       </div>
     );
@@ -264,14 +283,12 @@ export default function HospitalCalendar() {
         <CalendarWrapper>
           <Calendar
             locale="en-US"
-            onChange={(date) => {
-              if (date instanceof Date) setSelectedDate(date);
-            }}
             value={selectedDate}
+            onChange={(d) => d instanceof Date && setSelectedDate(d)}
             tileContent={renderTileContent}
-            onActiveStartDateChange={({ activeStartDate }) => {
-              if (activeStartDate) setActiveDate(activeStartDate);
-            }}
+            onActiveStartDateChange={({ activeStartDate }) =>
+              activeStartDate && setActiveDate(activeStartDate)
+            }
           />
         </CalendarWrapper>
       </ContentBox>
@@ -282,24 +299,13 @@ export default function HospitalCalendar() {
           buttonText="닫기"
           onClose={() => setModalOpen(false)}
         >
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+          <StyledList>
             {modalItems.map((item, idx) => (
-              <li
-                key={idx}
-                onClick={() => handleAppointmentClick(item)}
-                style={{
-                  marginBottom: '0.5rem',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '6px',
-                  transition: 'background 0.2s',
-                }}
-              >
+              <StyledItem key={idx} onClick={() => handleAppointmentClick(item)}>
                 🏥 {item.name} - {item.title} ({item.time})
-              </li>
+              </StyledItem>
             ))}
-          </ul>
+          </StyledList>
         </CommonModal>
       )}
 

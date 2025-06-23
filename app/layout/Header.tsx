@@ -5,15 +5,26 @@ import { Link } from 'react-router-dom';
 import NotificationComponent from '~/features/notification/components/NotificationComponent';
 
 const HeaderBar = styled.header`
-  padding: 1rem 2rem;
+  padding: 1rem 3rem;
   border-bottom: 1px solid #eee;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+`;
+
+const HeaderContent = styled.div`
+  width: 100%;
+  max-width: 1200px; /* MainLayout의 max-width와 동일하게 설정 */
+  display: flex;
+  justify-content: space-between; /* 내부 컨텐츠는 양 끝 정렬 */
   align-items: center;
 `;
 
 const LogoLink = styled(Link)`
   width: 10%;
+  min-width: 80px;
+  max-width: 120px;
 `;
 
 const LogoImage = styled.img`
@@ -48,22 +59,24 @@ const Header = () => {
 
   return (
     <HeaderBar>
-      <LogoLink to="/">
-        <LogoImage src="/logo.png" alt="logo" />
-      </LogoLink>
-      <RightGroup>
-        {user ? (
-          <>
-            <NotificationComponent />
-            <Profile name={user.name} imageUrl={user.profileImageUrl} />
-          </>
-        ) : (
-          <>
-            <AuthButton href="/login">로그인</AuthButton>
-            <AuthButton href="/signup">회원가입</AuthButton>
-          </>
-        )}
-      </RightGroup>
+      <HeaderContent>
+        <LogoLink to="/">
+          <LogoImage src="/logo.png" alt="logo" />
+        </LogoLink>
+        <RightGroup>
+          {user ? (
+            <>
+              <NotificationComponent />
+              <Profile name={user.name} imageUrl={user.profileImageUrl} />
+            </>
+          ) : (
+            <>
+              <AuthButton href="/login">로그인</AuthButton>
+              <AuthButton href="/signup">회원가입</AuthButton>
+            </>
+          )}
+        </RightGroup>
+      </HeaderContent>
     </HeaderBar>
   );
 };

@@ -10,19 +10,26 @@ const links: LinkItem[] = [{ name: 'Home', url: '/' }];
 
 const FooterBar = styled.footer`
   width: 100%;
-  padding: 2rem 2rem;
+  padding: 2rem 1rem;
   background-color: #243345;
   color: #fff;
+  display: flex;
+  justify-content: center;
+`;
 
+const FooterContent = styled.div`
+  width: 100%;
+  max-width: 1200px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 1rem;
 `;
 
 const LinksRow = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.5rem;
   justify-content: center;
 `;
 
@@ -43,11 +50,11 @@ const InfoText = styled.p`
   font-size: 0.8125rem;
   line-height: 1.5;
   color: #ddd;
-  text-align: left;
+  text-align: center;
 `;
 
 const CopyrightText = styled.p`
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   font-size: 0.875rem;
   color: #ccc;
 `;
@@ -55,21 +62,23 @@ const CopyrightText = styled.p`
 function Footer() {
   return (
     <FooterBar>
-      <LinksRow>
-        {links.map(({ name, url }) => (
-          <LinkButton key={url} to={url}>
-            {name}
-          </LinkButton>
-        ))}
-      </LinksRow>
+      <FooterContent>
+        <LinksRow>
+          {links.map(({ name, url }) => (
+            <LinkButton key={url} to={url}>
+              {name}
+            </LinkButton>
+          ))}
+        </LinksRow>
 
-      <InfoText>
-        상호명: (주)닥투게더 · 주소: 부산광역시 해운대구 우동 1514
-        <br />
-        고객센터: 1599-1598 · 이메일: support@docto.com
-      </InfoText>
+        <InfoText>
+          상호명: (주)DocTogether · 주소: 부산광역시 해운대구 우동 1514
+          <br />
+          고객센터: 1599-1598 · 이메일: support@docto.com
+        </InfoText>
 
-      <CopyrightText>© 2025 DocTo</CopyrightText>
+        <CopyrightText>© 2025 DocTo</CopyrightText>
+      </FooterContent>
     </FooterBar>
   );
 }

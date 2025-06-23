@@ -279,6 +279,16 @@ export default function GuardianCalendar() {
     fetchData(activeDate);
   }, [activeDate]);
 
+  const mealLabel = (meal: string) => {
+    const map: Record<string, string> = {
+      morning: '아침',
+      lunch: '점심',
+      dinner: '저녁',
+      etc: '기타',
+    };
+    return map[meal] ?? meal;
+  };
+
   const updateCalendarData = (lists: any[], name: string) => {
     const flat = lists.flatMap(({ name: pname, patientGuardianId, calendarItems }: any) =>
       name === '전체'
@@ -298,6 +308,7 @@ export default function GuardianCalendar() {
       setSelectedItem({ ...item, ...detail });
     } else {
       setSelectedItem(item);
+      console.log(selectedItem);
     }
     setItemDetailOpen(true);
   };
@@ -486,10 +497,47 @@ export default function GuardianCalendar() {
         {itemDetailOpen && selectedItem && (
           <CommonModal
             title={`${selectedItem.date} 상세정보`}
-            buttonText=""
+            buttonText="확인"
             onClose={() => setItemDetailOpen(false)}
           >
-            {/*여기에 상세정보 + 수정/삭제 버튼*/}
+            <div style={{ textAlign: 'left', lineHeight: '1.6' }}>
+              {selectedItem.itemType === 'MEDICATION' ? (
+                <>
+                  <p>
+                    <strong>환자 이름:</strong> {selectedItem.name}
+                  </p>
+                  <p>
+                    <strong>복약 이름:</strong> {selectedItem.title}
+                  </p>
+                  <p>
+                    <strong>복약 기간:</strong> {selectedItem.startDate} ~ {selectedItem.endDate}
+                  </p>
+                  <p>
+                    <strong>복용 시간:</strong>{' '}
+                    {selectedItem.times && selectedItem.times.length > 0
+                      ? selectedItem.times
+                          .map(
+                            (t: { meal: string; time: string }) =>
+                              `${mealLabel(t.meal)} ${t.time.slice(0, 5)}`,
+                          )
+                          .join(', ')
+                      : '시간 정보 없음'}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    <strong>환자:</strong> {selectedItem.name}
+                  </p>
+                  <p>
+                    <strong>진료일:</strong> {selectedItem.date}
+                  </p>
+                  <p>
+                    <strong>시간:</strong> {selectedItem.time}
+                  </p>
+                </>
+              )}
+            </div>
           </CommonModal>
         )}
       </ContentBox>

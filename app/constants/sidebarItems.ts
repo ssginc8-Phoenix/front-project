@@ -17,7 +17,7 @@ export const patientSidebarItems: SidebarItem[] = [
 ];
 
 export const guardianSidebarItems = [
-  { label: '환자 관리', key: 'patients', icon: '🧑‍💼' },
+  { label: '환자 관리', key: 'patient', icon: '🧑‍💼' },
   { label: '예약 관리', key: 'appointment', icon: '📋' },
   { label: '캘린더', key: 'calendar', icon: '🗓️' },
   { label: '리뷰 관리', key: 'review', icon: '✏️' },

@@ -31,13 +31,13 @@ const features = [
     title: '주변 병원',
     desc: '근처 병원을 살펴보세요',
     icon: '/location.png',
-    route: '/hospitals/search',
+    route: '/hospital/search',
   },
   {
     title: '예약 관리',
     desc: '예약·대기 현황을 관리하세요',
     icon: '/appointment.png',
-    route: '/appointments/list',
+    route: '/appointments',
   },
   {
     title: '캘린더',

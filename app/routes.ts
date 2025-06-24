@@ -17,6 +17,7 @@ export default [
   route('/sandbox/fail', 'routes/payments/fail.tsx'),
 
   route('hospital', 'layout/MapLayout.tsx', [
+    route(':hospitalId', 'routes/hospital/hospitalDetail.tsx'),
     route('search', 'routes/hospital/hospitalSearch.tsx'),
   ]),
 

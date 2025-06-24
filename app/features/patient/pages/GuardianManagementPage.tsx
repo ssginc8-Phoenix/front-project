@@ -87,6 +87,8 @@ const GuardianManagementPage: React.FC = () => {
       if (p?.patientId) {
         const list = await getGuardians(p.patientId);
         setGuardians(list);
+
+        console.log(list);
       }
     })();
   }, [fetchMyInfo]);

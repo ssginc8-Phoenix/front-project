@@ -40,6 +40,30 @@ export const getAppointmentList = async (page: number, size: number, date?: stri
 };
 
 /**
+ * 활성화된 예약 리스트 조회 (로그인한 유저의)
+ */
+export const getActiveAppointmentList = async (page: number, size: number, date?: string) => {
+  const res = await axios.get(`http://localhost:8080/api/v1/users/me/appointments/active`, {
+    withCredentials: true,
+    params: { page, size, date },
+  });
+
+  return res.data;
+};
+
+/**
+ * 비활성화된 예약 리스트 조회 (로그인한 유저의)
+ */
+export const getInactiveAppointmentList = async (page: number, size: number, date?: string) => {
+  const res = await axios.get(`http://localhost:8080/api/v1/users/me/appointments/inactive`, {
+    withCredentials: true,
+    params: { page, size, date },
+  });
+
+  return res.data;
+};
+
+/**
  * 예약 가능한 시간 슬롯 리스트 조회 (로그인한 유저의)
  */
 export const getAvailableTimeSlots = async (doctorId: number, patientId: number, date: string) => {

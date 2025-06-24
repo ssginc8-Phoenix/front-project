@@ -8,7 +8,7 @@ import type {
   Page,
   ReviewAllListResponse,
 } from '~/features/reviews/types/review';
-import { HospitalReviewCard } from '~/features/reviews/component/common/HospitalReviewCard';
+import { HospitalReviewCard } from '~/features/reviews/component/list/HospitalReviewCard';
 
 export default function ReviewAdminPage() {
   const [page, setPage] = useState(0);

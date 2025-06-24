@@ -8,7 +8,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import ChatBotComponent from '~/features/chatbot/components/ChatBotComponent';
 import { useMyHospitalId } from '~/features/hospitals/hooks/useMyHospitalId';
-import ReviewSummaryCard from '~/features/reviews/component/common/ReviewSummaryCard';
+import ReviewSummaryCard from '~/features/reviews/component/summary/ReviewSummaryCard';
 
 const ads = ['new_banner.png', 'new_banner.png', 'new_banner.png'];
 

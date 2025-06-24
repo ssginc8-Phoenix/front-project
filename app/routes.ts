@@ -10,12 +10,6 @@ export default [
   route('/reset-password', 'routes/passwordResetVerify.tsx'),
   route('/reset-password/set', 'routes/resetPassword.tsx'),
 
-  /** 결제  */
-  route('/payments/request', 'routes/payments/paymentRequest.tsx'),
-  route('/payments/history', 'routes/payments/paymentHistory.tsx'),
-  route('/sandbox/success', 'routes/payments/success.tsx'),
-  route('/sandbox/fail', 'routes/payments/fail.tsx'),
-
   route('hospital', 'layout/MapLayout.tsx', [
     route(':hospitalId', 'routes/hospital/hospitalDetail.tsx'),
     route('search', 'routes/hospital/hospitalSearch.tsx'),
@@ -39,6 +33,12 @@ export default [
     route('info', 'routes/info.tsx'),
     route('schedule', 'routes/doctor/doctorSchedule.tsx'),
     route('chart', 'routes/hospital/hospitalAdminChart.tsx'),
+
+    /** 결제  */
+    route('/payments/request', 'routes/payments/paymentRequest.tsx'),
+    route('/payments/history', 'routes/payments/paymentHistory.tsx'),
+    route('/sandbox/success', 'routes/payments/success.tsx'),
+    route('/sandbox/fail', 'routes/payments/fail.tsx'),
 
     /** 예약 요청 */
     route('appointment', 'routes/appointment/appointmentRequest.tsx'),

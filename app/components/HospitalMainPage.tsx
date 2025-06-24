@@ -11,7 +11,7 @@ import ReviewSummaryCard from '~/features/reviews/component/common/ReviewSummary
 const ads = ['H_Banner.png', '/ads/ad2.png', '/ads/ad3.png'];
 
 const features = [
-  { title: '', route: '/hospitals/search', icon: '/location.png' },
+  { title: '주변 병원', route: '/hospitals/search', icon: '/location.png' },
   { title: '예약 관리', route: '/appointments/dashboard', icon: '/appointment.png' },
   { title: '서류 발급', route: '/documents', icon: '/document.png' },
 ];

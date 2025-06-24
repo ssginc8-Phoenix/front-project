@@ -91,7 +91,7 @@ const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
     // 리뷰 작성 완료되면 바로 리뷰관리 페이지로 이동
     setTimeout(() => {
       setShowSuccessAlert(false);
-      navigate('/reviews/me');
+      navigate('/review');
     }, 1500);
   };
 

@@ -136,6 +136,7 @@ const GuardianManagementPage: React.FC = () => {
       setPatientInfo(p);
       if (p?.patientId) {
         await reloadAll(p.patientId);
+
       }
     })();
   }, [fetchMyInfo]);

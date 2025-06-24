@@ -8,6 +8,7 @@ const Wrapper = styled.div`
   width: 100%;
   display: flex;
   justify-content: center;
+  margin-top: 2rem;
 `;
 
 const ContentBox = styled.div`
@@ -116,7 +117,7 @@ const SuccessPage = () => {
               </ResponseRow>
             </ResponseSection>
             <ButtonGroup>
-              <StyledButton onClick={() => navigate('/appointments/list')}>
+              <StyledButton onClick={() => navigate('/appointments')}>
                 예약 관리 페이지로 이동
               </StyledButton>
             </ButtonGroup>

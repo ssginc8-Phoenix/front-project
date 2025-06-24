@@ -31,7 +31,6 @@ const PaymentRequestPage = () => {
 
   return (
     <>
-      <Header />
       <Container>
         {appointment && <PaymentForm appointment={appointment} onSubmit={handleSubmit} />}
       </Container>

@@ -10,12 +10,12 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
   padding-top: 100px;
+  margin-bottom: 10rem;
 `;
 
 const LoginPage = () => {
   return (
     <>
-      <Header />
       <Wrapper>
         <LoginForm />
         <LoginHelperLinks />

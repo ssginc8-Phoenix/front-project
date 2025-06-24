@@ -151,7 +151,6 @@ const DoctorRegistrationPage = () => {
 
   return (
     <PageBackground>
-      <Header />
       <Wrapper>
         <Title>의사 등록</Title>
         {doctors.map((doctor, index) => (

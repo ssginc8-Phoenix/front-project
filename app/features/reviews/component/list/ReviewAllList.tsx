@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ReviewAllListResponse } from '../types/review';
+import type { ReviewAllListResponse } from '../../types/review';
 
 interface Props {
   reviews: ReviewAllListResponse[];

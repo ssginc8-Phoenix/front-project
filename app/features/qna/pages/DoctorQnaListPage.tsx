@@ -87,68 +87,84 @@ export const DoctorQnaListPage: React.FC = () => {
 };
 
 const Container = styled.div`
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 40px 20px;
 `;
 
 const Header = styled.h2`
+  font-size: 2rem;
+  font-weight: bold;
   text-align: center;
-  margin-bottom: 16px;
+  color: #222;
+  margin-bottom: 2rem;
 `;
 
 const Centered = styled.p`
   text-align: center;
-  color: #666;
-  margin: 48px 0;
+  color: #888;
+  font-size: 1rem;
+  margin: 80px 0;
 `;
 
 const TabBar = styled.div`
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
 `;
 
 const Tab = styled.button<{ active: boolean }>`
-  flex: 1;
-  padding: 8px 0;
+  padding: 10px 24px;
+  border-radius: 999px;
   border: none;
-  cursor: pointer;
-  background: ${({ active }) => (active ? '#00499e' : '#f0f0f0')};
+  font-size: 1rem;
+  font-weight: ${({ active }) => (active ? '700' : '500')};
+  background-color: ${({ active }) => (active ? '#005fcc' : '#f1f3f5')};
   color: ${({ active }) => (active ? '#fff' : '#333')};
-  font-weight: ${({ active }) => (active ? 'bold' : 'normal')};
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ active }) => (active ? '#004da8' : '#e4e7ea')};
+  }
 `;
 
 const List = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 `;
 
 const Card = styled.div`
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 24px 28px;
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   cursor: pointer;
-  transition: box-shadow 0.2s ease;
+  transition: all 0.2s ease;
+  text-align: left;
+
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
   }
 `;
 
 const Snippet = styled.p`
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-size: 1rem;
-  color: #333;
+  font-weight: 500;
+  color: #222;
+  line-height: 1.5;
 `;
 
 const Meta = styled.div`
-  font-size: 0.75rem;
-  color: #888;
+  font-size: 0.85rem;
+  color: #999;
 `;
 
 const PaginationWrapper = styled.div`
   display: flex;
   justify-content: center;
-  margin-top: 2rem;
+  margin-top: 3rem;
 `;

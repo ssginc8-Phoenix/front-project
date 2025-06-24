@@ -56,12 +56,10 @@ export default function Footer() {
 
 const FooterBar = styled.footer`
   width: 100%;
-  padding: 2rem 1rem;
   background: #243345;
   color: #fff;
   display: flex;
   justify-content: center;
-  box-sizing: border-box;
 `;
 
 const FooterContent = styled.div`

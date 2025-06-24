@@ -6,7 +6,7 @@ import Button from '~/components/styled/Button';
 import { RefreshButton } from '~/components/styled/RefreshButton';
 import { FiRefreshCw } from 'react-icons/fi';
 import { useAppointmentActions } from '~/features/appointment/hooks/useAppointmentActions';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 import dayjs from 'dayjs';
 import DateTimeSelectorModal from '~/features/appointment/components/detail/DateTimeSelectorModal';
@@ -85,6 +85,7 @@ const InfoText = styled.p`
 const ButtonGroup = styled.div`
   display: flex;
   justify-content: center;
+  gap: 1rem;
   margin-top: 2rem;
 `;
 
@@ -116,12 +117,32 @@ const AppointmentDetailModal = ({
 
   const canModify = appointment?.status === 'REQUESTED' || appointment?.status === 'CONFIRMED';
 
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // 모달 내부를 클릭한 것이 아닌 경우 onClose 호출
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
   /** 예약 취소 */
   const handleCancel = async () => {
     if (!appointment) return;
     const success = await cancelAppointment(appointment.appointmentId);
     if (success) {
       onRefreshList();
+      onClose();
     }
   };
 
@@ -142,13 +163,25 @@ const AppointmentDetailModal = ({
       refetch();
       setDateTimeSelectorModalOpen(false);
       onRefreshList();
+      onClose();
+    }
+  };
+
+  const getPaymentMethodInKorean = (method: string) => {
+    switch (method) {
+      case 'ONSITE':
+        return '현장 수납';
+      case 'ONLINE':
+        return '앱 내 결제';
+      default:
+        return method;
     }
   };
 
   return (
     <>
       <Overlay>
-        <Modal>
+        <Modal ref={modalRef}>
           {isLoading && <LoadingIndicator />}
           {error && <ErrorMessage message={error.message} />}
 
@@ -212,7 +245,7 @@ const AppointmentDetailModal = ({
 
               <Section>
                 <SectionTitle>수납 방법</SectionTitle>
-                <InfoText>{appointment.paymentType}</InfoText>
+                <InfoText>{getPaymentMethodInKorean(appointment.paymentType)}</InfoText>
               </Section>
 
               {canModify && (

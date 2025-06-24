@@ -61,8 +61,8 @@ const DoctorRegistrationPage = () => {
     { email: '', password: '', name: '', phone: '', specialization: '' },
   ]);
   const [emailCheckResults, setEmailCheckResults] = useState<
-    { success: boolean; message: string }[]
-  >([{ success: false, message: '' }]);
+    { success: boolean; message: string; checked: boolean }[]
+  >([{ success: false, message: '', checked: false }]);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
@@ -78,6 +78,12 @@ const DoctorRegistrationPage = () => {
     const updated = [...doctors];
     updated[index][field] = value;
     setDoctors(updated);
+
+    if (field === 'email') {
+      const updatedChecks = [...emailCheckResults];
+      updatedChecks[index] = { success: false, message: '', checked: false };
+      setEmailCheckResults(updatedChecks);
+    }
   };
 
   const handleAddDoctor = () => {
@@ -85,7 +91,7 @@ const DoctorRegistrationPage = () => {
       ...prev,
       { email: '', password: '', name: '', phone: '', specialization: '' },
     ]);
-    setEmailCheckResults((prev) => [...prev, { success: false, message: '' }]);
+    setEmailCheckResults((prev) => [...prev, { success: false, message: '', checked: false }]);
   };
 
   const handleRemove = (index: number) => {
@@ -98,19 +104,30 @@ const DoctorRegistrationPage = () => {
   const handleCheckEmail = async (index: number, email: string) => {
     try {
       await checkEmailDuplicate(email);
-      updateEmailCheckResult(index, true, '사용 가능한 이메일입니다.');
+      updateEmailCheckResult(index, true, '사용 가능한 이메일입니다.', true);
     } catch {
-      updateEmailCheckResult(index, false, '이미 사용 중인 이메일입니다.');
+      updateEmailCheckResult(index, false, '이미 사용 중인 이메일입니다.', true);
     }
   };
 
-  const updateEmailCheckResult = (index: number, success: boolean, message: string) => {
+  const updateEmailCheckResult = (
+    index: number,
+    success: boolean,
+    message: string,
+    checked: boolean,
+  ) => {
     const updated = [...emailCheckResults];
-    updated[index] = { success, message };
+    updated[index] = { success, message, checked };
     setEmailCheckResults(updated);
   };
 
   const handleSubmit = async () => {
+    const unverified = emailCheckResults.some((res) => !res.success || !res.checked);
+    if (unverified) {
+      alert('모든 이메일에 대해 중복 확인을 완료해주세요.');
+      return;
+    }
+
     if (!hospitalId) {
       alert('병원 ID가 없습니다. 병원을 먼저 등록해주세요.');
       return;
@@ -145,7 +162,11 @@ const DoctorRegistrationPage = () => {
             onChange={handleChange}
             onCheckEmail={handleCheckEmail}
             onRemove={handleRemove}
-            emailCheckMessage={emailCheckResults[index]?.message}
+            emailCheckMessage={
+              !emailCheckResults[index]?.checked && !emailCheckResults[index]?.success
+                ? '이메일 중복 확인을 해주세요.'
+                : emailCheckResults[index]?.message
+            }
             emailCheckSuccess={emailCheckResults[index]?.success}
           />
         ))}

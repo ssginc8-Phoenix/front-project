@@ -7,6 +7,13 @@ export interface Guardian {
   name: string;
 }
 
+export interface PendingInvite {
+  mappingId: number;
+  name: string;
+  email: string;
+  inviteCode: string;
+}
+
 export interface PatientSummary {
   patientId: number;
   name: string;
@@ -26,6 +33,17 @@ export const inviteGuardian = async (patientId: number, guardianEmail: string) =
     { withCredentials: true }, // 세션 쿠키 필요
   );
   return response.data;
+};
+
+/**
+ * 환자별 “초대중” 보호자 목록 조회
+ * GET /api/v1/guardians/{patientId}/pending-invites
+ */
+export const getPendingGuardianInvites = async (patientId: number): Promise<PendingInvite[]> => {
+  const { data } = await axios.get<PendingInvite[]>(`${HOST}/${patientId}/pending-invites`, {
+    withCredentials: true,
+  });
+  return data;
 };
 
 /**

@@ -4,10 +4,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import styled from 'styled-components';
 import { getGuardianCalendar } from '~/features/calendar/api/CalendarAPI';
-import {
-  getMedicationSchedule,
-  deleteMedicationSchedule,
-} from '~/features/medication/api/medicationAPI';
+import { getMedicationSchedule } from '~/features/medication/api/medicationAPI';
 import CommonModal from '~/components/common/CommonModal';
 import MedicationRegisterModal from '~/features/medication/components/MedicationRegisterModal';
 import { getMyGuardianInfo } from '~/features/guardian/api/guardianAPI';
@@ -54,6 +51,79 @@ const Legend = styled.div`
   }
   .medication-dot {
     background-color: #267e3e;
+  }
+`;
+
+export const StyledList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+export const StyledItem = styled.li<{ itemType: 'MEDICATION' | 'APPOINTMENT' }>`
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.7rem;
+  border-radius: 14px;
+  background: ${({ itemType }) => (itemType === 'MEDICATION' ? '#f4fcf7' : '#f6f9fe')};
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    border-radius: 14px 0 0 14px;
+    background: ${({ itemType }) => (itemType === 'MEDICATION' ? '#34c759' : '#2563eb')};
+  }
+
+  cursor: pointer;
+  transition: transform 0.12s ease;
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  .icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    background: ${({ itemType }) => (itemType === 'MEDICATION' ? '#d1fadf' : '#dbe8ff')};
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    .title {
+      font:
+        600 1rem/1.25 'Pretendard',
+        sans-serif;
+      color: ${({ itemType }) => (itemType === 'MEDICATION' ? '#15803d' : '#1e3a8a')};
+    }
+    .patient {
+      font:
+        500 0.82rem/1.3 'Pretendard',
+        sans-serif;
+      color: #64748b;
+    }
+  }
+
+  .time {
+    font:
+      600 0.9rem/1 'Pretendard',
+      sans-serif;
+    color: #475569;
+    white-space: nowrap;
   }
 `;
 
@@ -182,6 +252,7 @@ export default function GuardianCalendar() {
 
   const fetchData = async (date: Date = activeDate) => {
     const res = await getGuardianCalendar(date.getFullYear(), date.getMonth() + 1);
+
     setFullList(res.calendarItemLists);
 
     const names = res.calendarItemLists
@@ -208,6 +279,16 @@ export default function GuardianCalendar() {
     fetchData(activeDate);
   }, [activeDate]);
 
+  const mealLabel = (meal: string) => {
+    const map: Record<string, string> = {
+      morning: '아침',
+      lunch: '점심',
+      dinner: '저녁',
+      etc: '기타',
+    };
+    return map[meal] ?? meal;
+  };
+
   const updateCalendarData = (lists: any[], name: string) => {
     const flat = lists.flatMap(({ name: pname, patientGuardianId, calendarItems }: any) =>
       name === '전체'
@@ -227,6 +308,7 @@ export default function GuardianCalendar() {
       setSelectedItem({ ...item, ...detail });
     } else {
       setSelectedItem(item);
+      console.log(selectedItem);
     }
     setItemDetailOpen(true);
   };
@@ -385,37 +467,77 @@ export default function GuardianCalendar() {
             buttonText="닫기"
             onClose={() => setModalOpen(false)}
           >
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              {modalItems.map((item, idx) => (
-                <li
-                  key={`${modalDate}-${idx}`}
-                  onClick={() => {
-                    setModalOpen(false);
-                    openDetail(item);
-                  }}
-                  style={{
-                    marginBottom: '0.5rem',
-                    padding: '0.25rem 0.5rem',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    backgroundColor: item.itemType === 'MEDICATION' ? '#e6fbe5' : '#e0f0ff',
-                    color: item.itemType === 'MEDICATION' ? '#267e3e' : '#1a5da2',
-                  }}
-                >
-                  {item.itemType === 'MEDICATION' ? '💊' : '🏥'} {item.name} — {item.title}
-                </li>
-              ))}
-            </ul>
+            <StyledList>
+              {modalItems
+                .slice()
+                .sort((a, b) => (a.time ?? '').localeCompare(b.time ?? ''))
+                .map((item) => (
+                  <StyledItem
+                    key={item.relatedId ?? item.title}
+                    itemType={item.itemType}
+                    onClick={() => {
+                      setModalOpen(false);
+                      openDetail(item);
+                    }}
+                  >
+                    <div className="icon">{item.itemType === 'MEDICATION' ? '💊' : '🏥'}</div>
+
+                    <div className="text">
+                      <div className="title">{item.title}</div>
+                      <div className="patient">{item.name}</div>
+                    </div>
+
+                    {item.time && <div className="time">{item.time.slice(0, 5)}</div>}
+                  </StyledItem>
+                ))}
+            </StyledList>
           </CommonModal>
         )}
 
         {itemDetailOpen && selectedItem && (
           <CommonModal
             title={`${selectedItem.date} 상세정보`}
-            buttonText=""
+            buttonText="확인"
             onClose={() => setItemDetailOpen(false)}
           >
-            {/*여기에 상세정보 + 수정/삭제 버튼*/}
+            <div style={{ textAlign: 'left', lineHeight: '1.6' }}>
+              {selectedItem.itemType === 'MEDICATION' ? (
+                <>
+                  <p>
+                    <strong>환자 이름:</strong> {selectedItem.name}
+                  </p>
+                  <p>
+                    <strong>복약 이름:</strong> {selectedItem.title}
+                  </p>
+                  <p>
+                    <strong>복약 기간:</strong> {selectedItem.startDate} ~ {selectedItem.endDate}
+                  </p>
+                  <p>
+                    <strong>복용 시간:</strong>{' '}
+                    {selectedItem.times && selectedItem.times.length > 0
+                      ? selectedItem.times
+                          .map(
+                            (t: { meal: string; time: string }) =>
+                              `${mealLabel(t.meal)} ${t.time.slice(0, 5)}`,
+                          )
+                          .join(', ')
+                      : '시간 정보 없음'}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    <strong>환자:</strong> {selectedItem.name}
+                  </p>
+                  <p>
+                    <strong>진료일:</strong> {selectedItem.date}
+                  </p>
+                  <p>
+                    <strong>시간:</strong> {selectedItem.time}
+                  </p>
+                </>
+              )}
+            </div>
           </CommonModal>
         )}
       </ContentBox>

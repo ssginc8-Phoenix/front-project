@@ -139,7 +139,7 @@ const PaymentForm = ({ appointment, onSubmit }: PaymentFormProps) => {
         <CommonModal
           title="결제 요청을 보냈습니다."
           buttonText="예약 내역 페이지로 이동하기"
-          onClose={() => navigate('/appointments/list')}
+          onClose={() => navigate('/appointments')}
         />
       )}
     </Card>

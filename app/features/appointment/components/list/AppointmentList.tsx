@@ -10,6 +10,7 @@ import type { AppointmentList } from '~/types/appointment';
 const Wrapper = styled.div`
   padding: 2rem;
   width: 100%;
+  box-sizing: border-box;
 `;
 
 const Title = styled.h1`
@@ -23,8 +24,10 @@ const Title = styled.h1`
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 16px;
+  max-width: calc(320px * 3 + 16px * 2000);
+  margin: 0 auto;
 `;
 
 const PaginationWrapper = styled.div`

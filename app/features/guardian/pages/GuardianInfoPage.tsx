@@ -1,16 +1,13 @@
-// src/features/guardian/pages/GuardianInfoPage.tsx
 import styled from 'styled-components';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import SidebarMenu from '~/features/guardian/components/SidebarMenu'; // Patient SidebarMenu 사용 (스타일 통일)
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { getUserInfo, updateUserInfo } from '~/features/patient/api/userAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
-import ReusableModal from '~/features/patient/components/ReusableModal'; // ReusableModal 경로 통일
+import ReusableModal from '~/features/patient/components/ReusableModal';
 import { PasswordModal } from '~/features/patient/components/PasswordModal';
-import { guardianSidebarItems } from '~/constants/sidebarItems';
+import Sidebar from '~/common/Sidebar';
 
-// 전화번호 3-4-4 포맷 함수 추가 (필요시)
 const formatPhoneNumber = (value: string) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
   const part1 = digits.slice(0, 3);
@@ -21,96 +18,55 @@ const formatPhoneNumber = (value: string) => {
   return part1;
 };
 
-// PageBg를 PageWrapper로 변경하고 CalendarPage 스타일과 통일
 const PageWrapper = styled.div`
-  display: flex; /* CalendarPage와 동일 */
-  min-height: 100vh; /* CalendarPage와 동일 */
-  background-color: #f0f4f8; /* CalendarPage와 동일 */
-  font-family: 'Segoe UI', sans-serif; /* CalendarPage와 동일 */
-  /* max-width, margin, padding-top 제거. flex 컨테이너 역할만 */
+  display: flex;
+  min-height: 100vh;
+  background-color: #f0f4f8;
+  font-family: 'Segoe UI', sans-serif;
 `;
 
-// FlexRow 제거 (PageWrapper가 flex 컨테이너 역할)
-
-// SidebarBox 스타일 CalendarPage와 통일
 const SidebarBox = styled.div`
-  width: 260px; /* CalendarPage와 동일한 너비 */
+  width: 260px;
   background: white;
-  border-right: 1px solid #e0e0e0; /* CalendarPage와 동일한 border */
-  padding: 2rem 1rem; /* CalendarPage와 동일한 패딩 */
+  border-right: 1px solid #e0e0e0;
+  padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-radius: 0 20px 20px 0; /* CalendarPage와 동일한 border-radius */
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05); /* CalendarPage와 동일한 box-shadow */
-  flex-shrink: 0; /* CalendarPage와 동일 */
-  /* margin-right 제거 */
+  border-radius: 0 20px 20px 0;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
 `;
 
-const ProfileSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem; /* CalendarPage와 동일 */
-`;
-
-const ProfileImage = styled.img`
-  width: 80px; /* CalendarPage와 동일 */
-  height: 80px; /* CalendarPage와 동일 */
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 8px;
-`;
-
-const ProfileName = styled.div`
-  font-weight: bold; /* CalendarPage와 동일 */
-  font-size: 1.3rem; /* CalendarPage와 동일 */
-  color: #333; /* CalendarPage와 유사 */
-`;
-
-const ProfileRole = styled.div`
-  color: #777; /* CalendarPage와 동일 */
-  font-size: 1rem;
-`;
-
-// MainSection 스타일 CalendarPage의 ContentWrapper 또는 PatientInfoPage의 MainSection과 통일
 const MainSection = styled.section`
   flex: 1;
-  padding: 2rem; /* CalendarPage의 ContentWrapper와 동일 */
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  max-width: 900px; /* PatientInfoPage에서 늘린 너비와 통일 */
-  margin-left: 48px; /* 사이드바와의 간격 통일 */
+  max-width: 900px;
+  margin-left: 48px;
 `;
 
 const GuardianInfoHeader = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 2rem; /* PatientInfoPage와 통일 */
-  font-size: 2.2rem; /* PatientInfoPage와 통일 */
-  font-weight: 700; /* PatientInfoPage와 통일 */
-  color: #00499e; /* PatientInfoPage와 통일 */
+  margin-bottom: 2rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #00499e;
 `;
 
-// const ProfileInfo = styled.img`
-//   width: 2.5rem; /* PatientInfoPage의 MainHeaderProfileImage와 통일 */
-//   height: 2.5rem; /* PatientInfoPage의 MainHeaderProfileImage와 통일 */
-//   border-radius: 50%;
-//   object-fit: cover;
-//   margin-right: 12px; /* PatientInfoPage의 MainHeaderProfileImage와 통일 */
-// `;
-
 const Name = styled.div`
-  font-size: 2.2rem; /* PatientInfoPage와 통일 */
-  font-weight: 700; /* PatientInfoPage와 통일 */
-  color: #00499e; /* PatientInfoPage와 통일 */
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #00499e;
 `;
 
 const InfoFormBox = styled.form`
-  margin: 0; /* 중앙 정렬 대신 왼쪽 정렬 */
+  margin: 0;
   width: 100%;
-  max-width: none; /* 이전 PatientInfoPage와 동일하게 max-width 제거 */
+  max-width: none;
   padding: 38px 28px 32px;
   background: #fff;
   border-radius: 22px;
@@ -130,7 +86,7 @@ const Label = styled.label`
   font-size: 1.07rem;
   color: #2c2c2c;
   width: 88px;
-  flex-shrink: 0; /* 레이블이 줄어들지 않도록 */
+  flex-shrink: 0;
 `;
 
 const Input = styled.input`
@@ -149,8 +105,8 @@ const Input = styled.input`
 const SaveButton = styled.button`
   margin: 28px auto 0;
   padding: 12px 52px;
-  background: #00499e; /* CalendarPage 및 PatientInfoPage와 통일 */
-  color: #fff; /* CalendarPage 및 PatientInfoPage와 통일 */
+  background: #00499e;
+  color: #fff;
   font-weight: 700;
   font-size: 1.13rem;
   border-radius: 19px;
@@ -158,7 +114,7 @@ const SaveButton = styled.button`
   cursor: pointer;
   transition: background 0.16s;
   &:hover {
-    background: #003a7a; /* CalendarPage 및 PatientInfoPage와 통일 */
+    background: #003a7a;
   }
 `;
 
@@ -169,13 +125,13 @@ const Footer = styled.div`
   font-size: 1.01rem;
   letter-spacing: 0.04rem;
   span {
-    color: #00499e; /* CalendarPage 및 PatientInfoPage와 통일 */
+    color: #00499e;
     cursor: pointer;
-    border: none; /* 버튼처럼 보이던 스타일 제거 */
-    background: none; /* 버튼처럼 보이던 스타일 제거 */
-    margin: 0 8px; /* PatientInfoPage와 통일 */
-    font-weight: 500; /* PatientInfoPage와 통일 */
-    font-size: 1.03rem; /* PatientInfoPage와 통일 */
+    border: none;
+    background: none;
+    margin: 0 8px;
+    font-weight: 500;
+    font-size: 1.03rem;
     transition: color 0.12s;
     &:hover {
       color: #ff4646;
@@ -191,9 +147,9 @@ const GuardianInfoPage = () => {
     name: '',
     email: '',
     phone: '',
-    address: '', // 메인 주소
+    address: '',
   });
-  const [detailAddress, setDetailAddress] = useState(''); // 상세 주소
+  const [detailAddress, setDetailAddress] = useState('');
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
@@ -203,10 +159,8 @@ const GuardianInfoPage = () => {
     const fetchUser = async () => {
       try {
         const myInfo = await getUserInfo();
-        // 전화번호 포맷 적용
         const formattedPhone = formatPhoneNumber(myInfo.phone || '');
 
-        // 전체 주소 문자열 → 메인주소 + 상세주소 분리
         const raw = myInfo.address || '';
         let main = raw;
         let detail = '';
@@ -218,7 +172,7 @@ const GuardianInfoPage = () => {
         setForm({
           name: myInfo.name || '',
           email: myInfo.email || '',
-          phone: formattedPhone, // 포맷된 전화번호 사용
+          phone: formattedPhone,
           address: main,
         });
         setDetailAddress(detail);
@@ -229,9 +183,6 @@ const GuardianInfoPage = () => {
     fetchUser();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, phone: formatPhoneNumber(e.target.value) });
   };
@@ -246,12 +197,10 @@ const GuardianInfoPage = () => {
       await updateUserInfo({
         name: form.name,
         email: form.email,
-        phone: form.phone.replace(/-/g, ''), // 저장 시 하이픈 제거
+        phone: form.phone.replace(/-/g, ''),
         address: fullAddress,
       });
       alert('정보가 성공적으로 저장되었습니다.');
-      // 변경된 정보 즉시 반영을 위해 페이지 새로고침 또는 상태 재요청
-      // navigate(0); // 이 방법 대신, 사용자 정보를 다시 불러오는 로직을 실행하는 것이 더 좋습니다.
       const updatedInfo = await getUserInfo();
       const raw = updatedInfo.address || '';
       let main = raw;
@@ -274,9 +223,6 @@ const GuardianInfoPage = () => {
     }
   };
 
-  const handleSidebarChange = (key: string) => {
-    navigate(`/guardians/${key}`);
-  };
   const handleWithdrawClick = () => setShowConfirm(true);
   const handleConfirmCancel = () => setShowConfirm(false);
   const handleConfirmOk = () => {
@@ -298,27 +244,12 @@ const GuardianInfoPage = () => {
     <>
       <PageWrapper>
         <SidebarBox>
-          <ProfileSection>
-            <ProfileImage
-              src={
-                user?.profileImageUrl ??
-                'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png'
-              }
-              alt="프로필 사진"
-            />
-            <ProfileName>{user?.name ?? '로딩 중'} 님</ProfileName>
-            <ProfileRole>보호자</ProfileRole>
-          </ProfileSection>
-          <SidebarMenu
-            items={guardianSidebarItems}
-            activeKey="info"
-            onChange={handleSidebarChange}
-          />
+          <Sidebar />
         </SidebarBox>
 
         <MainSection>
           <GuardianInfoHeader>
-            <Name>{user?.name}님 정보</Name> {/* PatientInfoPage와 통일 */}
+            <Name>{user?.name}님 정보</Name>
           </GuardianInfoHeader>
 
           <InfoFormBox onSubmit={handleSave}>
@@ -337,7 +268,7 @@ const GuardianInfoPage = () => {
                 id="phone"
                 name="phone"
                 value={form.phone}
-                onChange={handlePhoneChange} // 전화번호 포맷팅 함수 사용
+                onChange={handlePhoneChange}
                 placeholder="전화번호 입력 (010-1234-5678)"
               />
             </InputRow>
@@ -360,7 +291,7 @@ const GuardianInfoPage = () => {
                 id="detailAddress"
                 type="text"
                 value={detailAddress}
-                onChange={handleDetailAddressChange} // 상세 주소 변경 함수 사용
+                onChange={handleDetailAddressChange}
                 placeholder="상세주소 입력 (예: 111동 1234호)"
               />
             </InputRow>
@@ -374,7 +305,6 @@ const GuardianInfoPage = () => {
         </MainSection>
       </PageWrapper>
 
-      {/* 탈퇴 3단계 모달들 - 스타일 통일 */}
       <ReusableModal open={showConfirm} onClose={handleConfirmCancel} hideCloseButton>
         <div
           style={{ fontSize: '1.13rem', fontWeight: 600, marginBottom: 24, textAlign: 'center' }}
@@ -388,7 +318,7 @@ const GuardianInfoPage = () => {
               background: '#f3f3f3',
               borderRadius: 16,
               border: 'none',
-              padding: '10px 24px', // PatientInfoPage와 통일
+              padding: '10px 24px',
               color: '#555',
               fontWeight: 500,
               fontSize: '1.05rem',
@@ -405,7 +335,7 @@ const GuardianInfoPage = () => {
               background: '#ff4646',
               borderRadius: 16,
               border: 'none',
-              padding: '10px 24px', // PatientInfoPage와 통일
+              padding: '10px 24px',
               color: '#fff',
               fontWeight: 600,
               fontSize: '1.05rem',
@@ -422,10 +352,10 @@ const GuardianInfoPage = () => {
       <ReusableModal open={showByeModal} onClose={handleByeClose} hideCloseButton>
         <div
           style={{
-            color: '#00499e', // PatientInfoPage와 통일
+            color: '#00499e',
             fontWeight: 700,
-            fontSize: '1.2rem', // PatientInfoPage와 통일
-            marginBottom: 20, // PatientInfoPage와 통일
+            fontSize: '1.2rem',
+            marginBottom: 20,
             whiteSpace: 'pre-line',
             textAlign: 'center',
           }}

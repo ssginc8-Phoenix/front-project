@@ -1,3 +1,4 @@
+// src/features/patient/pages/GuardianManagementPage.tsx
 import styled from 'styled-components';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -7,16 +8,15 @@ import {
   deletePatientGuardian,
   type Guardian,
 } from '~/features/patient/api/patientAPI';
-import { inviteGuardian } from '~/features/guardian/api/guardianAPI';
-import { getUserInfo } from '~/features/patient/api/userAPI';
+import {
+  inviteGuardian,
+  getPendingGuardianInvites,
+  type PendingInvite,
+} from '~/features/guardian/api/guardianAPI';
 import { getPatientInfo } from '~/features/patient/api/patientAPI';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import ReusableModal from '~/features/patient/components/ReusableModal';
 import Sidebar from '~/common/Sidebar';
-
-/**
- * 환자 마이페이지
- */
 
 const PageWrapper = styled.div`
   display: flex;
@@ -28,35 +28,80 @@ const MainSection = styled.div`
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  margin-left: 48px; /* 사이드바와의 간격 유지 */
+  margin-left: 48px;
 `;
+
 const Title = styled.h2`
   font-size: 2.2rem;
   font-weight: 700;
   color: #00499e;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 `;
+
+const SectionTitle = styled.h3`
+  font-size: 1.2rem;
+  margin: 1rem 0 0.5rem;
+  color: #333;
+`;
+
 const ListWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 `;
-const AddCard = styled.button`
+
+const PendingCard = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  height: 100px;
-  border-radius: 12px;
-  border: 2px dashed #00499e;
-  font-size: 3rem;
-  color: #00499e;
+  padding: 1rem;
   background: #fff;
-  cursor: pointer;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  color: #333;
+  font-size: 1rem;
+`;
+
+const ActionGroup = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
+const ResendButton = styled.button`
+  padding: 0.4rem 0.8rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  &:hover {
+    background: #1d4ed8;
+  }
+`;
+
+const CancelButton = styled.button`
+  padding: 0.4rem 0.8rem;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  &:hover {
+    background: #dc2626;
+  }
+`;
+
+const AddCard = styled.button`
+  margin-top: 1rem;
+  height: 100px;
+  border: 2px dashed #00499e;
+  border-radius: 12px;
+  background: #fff;
+  color: #00499e;
+  font-size: 3rem;
+  cursor: pointer;
   &:hover {
     background: #e9f0ff;
   }
@@ -64,29 +109,34 @@ const AddCard = styled.button`
 
 const GuardianManagementPage: React.FC = () => {
   const [guardians, setGuardians] = useState<Guardian[]>([]);
-  const [userinfo, setUserinfo] = useState<{ name: string; profileImageUrl?: string } | null>(null);
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [patientInfo, setPatientInfo] = useState<{ patientId: number } | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [newGuardianEmail, setNewGuardianEmail] = useState('');
   const [inviteCode, setInviteCode] = useState<string | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
 
   const { fetchMyInfo } = useLoginStore();
   const navigate = useNavigate();
 
+  // 수락된 보호자와 초대중 목록을 동시에 갱신
+  const reloadAll = async (patientId: number) => {
+    const [acc, pend] = await Promise.all([
+      getGuardians(patientId),
+      getPendingGuardianInvites(patientId),
+    ]);
+    setGuardians(acc);
+    setPendingInvites(pend);
+  };
+
   useEffect(() => {
     (async () => {
       await fetchMyInfo();
-      const u = await getUserInfo();
-      setUserinfo(u);
-
       const p = await getPatientInfo();
       setPatientInfo(p);
-
       if (p?.patientId) {
-        const list = await getGuardians(p.patientId);
-        setGuardians(list);
+        await reloadAll(p.patientId);
+
       }
     })();
   }, [fetchMyInfo]);
@@ -96,7 +146,21 @@ const GuardianManagementPage: React.FC = () => {
   const handleDelete = async (g: Guardian) => {
     if (!confirm(`${g.name} 보호자를 정말 삭제하시겠습니까?`)) return;
     await deletePatientGuardian(g.patientGuardianId);
-    setGuardians((gs) => gs.filter((x) => x.patientGuardianId !== g.patientGuardianId));
+    if (patientInfo) await reloadAll(patientInfo.patientId);
+  };
+
+  const handleCancelInvite = async (inv: PendingInvite) => {
+    if (!confirm(`초대를 취소하시겠습니까? (${inv.name})`)) return;
+    await deletePatientGuardian(inv.mappingId);
+    if (patientInfo) await reloadAll(patientInfo.patientId);
+  };
+
+  const handleResendInvite = async (inv: PendingInvite) => {
+    if (!patientInfo) return;
+    const res = await inviteGuardian(patientInfo.patientId, inv.email);
+    setInviteCode(res.inviteCode);
+    setShowCodeModal(true);
+    await reloadAll(patientInfo.patientId);
   };
 
   const openInvite = () => setShowInviteModal(true);
@@ -110,24 +174,35 @@ const GuardianManagementPage: React.FC = () => {
     const res = await inviteGuardian(patientInfo.patientId, newGuardianEmail);
     setInviteCode(res.inviteCode);
     closeInvite();
-    setShowSuccessModal(true);
-    if (patientInfo?.patientId) {
-      const updated = await getGuardians(patientInfo.patientId);
-      setGuardians(updated);
-    }
-  };
-
-  const closeSuccess = () => {
-    setShowSuccessModal(false);
     setShowCodeModal(true);
+    await reloadAll(patientInfo.patientId);
   };
 
   return (
     <PageWrapper>
-      <Sidebar />
+      <Sidebar onChange={handleSidebarChange} />
 
       <MainSection>
         <Title>🧑‍🤝‍🧑 보호자 관리</Title>
+
+        {/* 1. 초대중 */}
+        <SectionTitle>초대중</SectionTitle>
+        <ListWrapper>
+          {pendingInvites.map((inv) => (
+            <PendingCard key={inv.mappingId}>
+              <span>
+                {inv.name} <em>(초대중)</em>
+              </span>
+              <ActionGroup>
+                <ResendButton onClick={() => handleResendInvite(inv)}>재초대</ResendButton>
+                <CancelButton onClick={() => handleCancelInvite(inv)}>취소</CancelButton>
+              </ActionGroup>
+            </PendingCard>
+          ))}
+        </ListWrapper>
+
+        {/* 2. 등록된 보호자 */}
+        <SectionTitle>등록된 보호자</SectionTitle>
         <ListWrapper>
           {guardians.map((g) => (
             <GuardianCard
@@ -136,11 +211,13 @@ const GuardianManagementPage: React.FC = () => {
               onDelete={() => handleDelete(g)}
             />
           ))}
-          <AddCard onClick={openInvite}>＋</AddCard>
         </ListWrapper>
+
+        {/* 3. 새 초대 */}
+        <AddCard onClick={openInvite}>＋</AddCard>
       </MainSection>
 
-      {/* 초대 모달 */}
+      {/* 보호자 초대 모달 */}
       <ReusableModal open={showInviteModal} onClose={closeInvite}>
         <div style={{ padding: 20 }}>
           <h2>보호자 초대</h2>
@@ -174,28 +251,7 @@ const GuardianManagementPage: React.FC = () => {
         </div>
       </ReusableModal>
 
-      {/* 성공 모달 */}
-      <ReusableModal open={showSuccessModal} onClose={closeSuccess}>
-        <div style={{ padding: 20, textAlign: 'center' }}>
-          <h2>초대코드가 발송되었습니다! 📧</h2>
-          <p style={{ marginBottom: 20 }}>보호자 이메일로 초대코드가 전송되었습니다.</p>
-          <button
-            onClick={closeSuccess}
-            style={{
-              marginTop: 20,
-              padding: 12,
-              backgroundColor: '#00499e',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-            }}
-          >
-            확인
-          </button>
-        </div>
-      </ReusableModal>
-
-      {/* 코드 모달 */}
+      {/* 초대코드 표시 모달 */}
       <ReusableModal open={showCodeModal} onClose={() => setShowCodeModal(false)}>
         <div style={{ padding: 20 }}>
           <h2>초대코드가 생성되었습니다 🎉</h2>

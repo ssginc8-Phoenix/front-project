@@ -9,7 +9,6 @@ const PageContainer = styled.div`
   display: flex;
   justify-content: center;
   padding: 4rem 1.5rem;
-  background-color: #f8f9fb;
   min-height: 100vh;
 `;
 
@@ -144,7 +143,6 @@ const PaymentHistoryPage = () => {
 
   return (
     <>
-      <Header />
       <PageContainer>
         <Card>
           <Title>진료 결제 내역</Title>

@@ -58,7 +58,7 @@ const Sidebar = () => {
         return '보호자';
       case 'DOCTOR':
         return '의사';
-      case 'HOSPITAL':
+      case 'HOSPITAL_ADMIN':
         return '병원 관리자';
       case 'PATIENT':
         return '환자';
@@ -74,7 +74,7 @@ const Sidebar = () => {
         return guardianSidebarItems;
       case 'DOCTOR':
         return doctorSidebarItems;
-      case 'HOSPITAL':
+      case 'HOSPITAL_ADMIN':
         return hospitalSidebarItems;
       case 'PATIENT':
       default:
@@ -88,7 +88,7 @@ const Sidebar = () => {
   // 각 사이드바 아이템 키에 대한 라우트 정의
   const itemRoutes: { [key: string]: string } = {
     guardian: '/guardian',
-    patient: '/patient',
+    patient: '/mypage',
     appointment: '/appointments', // 예약 조회 및 관리 페이지
     calendar: '/calendar',
     review: '/review',

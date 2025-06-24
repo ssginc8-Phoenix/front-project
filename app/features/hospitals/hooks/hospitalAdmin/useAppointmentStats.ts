@@ -25,10 +25,14 @@ export function useAppointmentStats(start: string, end: string) {
           params: { start, end },
         });
 
-        const transformed: AppointmentStat[] = response.data.map((item: any) => ({
-          date: dayjs(item.date).format('MM/DD'), // "2025-06-12T00:00:00" → "06/12"
+        const transformed = response.data.map((item: any) => ({
+          // ISO 포맷 (fullStats key와 매칭용)
+          dateIso: dayjs(item.date).format('YYYY-MM-DD'),
+          // 차트 축 레이블용
+          display: dayjs(item.date).format('MM/DD'),
           count: item.count,
         }));
+        setData(transformed);
 
         console.log('✅ Received appointment stats:', transformed);
         setData(transformed);

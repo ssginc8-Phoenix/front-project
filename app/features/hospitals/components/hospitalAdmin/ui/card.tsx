@@ -3,9 +3,9 @@ import styled from 'styled-components';
 
 export const Card = styled.div<{ isSelected?: boolean }>`
   flex: calc(50% - 0.5rem);
-  min-width: 280px;
+  min-width: 300px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 1rem;
   border-radius: 1rem;

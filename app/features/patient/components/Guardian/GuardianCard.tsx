@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 const Card = styled.div`
   position: relative;
@@ -23,7 +23,6 @@ const Info = styled.div`
   gap: 1rem;
 `;
 
-// AvatarWrapper: 이미지가 있는 경우 <img>를, 없는 경우 fallback 원 형태
 const AvatarWrapper = styled.div<{ size?: number }>`
   flex-shrink: 0;
   width: ${({ size }) => size ?? 56}px;
@@ -65,19 +64,28 @@ const DeleteBtn = styled.button`
   }
 `;
 
+// JSX 형태로 넘겨줄 때 사용할, 기본 프로필 이미지 styled-component
+export const ProfileImage = styled.img`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+
 interface Props {
   name: string;
-  profileImageUrl?: string;
+  /**
+   * <ProfileImage /> JSX 혹은 null 을 직접 넘겨주세요.
+   */
+  avatar?: ReactNode;
   onClick?: () => void;
   onDelete: () => void;
 }
 
-const GuardianCard: React.FC<Props> = ({ name, profileImageUrl, onClick, onDelete }) => (
+const GuardianCard: React.FC<Props> = ({ name, avatar, onClick, onDelete }) => (
   <Card onClick={onClick}>
     <Info>
-      <AvatarWrapper>
-        {profileImageUrl ? <img src={profileImageUrl} alt={`${name} 프로필`} /> : null}
-      </AvatarWrapper>
+      <AvatarWrapper size={56}>{avatar /* 넘어온 JSX(또는 null) 를 그대로 렌더링 */}</AvatarWrapper>
       <Texts>
         <Name>{name}</Name>
       </Texts>

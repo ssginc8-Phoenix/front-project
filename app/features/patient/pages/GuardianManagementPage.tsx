@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import GuardianCard from '~/features/patient/components/Guardian/GuardianCard';
+import GuardianCard, { ProfileImage } from '~/features/patient/components/Guardian/GuardianCard';
 import {
   getGuardians,
   deletePatientGuardian,
@@ -16,6 +16,7 @@ import { getPatientInfo } from '~/features/patient/api/patientAPI';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import ReusableModal from '~/features/patient/components/ReusableModal';
 import Sidebar from '~/common/Sidebar';
+import type { User } from '~/types/user';
 
 const PageWrapper = styled.div`
   display: flex;
@@ -106,6 +107,9 @@ const AddCard = styled.button`
   }
 `;
 
+// 기본 아바타 URL
+const DEFAULT_AVATAR = 'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png';
+
 const GuardianManagementPage: React.FC = () => {
   const [guardians, setGuardians] = useState<Guardian[]>([]);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
@@ -118,7 +122,6 @@ const GuardianManagementPage: React.FC = () => {
   const { fetchMyInfo } = useLoginStore();
   const navigate = useNavigate();
 
-  // 수락된 보호자와 초대중 목록을 동시에 갱신
   const reloadAll = async (patientId: number) => {
     const [acc, pend] = await Promise.all([
       getGuardians(patientId),
@@ -138,8 +141,6 @@ const GuardianManagementPage: React.FC = () => {
       }
     })();
   }, [fetchMyInfo]);
-
-  const handleSidebarChange = (key: string) => navigate(`/patients/${key}`);
 
   const handleDelete = async (g: Guardian) => {
     if (!confirm(`${g.name} 보호자를 정말 삭제하시겠습니까?`)) return;
@@ -178,7 +179,7 @@ const GuardianManagementPage: React.FC = () => {
 
   return (
     <PageWrapper>
-      <Sidebar onChange={handleSidebarChange} />
+      <Sidebar onChange={(key) => navigate(`/patients/${key}`)} />
 
       <MainSection>
         <Title>🧑‍🤝‍🧑 보호자 관리</Title>
@@ -206,7 +207,9 @@ const GuardianManagementPage: React.FC = () => {
             <GuardianCard
               key={g.patientGuardianId}
               name={g.name}
-              profileImageUrl={g.profileImageUrl}
+              avatar={
+                <ProfileImage src={g.profileImageUrl ?? DEFAULT_AVATAR} alt={`${g.name} 프로필`} />
+              }
               onDelete={() => handleDelete(g)}
             />
           ))}
@@ -226,8 +229,7 @@ const GuardianManagementPage: React.FC = () => {
             onChange={(e) => setNewGuardianEmail(e.target.value)}
             placeholder="보호자 이메일 입력"
             style={{
-              display: 'flex',
-              width: '92.5%',
+              width: '100%',
               padding: 12,
               marginBottom: 20,
               borderRadius: 8,

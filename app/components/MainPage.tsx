@@ -40,7 +40,7 @@ const features = [
     title: '캘린더',
     desc: '일정을 한눈에 살펴보세요',
     icon: '/calendar.png',
-    route: '/documents',
+    route: '/calendar',
   },
   {
     title: '서류 발급',

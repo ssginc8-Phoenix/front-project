@@ -3,11 +3,10 @@ import styled from 'styled-components';
 import { findEmail } from '~/features/user/api/UserAPI';
 import CommonModal from '~/components/common/CommonModal';
 import FindEmailForm from '~/features/user/components/loginHelper/FindEmailForm';
-import Header from '~/layout/Header';
 
 const Wrapper = styled.div`
-  max-width: 480px;
-  margin: 80px auto;
+  max-width: 500px;
+  margin: 10rem auto;
   padding: 2rem;
   background-color: #ffffff;
   border: 1px solid #ddd;
@@ -16,11 +15,16 @@ const Wrapper = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
   text-align: center;
+  margin-bottom: 1.5rem;
+`;
+
+const Description = styled.p`
+  text-align: center;
   margin-bottom: 2rem;
-  color: #333;
+  color: #555;
 `;
 
 const Message = styled.div`
@@ -38,18 +42,18 @@ const FindEmailPage = () => {
     try {
       const response = await findEmail({ name, phone });
       setEmail(response.email);
-      setModalOpen(true);
-    } catch (e) {
+    } catch {
       setEmail('');
+    } finally {
       setModalOpen(true);
     }
   };
 
   return (
     <>
-      <Header />
       <Wrapper>
         <Title>이메일 찾기</Title>
+        <Description>이름과 휴대폰 번호를 입력하면 가입한 이메일을 확인할 수 있어요.</Description>
         <FindEmailForm onFindEmail={handleFindEmail} />
 
         {modalOpen && (
@@ -58,10 +62,12 @@ const FindEmailPage = () => {
             buttonText="확인"
             onClose={() => setModalOpen(false)}
           >
-            {email && (
+            {email ? (
               <Message>
                 회원님의 이메일은 <strong>{email}</strong> 입니다.
               </Message>
+            ) : (
+              <Message>일치하는 이메일 정보를 찾을 수 없습니다.</Message>
             )}
           </CommonModal>
         )}

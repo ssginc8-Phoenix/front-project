@@ -32,9 +32,7 @@ const ContentWrapper = styled.div`
 const GuardianCalendarPage = () => {
   return (
     <PageWrapper>
-      <SidebarBox>
-        <Sidebar />
-      </SidebarBox>
+      <Sidebar />
 
       <ContentWrapper>
         <GuardianCalendar />

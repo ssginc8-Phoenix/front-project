@@ -12,13 +12,11 @@ import ReviewSummaryCard from '~/features/reviews/component/common/ReviewSummary
 
 const ads = ['new_banner.png', 'new_banner.png', 'new_banner.png'];
 
-
 const notices = [
   { id: 1, title: '바른이비인후과 진료시간 변경 안내 (07.01부터)', date: '2025.06.23' },
   { id: 2, title: '병원 리뷰 작성 시 포인트 지급 이벤트', date: '2025.06.20' },
   { id: 3, title: '챗봇 기능 점검 예정 안내 (06.25)', date: '2025.06.18' },
   { id: 4, title: '의사 Q&A 응답 지연 안내', date: '2025.06.14' },
-
 ];
 
 const news = [
@@ -45,7 +43,7 @@ const features = [
     title: '캘린더',
     desc: '일정을 한눈에 확인하세요',
     icon: '/calendar.png',
-    route: '/documents',
+    route: '/calendar',
   },
   {
     title: '서류 등록',

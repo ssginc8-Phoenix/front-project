@@ -4,11 +4,10 @@ import { useState } from 'react';
 import PasswordResetForm from '~/features/user/components/loginHelper/PasswordResetForm';
 import { resetPassword } from '~/features/user/api/UserAPI';
 import CommonModal from '~/components/common/CommonModal';
-import Header from '~/layout/Header';
 
 const Wrapper = styled.div`
   max-width: 500px;
-  margin: 80px auto;
+  margin: 10rem auto;
   padding: 2rem;
   background-color: #ffffff;
   border: 1px solid #ddd;
@@ -98,7 +97,6 @@ const ResetPasswordPage = () => {
 
   return (
     <>
-      <Header />
       <Wrapper>
         <Title>비밀번호 재설정</Title>
         <Notice>

@@ -2,8 +2,8 @@ import styled from 'styled-components';
 import { Link } from 'react-router';
 
 const cardItems = [
-  { title: '닥투 도입 상담', badge: '병원전용', icon: '/icons/consult.png', link: '#' },
-  { title: '채용 공고', icon: '/icons/recruit.png', link: '#' },
+  { title: '닥투 도입 상담', badge: '병원전용', icon: 'footer_consultation.png', link: '#' },
+  { title: '채용 공고', icon: 'footer_document.png', link: '#' },
 ];
 
 const policyLinks = [

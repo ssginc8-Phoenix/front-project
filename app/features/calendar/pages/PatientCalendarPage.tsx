@@ -36,9 +36,7 @@ const ContentWrapper = styled.div`
 const PatientCalendarPage = () => {
   return (
     <PageWrapper>
-      <SidebarBox>
-        <Sidebar />
-      </SidebarBox>
+      <Sidebar />
 
       <ContentWrapper>
         <PatientCalendar />

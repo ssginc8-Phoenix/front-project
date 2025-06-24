@@ -305,7 +305,12 @@ const UserSignupForm = () => {
 
     try {
       await login({ email, password });
-      navigate('/');
+
+      if (role === 'HOSPITAL_ADMIN') {
+        navigate('/hospital/create');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       console.error('자동 로그인 실패:', err);
       navigate('/login');

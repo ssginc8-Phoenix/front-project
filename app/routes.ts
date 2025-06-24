@@ -4,6 +4,7 @@ export default [
   route('hospital', 'layout/MapLayout.tsx', [
     route(':hospitalId', 'routes/hospital/hospitalDetail.tsx'),
     route('search', 'routes/hospital/hospitalSearch.tsx'),
+    route('create', 'routes/hospital/hospitalCreate.tsx'),
   ]),
 
   route('myPage', 'layout/MyPageLayout.tsx', [index('routes/myPage.tsx')]),
@@ -29,7 +30,7 @@ export default [
     route('appointments', 'routes/appointment/appointmentDashboard.tsx'), // 역할별 예약 조회 및 관리
     route('calendar', 'routes/calendar/calendar.tsx'), // 역할별 캘린더
     route('review', 'features/reviews/pages/ReviewMyListPage.tsx'),
-    route('qna', 'routes/qna/QnAListPage.tsx'),
+    route('qna', 'routes/qna/QnAList.tsx'),
     route('info', 'routes/info.tsx'),
     route('schedule', 'routes/doctor/doctorSchedule.tsx'),
     route('chart', 'routes/hospital/hospitalAdminChart.tsx'),

@@ -28,7 +28,6 @@ const Form = styled.form`
   align-items: center;
   padding: 12px;
   gap: 10px;
-  background-color: #f9f9f9;
 `;
 
 const Input = styled.textarea`

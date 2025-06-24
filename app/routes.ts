@@ -1,19 +1,12 @@
 import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
-  /** 로그인, 회원가입 관련  */
-  route('/login', 'routes/login.tsx'),
-  route('/signup', 'routes/signup.tsx'),
-  route('/signup/form', 'routes/signupForm.tsx'),
-  route('/register-doctors', 'routes/doctorForm.tsx'),
-  route('/find-email', 'routes/findEmail.tsx'),
-  route('/reset-password', 'routes/passwordResetVerify.tsx'),
-  route('/reset-password/set', 'routes/resetPassword.tsx'),
-
   route('hospital', 'layout/MapLayout.tsx', [
     route(':hospitalId', 'routes/hospital/hospitalDetail.tsx'),
     route('search', 'routes/hospital/hospitalSearch.tsx'),
   ]),
+
+  route('myPage', 'layout/MyPageLayout.tsx', [index('routes/myPage.tsx')]),
 
   /** MainLayout 적용 */
   route('', 'layout/MainLayout.tsx', [
@@ -21,7 +14,14 @@ export default [
     index('routes/main.tsx'),
     route('hospital/main', 'routes/hospital/HospitalMainPage.tsx'),
 
-    route('myPage', 'routes/myPage.tsx'), // 역할별 마이페이지
+    /** 로그인, 회원가입 관련  */
+    route('/login', 'routes/login.tsx'),
+    route('/signup', 'routes/signup.tsx'),
+    route('/signup/form', 'routes/signupForm.tsx'),
+    route('/register-doctors', 'routes/doctorForm.tsx'),
+    route('/find-email', 'routes/findEmail.tsx'),
+    route('/reset-password', 'routes/passwordResetVerify.tsx'),
+    route('/reset-password/set', 'routes/resetPassword.tsx'),
 
     /** 사이드바 */
     route('guardian', 'routes/patient/guardianManagement.tsx'), // 환자 - 보호자 관리

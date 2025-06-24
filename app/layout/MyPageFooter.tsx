@@ -1,34 +1,16 @@
 import styled from 'styled-components';
 import { Link } from 'react-router';
 
-const cardItems = [
-  { title: '닥투 도입 상담', badge: '병원전용', icon: 'footer_consultation.png', link: '#' },
-  { title: '채용 공고', icon: 'footer_document.png', link: '#' },
-];
-
 const policyLinks = [
   { name: '회사 소개', url: '#' },
   { name: '이용약관', url: '#' },
   { name: '개인정보처리방침', url: '#' },
 ];
 
-export default function Footer() {
+export default function MyPageFooter() {
   return (
     <FooterBar>
       <FooterContent>
-        {/* 상단 카드 */}
-        <CardRow>
-          {cardItems.map(({ title, badge, icon, link }) => (
-            <Card key={title} to={link}>
-              <CardIcon src={icon} alt="" />
-              <CardTitle>
-                {title}
-                {badge && <Badge>{badge}</Badge>}
-              </CardTitle>
-            </Card>
-          ))}
-        </CardRow>
-
         {/* 정책 링크 */}
         <LinksRow>
           {policyLinks.map(({ name, url }) => (
@@ -69,50 +51,6 @@ const FooterContent = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-`;
-
-const CardRow = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  @media (min-width: 640px) {
-    flex-direction: row;
-  }
-`;
-
-const Card = styled(Link)`
-  flex: 1 1 320px;
-  background: #1d2938;
-  border-radius: 12px;
-  padding: 18px 22px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  text-decoration: none;
-  color: #fff;
-`;
-
-const CardIcon = styled.img`
-  width: 44px;
-  height: 44px;
-`;
-
-const CardTitle = styled.span`
-  font-size: 1.05rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const Badge = styled.span`
-  background: #4478ff;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
 `;
 
 const LinksRow = styled.div`

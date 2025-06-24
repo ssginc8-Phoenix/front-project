@@ -13,6 +13,9 @@ export const Card = styled.div`
   background-color: #fefefe;
   border-radius: 20px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 `;
 
 export const Header = styled.div`

@@ -2,11 +2,10 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { sendVerifyCode, confirmVerifyCode } from '~/features/user/api/UserAPI';
 import PasswordResetVerifyForm from '~/features/user/components/loginHelper/PasswordResetVerifyForm';
-import Header from '~/layout/Header';
 
 const Wrapper = styled.div`
   max-width: 500px;
-  margin: 80px auto;
+  margin: 10rem auto;
   padding: 2rem;
   background-color: #ffffff;
   border: 1px solid #ddd;
@@ -49,7 +48,6 @@ const PasswordResetVerifyPage = () => {
 
   return (
     <>
-      <Header />
       <Wrapper>
         <Title>비밀번호찾기</Title>
         <Description>비밀번호를 찾기 위해 이메일을 입력해주세요.</Description>

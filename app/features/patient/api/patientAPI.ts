@@ -6,6 +6,7 @@ const HOST = 'http://localhost:8080/api/v1/patients';
 export interface Guardian {
   patientGuardianId: number;
   name: string;
+  profileImageUrl: string;
 }
 
 /**

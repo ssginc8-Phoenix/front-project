@@ -3,19 +3,23 @@ import styled from 'styled-components';
 
 import Pagination from '~/components/common/Pagination';
 import { getAllReviews } from '~/features/reviews/api/reviewAPI';
-import type { HospitalReviewResponse, Page } from '~/features/reviews/types/review';
+import type {
+  HospitalReviewResponse,
+  Page,
+  ReviewAllListResponse,
+} from '~/features/reviews/types/review';
 import { HospitalReviewCard } from '~/features/reviews/component/common/HospitalReviewCard';
 
 export default function ReviewAdminPage() {
   const [page, setPage] = useState(0);
-  const [data, setData] = useState<Page<HospitalReviewResponse> | null>(null);
+  const [data, setData] = useState<Page<ReviewAllListResponse> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
     getAllReviews(page, 10)
-      .then((res) => setData(res.data))
+      .then((res) => setData(res))
       .catch(() => setError('리뷰 불러오는 중 오류가 발생했습니다.'))
       .finally(() => setLoading(false));
   }, [page]);

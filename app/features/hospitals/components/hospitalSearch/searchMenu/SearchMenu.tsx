@@ -110,7 +110,7 @@ const SearchMenu: React.FC<SearchMenuProps> = ({
         {/* 검색어 */}
         <SearchInput
           type="text"
-          placeholder="병원 이름, 의사 이름 검색"
+          placeholder="병원 이름"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}

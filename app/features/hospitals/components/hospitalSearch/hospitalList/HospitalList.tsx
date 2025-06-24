@@ -14,6 +14,7 @@ interface HospitalListProps {
   onPageChange: (page: number) => void;
   onHospitalSelect: (hospitalId: number, lat: number, lng: number) => void;
   selectedHospitalId?: number | null;
+  baseLocation?: { lat: number; lng: number };
 }
 
 const Wrapper = styled.div`
@@ -107,6 +108,7 @@ const HospitalList: React.FC<HospitalListProps> = ({
   error,
   onHospitalSelect,
   selectedHospitalId,
+  baseLocation,
 }) => {
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 3;
@@ -141,11 +143,12 @@ const HospitalList: React.FC<HospitalListProps> = ({
             ? `${formatTime(todaySchedule.openTime)} ~ ${formatTime(todaySchedule.closeTime)}`
             : '진료시간 정보 없음';
 
+          const base = baseLocation ?? currentLocation;
           const distance =
-            currentLocation && hospital.latitude && hospital.longitude
+            baseLocation && hospital.latitude && hospital.longitude
               ? calculateDistance(
-                  currentLocation.latitude,
-                  currentLocation.longitude,
+                  baseLocation.lat,
+                  baseLocation.lng,
                   Number(hospital.latitude),
                   Number(hospital.longitude),
                 )

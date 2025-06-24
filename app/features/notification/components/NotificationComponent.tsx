@@ -24,6 +24,7 @@ import {
 } from '~/features/notification/components/Notification.styels';
 import { Bell, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import { NEW_FCM_MESSAGE_EVENT } from '~/features/fcm/util/fcm';
 
 const Audio = styled.audio`
   display: none;
@@ -54,6 +55,7 @@ const NotificationComponent = () => {
   const markAllUnreadAsRead = async () => {
     console.log('모두 읽음 처리');
 
+    // 읽지 않은 알림만 필터링
     const unreadNotifications = notifications.filter((n) => !n.isRead);
     for (const notification of unreadNotifications) {
       try {
@@ -85,22 +87,27 @@ const NotificationComponent = () => {
 
   // FCM 메세지 수신 등록 및 처리
   useEffect(() => {
-    if (!messaging || !user) return;
+    if (!user) return;
 
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log('수신된 FCM 메세지:', payload);
+    // NEW_FCM_MESSAGE_EVENT 이벤트 핸들러 정의
+    const handleNewFCMMessage = () => {
+      console.log('NEW_FCM_MESSAGE_EVENT 수신됨');
 
-      setShake(true); // 벨 아이콘 흔들림 시작
-      setTimeout(() => setShake(false), 1000); // 1초 후 흗들림 종료
+      setShake(true);
+      setTimeout(() => setShake(false), 1000);
 
-      // 알림 소리 재생 시도
       audioRef.current?.play().catch((e) => console.warn('알림 사운드 차단: ', e));
 
-      // 새 알림 리스트를 서버에서 다시 조회
+      // 새 알림 리스트를 서버에서 다시 조회 (UI 업데이트)
       fetchNotifications();
+    };
 
-      return () => unsubscribe(); // 컴포넌트 언마운트 시 이벤트 해제
-    });
+    window.addEventListener(NEW_FCM_MESSAGE_EVENT, handleNewFCMMessage);
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 해제
+    return () => {
+      window.removeEventListener(NEW_FCM_MESSAGE_EVENT, handleNewFCMMessage);
+    };
   }, [user]);
 
   // 벨 아이콘 클릭 시 드롭다운 토글
@@ -125,7 +132,7 @@ const NotificationComponent = () => {
 
   return (
     <BellWrapper>
-      <BellIcon onClick={toggleDropdown} shake={shake}>
+      <BellIcon onClick={toggleDropdown} $shake={shake}>
         <Bell size={24} strokeWidth={2} />
       </BellIcon>
       {notifications.some((n) => !n.isRead) && <RedDot />}

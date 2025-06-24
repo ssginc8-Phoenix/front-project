@@ -6,14 +6,14 @@ import styled from 'styled-components';
 
 const PageLayout = styled.div`
   display: flex;
-  height: 75vh;
+  min-height: 100vh;
   background-color: #f8f9fa;
 `;
 
 const ContentArea = styled.div`
   flex-grow: 1;
   overflow-y: auto;
-  padding: 2rem;
+  padding: 2rem 3rem;
 `;
 
 const AppointmentListPage = () => {

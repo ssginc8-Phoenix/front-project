@@ -47,7 +47,7 @@ const AppointmentListComponent = ({
 }: AppointmentListProps) => {
   const [page, setPage] = useState(0);
 
-  const { list, pagination, loading, error } = useAppointmentList(page, 9);
+  const { list, pagination, loading, error } = useAppointmentList(page, 6);
 
   useEffect(() => {}, [refreshTrigger]);
 

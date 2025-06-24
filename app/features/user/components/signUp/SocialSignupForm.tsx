@@ -12,6 +12,7 @@ const Wrapper = styled.div`
   align-items: flex-start;
   padding: 80px 40px;
   min-height: 100vh;
+  margin-bottom: 5rem;
 `;
 
 const FormContainer = styled.div`

@@ -1,10 +1,11 @@
 import styled from 'styled-components';
 import HospitalChart from '~/features/hospitals/components/hospitalAdmin/chart/HospitalChart';
 import ReviewPolarityChart from '~/features/hospitals/components/hospitalAdmin/chart/ReviewPolarityChart';
-import UserRatioChart from '~/features/hospitals/components/hospitalAdmin/chart/UserRatioChart';
+
 import { useMyHospitalId } from '~/features/hospitals/hooks/useMyHospitalId';
 import { Card } from '~/features/hospitals/components/hospitalAdmin/ui/card';
 import Sidebar from '~/common/Sidebar';
+import MonthlyStatsChart from '~/features/hospitals/components/hospitalAdmin/chart/MonthlyStatsChart';
 
 const PageWrapper = styled.div`
   width: 100%;
@@ -40,7 +41,11 @@ const ChartGrid = styled.div`
 `;
 
 const FullWidthCard = styled(Card)`
+  /* 그리드 상에서 2열을 차지하도록 */
   grid-column: span 2;
+  /* flex 계산을 무시하고, width:100% 로 덮어씌우기 */
+  flex: none;
+  width: 100%;
 `;
 
 const HospitalAdminChartPage = () => {
@@ -65,7 +70,7 @@ const HospitalAdminChartPage = () => {
           </Card>
 
           <Card>
-            <UserRatioChart />
+            <MonthlyStatsChart />
           </Card>
         </ChartGrid>
       </MainSection>

@@ -8,6 +8,7 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
   padding-top: 100px;
+  margin-bottom: 15rem;
 `;
 
 const Logo = styled.img`
@@ -33,7 +34,6 @@ const SignUpPage = () => {
 
   return (
     <>
-      <Header />
       <Wrapper>
         <Logo src="/logo.png" alt="Docto 로고" />
         <Title>함께하는 진료! DocTo는 여러분을 환영합니다</Title>

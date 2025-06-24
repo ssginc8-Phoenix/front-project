@@ -31,7 +31,6 @@ const SignUpFormPage = () => {
 
   return (
     <>
-      <Header />
       <Wrapper>
         {providerId === undefined ? (
           <UserSignupForm />

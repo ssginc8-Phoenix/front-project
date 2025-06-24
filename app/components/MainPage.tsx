@@ -7,7 +7,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import ChatBotComponent from '~/features/chatbot/components/ChatBotComponent';
 
-const ads = ['new_banner.png', '/ads/ad2.png', '/ads/ad3.png'];
+const ads = ['new_banner.png', 'new_banner.png', 'new_banner.png'];
 
 const notices = [
   { id: 1, title: '바른이비인후과 진료시간 변경 안내 (07.01부터)', date: '2025.06.23' },
@@ -37,10 +37,10 @@ const features = [
     route: '/appointments/list',
   },
   {
-    title: '서류 발급',
-    desc: '서류를 간편하게 다운로드하세요',
-    icon: '/document.png',
-    route: '/documents',
+    title: '캘린더',
+    desc: '일정을 한눈에 살펴보세요',
+    icon: '/calendar.png',
+    route: '/calendar',
   },
   {
     title: '서류 발급',
@@ -170,7 +170,7 @@ export default function MainPage() {
       </AboutBlock>
 
       <AboutBlock reverse>
-        <AboutImage src="/images/about-2.jpg" alt="원스톱 헬스케어 관리" />
+        <AboutImage src="/images/about-2.jpg" />
         <AboutText>
           <h5>ONE-STOP CARE</h5>
           <h3>
@@ -186,7 +186,7 @@ export default function MainPage() {
         </AboutText>
       </AboutBlock>
 
-      <ChatBtn onClick={() => setIsChatOpen(true)}>💬</ChatBtn>
+      <ChatBtn onClick={() => setIsChatOpen(true)}>🤖</ChatBtn>
       {isChatOpen && (
         <ChatModalOverlay onClick={() => setIsChatOpen(false)}>
           <ChatModal onClick={(e) => e.stopPropagation()}>
@@ -296,7 +296,7 @@ export const TelCard = styled.div`
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 1px;
 
   .caption {
     font-size: 0.9rem;
@@ -364,8 +364,8 @@ export const GuideCard = styled.div`
   }
 
   img {
-    width: 46px;
-    height: 46px;
+    width: 70px;
+    height: 70px;
     margin-bottom: 14px;
   }
 
@@ -381,13 +381,13 @@ export const GuideCard = styled.div`
   }
 `;
 
-export const AboutBlock = styled.section<{ reverse?: boolean }>`
-  max-width: 1200px;
-  margin: 100px auto;
+const AboutBlock = styled.section<{ reverse?: boolean }>`
+  max-width: 1000px;
+  margin: 10px auto;
   padding: 0 16px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  gap: 16px;
   grid-template-areas: ${({ reverse }) => (reverse ? '"img txt"' : '"txt img"')};
   align-items: center;
 

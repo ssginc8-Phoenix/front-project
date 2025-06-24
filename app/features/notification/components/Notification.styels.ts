@@ -15,7 +15,7 @@ export const BellWrapper = styled.div`
   align-items: center;
 `;
 
-export const BellIcon = styled.div<{ shake: boolean }>`
+export const BellIcon = styled.div<{ $shake: boolean }>`
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
@@ -31,7 +31,7 @@ export const BellIcon = styled.div<{ shake: boolean }>`
   svg {
     color: #333;
     animation: ${(props) =>
-      props.shake
+      props.$shake
         ? css`
             ${shakeAnimation} 0.5s ease-in-out
           `
@@ -92,7 +92,9 @@ export const DeleteButton = styled.button`
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  transition:
+    background-color 0.2s ease-in-out,
+    color 0.2s ease-in-out;
 
   &:hover {
     background-color: #ffe8e6; /* 연한 빨간색 */
@@ -104,12 +106,12 @@ export const DeleteButton = styled.button`
   }
 `;
 
-
 export const NotificationItem = styled.div<{ isRead?: boolean }>`
   padding: 12px 15px;
   border-bottom: 1px solid #eee;
   cursor: pointer;
-  background-color: ${props => props.isRead ? '#f8f8f8' : '#ffffff'}; /* 읽음 여부에 따라 배경색 변경 */
+  background-color: ${(props) =>
+    props.isRead ? '#f8f8f8' : '#ffffff'}; /* 읽음 여부에 따라 배경색 변경 */
   transition: background-color 0.2s ease-in-out;
 
   &:last-child {
@@ -117,7 +119,7 @@ export const NotificationItem = styled.div<{ isRead?: boolean }>`
   }
 
   &:hover {
-    background-color: ${props => props.isRead ? '#f0f0f0' : '#f5f5f5'};
+    background-color: ${(props) => (props.isRead ? '#f0f0f0' : '#f5f5f5')};
   }
 `;
 

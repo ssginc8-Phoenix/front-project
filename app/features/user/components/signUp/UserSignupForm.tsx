@@ -16,6 +16,7 @@ const Wrapper = styled.div`
   align-items: flex-start;
   padding: 80px 40px;
   min-height: 100vh;
+  margin-bottom: 5rem;
 `;
 
 const FormContainer = styled.div`
@@ -375,9 +376,13 @@ const UserSignupForm = () => {
               type="tel"
               value={formatPhoneNumber(phone)}
               placeholder="010-1234-1234 (-를 빼고 입력해주세요)"
-              onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+              onChange={(e) => {
+                const digitsOnly = e.target.value.replace(/[^0-9]/g, '').slice(0, 11);
+                setPhone(digitsOnly);
+              }}
               required
             />
+
             {phoneError && <ErrorMessage>{phoneError}</ErrorMessage>}
           </FieldGroup>
 

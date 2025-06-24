@@ -8,8 +8,8 @@ const Title = styled.h2`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  justify-content: center;
   margin-bottom: 2rem;
-  margin-left: 30rem;
 `;
 
 const HospitalCreatePage = () => {

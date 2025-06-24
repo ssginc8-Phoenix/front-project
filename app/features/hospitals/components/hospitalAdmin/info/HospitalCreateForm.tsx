@@ -524,7 +524,7 @@ const HospitalCreateForm: React.FC = () => {
                   </option>
                 ))}
               </SelectDay>
-
+              <span style={{ fontWeight: 500 }}>진료:</span>
               <InputTime
                 type="time"
                 step="1800" /* 30분 단위 */
@@ -558,10 +558,14 @@ const HospitalCreateForm: React.FC = () => {
                 value={row.lunchEnd}
                 onChange={(e) => handleScheduleChange(idx, 'lunchEnd', e.target.value)}
               />
-              <CopyScheduleButton onClick={() => handleCopySchedule(idx)} title="이 행 복사">
+              <CopyScheduleButton
+                type="button"
+                onClick={() => handleCopySchedule(idx)}
+                title="이 행 복사"
+              >
                 <Copy size={16} />
               </CopyScheduleButton>
-              <RemoveScheduleButton onClick={() => handleRemoveSchedule(idx)}>
+              <RemoveScheduleButton type="button" onClick={() => handleRemoveSchedule(idx)}>
                 <X size={16} />
               </RemoveScheduleButton>
             </ScheduleRow>
@@ -614,7 +618,7 @@ const InputTime = styled.input`
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
   background: white;
-  font-size: 1rem;
+  font-size: 0.875rem;
 
   /* iOS Safari, Chrome on Android 등의 기본 시계 스타일 유지하면서 */
   /* Firefox 에서는 placeholder 폰트 크기 조정이 필요할 수 있습니다 */

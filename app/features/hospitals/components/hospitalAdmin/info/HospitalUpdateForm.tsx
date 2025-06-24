@@ -875,8 +875,9 @@ const InputTime = styled.input`
   padding: 0.5rem;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
+  width: 110px;
   background: white;
-  font-size: 1rem;
+  font-size: 0.875rem;
 
   /* iOS Safari, Chrome on Android 등의 기본 시계 스타일 유지하면서 */
   /* Firefox 에서는 placeholder 폰트 크기 조정이 필요할 수 있습니다 */

@@ -71,9 +71,12 @@ export const deletePatient = async (patientId: number): Promise<void> => {
  * 환자별 보호자 목록 조회 API
  */
 export const getGuardians = async (patientId: number): Promise<Guardian[]> => {
-  const res = await axios.get<Guardian[]>(`${HOST}/${patientId}/guardians`, {
-    withCredentials: true,
-  });
+  const res = await axios.get<Guardian[]>(
+    `http://localhost:8080/api/v1/patients/${patientId}/guardians`,
+    {
+      withCredentials: true,
+    },
+  );
   return res.data;
 };
 

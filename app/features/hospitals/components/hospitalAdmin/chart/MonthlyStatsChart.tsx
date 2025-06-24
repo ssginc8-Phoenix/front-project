@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import dayjs from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 import 'dayjs/locale/ko';
@@ -12,104 +12,140 @@ dayjs.locale('ko');
 const Container = styled.div`
   width: 100%;
   background: #fff;
-  border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 `;
 
 const Title = styled.h2`
   font-size: 1.5rem;
   font-weight: 700;
   color: #00499e;
-  margin-bottom: 1rem;
+  margin-bottom: 6rem;
 `;
 
-const Controls = styled.div`
+const ToggleContainer = styled.div`
   display: flex;
-  align-items: center;
+  justify-content: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
+`;
 
-  & input {
-    padding: 0.5rem;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+const ToggleButton = styled.button<{ active: boolean }>`
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #4e73df;
+  border-radius: 9999px;
+  background: ${({ active }) => (active ? '#4e73df' : '#fff')};
+  color: ${({ active }) => (active ? '#fff' : '#4e73df')};
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+  &:hover {
+    background: #4e73df;
+    color: #fff;
   }
 `;
 
-const MonthlyStatsChart: React.FC = () => {
-  // 기본으로 6개월 전부터 이번 달까지 선택
-  const [startMonth, setStartMonth] = useState(dayjs().subtract(5, 'month').format('YYYY-MM'));
-  const [endMonth, setEndMonth] = useState(dayjs().format('YYYY-MM'));
+const ChartWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+`;
 
-  const startDate = dayjs(startMonth + '-01').format('YYYY-MM-DD');
-  const endDate = dayjs(endMonth + '-01')
-    .endOf('month')
-    .format('YYYY-MM-DD');
+export const MonthlyHalfChart: React.FC = () => {
+  const [half, setHalf] = useState<'first' | 'second'>('first');
+  const year = dayjs().year();
 
-  // 일별 진료 데이터를 해당 기간만큼 가져옴
+  const startMonth = half === 'first' ? `${year}-01` : `${year}-07`;
+  const endMonth = half === 'first' ? `${year}-06` : `${year}-12`;
+
+  const startDate = dayjs(`${startMonth}-01`).format('YYYY-MM-DD');
+  const endDate = dayjs(`${endMonth}-01`).endOf('month').format('YYYY-MM-DD');
+
   const { data: stats = [], loading } = useAppointmentStats(startDate, endDate);
 
-  // 일별 데이터를 월별 합계로 집계
+  // 일별 → 월별 집계
   const monthlyMap: Record<string, number> = {};
   stats.forEach(({ date, count }) => {
     const m = dayjs(date).format('YYYY-MM');
     monthlyMap[m] = (monthlyMap[m] || 0) + count;
   });
-  const chartData = Object.entries(monthlyMap)
-    .map(([month, value]) => ({ month, value }))
-    .sort((a, b) => (a.month > b.month ? 1 : -1));
+
+  // 해당 반기의 모든 달 리스트
+  const months: string[] = [];
+  for (
+    let cursor = dayjs(`${startMonth}-01`);
+    !cursor.isAfter(dayjs(`${endMonth}-01`).endOf('month'));
+    cursor = cursor.add(1, 'month')
+  ) {
+    months.push(cursor.format('YYYY-MM'));
+  }
+
+  const chartData = months.map((m) => ({
+    month: m,
+    value: monthlyMap[m] || 0,
+  }));
+
+  // 간격 & 크기 조절
+  const barSize = 35;
+  const barGap = 40;
 
   return (
     <Container>
-      <Title>월별 진료 통계</Title>
-      <Controls>
-        <label>
-          시작 월:
-          <input type="month" value={startMonth} onChange={(e) => setStartMonth(e.target.value)} />
-        </label>
-        <label>
-          종료 월:
-          <input type="month" value={endMonth} onChange={(e) => setEndMonth(e.target.value)} />
-        </label>
-      </Controls>
+      <Title>월별 진료 통계 ({half === 'first' ? '상반기' : '하반기'})</Title>
+
+      <ToggleContainer>
+        <ToggleButton active={half === 'first'} onClick={() => setHalf('first')}>
+          상반기 (1~6월)
+        </ToggleButton>
+        <ToggleButton active={half === 'second'} onClick={() => setHalf('second')}>
+          하반기 (7~12월)
+        </ToggleButton>
+      </ToggleContainer>
 
       {loading ? (
         <p>📊 데이터를 불러오는 중입니다...</p>
       ) : (
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <XAxis
-              dataKey="month"
-              tickFormatter={(val) => dayjs(val + '-01').format('YYYY년 M월')}
-              tick={{ fontSize: 12, fill: '#555' }}
-              axisLine={{ stroke: '#ccc' }}
-              tickLine={false}
-            />
-            <YAxis
-              dataKey="value"
-              tick={{ fontSize: 12, fill: '#555' }}
-              axisLine={{ stroke: '#ccc' }}
-              tickLine={false}
-              allowDecimals={false}
-            />
-            <Tooltip
-              formatter={(val) => [`${val}건`, '진료 수']}
-              labelFormatter={(label) => `📅 ${label}`}
-              contentStyle={{
-                backgroundColor: '#fff',
-                borderRadius: 8,
-                boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-              }}
-              labelStyle={{ fontWeight: 'bold', color: '#333' }}
-            />
-            <Bar dataKey="value" fill="#4e73df" radius={[6, 6, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <ChartWrapper>
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart
+              data={chartData}
+              margin={{ top: 20, right: 20, left: 20, bottom: 10 }}
+              barGap={barGap}
+              barCategoryGap="30%"
+            >
+              <XAxis
+                dataKey="month"
+                interval={0}
+                tickFormatter={(val) => dayjs(`${val}-01`).format('M월')}
+                tick={{ fontSize: 12, fill: '#555' }}
+                axisLine={{ stroke: '#ccc' }}
+                tickLine={false}
+              />
+              <YAxis
+                dataKey="value"
+                tick={{ fontSize: 12, fill: '#555' }}
+                axisLine={{ stroke: '#ccc' }}
+                tickLine={false}
+                allowDecimals={false}
+              />
+              <Tooltip
+                formatter={(v) => [`${v}건`, '진료 수']}
+                labelFormatter={(label) => `📅 ${label}`}
+                contentStyle={{
+                  backgroundColor: '#fff',
+                  borderRadius: 8,
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                }}
+                labelStyle={{ fontWeight: 'bold', color: '#333' }}
+              />
+              <Bar dataKey="value" fill="#4e73df" radius={[6, 6, 0, 0]} barSize={barSize} />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartWrapper>
       )}
     </Container>
   );
 };
 
-export default MonthlyStatsChart;
+export default MonthlyHalfChart;

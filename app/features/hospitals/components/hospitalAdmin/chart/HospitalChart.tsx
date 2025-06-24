@@ -17,8 +17,6 @@ const Container = styled.div`
   width: 100%;
   padding: 1rem;
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 `;
 
 const Title = styled.h2`
@@ -55,7 +53,6 @@ const NavButton = styled.button<{ disabled?: boolean }>`
   transition:
     transform 0.2s,
     box-shadow 0.2s;
-
   &:hover {
     transform: ${({ disabled }) => (disabled ? 'none' : 'scale(1.05)')};
     box-shadow: ${({ disabled }) => (disabled ? 'none' : '0 8px 16px rgba(34, 74, 190, 0.3)')};
@@ -67,20 +64,48 @@ const NavButton = styled.button<{ disabled?: boolean }>`
 `;
 // — styled-components 정의 끝 —
 
-const HospitalChart = () => {
+interface StatItem {
+  dateIso: string; // "YYYY-MM-DD"
+  display: string; // "MM/DD"
+  count: number;
+}
+
+const HospitalChart: React.FC = () => {
+  // 1) 주간 범위 계산 (월요일~일요일)
   const [weekStart, setWeekStart] = useState(() => dayjs().startOf('isoWeek'));
   const weekEnd = weekStart.endOf('isoWeek');
+
   const startDate = weekStart.format('YYYY-MM-DD');
   const endDate = weekEnd.format('YYYY-MM-DD');
-  const { data: appointmentStats = [], loading } = useAppointmentStats(startDate, endDate);
 
+  // 2) useAppointmentStats 훅에서 dateIso, display, count 가져오기
+  const { data: rawStats = [], loading } = useAppointmentStats(startDate, endDate);
+
+  // 3) rawStats를 Map으로 변환 (key: dateIso → count)
+  const rawMap = new Map<string, number>();
+  rawStats.forEach(({ date, count }) => {
+    rawMap.set(date, count);
+  });
+
+  // 4) 빈 날을 0으로 채워 fullStats 생성
+  const fullStats: StatItem[] = [];
+  for (let d = weekStart.clone(); !d.isAfter(weekEnd); d = d.add(1, 'day')) {
+    const iso = d.format('YYYY-MM-DD');
+    fullStats.push({
+      dateIso: iso,
+      display: d.format('M/D'),
+      count: rawMap.get(iso) ?? 0,
+    });
+  }
+
+  // 5) 차트 너비 계산
   const barSize = 20;
-  const barGap = 40;
-  const chartWidth = appointmentStats.length * (barSize + barGap) + 100;
+  const barGap = 60;
+  const chartWidth = fullStats.length * (barSize + barGap) + 100;
 
+  // 6) 이전/다음 주 핸들러
   const prevWeek = () => setWeekStart((prev) => prev.subtract(1, 'week'));
   const nextWeek = () => setWeekStart((prev) => prev.add(1, 'week'));
-  const isNextDisabled = weekStart.isSame(dayjs().startOf('isoWeek'));
 
   return (
     <Container>
@@ -97,7 +122,7 @@ const HospitalChart = () => {
           {weekStart.format('M/D')} ~ {weekEnd.format('M/D')}
         </span>
 
-        <NavButton onClick={nextWeek} disabled={isNextDisabled}>
+        <NavButton onClick={nextWeek}>
           다음 주 <ChevronRight size={16} />
         </NavButton>
       </Nav>
@@ -109,16 +134,16 @@ const HospitalChart = () => {
           <BarChart
             width={chartWidth}
             height={300}
-            data={appointmentStats}
+            data={fullStats}
             margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
           >
             <XAxis
-              dataKey="date"
+              dataKey="dateIso"
               tick={{ fontSize: 12, fill: '#555' }}
               interval={0}
               axisLine={{ stroke: '#ddd' }}
-              tickFormatter={(v) => {
-                const d = dayjs(v);
+              tickFormatter={(iso) => {
+                const d = dayjs(iso as string);
                 return `${d.format('M/D')}(${d.format('dd')})`;
               }}
             />
@@ -128,14 +153,14 @@ const HospitalChart = () => {
               allowDecimals={false}
             />
             <Tooltip
+              formatter={(val: number) => [`${val}건`, '진료 수']}
+              labelFormatter={(label: string) => `📅 ${dayjs(label).format('YYYY-MM-DD')}`}
               contentStyle={{
                 backgroundColor: '#fff',
                 borderRadius: 8,
                 boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
               }}
               labelStyle={{ fontWeight: 'bold', color: '#333' }}
-              formatter={(val: any) => [`${val}건`, '진료 수']}
-              labelFormatter={(label) => `📅 ${label}`}
             />
             <Bar dataKey="count" fill="#4e73df" radius={[6, 6, 0, 0]} barSize={barSize} />
           </BarChart>

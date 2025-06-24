@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Outlet } from 'react-router';
 import Header from '~/layout/Header';
-import MyPageFooter from '~/layout/Footer';
+import MyPageFooter from '~/layout/MyPageFooter';
 
 const LayoutContainer = styled.div`
   display: flex;

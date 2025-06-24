@@ -7,7 +7,7 @@ const policyLinks = [
   { name: '개인정보처리방침', url: '#' },
 ];
 
-export default function Footer() {
+export default function MyPageFooter() {
   return (
     <FooterBar>
       <FooterContent>

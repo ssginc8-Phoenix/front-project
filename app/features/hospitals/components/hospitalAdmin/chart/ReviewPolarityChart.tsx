@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { useReviews } from '~/features/hospitals/hooks/hospitalAdmin/useReviews';
 import type { KeywordType } from '~/features/hospitals/types/review';
+import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
 
 interface Props {
   hospitalId: number;
@@ -119,18 +120,18 @@ export const KeywordTypeMap: Record<
 
 const ReviewPolarityChart: React.FC<Props> = ({ hospitalId }) => {
   const { data: reviewsRaw, loading } = useReviews(hospitalId);
-  // reviewsRaw가 null일 수도 있으므로 빈 배열을 기본으로
   const reviews = reviewsRaw ?? [];
 
-  // 모든 훅과 연산은 최상위에서
-  const allKeywords: KeywordType[] = reviews.flatMap((r) => r.keywords as KeywordType[]);
-  const keywordCounts = allKeywords.reduce<Record<KeywordType, number>>(
-    (acc, kw) => {
-      acc[kw] = (acc[kw] || 0) + 1;
-      return acc;
-    },
-    {} as Record<KeywordType, number>,
-  );
+  // 키워드별 등장 횟수 집계
+  const keywordCounts = reviews
+    .flatMap((r) => r.keywords as KeywordType[])
+    .reduce<Record<KeywordType, number>>(
+      (acc, kw) => {
+        acc[kw] = (acc[kw] || 0) + 1;
+        return acc;
+      },
+      {} as Record<KeywordType, number>,
+    );
 
   useEffect(() => {
     if (!loading && reviews.length > 0) {
@@ -139,13 +140,10 @@ const ReviewPolarityChart: React.FC<Props> = ({ hospitalId }) => {
     }
   }, [loading, reviews.length, keywordCounts]);
 
-  if (loading) {
-    return <p>🔄 리뷰 데이터를 불러오는 중...</p>;
-  }
-  if (reviews.length === 0) {
-    return <p>리뷰가 아직 없습니다.</p>;
-  }
+  if (loading) return <p>🔄 리뷰 데이터를 불러오는 중...</p>;
+  if (reviews.length === 0) return <p>리뷰가 아직 없습니다.</p>;
 
+  // 리뷰 감정 통계
   const counts = reviews.reduce(
     (acc, review) => {
       const pos = review.keywords.filter((kw) => KeywordTypeMap[kw].polarity === 'POSITIVE').length;
@@ -156,18 +154,40 @@ const ReviewPolarityChart: React.FC<Props> = ({ hospitalId }) => {
     },
     { positive: 0, negative: 0 },
   );
-
   const totalReviews = counts.positive + counts.negative;
   const chartData = [
     { name: '긍정 리뷰', value: counts.positive },
     { name: '부정 리뷰', value: counts.negative },
   ].filter((d) => d.value > 0);
 
+  // 상위 3개 키워드 추출
+  const sorted = Object.entries(keywordCounts) as [KeywordType, number][];
+  const positiveTop3 = sorted
+    .filter(([kw]) => KeywordTypeMap[kw].polarity === 'POSITIVE')
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+  const negativeTop3 = sorted
+    .filter(([kw]) => KeywordTypeMap[kw].polarity === 'NEGATIVE')
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+
+  // emoji 매핑 테이블
+  const emojiMap: Record<string, string> = {};
+  [...GOOD_OPTIONS, ...BAD_OPTIONS].forEach((opt) => {
+    emojiMap[opt.value] = opt.emoji;
+  });
+
   return (
-    <div className="w-full flex flex-col items-center gap-4">
+    <div className="w-full flex flex-col items-center gap-6">
       <h2 className="text-xl font-semibold">리뷰 감정 통계 ({totalReviews}건)</h2>
-      <div style={{ width: '100%', height: 300 }}>
-        <ResponsiveContainer>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          height: 300,
+        }}
+      >
+        <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={chartData}
@@ -188,6 +208,29 @@ const ReviewPolarityChart: React.FC<Props> = ({ hospitalId }) => {
             <Tooltip formatter={(value: number) => `${value}건`} />
           </PieChart>
         </ResponsiveContainer>
+      </div>
+
+      <div className="w-full flex justify-around mt-4">
+        <div className="flex flex-col items-center">
+          <h3 className="font-medium mb-2">상위 3개 긍정 키워드</h3>
+          <ul className="list-disc list-inside">
+            {positiveTop3.map(([kw, count]) => (
+              <li key={kw}>
+                {emojiMap[kw]} {KeywordTypeMap[kw].label}: {count}회
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="flex flex-col items-center">
+          <h3 className="font-medium mb-2">상위 3개 부정 키워드</h3>
+          <ul className="list-disc list-inside">
+            {negativeTop3.map(([kw, count]) => (
+              <li key={kw}>
+                {emojiMap[kw]} {KeywordTypeMap[kw].label}: {count}회
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

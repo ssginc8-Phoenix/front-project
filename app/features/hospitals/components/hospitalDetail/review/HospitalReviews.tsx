@@ -128,7 +128,6 @@ const HospitalReviews: React.FC<HospitalReviewsProps> = ({ hospitalId }) => {
 
     return (
       <>
-        <SectionTitle>키워드 통계</SectionTitle>
         <KeywordStatsChart reviews={reviews} />
       </>
     );

@@ -1,4 +1,3 @@
-// src/features/patient/pages/GuardianManagementPage.tsx
 import styled from 'styled-components';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -136,7 +135,6 @@ const GuardianManagementPage: React.FC = () => {
       setPatientInfo(p);
       if (p?.patientId) {
         await reloadAll(p.patientId);
-
       }
     })();
   }, [fetchMyInfo]);
@@ -208,6 +206,7 @@ const GuardianManagementPage: React.FC = () => {
             <GuardianCard
               key={g.patientGuardianId}
               name={g.name}
+              profileImageUrl={g.profileImageUrl}
               onDelete={() => handleDelete(g)}
             />
           ))}
@@ -227,7 +226,8 @@ const GuardianManagementPage: React.FC = () => {
             onChange={(e) => setNewGuardianEmail(e.target.value)}
             placeholder="보호자 이메일 입력"
             style={{
-              width: '100%',
+              display: 'flex',
+              width: '92.5%',
               padding: 12,
               marginBottom: 20,
               borderRadius: 8,

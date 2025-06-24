@@ -23,11 +23,23 @@ const Info = styled.div`
   gap: 1rem;
 `;
 
-const Avatar = styled.div`
-  width: 56px;
-  height: 56px;
-  background-color: #e0ebff;
+// AvatarWrapper: 이미지가 있는 경우 <img>를, 없는 경우 fallback 원 형태
+const AvatarWrapper = styled.div<{ size?: number }>`
+  flex-shrink: 0;
+  width: ${({ size }) => size ?? 56}px;
+  height: ${({ size }) => size ?? 56}px;
   border-radius: 9999px;
+  overflow: hidden;
+  background-color: #e0ebff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const Texts = styled.div`
@@ -55,14 +67,17 @@ const DeleteBtn = styled.button`
 
 interface Props {
   name: string;
+  profileImageUrl?: string;
   onClick?: () => void;
   onDelete: () => void;
 }
 
-const GuardianCard: React.FC<Props> = ({ name, onClick, onDelete }) => (
+const GuardianCard: React.FC<Props> = ({ name, profileImageUrl, onClick, onDelete }) => (
   <Card onClick={onClick}>
     <Info>
-      <Avatar />
+      <AvatarWrapper>
+        {profileImageUrl ? <img src={profileImageUrl} alt={`${name} 프로필`} /> : null}
+      </AvatarWrapper>
       <Texts>
         <Name>{name}</Name>
       </Texts>

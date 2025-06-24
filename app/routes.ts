@@ -6,13 +6,13 @@ export default [
     route('search', 'routes/hospital/hospitalSearch.tsx'),
   ]),
 
+  route('myPage', 'layout/MyPageLayout.tsx', [index('routes/myPage.tsx')]),
+
   /** MainLayout 적용 */
   route('', 'layout/MainLayout.tsx', [
     /** HOME */
     index('routes/main.tsx'),
     route('hospital/main', 'routes/hospital/HospitalMainPage.tsx'),
-
-    route('myPage', 'routes/myPage.tsx'), // 역할별 마이페이지
 
     /** 로그인, 회원가입 관련  */
     route('/login', 'routes/login.tsx'),

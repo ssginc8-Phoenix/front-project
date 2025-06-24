@@ -58,9 +58,16 @@ const AppointmentUpdateModal = ({
   const navigate = useNavigate();
   const { cancelAppointment, updateAppointmentStatus } = useAppointmentActions();
 
-  const canConfirm = appointment?.status === 'REQUESTED';
-  const canModify = appointment?.status === 'REQUESTED' || appointment?.status === 'CONFIRMED';
-  let canRequestPayment =
+  // '예약 승인' 버튼을 보여줄지 여부 (예약 요청 상태일 때만)
+  const canShowConfirmButton = appointment?.status === 'REQUESTED';
+  // '예약 취소' 버튼을 보여줄지 여부 (요청 또는 승인 상태일 때)
+  const canShowCancelButton =
+    appointment?.status === 'REQUESTED' || appointment?.status === 'CONFIRMED';
+  // '예약 완료' 버튼을 보여줄지 여부 (예약 승인 상태일 때만)
+  const canShowCompleteButton = appointment?.status === 'CONFIRMED';
+
+  // 결제 요청 버튼ㅇ르 보여줄지 여부 (온라인 결제 타입이고, 완료 상태일 때)
+  const canRequestPayment =
     appointment?.paymentType === 'ONLINE' && appointment?.status === 'COMPLETED';
 
   /** 예약 취소 */
@@ -87,8 +94,8 @@ const AppointmentUpdateModal = ({
     const success = await updateAppointmentStatus(appointment.appointmentId, 'COMPLETED');
     if (success) {
       await refetch();
+      // 예약 완료 후 결제 타입이 온라인이면 결제 요청 페이지로 이동
       if (appointment?.paymentType === 'ONLINE') {
-        canRequestPayment = true;
         navigate(`/payments/request?appointmentId=${appointment?.appointmentId}`);
       }
     }
@@ -101,109 +108,114 @@ const AppointmentUpdateModal = ({
 
   return (
     <>
-      <Overlay>
-        <Modal>
-          {isLoading && <LoadingIndicator />}
-          {error && <ErrorMessage message={error.message} />}
+      {isOpen && (
+        <Overlay>
+          <Modal>
+            {isLoading && <LoadingIndicator />}
+            {error && <ErrorMessage message={error.message} />}
 
-          {appointment && (
-            <>
-              <Header>
-                <TitleRow>
-                  <Title>
-                    {new Date(appointment.appointmentTime).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}{' '}
-                    진료예약
-                  </Title>
-                  <RefreshButton onClick={() => refetch()} disabled={isRefetching} title="새로고침">
-                    <FiRefreshCw size={20} />
-                  </RefreshButton>
-                </TitleRow>
+            {appointment && (
+              <>
+                <Header>
+                  <TitleRow>
+                    <Title>
+                      {new Date(appointment.appointmentTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}{' '}
+                      진료예약
+                    </Title>
+                    <RefreshButton
+                      onClick={() => refetch()}
+                      disabled={isRefetching}
+                      title="새로고침"
+                    >
+                      <FiRefreshCw size={20} />
+                    </RefreshButton>
+                  </TitleRow>
 
-                <HospitalName> {appointment.hospitalName} </HospitalName>
-                <SubInfo>
-                  {appointment.doctorName} 원장 <br />
-                  접수: {appointment.createdAt}
-                </SubInfo>
-              </Header>
+                  <HospitalName> {appointment.hospitalName} </HospitalName>
+                  <SubInfo>
+                    {appointment.doctorName} 원장 <br />
+                    접수: {appointment.createdAt}
+                  </SubInfo>
+                </Header>
 
-              <Divider />
+                <Divider />
 
-              <Section>
-                <SectionTitle>병원 정보</SectionTitle>
-                <InfoText>{appointment.hospitalName}</InfoText>
-                <InfoText>{appointment.doctorName} 원장</InfoText>
-              </Section>
-
-              <Section>
-                <SectionTitle>환자 정보</SectionTitle>
-                <InfoText>{appointment.patientName}</InfoText>
-                {/* 주민등록번호 : 민감정보 보여주는 게 맞는가? */}
-              </Section>
-
-              <Section>
-                <SectionTitle>진료 항목</SectionTitle>
-                <InfoText>
-                  {appointment.appointmentType === 'SCHEDULED' ||
-                  appointment.appointmentType === 'IMMEDIATE'
-                    ? '일반 진료'
-                    : appointment.appointmentType}
-                </InfoText>
-              </Section>
-
-              <Section>
-                <SectionTitle>진료 정보</SectionTitle>
-                <InfoText>{appointment.symptom}</InfoText>
-              </Section>
-
-              {appointment.question && (
                 <Section>
-                  <SectionTitle>원장님께 궁금한 점</SectionTitle>
-                  <InfoText>{appointment.question}</InfoText>
+                  <SectionTitle>병원 정보</SectionTitle>
+                  <InfoText>{appointment.hospitalName}</InfoText>
+                  <InfoText>{appointment.doctorName} 원장</InfoText>
                 </Section>
-              )}
 
-              <Section>
-                <SectionTitle>수납 방법</SectionTitle>
-                <InfoText>{appointment.paymentType}</InfoText>
-              </Section>
+                <Section>
+                  <SectionTitle>환자 정보</SectionTitle>
+                  <InfoText>{appointment.patientName}</InfoText>
+                </Section>
 
-              <ButtonStack>
-                <ButtonRowCenter>
-                  {canModify && (
-                    <>
+                <Section>
+                  <SectionTitle>진료 항목</SectionTitle>
+                  <InfoText>
+                    {appointment.appointmentType === 'SCHEDULED' ||
+                    appointment.appointmentType === 'IMMEDIATE'
+                      ? '일반 진료'
+                      : appointment.appointmentType}
+                  </InfoText>
+                </Section>
+
+                <Section>
+                  <SectionTitle>진료 정보</SectionTitle>
+                  <InfoText>{appointment.symptom}</InfoText>
+                </Section>
+
+                {appointment.question && (
+                  <Section>
+                    <SectionTitle>원장님께 궁금한 점</SectionTitle>
+                    <InfoText>{appointment.question}</InfoText>
+                  </Section>
+                )}
+
+                <Section>
+                  <SectionTitle>수납 방법</SectionTitle>
+                  <InfoText>{appointment.paymentType}</InfoText>
+                </Section>
+
+                <ButtonStack>
+                  <ButtonRowCenter>
+                    {canShowCancelButton && (
                       <Button $variant="secondary" onClick={handleCancel}>
                         예약 취소
                       </Button>
-                      {canConfirm && (
-                        <Button $variant="secondary" onClick={handleConfirm}>
-                          예약 승인
-                        </Button>
-                      )}
+                    )}
+                    {canShowConfirmButton && (
+                      <Button $variant="secondary" onClick={handleConfirm}>
+                        예약 승인
+                      </Button>
+                    )}
+                    {canShowCompleteButton && (
                       <Button $variant="secondary" onClick={handleComplete}>
                         예약 완료
                       </Button>
-                    </>
-                  )}
-                </ButtonRowCenter>
+                    )}
+                  </ButtonRowCenter>
 
-                <ButtonRowCenter>
-                  {canRequestPayment && (
-                    <Button $variant="primary" onClick={handlePaymentRequest}>
-                      결제 요청
+                  <ButtonRowCenter>
+                    {canRequestPayment && (
+                      <Button $variant="primary" onClick={handlePaymentRequest}>
+                        결제 요청
+                      </Button>
+                    )}
+                    <Button $variant="primary" onClick={onClose}>
+                      닫기
                     </Button>
-                  )}
-                  <Button $variant="primary" onClick={onClose}>
-                    닫기
-                  </Button>
-                </ButtonRowCenter>
-              </ButtonStack>
-            </>
-          )}
-        </Modal>
-      </Overlay>
+                  </ButtonRowCenter>
+                </ButtonStack>
+              </>
+            )}
+          </Modal>
+        </Overlay>
+      )}
     </>
   );
 };

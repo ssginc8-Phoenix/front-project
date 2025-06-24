@@ -29,6 +29,7 @@ export const doctorSidebarItems: doctorSidebarItem[] = [
   { label: '정보 관리', icon: '🧑‍🤝‍🧑', key: 'info' },
   { label: '스케줄 관리', icon: '⚙️', key: 'schedule' },
   { label: '예약 조회', icon: '💬', key: 'appointment' },
+  { label: 'Q&A', icon: '❓', key: 'qna' },
   { label: '캘린더', icon: '🗓️', key: 'calendar' },
   { label: '리뷰 관리', icon: '✏️', key: 'review' },
   { label: '고객 센터', icon: '📋', key: 'cs' },

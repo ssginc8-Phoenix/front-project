@@ -19,6 +19,7 @@ export interface PatientSummary {
   name: string;
   residentRegistrationNumber: string;
   patientGuardianId: number;
+  address: string;
 }
 
 const HOST = 'http://localhost:8080/api/v1/guardians';

@@ -33,6 +33,7 @@ interface AroundMapProps {
   center: LocationCoord;
   onMarkerClick: (hospitalId: number, lat: number, lng: number) => void;
   currentLocation?: { latitude: number; longitude: number } | null;
+  patientMarker?: { lat: number; lng: number } | null;
 }
 
 const AroundMap = ({ hospitals, center, onMarkerClick, currentLocation }: AroundMapProps) => {

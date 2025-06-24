@@ -5,6 +5,7 @@ import UserRatioChart from '~/features/hospitals/components/hospitalAdmin/chart/
 import { useMyHospitalId } from '~/features/hospitals/hooks/useMyHospitalId';
 import { Card } from '~/features/hospitals/components/hospitalAdmin/ui/card';
 import Sidebar from '~/common/Sidebar';
+import MonthlyStatsChart from '~/features/hospitals/components/hospitalAdmin/chart/MonthlyStatsChart';
 
 const PageWrapper = styled.div`
   width: 100%;
@@ -65,7 +66,7 @@ const HospitalAdminChartPage = () => {
           </Card>
 
           <Card>
-            <UserRatioChart />
+            <MonthlyStatsChart />
           </Card>
         </ChartGrid>
       </MainSection>

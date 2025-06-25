@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ReviewMyListResponse } from '~/features/reviews/types/review';
-import { ReviewCard } from '~/features/reviews/component/common/ReviewCard';
+import { ReviewCard } from '~/features/reviews/component/list/ReviewCard';
 import Pagination from '~/components/common/Pagination';
 import styled from 'styled-components';
 

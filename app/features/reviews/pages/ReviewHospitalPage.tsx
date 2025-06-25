@@ -6,8 +6,8 @@ import Pagination from '~/components/common/Pagination';
 import { useHospitalReviews } from '~/features/reviews/hooks/useHospitalReviews';
 import type { HospitalReviewResponse } from '~/features/reviews/types/review';
 import { reportReview } from '~/features/reviews/api/reviewAPI';
-import { HospitalReviewCard } from '~/features/reviews/component/common/HospitalReviewCard';
-import { ReportModal } from '~/features/reviews/component/common/ReportModal';
+import { HospitalReviewCard } from '~/features/reviews/component/list/HospitalReviewCard';
+import { ReportModal } from '~/features/reviews/component/update/ReportModal';
 
 export default function ReviewHospitalPage() {
   const { hospitalId } = useParams<{ hospitalId: string }>();

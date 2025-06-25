@@ -1,7 +1,7 @@
 import type { AppointmentList } from '~/types/appointment';
 import styled from 'styled-components';
 import { StatusBadge } from '~/components/styled/StatusBadge';
-import ReviewCreateModal from '~/features/reviews/component/modal/ReviewCreateModal';
+import ReviewCreateModal from '~/features/reviews/component/add/ReviewCreateModal';
 import { useState } from 'react';
 import LoginStore from '~/features/user/stores/LoginStore';
 import { useNavigate } from 'react-router';

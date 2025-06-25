@@ -154,20 +154,16 @@ const AppointmentListComponent = ({
                   />
                 ))}
               </Grid>
-              {pagination.totalPages > 1 && ( // 페이지네이션 조건은 그대로 유지
-                <PaginationWrapper>
-                  <Pagination
-                    totalPages={pagination.totalPages}
-                    currentPage={pagination.currentPage}
-                    onPageChange={setPage}
-                  />
-                </PaginationWrapper>
-              )}
+              <PaginationWrapper>
+                <Pagination
+                  totalPages={pagination.totalPages}
+                  currentPage={pagination.currentPage}
+                  onPageChange={setPage}
+                />
+              </PaginationWrapper>
             </>
           ) : (
-            // 데이터가 없을 때 EmptyStateContainer 렌더링
             <EmptyStateContainer>
-              {/* 여기에 아이콘을 추가할 수도 있습니다. 예: <NoDataIcon /> */}
               <EmptyStateText>예약 내역이 존재하지 않습니다.</EmptyStateText>
               <EmptyStateText>새로운 예약을 추가해보세요!</EmptyStateText>
             </EmptyStateContainer>

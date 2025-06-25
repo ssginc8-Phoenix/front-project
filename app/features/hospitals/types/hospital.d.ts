@@ -58,10 +58,10 @@ export type DayOfWeek =
 export interface CreateScheduleRequest {
   hospitalScheduleId?: number | undefined;
   dayOfWeek: DayOfWeek;
-  openTime: string; // "HH:mm:ss" 포맷 (예: "09:00:00")
-  closeTime: string; // "HH:mm:ss"
-  lunchStart: string; // "HH:mm:ss"
-  lunchEnd: string; // "HH:mm:ss"
+  openTime: string | null; // "HH:mm:ss" 포맷 (예: "09:00:00")
+  closeTime: string | null; // "HH:mm:ss"
+  lunchStart: string | null; // "HH:mm:ss"
+  lunchEnd: string | null; // "HH:mm:ss"
 }
 export interface HospitalForm {
   name: string;

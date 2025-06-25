@@ -1,29 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { X } from 'lucide-react';
-import { getWaiting } from '~/features/hospitals/api/hospitalAPI';
+import { createWaiting, getWaiting, getMyHospital } from '~/features/hospitals/api/hospitalAPI';
 
 interface WaitModalProps {
-  hospitalId: number;
   onClose: () => void;
-  onConfirm: (count: number) => void;
 }
 
-const WaitModal: React.FC<WaitModalProps> = ({ hospitalId, onClose, onConfirm }) => {
+const WaitModal: React.FC<WaitModalProps> = ({ onClose }) => {
+  const [hospitalId, setHospitalId] = useState<number | null>(null);
   const [count, setCount] = useState(0);
+
   useEffect(() => {
-    const fetchWaiting = async () => {
+    const fetchHospitalAndWaiting = async () => {
       try {
-        const res = await getWaiting(hospitalId);
+        const hospital = await getMyHospital();
+        setHospitalId(hospital.hospitalId);
+
+        const res = await getWaiting(hospital.hospitalId);
         if (typeof res === 'number') setCount(res);
         else if (res.waiting) setCount(res.waiting);
       } catch (error) {
-        console.error('웨이팅 정보 불러오기 실패', error);
+        console.error('병원 또는 대기 정보 불러오기 실패', error);
       }
     };
 
-    fetchWaiting();
-  }, [hospitalId]);
+    fetchHospitalAndWaiting();
+  }, []);
+
+  const handleRegisterWaiting = async () => {
+    if (!hospitalId) return;
+    try {
+      await createWaiting(hospitalId, count);
+      alert(`대기 인원 ${count}명 등록 완료`);
+      onClose(); // 모달 닫기
+    } catch (err) {
+      console.error('대기 등록 에러', err);
+      alert('대기 등록에 실패했습니다.');
+    }
+  };
+
   return (
     <Overlay>
       <ModalBox>
@@ -52,7 +68,7 @@ const WaitModal: React.FC<WaitModalProps> = ({ hospitalId, onClose, onConfirm })
           <CancelButton type="button" onClick={onClose}>
             취소
           </CancelButton>
-          <ConfirmButton type="button" onClick={() => onConfirm(count)}>
+          <ConfirmButton type="button" onClick={handleRegisterWaiting}>
             등록
           </ConfirmButton>
         </Actions>

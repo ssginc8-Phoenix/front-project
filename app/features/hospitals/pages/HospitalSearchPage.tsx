@@ -32,7 +32,7 @@ const SidePanel = styled.div`
   top: 16px;
   left: 16px;
   bottom: 16px;
-  width: 360px;
+  width: 400px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -67,13 +67,7 @@ const SidePanelWrapper = styled.div`
   gap: 1rem;
   z-index: 1000;
 `;
-const ListAndSelectorWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-`;
+
 const ListWithSelectorRow = styled.div`
   display: flex;
   flex-direction: row;
@@ -82,13 +76,7 @@ const ListWithSelectorRow = styled.div`
   gap: 0.5rem;
   padding: 0 1rem;
 `;
-const PatientSelectorWrapper = styled.div`
-  background: white;
-  padding: 8px 12px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  height: fit-content;
-`;
+
 const PAGE_SIZE = 10;
 const RADIUS_KM = 5;
 type SortBy = 'NAME' | 'DISTANCE' | 'REVIEW_COUNT';
@@ -293,7 +281,6 @@ const HospitalSearchPage: React.FC = () => {
                 }
                 selectedHospitalId={undefined}
               />
-              <PatientSelector />
             </ListWithSelectorRow>
           ) : (
             <HospitalDetailPanel hospitalId={selectedId} onClose={() => setSelectedId(null)} />

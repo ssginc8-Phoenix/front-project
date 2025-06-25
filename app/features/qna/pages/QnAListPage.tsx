@@ -160,8 +160,6 @@ const QnAListPage = () => {
   );
 };
 
-export default QnAListPage;
-
 function maskName(name: string) {
   if (!name || name.length < 2) return name;
   return name[0] + '*'.repeat(name.length - 1);
@@ -280,3 +278,5 @@ const CenterText = styled.p`
   justify-content: center;
   color: #6b7280;
 `;
+
+export default QnAListPage;

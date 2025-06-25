@@ -1,4 +1,4 @@
-(''); // src/features/patient/pages/PatientInfoPage.tsx
+// src/features/patient/pages/PatientInfoPage.tsx
 import styled from 'styled-components';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
@@ -75,16 +75,20 @@ const Label = styled.label`
   flex-shrink: 0;
 `;
 
-const Input = styled.input`
+const Input = styled.input<{ readOnly?: boolean }>`
   flex: 1;
-  font-size: 1.09rem;
-  padding: 14px 12px;
-  border: 1.7px solid #e2e4e8;
-  border-radius: 7px;
-  background: #f8fafd;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background-color: ${({ readOnly }) => (readOnly ? '#f2f2f2' : '#fff')};
+  color: ${({ readOnly }) => (readOnly ? '#777' : '#000')};
+
   &:focus {
-    border-color: #2261bb;
-    background: #fff;
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    background-color: #fff;
   }
 `;
 
@@ -231,10 +235,12 @@ const PatientInfoPage = () => {
             </InputRow>
             <InputRow>
               <Label htmlFor="address">주소</Label>
-              <DaumPost
-                address={form.address}
-                setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
-              />
+              <div style={{ flex: 1 }}>
+                <DaumPost
+                  address={form.address}
+                  setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
+                />
+              </div>
             </InputRow>
             <InputRow>
               <Label htmlFor="detailAddress">상세 주소</Label>

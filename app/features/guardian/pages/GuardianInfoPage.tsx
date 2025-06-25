@@ -25,19 +25,6 @@ const PageWrapper = styled.div`
   font-family: 'Segoe UI', sans-serif;
 `;
 
-const SidebarBox = styled.div`
-  width: 260px;
-  background: white;
-  border-right: 1px solid #e0e0e0;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 0 20px 20px 0;
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
-  flex-shrink: 0;
-`;
-
 const MainSection = styled.section`
   flex: 1;
   padding: 2rem;
@@ -89,16 +76,20 @@ const Label = styled.label`
   flex-shrink: 0;
 `;
 
-const Input = styled.input`
+const Input = styled.input<{ readOnly?: boolean }>`
   flex: 1;
-  font-size: 1.09rem;
-  padding: 14px 12px;
-  border: 1.7px solid #e2e4e8;
-  border-radius: 7px;
-  background: #f8fafd;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background-color: ${({ readOnly }) => (readOnly ? '#f2f2f2' : '#fff')};
+  color: ${({ readOnly }) => (readOnly ? '#777' : '#000')};
+
   &:focus {
-    border-color: #2261bb;
-    background: #fff;
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    background-color: #fff;
   }
 `;
 
@@ -223,9 +214,7 @@ const GuardianInfoPage = () => {
   return (
     <>
       <PageWrapper>
-        <SidebarBox>
-          <Sidebar />
-        </SidebarBox>
+        <Sidebar />
         <MainSection>
           <GuardianInfoHeader>
             <Name>{user?.name}님 정보</Name>
@@ -250,10 +239,12 @@ const GuardianInfoPage = () => {
             </InputRow>
             <InputRow>
               <Label htmlFor="address">주소</Label>
-              <DaumPost
-                address={form.address}
-                setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
-              />
+              <div style={{ flex: 1 }}>
+                <DaumPost
+                  address={form.address}
+                  setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
+                />
+              </div>
             </InputRow>
             <InputRow>
               <Label htmlFor="detailAddress">상세 주소</Label>

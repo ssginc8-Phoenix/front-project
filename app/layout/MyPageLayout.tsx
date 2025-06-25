@@ -21,6 +21,14 @@ const MainContentWrapper = styled.div`
   gap: 2rem;
 `;
 
+const BackGroundColor = styled.div`
+  background-color: #f0f4f8;
+  border-radius: 1rem;
+
+  flex: 1;
+  display: flex;
+`;
+
 const ContentArea = styled.main`
   flex-grow: 1;
   overflow-y: auto;
@@ -32,10 +40,12 @@ const MyPageLayout = () => {
       <Header />
 
       <MainContentWrapper>
-        <Sidebar />
-        <ContentArea>
-          <Outlet />
-        </ContentArea>
+        <BackGroundColor>
+          <Sidebar />
+          <ContentArea>
+            <Outlet />
+          </ContentArea>
+        </BackGroundColor>
       </MainContentWrapper>
 
       <MyPageFooter />

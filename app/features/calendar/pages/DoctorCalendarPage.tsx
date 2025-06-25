@@ -8,16 +8,6 @@ const PageWrapper = styled.div`
   background-color: #f5f7fb;
 `;
 
-const SidebarBox = styled.div`
-  width: 260px;
-  background: #fff;
-  border-right: 1px solid #ddd;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
 const ContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;

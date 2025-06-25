@@ -7,7 +7,7 @@ import styled from 'styled-components';
 const PageLayout = styled.div`
   display: flex;
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #f0f4f8;
 `;
 
 const ContentArea = styled.div`

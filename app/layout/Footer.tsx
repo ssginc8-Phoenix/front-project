@@ -76,6 +76,7 @@ const CardRow = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
+  margin-top: 1rem;
   @media (min-width: 640px) {
     flex-direction: row;
   }

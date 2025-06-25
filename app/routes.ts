@@ -40,6 +40,9 @@ export default [
     route('/sandbox/success', 'routes/payments/success.tsx'),
     route('/sandbox/fail', 'routes/payments/fail.tsx'),
 
+    route('/documents', 'routes/documents/DocumentRequest.tsx'),
+    route('/documents/admin', 'routes/documents/AdminDocumentList.tsx'),
+
     /** 예약 요청 */
     route('appointment', 'routes/appointment/appointmentRequest.tsx'),
 

@@ -49,7 +49,7 @@ const features = [
     title: '서류 등록',
     desc: '서류를 간편하게 등록하세요',
     icon: '/document.png',
-    route: '/documents',
+    route: '/documents/admin',
   },
 ];
 

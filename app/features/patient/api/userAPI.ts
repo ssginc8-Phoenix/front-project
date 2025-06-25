@@ -36,15 +36,14 @@ export const getUserInfo = async (): Promise<User> => {
 /**
  * 유저 정보 수정 API
  */
-export const updateUserInfo = async (payload: {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-}) => {
-  const res = await axios.patch(HOST, payload, {
+export const updateUserInfo = async (formData: FormData) => {
+  const res = await axios.patch(`${HOST}`, formData, {
     withCredentials: true,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   });
+
   return res.data;
 };
 

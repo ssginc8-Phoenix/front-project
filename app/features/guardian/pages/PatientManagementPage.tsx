@@ -131,8 +131,7 @@ export const PatientManagementPage = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
 
-  const { user, fetchMyInfo } = useLoginStore();
-  const navigate = useNavigate();
+  const { fetchMyInfo } = useLoginStore();
 
   useEffect(() => {
     const fetchData = async () => {

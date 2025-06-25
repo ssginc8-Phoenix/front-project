@@ -13,11 +13,13 @@ const Container = styled.div`
   width: 100%;
   background: #fff;
   padding: 1rem;
+  align-items: center;
 `;
 
 const Title = styled.h2`
   font-size: 1.5rem;
-  font-weight: 700;
+  padding-left: 3rem;
+  font-weight: 600;
   color: #00499e;
   margin-bottom: 6rem;
 `;

@@ -361,6 +361,10 @@ export const GuideCard = styled.div`
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    img {
+      animation: bounce 0.6s ease-in-out infinite;
+    }
   }
 
   img {
@@ -378,6 +382,16 @@ export const GuideCard = styled.div`
     font-size: 0.85rem;
     color: #777;
     line-height: 1.4;
+  }
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
   }
 `;
 

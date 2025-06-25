@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { getMyDoctorInfo, updateDoctorProfile } from '~/features/doctor/api/doctorAPI';
+import loginStore from '~/features/user/stores/LoginStore';
 
 const Form = styled.form`
   max-width: 48rem;
@@ -82,6 +83,7 @@ const DoctorInfoForm: React.FC = () => {
   });
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { fetchMyInfo } = loginStore();
 
   useEffect(() => {
     const fetchDoctorInfo = async () => {
@@ -131,6 +133,7 @@ const DoctorInfoForm: React.FC = () => {
 
     try {
       await updateDoctorProfile(doctorId, formData);
+      await fetchMyInfo();
       alert('프로필이 수정되었습니다.');
     } catch (err) {
       console.error(err);

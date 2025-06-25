@@ -1,20 +1,12 @@
 import React, { useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import styled from 'styled-components';
 import { useReviews } from '~/features/hospitals/hooks/hospitalAdmin/useReviews';
 import type { KeywordType } from '~/features/hospitals/types/review';
 import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
 
-interface Props {
-  hospitalId: number;
-}
-
-const COLORS = {
-  POSITIVE: '#4caf50',
-  NEGATIVE: '#f44336',
-};
-
-// 키워드 메타 정보
-export const KeywordTypeMap: Record<
+// ✅ 이 부분이 기존 키워드 맵 전체
+const KeywordTypeMap: Record<
   KeywordType,
   { label: string; category: string; polarity: 'POSITIVE' | 'NEGATIVE' }
 > = {
@@ -28,20 +20,17 @@ export const KeywordTypeMap: Record<
     category: 'MEDICAL_SERVICE',
     polarity: 'POSITIVE',
   },
-
   CLEAN_HOSPITAL: { label: '위생이 청결해요', category: 'FACILITY_ENV', polarity: 'POSITIVE' },
   NICE_FACILITY: { label: '시설이 좋아요', category: 'FACILITY_ENV', polarity: 'POSITIVE' },
   EASY_PARKING: { label: '주차가 편해요', category: 'FACILITY_ENV', polarity: 'POSITIVE' },
   GOOD_LOCATION: { label: '위치가 좋아요', category: 'FACILITY_ENV', polarity: 'POSITIVE' },
   COMFORTABLE_ATMOS: { label: '분위기가 편안해요', category: 'FACILITY_ENV', polarity: 'POSITIVE' },
-
   FAIR_PRICE: { label: '진료비가 합리적이에요', category: 'COST_ADMIN', polarity: 'POSITIVE' },
   EASY_INSURANCE: { label: '보험 처리가 편해요', category: 'COST_ADMIN', polarity: 'POSITIVE' },
   FAST_RESULTS: { label: '검사 결과가 빨리 나와요', category: 'COST_ADMIN', polarity: 'POSITIVE' },
   ENOUGH_CONSULT: { label: '상담 시간이 충분해요', category: 'COST_ADMIN', polarity: 'POSITIVE' },
   WANT_RETURN: { label: '재방문하고 싶어요', category: 'COST_ADMIN', polarity: 'POSITIVE' },
   FAST_PAYMENT: { label: '수납이 빠르고 편해요', category: 'COST_ADMIN', polarity: 'POSITIVE' },
-
   UNFRIENDLY_EXAM: {
     label: '진료가 불친절해요',
     category: 'MEDICAL_SERVICE',
@@ -74,7 +63,6 @@ export const KeywordTypeMap: Record<
     category: 'MEDICAL_SERVICE',
     polarity: 'NEGATIVE',
   },
-
   DIRTY_HOSPITAL: { label: '병원이 지저분해요', category: 'FACILITY_ENV', polarity: 'NEGATIVE' },
   WORRY_CLEAN: { label: '소독/청결이 걱정돼요', category: 'FACILITY_ENV', polarity: 'NEGATIVE' },
   TIGHT_WAIT_AREA: {
@@ -102,7 +90,6 @@ export const KeywordTypeMap: Record<
     category: 'FACILITY_ENV',
     polarity: 'NEGATIVE',
   },
-
   EXPENSIVE: { label: '진료비가 너무 비싸요', category: 'COST_ADMIN', polarity: 'NEGATIVE' },
   PUSH_UNNECESSARY: {
     label: '불필요한 시술을 권유해요',
@@ -118,11 +105,61 @@ export const KeywordTypeMap: Record<
   LATE_RECEIPT: { label: '영수증/서류 처리 지연', category: 'COST_ADMIN', polarity: 'NEGATIVE' },
 };
 
-const ReviewPolarityChart: React.FC<Props> = ({ hospitalId }) => {
+// ✅ 스타일 컴포넌트들
+const Container = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+`;
+
+const Title = styled.h2`
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #00499e;
+`;
+
+const ChartWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  height: 300px;
+  width: 100%;
+`;
+
+const KeywordSection = styled.div`
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 1rem;
+`;
+
+const KeywordBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const KeywordTitle = styled.h3`
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+`;
+
+const KeywordList = styled.ul`
+  list-style: disc;
+  padding-left: 1rem;
+`;
+
+const KeywordItem = styled.li`
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+`;
+
+const ReviewPolarityChart: React.FC<{ hospitalId: number }> = ({ hospitalId }) => {
   const { data: reviewsRaw, loading } = useReviews(hospitalId);
   const reviews = reviewsRaw ?? [];
 
-  // 키워드별 등장 횟수 집계
   const keywordCounts = reviews
     .flatMap((r) => r.keywords as KeywordType[])
     .reduce<Record<KeywordType, number>>(
@@ -136,57 +173,49 @@ const ReviewPolarityChart: React.FC<Props> = ({ hospitalId }) => {
   useEffect(() => {
     if (!loading && reviews.length > 0) {
       console.table(keywordCounts);
-      console.log('🔍 원본 리뷰 데이터:', reviews);
     }
   }, [loading, reviews.length, keywordCounts]);
 
   if (loading) return <p>🔄 리뷰 데이터를 불러오는 중...</p>;
   if (reviews.length === 0) return <p>리뷰가 아직 없습니다.</p>;
 
-  // 리뷰 감정 통계
-  const counts = reviews.reduce(
-    (acc, review) => {
-      const pos = review.keywords.filter((kw) => KeywordTypeMap[kw].polarity === 'POSITIVE').length;
-      const neg = review.keywords.filter((kw) => KeywordTypeMap[kw].polarity === 'NEGATIVE').length;
-      if (pos >= neg) acc.positive++;
-      else acc.negative++;
-      return acc;
-    },
-    { positive: 0, negative: 0 },
-  );
-  const totalReviews = counts.positive + counts.negative;
+  const counts = reviews
+    .flatMap((r) => r.keywords as KeywordType[])
+    .reduce(
+      (acc, kw) => {
+        const polarity = KeywordTypeMap[kw].polarity;
+        if (polarity === 'POSITIVE') acc.positive++;
+        else acc.negative++;
+        return acc;
+      },
+      { positive: 0, negative: 0 },
+    );
+
   const chartData = [
     { name: '긍정 리뷰', value: counts.positive },
     { name: '부정 리뷰', value: counts.negative },
   ].filter((d) => d.value > 0);
 
-  // 상위 3개 키워드 추출
   const sorted = Object.entries(keywordCounts) as [KeywordType, number][];
   const positiveTop3 = sorted
     .filter(([kw]) => KeywordTypeMap[kw].polarity === 'POSITIVE')
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3);
+
   const negativeTop3 = sorted
     .filter(([kw]) => KeywordTypeMap[kw].polarity === 'NEGATIVE')
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3);
 
-  // emoji 매핑 테이블
   const emojiMap: Record<string, string> = {};
   [...GOOD_OPTIONS, ...BAD_OPTIONS].forEach((opt) => {
     emojiMap[opt.value] = opt.emoji;
   });
 
   return (
-    <div className="w-full flex flex-col items-center gap-6">
-      <h2 className="text-xl font-semibold">리뷰 감정 통계 ({totalReviews}건)</h2>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          height: 300,
-        }}
-      >
+    <Container>
+      <Title>리뷰 키워드 통계 ({counts.positive + counts.negative}개)</Title>
+      <ChartWrapper>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -201,38 +230,39 @@ const ReviewPolarityChart: React.FC<Props> = ({ hospitalId }) => {
               {chartData.map((entry, idx) => (
                 <Cell
                   key={`cell-${idx}`}
-                  fill={COLORS[entry.name === '긍정 리뷰' ? 'POSITIVE' : 'NEGATIVE']}
+                  fill={entry.name === '긍정 리뷰' ? '#4caf50' : '#f44336'}
                 />
               ))}
             </Pie>
             <Tooltip formatter={(value: number) => `${value}건`} />
           </PieChart>
         </ResponsiveContainer>
-      </div>
+      </ChartWrapper>
 
-      <div className="w-full flex justify-around mt-4">
-        <div className="flex flex-col items-center">
-          <h3 className="font-medium mb-2">상위 3개 긍정 키워드</h3>
-          <ul className="list-disc list-inside">
+      <KeywordSection>
+        <KeywordBox>
+          <KeywordTitle>상위 3개 긍정 키워드</KeywordTitle>
+          <KeywordList>
             {positiveTop3.map(([kw, count]) => (
-              <li key={kw}>
+              <KeywordItem key={kw}>
                 {emojiMap[kw]} {KeywordTypeMap[kw].label}: {count}회
-              </li>
+              </KeywordItem>
             ))}
-          </ul>
-        </div>
-        <div className="flex flex-col items-center">
-          <h3 className="font-medium mb-2">상위 3개 부정 키워드</h3>
-          <ul className="list-disc list-inside">
+          </KeywordList>
+        </KeywordBox>
+
+        <KeywordBox>
+          <KeywordTitle>상위 3개 부정 키워드</KeywordTitle>
+          <KeywordList>
             {negativeTop3.map(([kw, count]) => (
-              <li key={kw}>
+              <KeywordItem key={kw}>
                 {emojiMap[kw]} {KeywordTypeMap[kw].label}: {count}회
-              </li>
+              </KeywordItem>
             ))}
-          </ul>
-        </div>
-      </div>
-    </div>
+          </KeywordList>
+        </KeywordBox>
+      </KeywordSection>
+    </Container>
   );
 };
 

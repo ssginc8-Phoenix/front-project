@@ -1,4 +1,4 @@
-// src/features/patient/pages/PatientInfoPage.tsx
+(''); // src/features/patient/pages/PatientInfoPage.tsx
 import styled from 'styled-components';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
@@ -7,10 +7,8 @@ import { PasswordModal } from '~/features/patient/components/PasswordModal';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { getUserInfo, updateUserInfo } from '~/features/patient/api/userAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
-import type { User } from '~/types/user';
 import Sidebar from '~/common/Sidebar';
 
-// 전화번호 3-4-4 포맷 함수
 const formatPhoneNumber = (value: string) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
   const part1 = digits.slice(0, 3);
@@ -24,7 +22,6 @@ const formatPhoneNumber = (value: string) => {
 const PatientPageWrapper = styled.div`
   display: flex;
   min-height: 100vh;
-  //background-color: #f0f4f8;
   font-family: 'Segoe UI', sans-serif;
 `;
 
@@ -35,7 +32,7 @@ const MainSection = styled.section`
   flex-direction: column;
   min-width: 0;
   max-width: 900px;
-  margin-left: 48px; /* 사이드바와의 간격 유지 */
+  margin-left: 48px;
 `;
 
 const PatientInfoHeader = styled.div`
@@ -56,8 +53,7 @@ const Name = styled.div`
 const InfoFormBox = styled.form`
   margin: 0;
   width: 100%;
-  max-width: none;
-  padding: 38px 28px 32px 28px;
+  padding: 38px 28px 32px;
   background: #fff;
   border-radius: 22px;
   box-shadow: 0 4px 24px rgba(34, 97, 187, 0.09);
@@ -72,19 +68,15 @@ const InputRow = styled.div`
   gap: 22px;
 `;
 
-const AddressWrapper = styled.div`
-  flex: 1;
-`;
-
 const Label = styled.label`
-  font-size: 1.07rem;
+  font-size: 0.9rem;
   color: #2c2c2c;
   width: 88px;
   flex-shrink: 0;
 `;
 
 const Input = styled.input`
-  flex: 1 1 auto;
+  flex: 1;
   font-size: 1.09rem;
   padding: 14px 12px;
   border: 1.7px solid #e2e4e8;
@@ -97,7 +89,7 @@ const Input = styled.input`
 `;
 
 const SaveButton = styled.button`
-  margin: 28px auto 0 auto;
+  margin: 28px auto 0;
   padding: 12px 52px;
   background: #00499e;
   color: #fff;
@@ -106,7 +98,6 @@ const SaveButton = styled.button`
   border-radius: 19px;
   border: none;
   cursor: pointer;
-  transition: background 0.16s;
   &:hover {
     background: #003a7a;
   }
@@ -117,36 +108,33 @@ const Footer = styled.div`
   text-align: center;
   color: #999;
   font-size: 1.01rem;
-  letter-spacing: 0.04rem;
-
   span {
     color: #00499e;
     cursor: pointer;
-    border: none;
-    background: none;
     margin: 0 8px;
     font-weight: 500;
-    font-size: 1.03rem;
-    transition: color 0.12s;
     &:hover {
       color: #ff4646;
     }
   }
 `;
 
+const ImagePreview = styled.img`
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 88px;
+`;
+
 const PatientInfoPage = () => {
   const { user, fetchMyInfo } = useLoginStore();
   const navigate = useNavigate();
-  const [userinfo, setUserinfo] = useState<User | null>(null);
 
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-  });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '' });
   const [detailAddress, setDetailAddress] = useState('');
-
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
   const [showByeModal, setShowByeModal] = useState(false);
@@ -156,11 +144,10 @@ const PatientInfoPage = () => {
       try {
         await fetchMyInfo();
         const myInfo = await getUserInfo();
-        setUserinfo(myInfo);
 
         const raw = myInfo.address || '';
-        let main = raw;
-        let detail = '';
+        let main = raw,
+          detail = '';
         const m = raw.match(/^(.*\))\s*(.*)$/);
         if (m) {
           main = m[1];
@@ -174,29 +161,41 @@ const PatientInfoPage = () => {
           address: main,
         });
         setDetailAddress(detail);
+        setPreviewUrl(myInfo.profileImageUrl || null);
       } catch (error) {
         console.error('사용자 정보 가져오기 실패', error);
       }
     };
-
     fetchUser();
   }, [fetchMyInfo]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, phone: formatPhoneNumber(e.target.value) });
   };
   const handleDetailAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDetailAddress(e.target.value);
   };
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfileImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const fullAddress = form.address + (detailAddress ? ' ' + detailAddress : '');
-      await updateUserInfo({ ...form, address: fullAddress });
+      const fullAddress = detailAddress ? `${form.address} ${detailAddress}` : form.address;
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('email', form.email);
+      formData.append('phone', form.phone.replace(/-/g, ''));
+      formData.append('address', fullAddress);
+      if (profileImage) formData.append('profileImage', profileImage);
+
+      await updateUserInfo(formData);
+      await fetchMyInfo();
       alert('정보가 성공적으로 저장되었습니다.');
     } catch (error) {
       console.error('정보 저장 실패', error);
@@ -204,88 +203,62 @@ const PatientInfoPage = () => {
     }
   };
 
-  const handleSidebarChange = (key: string) => {
-    navigate(`/patients/${key}`);
-  };
-  const handleWithdrawClick = () => setShowConfirm(true);
-  const handleConfirmCancel = () => setShowConfirm(false);
-  const handleConfirmOk = () => {
-    setShowConfirm(false);
-    setShowPwModal(true);
-  };
-  const handlePwModalClose = () => setShowPwModal(false);
-  const handlePwSuccess = async () => {
-    setShowPwModal(false);
-    alert('회원 탈퇴 완료 (가짜)');
-    setShowByeModal(true);
-  };
-  const handleByeClose = () => {
-    setShowByeModal(false);
-    navigate('/');
-  };
-
   return (
     <>
       <PatientPageWrapper>
         <Sidebar />
-
         <MainSection>
           <PatientInfoHeader>
             <Name>{user?.name} 님 정보</Name>
           </PatientInfoHeader>
-
           <InfoFormBox onSubmit={handleSave}>
             <InputRow>
               <Label htmlFor="name">이름</Label>
-              <Input id="name" name="name" value={form.name} readOnly />
+              <Input id="name" value={form.name} readOnly />
             </InputRow>
-
             <InputRow>
               <Label htmlFor="email">이메일</Label>
-              <Input id="email" name="email" value={form.email} readOnly />
+              <Input id="email" value={form.email} readOnly />
             </InputRow>
-
             <InputRow>
               <Label htmlFor="phone">전화번호</Label>
               <Input
                 id="phone"
-                name="phone"
                 value={form.phone}
                 onChange={handlePhoneChange}
                 placeholder="010-1234-5678"
               />
             </InputRow>
-
             <InputRow>
-              <Label>주소</Label>
-              <AddressWrapper>
-                <DaumPost
-                  address={form.address}
-                  setAddress={(newAddr) => setForm({ ...form, address: newAddr })}
-                />
-              </AddressWrapper>
+              <Label htmlFor="address">주소</Label>
+              <DaumPost
+                address={form.address}
+                setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
+              />
             </InputRow>
-
             <InputRow>
-              <Label htmlFor="detailAddress">상세주소</Label>
+              <Label htmlFor="detailAddress">상세 주소</Label>
               <Input
                 id="detailAddress"
                 value={detailAddress}
                 onChange={handleDetailAddressChange}
-                placeholder="상세 주소를 입력하세요. 예: 111동 1234호"
+                placeholder="예: 111동 1234호"
               />
             </InputRow>
-
+            <InputRow>
+              <Label htmlFor="profileImage">프로필 이미지</Label>
+              <Input id="profileImage" type="file" accept="image/*" onChange={handleImageChange} />
+            </InputRow>
+            {previewUrl && <ImagePreview src={previewUrl} alt="미리보기" />}
             <SaveButton type="submit">저장</SaveButton>
           </InfoFormBox>
-
           <Footer>
-            <span onClick={handleWithdrawClick}>회원탈퇴</span>
+            <span onClick={() => setShowConfirm(true)}>회원탈퇴</span>
           </Footer>
         </MainSection>
       </PatientPageWrapper>
 
-      <ReusableModal open={showConfirm} onClose={handleConfirmCancel} hideCloseButton>
+      <ReusableModal open={showConfirm} onClose={() => setShowConfirm(false)} hideCloseButton>
         <div
           style={{ fontSize: '1.13rem', fontWeight: 600, marginBottom: 24, textAlign: 'center' }}
         >
@@ -293,7 +266,7 @@ const PatientInfoPage = () => {
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
           <button
-            onClick={handleConfirmCancel}
+            onClick={() => setShowConfirm(false)}
             style={{
               background: '#f3f3f3',
               borderRadius: 16,
@@ -301,16 +274,15 @@ const PatientInfoPage = () => {
               padding: '10px 24px',
               color: '#555',
               fontWeight: 500,
-              fontSize: '1.05rem',
-              cursor: 'pointer',
-              transition: 'background 0.16s',
-              '&:hover': { background: '#e0e0e0' },
             }}
           >
             취소
           </button>
           <button
-            onClick={handleConfirmOk}
+            onClick={() => {
+              setShowConfirm(false);
+              setShowPwModal(true);
+            }}
             style={{
               background: '#ff4646',
               borderRadius: 16,
@@ -318,20 +290,29 @@ const PatientInfoPage = () => {
               padding: '10px 24px',
               color: '#fff',
               fontWeight: 600,
-              fontSize: '1.05rem',
-              cursor: 'pointer',
-              transition: 'background 0.16s',
-              '&:hover': { background: '#cc3737' },
             }}
           >
             탈퇴하기
           </button>
         </div>
       </ReusableModal>
-
-      <PasswordModal open={showPwModal} onClose={handlePwModalClose} onSuccess={handlePwSuccess} />
-
-      <ReusableModal open={showByeModal} onClose={handleByeClose} hideCloseButton>
+      <PasswordModal
+        open={showPwModal}
+        onClose={() => setShowPwModal(false)}
+        onSuccess={() => {
+          setShowPwModal(false);
+          alert('회원 탈퇴 완료 (가짜)');
+          setShowByeModal(true);
+        }}
+      />
+      <ReusableModal
+        open={showByeModal}
+        onClose={() => {
+          setShowByeModal(false);
+          navigate('/');
+        }}
+        hideCloseButton
+      >
         <div
           style={{
             color: '#00499e',
@@ -347,7 +328,10 @@ const PatientInfoPage = () => {
           안녕히 가세요!
         </div>
         <button
-          onClick={handleByeClose}
+          onClick={() => {
+            setShowByeModal(false);
+            navigate('/');
+          }}
           style={{
             marginTop: 20,
             padding: '12px 24px',

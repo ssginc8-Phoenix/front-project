@@ -112,7 +112,63 @@ const StyledItem = styled.li`
   }
 `;
 
-/* ----------------------------- 타입 정의 ----------------------------- */
+const DetailContainer = styled.div`
+  background: #f9fafb;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+`;
+
+const HeaderSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const HeaderIcon = styled.div`
+  font-size: 2rem;
+  background: #e0f2fe;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+`;
+
+const HeaderTitle = styled.h3`
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+`;
+
+const InfoGrid = styled.div`
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  row-gap: 1rem;
+  column-gap: 5rem;
+`;
+
+const Label = styled.div`
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  text-align: right;
+`;
+
+const Value = styled.div`
+  font-size: 1rem;
+  color: #0f172a;
+`;
+
 interface AppointmentDetail {
   appointmentId: number;
   appointmentTime: string;
@@ -254,28 +310,30 @@ export default function DoctorCalendar() {
 
       {/* 예약 상세 모달 */}
       {detailOpen && appointmentDetail && (
-        <CommonModal
-          title={`${appointmentDetail.appointmentTime.split('T')[0]} 예약 상세`}
-          buttonText="확인"
-          onClose={() => setDetailOpen(false)}
-        >
-          <div style={{ textAlign: 'left', lineHeight: 1.6 }}>
-            <p>
-              <strong>환자:</strong> {appointmentDetail.patientName}
-            </p>
-            <p>
-              <strong>날짜:</strong> {appointmentDetail.appointmentTime.split('T')[0]}
-            </p>
-            <p>
-              <strong>시간:</strong> {appointmentDetail.appointmentTime.split('T')[1]}
-            </p>
-            <p>
-              <strong>증상:</strong> {appointmentDetail.symptom}
-            </p>
-            <p>
-              <strong>질문:</strong> {appointmentDetail.question}
-            </p>
-          </div>
+        <CommonModal title={null} buttonText="확인" onClose={() => setDetailOpen(false)}>
+          <DetailContainer>
+            <HeaderSection>
+              <HeaderIcon>🏥</HeaderIcon>
+              <HeaderTitle>{appointmentDetail.appointmentTime.split('T')[0]} 예약 상세</HeaderTitle>
+            </HeaderSection>
+
+            <InfoGrid>
+              <Label>환자</Label>
+              <Value>{appointmentDetail.patientName}</Value>
+
+              <Label>날짜</Label>
+              <Value>{appointmentDetail.appointmentTime.split('T')[0]}</Value>
+
+              <Label>시간</Label>
+              <Value>{appointmentDetail.appointmentTime.split('T')[1]}</Value>
+
+              <Label>증상</Label>
+              <Value>{appointmentDetail.symptom}</Value>
+
+              <Label>질문</Label>
+              <Value>{appointmentDetail.question}</Value>
+            </InfoGrid>
+          </DetailContainer>
         </CommonModal>
       )}
     </PageContainer>

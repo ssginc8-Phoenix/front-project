@@ -72,9 +72,11 @@ const Pagination = ({ totalPages, currentPage, onPageChange }: PaginationProps) 
 
   return (
     <Wrapper>
-      <ArrowButton onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 0}>
-        ◀ Previous
-      </ArrowButton>
+      {currentPage > 0 && (
+        <ArrowButton onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 0}>
+          ◀
+        </ArrowButton>
+      )}
 
       {createPageNumbers().map((item, index) =>
         item === '...' ? (
@@ -86,12 +88,14 @@ const Pagination = ({ totalPages, currentPage, onPageChange }: PaginationProps) 
         ),
       )}
 
-      <ArrowButton
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages - 1}
-      >
-        Next ▶
-      </ArrowButton>
+      {currentPage < totalPages - 1 && (
+        <ArrowButton
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages - 1}
+        >
+          ▶
+        </ArrowButton>
+      )}
     </Wrapper>
   );
 };

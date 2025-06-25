@@ -95,8 +95,6 @@ const QnAListPage = () => {
 
   return (
     <Layout>
-      <Sidebar />
-
       {/* 오른쪽 본문 */}
       <Content>
         <Header>

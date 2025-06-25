@@ -87,16 +87,16 @@ const Sidebar = () => {
 
   // 각 사이드바 아이템 키에 대한 라우트 정의
   const itemRoutes: { [key: string]: string } = {
-    guardian: '/guardian',
-    patient: '/mypage',
-    appointment: '/appointments', // 예약 조회 및 관리 페이지
-    calendar: '/calendar',
-    review: '/review',
-    qna: '/qna',
-    info: '/info',
-    schedule: '/schedule',
-    chart: '/chart',
-    cs: '/cs',
+    guardian: '/mypage/guardian',
+    patient: '/mypage/patient',
+    appointment: '/mypage/appointments', // 예약 조회 및 관리 페이지
+    calendar: '/mypage/calendar',
+    review: '/mypage/review',
+    qna: '/mypage/qna',
+    info: '/mypage/info',
+    schedule: '/mypage/schedule',
+    chart: '/mypage/chart',
+    cs: '/mypage/cs',
   };
 
   const handleSidebarChange = (key: string) => {

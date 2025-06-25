@@ -18,26 +18,6 @@ const formatPhoneNumber = (value: string) => {
   return part1;
 };
 
-const PageWrapper = styled.div`
-  display: flex;
-  min-height: 100vh;
-  background-color: #f0f4f8;
-  font-family: 'Segoe UI', sans-serif;
-`;
-
-const SidebarBox = styled.div`
-  width: 260px;
-  background: white;
-  border-right: 1px solid #e0e0e0;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 0 20px 20px 0;
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
-  flex-shrink: 0;
-`;
-
 const MainSection = styled.section`
   flex: 1;
   padding: 2rem;
@@ -222,60 +202,55 @@ const GuardianInfoPage = () => {
 
   return (
     <>
-      <PageWrapper>
-        <SidebarBox>
-          <Sidebar />
-        </SidebarBox>
-        <MainSection>
-          <GuardianInfoHeader>
-            <Name>{user?.name}님 정보</Name>
-          </GuardianInfoHeader>
-          <InfoFormBox onSubmit={handleSave}>
-            <InputRow>
-              <Label htmlFor="name">이름</Label>
-              <Input id="name" value={form.name} readOnly />
-            </InputRow>
-            <InputRow>
-              <Label htmlFor="email">이메일</Label>
-              <Input id="email" value={form.email} readOnly />
-            </InputRow>
-            <InputRow>
-              <Label htmlFor="phone">전화번호</Label>
-              <Input
-                id="phone"
-                value={form.phone}
-                onChange={handlePhoneChange}
-                placeholder="010-1234-5678"
-              />
-            </InputRow>
-            <InputRow>
-              <Label htmlFor="address">주소</Label>
-              <DaumPost
-                address={form.address}
-                setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
-              />
-            </InputRow>
-            <InputRow>
-              <Label htmlFor="detailAddress">상세 주소</Label>
-              <Input
-                id="detailAddress"
-                value={detailAddress}
-                onChange={handleDetailAddressChange}
-                placeholder="예: 111동 1234호"
-              />
-            </InputRow>
-            <InputRow>
-              <Label htmlFor="profileImage">프로필 이미지</Label>
-              <Input id="profileImage" type="file" accept="image/*" onChange={handleImageChange} />
-            </InputRow>
-            {previewUrl && <ImagePreview src={previewUrl} alt="미리보기" />}
-            <SaveButton type="submit">저장</SaveButton>
-          </InfoFormBox>
-          <Footer>
-            <span onClick={() => setShowConfirm(true)}>회원탈퇴</span>
-          </Footer>
-        </MainSection>
-      </PageWrapper>
+      <MainSection>
+        <GuardianInfoHeader>
+          <Name>{user?.name}님 정보</Name>
+        </GuardianInfoHeader>
+        <InfoFormBox onSubmit={handleSave}>
+          <InputRow>
+            <Label htmlFor="name">이름</Label>
+            <Input id="name" value={form.name} readOnly />
+          </InputRow>
+          <InputRow>
+            <Label htmlFor="email">이메일</Label>
+            <Input id="email" value={form.email} readOnly />
+          </InputRow>
+          <InputRow>
+            <Label htmlFor="phone">전화번호</Label>
+            <Input
+              id="phone"
+              value={form.phone}
+              onChange={handlePhoneChange}
+              placeholder="010-1234-5678"
+            />
+          </InputRow>
+          <InputRow>
+            <Label htmlFor="address">주소</Label>
+            <DaumPost
+              address={form.address}
+              setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
+            />
+          </InputRow>
+          <InputRow>
+            <Label htmlFor="detailAddress">상세 주소</Label>
+            <Input
+              id="detailAddress"
+              value={detailAddress}
+              onChange={handleDetailAddressChange}
+              placeholder="예: 111동 1234호"
+            />
+          </InputRow>
+          <InputRow>
+            <Label htmlFor="profileImage">프로필 이미지</Label>
+            <Input id="profileImage" type="file" accept="image/*" onChange={handleImageChange} />
+          </InputRow>
+          {previewUrl && <ImagePreview src={previewUrl} alt="미리보기" />}
+          <SaveButton type="submit">저장</SaveButton>
+        </InfoFormBox>
+        <Footer>
+          <span onClick={() => setShowConfirm(true)}>회원탈퇴</span>
+        </Footer>
+      </MainSection>
       <ReusableModal open={showConfirm} onClose={() => setShowConfirm(false)} hideCloseButton>
         <div
           style={{ fontSize: '1.13rem', fontWeight: 600, marginBottom: 24, textAlign: 'center' }}

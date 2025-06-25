@@ -11,15 +11,6 @@ import {
 import ReusableModal from '~/features/patient/components/ReusableModal';
 import Sidebar from '~/common/Sidebar'; // ReusableModal 경로 통일
 
-// --- 스타일 정의 ---
-const PageWrapper = styled.div`
-  display: flex; /* CalendarPage와 동일 */
-  min-height: 100vh; /* CalendarPage와 동일 */
-  background-color: #f0f4f8; /* CalendarPage와 동일 */
-  font-family: 'Segoe UI', sans-serif; /* CalendarPage와 동일 */
-  /* width, max-width, margin, padding, gap 제거. flex 컨테이너 역할만 */
-`;
-
 const MainSection = styled.div`
   flex: 1; /* CalendarPage의 ContentWrapper와 동일 */
   padding: 2rem; /* CalendarPage의 ContentWrapper와 동일 */
@@ -183,96 +174,92 @@ export const PatientManagementPage = () => {
 
   return (
     <>
-      <PageWrapper>
-        <Sidebar />
+      <MainSection>
+        <TitleWrapper>
+          <Title>🧑‍💼️ 환자 관리</Title>
+          <InviteButton onClick={() => setInviteModalOpen(true)}>초대 코드 입력</InviteButton>
+        </TitleWrapper>
 
-        <MainSection>
-          <TitleWrapper>
-            <Title>🧑‍💼️ 환자 관리</Title>
-            <InviteButton onClick={() => setInviteModalOpen(true)}>초대 코드 입력</InviteButton>
-          </TitleWrapper>
+        <ListWrapper>
+          {patients.map((patient) => (
+            <Card key={patient.patientId}>
+              <DeleteButton
+                onClick={() => {
+                  setSelectedPatientId(patient.patientId);
+                  setDeleteModalOpen(true);
+                }}
+              >
+                ×
+              </DeleteButton>
+              <div>
+                <PatientName>{patient.name}</PatientName>
+                <PatientInfo>{maskRRN(patient.residentRegistrationNumber)}</PatientInfo>
+              </div>
+            </Card>
+          ))}
+        </ListWrapper>
+      </MainSection>
 
-          <ListWrapper>
-            {patients.map((patient) => (
-              <Card key={patient.patientId}>
-                <DeleteButton
-                  onClick={() => {
-                    setSelectedPatientId(patient.patientId);
-                    setDeleteModalOpen(true);
-                  }}
-                >
-                  ×
-                </DeleteButton>
-                <div>
-                  <PatientName>{patient.name}</PatientName>
-                  <PatientInfo>{maskRRN(patient.residentRegistrationNumber)}</PatientInfo>
-                </div>
-              </Card>
-            ))}
-          </ListWrapper>
-        </MainSection>
+      {/* 초대코드 입력 모달 */}
+      <ReusableModal open={inviteModalOpen} onClose={() => setInviteModalOpen(false)}>
+        <div style={{ padding: 20 }}>
+          <h2 style={{ marginBottom: 20 }}>초대 코드 입력</h2>
+          <Input
+            type="text"
+            value={inviteCode}
+            onChange={(e) => setInviteCode(e.target.value)}
+            placeholder="초대 코드를 입력하세요"
+          />
+          <SubmitButton onClick={handleInviteAccept}>수락하기</SubmitButton>
+        </div>
+      </ReusableModal>
 
-        {/* 초대코드 입력 모달 */}
-        <ReusableModal open={inviteModalOpen} onClose={() => setInviteModalOpen(false)}>
-          <div style={{ padding: 20 }}>
-            <h2 style={{ marginBottom: 20 }}>초대 코드 입력</h2>
-            <Input
-              type="text"
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value)}
-              placeholder="초대 코드를 입력하세요"
-            />
-            <SubmitButton onClick={handleInviteAccept}>수락하기</SubmitButton>
-          </div>
-        </ReusableModal>
-
-        {/* 삭제 확인 모달 */}
-        <ReusableModal
-          open={deleteModalOpen}
-          onClose={() => setDeleteModalOpen(false)}
-          hideCloseButton
-        >
-          <div style={{ fontSize: '1.13rem', fontWeight: 600, marginBottom: 24 }}>
-            정말 이 환자 연결을 해제하시겠습니까?
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
-            <button
-              onClick={() => setDeleteModalOpen(false)}
-              style={{
-                background: '#f3f3f3',
-                borderRadius: 16,
-                border: 'none',
-                padding: '10px 24px',
-                color: '#555',
-                fontWeight: 500,
-                fontSize: '1.05rem',
-                cursor: 'pointer',
-                transition: 'background 0.16s',
-                '&:hover': { background: '#e0e0e0' },
-              }}
-            >
-              취소
-            </button>
-            <button
-              onClick={handleConfirmDelete}
-              style={{
-                background: '#ff4646',
-                borderRadius: 16,
-                border: 'none',
-                padding: '10px 24px',
-                color: '#fff',
-                fontWeight: 600,
-                fontSize: '1.05rem',
-                cursor: 'pointer',
-                transition: 'background 0.16s',
-                '&:hover': { background: '#cc3737' },
-              }}
-            >
-              삭제하기
-            </button>
-          </div>
-        </ReusableModal>
-      </PageWrapper>
+      {/* 삭제 확인 모달 */}
+      <ReusableModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        hideCloseButton
+      >
+        <div style={{ fontSize: '1.13rem', fontWeight: 600, marginBottom: 24 }}>
+          정말 이 환자 연결을 해제하시겠습니까?
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
+          <button
+            onClick={() => setDeleteModalOpen(false)}
+            style={{
+              background: '#f3f3f3',
+              borderRadius: 16,
+              border: 'none',
+              padding: '10px 24px',
+              color: '#555',
+              fontWeight: 500,
+              fontSize: '1.05rem',
+              cursor: 'pointer',
+              transition: 'background 0.16s',
+              '&:hover': { background: '#e0e0e0' },
+            }}
+          >
+            취소
+          </button>
+          <button
+            onClick={handleConfirmDelete}
+            style={{
+              background: '#ff4646',
+              borderRadius: 16,
+              border: 'none',
+              padding: '10px 24px',
+              color: '#fff',
+              fontWeight: 600,
+              fontSize: '1.05rem',
+              cursor: 'pointer',
+              transition: 'background 0.16s',
+              '&:hover': { background: '#cc3737' },
+            }}
+          >
+            삭제하기
+          </button>
+        </div>
+      </ReusableModal>
     </>
   );
 };

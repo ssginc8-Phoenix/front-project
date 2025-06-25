@@ -206,7 +206,6 @@ const PatientInfoPage = () => {
   return (
     <>
       <PatientPageWrapper>
-        <Sidebar />
         <MainSection>
           <PatientInfoHeader>
             <Name>{user?.name} 님 정보</Name>

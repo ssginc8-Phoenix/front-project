@@ -15,13 +15,6 @@ import {
 import { getPatientInfo } from '~/features/patient/api/patientAPI';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import ReusableModal from '~/features/patient/components/ReusableModal';
-import Sidebar from '~/common/Sidebar';
-import type { User } from '~/types/user';
-
-const PageWrapper = styled.div`
-  display: flex;
-  min-height: 100vh;
-`;
 
 const MainSection = styled.div`
   flex: 1;
@@ -178,9 +171,7 @@ const GuardianManagementPage: React.FC = () => {
   };
 
   return (
-    <PageWrapper>
-      <Sidebar onChange={(key) => navigate(`/patients/${key}`)} />
-
+    <>
       <MainSection>
         <Title>🧑‍🤝‍🧑 보호자 관리</Title>
 
@@ -284,7 +275,7 @@ const GuardianManagementPage: React.FC = () => {
           </button>
         </div>
       </ReusableModal>
-    </PageWrapper>
+    </>
   );
 };
 

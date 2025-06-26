@@ -9,50 +9,41 @@ import {
   patientSidebarItems,
 } from '~/constants/sidebarItems';
 
-// ---
-// Media Queries (기준점 정의)
-// ---
 const sizes = {
-  tablet: '768px', // 모바일/태블릿과 데스크톱을 구분하는 기준점
+  tablet: '768px',
 };
 
 const media = {
-  tablet: `@media (max-width: ${sizes.tablet})`, // 모바일/태블릿용 미디어 쿼리
+  tablet: `@media (max-width: ${sizes.tablet})`,
 };
 
-// ---
-// Styled Components (이 부분은 이전과 동일하게 유지됩니다)
-// ---
-
 const SidebarBox = styled.div`
-  width: 100%; /* 변경: 부모 컨테이너의 너비에 맞춥니다. */
-  height: 100%; /* 변경: 부모 컨테이너의 높이에 맞춥니다. */
+  width: 100%;
+  height: 100%;
   background: white;
-  border-right: 1px solid #e0e0e0; /* 데스크톱 스타일 유지 */
-  padding: 2rem 1rem; /* rem 단위로 변환하는 것을 고려해볼 수 있습니다. (예: 2rem 1rem) */
+  border-right: 1px solid #e0e0e0;
+  padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-radius: 0 20px 20px 0; /* 데스크톱 스타일 유지 */
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05); /* 데스크톱 스타일 유지 */
+  border-radius: 0 20px 20px 0;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
 
-  /* 데스크톱 환경에서 사이드바가 뷰포트에 고정되어 스크롤 가능하도록 설정 */
-  position: sticky; /* 데스크톱에서 스티키 포지션 유지 */
+  position: sticky;
   top: 0;
-  overflow-y: auto; /* 내용이 길어지면 스크롤 가능 */
-  overflow-x: hidden; /* 가로 스크롤 방지 */
-  -webkit-overflow-scrolling: touch; /* iOS에서 부드러운 스크롤 */
-  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 
   ${media.tablet} {
-    /* 모바일 환경에서 적용될 스타일 */
-    width: 100%; /* 변경: MobileSidebarMenu의 SidebarContainer 너비에 꽉 맞춥니다. */
-    height: 100%; /* 변경: MobileSidebarMenu의 SidebarContainer 높이에 꽉 맞춥니다. */
-    border-right: 0; /* 모바일에서는 테두리 제거 */
-    border-radius: 0; /* 모바일에서는 둥근 모서리 제거 */
-    box-shadow: none; /* 모바일에서는 그림자 제거 */
-    position: relative; /* 모바일에서 고정 해제 */
+    width: 100%;
+    height: 100%;
+    border-right: 0;
+    border-radius: 0;
+    box-shadow: none;
+    position: relative;
     top: auto;
   }
 `;
@@ -238,7 +229,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     }
   };
 
-  // user 정보가 있을 때만 사이드바 아이템을 가져옵니다.
   const sidebarItems = user ? getSidebarItemsByRole(user.role) : [];
 
   const itemRoutes: { [key: string]: string } = {
@@ -309,7 +299,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
         )}
       </ProfileSection>
 
-      {/* 변경: user 정보가 있을 때만 SidebarMenu를 렌더링합니다. */}
       {user && <SidebarMenu items={sidebarItems} onChange={handleSidebarChange} />}
 
       {user && <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>}

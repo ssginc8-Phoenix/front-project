@@ -2,9 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import Sidebar from '~/common/Sidebar';
 
-// ---
-// Media Queries (기존과 동일)
-// ---
 const sizes = {
   laptopL: '1600px',
   laptop: '1024px',
@@ -18,10 +15,6 @@ const media = {
   tablet: `@media (max-width: ${sizes.tablet})`,
   mobile: `@media (max-width: ${sizes.mobile})`,
 };
-
-// ---
-// Styled Components for Mobile Sidebar Menu
-// ---
 
 const Overlay = styled.div`
   position: fixed;
@@ -63,16 +56,13 @@ const SidebarContainer = styled.div<{ $isOpen: boolean }>`
     transform: translateX(0);
   `}
 
-  /* 변경된 부분: 768px보다 클 때 (즉, 태블릿 이상의 화면) 사이드바 숨김 */
   @media (min-width: ${sizes.tablet}) {
-    /* min-width로 변경 */
     display: none;
-    width: 80vw; /* 모바일일 때 사이드바 컨테이너의 너비 */
-    max-width: 320px; /* 최대 너비 제한 (선택 사항) */
+    width: 80vw;
+    max-width: 320px;
   }
 `;
 
-// MobileSidebarMenuProps 인터페이스 정의 (동일)
 interface MobileSidebarMenuProps {
   onClose: () => void;
   user: any;

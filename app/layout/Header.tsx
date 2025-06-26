@@ -6,9 +6,6 @@ import NotificationComponent from '~/features/notification/components/Notificati
 import { useState } from 'react';
 import MobileSidebarMenu from '~/common/MobileSidebarMenu';
 
-// ---
-// Media Queries (기존과 동일)
-// ---
 const sizes = {
   laptopL: '1600px',
   laptop: '1024px',
@@ -22,10 +19,6 @@ const media = {
   tablet: `@media (max-width: ${sizes.tablet})`,
   mobile: `@media (max-width: ${sizes.mobile})`,
 };
-
-// ---
-// Styled Components
-// ---
 
 const HeaderBar = styled.header`
   padding: 1rem 3rem;
@@ -109,7 +102,7 @@ const AuthButton = styled.a`
   }
 
   ${media.mobile} {
-    display: none; /* 모바일에서 숨김 */
+    display: none;
   }
 `;
 
@@ -132,14 +125,14 @@ const NavBtn = styled.button`
   }
 
   ${media.mobile} {
-    display: none; /* 모바일에서 숨김 */
+    display: none;
   }
 `;
 
 const HamburgerButton = styled.button`
   all: unset;
   cursor: pointer;
-  display: none; /* 기본적으로 숨김 */
+  display: none;
   width: 28px;
   height: 28px;
   position: relative;
@@ -147,7 +140,7 @@ const HamburgerButton = styled.button`
   margin-left: 0.5rem;
 
   ${media.mobile} {
-    display: flex; /* 모바일에서만 표시 */
+    display: flex;
     align-items: center;
     justify-content: center;
   }
@@ -179,51 +172,25 @@ const HamburgerButton = styled.button`
     background-color: #333;
     transition: opacity 0.3s ease;
   }
-
-  /* --- 이 아래의 .open 클래스 스타일을 제거하거나 주석 처리했습니다 --- */
-  /*
-  &.open {
-    &:before {
-      transform: translateY(8px) rotate(45deg);
-      top: 50%;
-    }
-    &:after {
-      transform: translateY(-8px) rotate(-45deg);
-      bottom: 50%;
-    }
-    & span {
-      opacity: 0;
-    }
-  }
-  */
 `;
 
-// ---
-// 외부 컴포넌트를 styled-components로 래핑하여 모바일에서 숨김 처리
-// ---
 const HiddenOnMobileWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
 
   ${media.mobile} {
-    display: none; /* 모바일에서 Wrapper 자체를 숨김 */
+    display: none;
   }
 `;
 
-// ---
-// 모바일에서만 알림 컴포넌트를 보이게 할 Wrapper 추가
-// ---
 const MobileNotificationWrapper = styled.div`
-  display: none; /* 기본적으로 숨김 */
+  display: none;
   ${media.mobile} {
-    display: block; /* 모바일에서만 표시 */
+    display: block;
   }
 `;
 
-// ---
-// Header Component
-// ---
 const Header = () => {
   const user = useLoginStore((state) => state.user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -231,9 +198,9 @@ const Header = () => {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     if (!isMenuOpen) {
-      document.body.style.overflow = 'hidden'; // 메뉴 열릴 때 스크롤 방지
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'auto'; // 메뉴 닫힐 때 스크롤 허용
+      document.body.style.overflow = 'auto';
     }
   };
 
@@ -244,8 +211,8 @@ const Header = () => {
     }
     const target = document.getElementById(id);
     if (target) target.scrollIntoView({ behavior: 'smooth' });
-    setIsMenuOpen(false); // 메뉴가 열려있었다면 닫기
-    document.body.style.overflow = 'auto'; // 메뉴 닫힐 때 스크롤 허용
+    setIsMenuOpen(false);
+    document.body.style.overflow = 'auto';
   };
 
   return (
@@ -256,19 +223,16 @@ const Header = () => {
             <LogoImage src="/logo.png" alt="logo" />
           </LogoLink>
           <RightGroup>
-            {/* PC/태블릿에서만 보이는 내비게이션 버튼 */}
             <NavBtn onClick={() => scrollToSection('about-section')}>서비스 소개</NavBtn>
             <NavBtn onClick={() => scrollToSection('tel-section')}>고객센터</NavBtn>
 
             {user ? (
               <>
-                {/* PC/태블릿에서만 보이는 알림 및 프로필 그룹 */}
                 <HiddenOnMobileWrapper>
                   <NotificationComponent />
                   <Profile name={user.name} imageUrl={user.profileImageUrl} />
                 </HiddenOnMobileWrapper>
 
-                {/* 모바일에서만 보이는 알림 컴포넌트 */}
                 <MobileNotificationWrapper>
                   <NotificationComponent />
                 </MobileNotificationWrapper>
@@ -280,14 +244,12 @@ const Header = () => {
               </>
             )}
 
-            {/* 모바일에서만 보이는 햄버거 버튼 */}
             <HamburgerButton onClick={toggleMenu} className={isMenuOpen ? 'open' : ''}>
               <span />
             </HamburgerButton>
           </RightGroup>
         </HeaderContent>
       </HeaderBar>
-      {/* 햄버거 메뉴 상태에 따라 렌더링될 모바일 사이드바 컴포넌트 */}
       {isMenuOpen && (
         <MobileSidebarMenu onClose={toggleMenu} user={user} scrollToSection={scrollToSection} />
       )}

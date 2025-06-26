@@ -15,11 +15,11 @@ const sizes = {
 
 const media = {
   tablet: `@media (max-width: ${sizes.tablet})`,
+  desktop: `@media (min-width: ${sizes.tablet})`,
 };
 
 const SidebarBox = styled.div`
-  width: 100%;
-  height: 100%;
+  width: 260px;
   background: white;
   border-right: 1px solid #e0e0e0;
   padding: 2rem 1rem;
@@ -30,21 +30,14 @@ const SidebarBox = styled.div`
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
 
-  position: sticky;
-  top: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  box-sizing: border-box;
-
-  ${media.tablet} {
+  @media (max-width: 768px) {
     width: 100%;
     height: 100%;
-    border-right: 0;
+    border-right: none;
     border-radius: 0;
     box-shadow: none;
-    position: relative;
-    top: auto;
+    padding: 1.5rem 1rem;
+    box-sizing: border-box;
   }
 `;
 
@@ -81,6 +74,7 @@ const ProfileName = styled.div`
 const ProfileRole = styled.div`
   color: #777;
   font-size: 1rem;
+  text-align: center;
   word-break: break-word;
   max-width: 100%;
 `;
@@ -97,12 +91,17 @@ const AuthButtonGroup = styled.div`
   flex-shrink: 0;
   overflow-x: hidden;
   max-width: 100%;
+
+  /* Hide on desktop, show on mobile/tablet */
+  ${media.desktop} {
+    display: none;
+  }
 `;
 
 const AuthButton = styled.button`
   all: unset;
   cursor: pointer;
-  width: 60%;
+  width: 90%;
   padding: 1rem 1.5rem;
   border-radius: 12px;
   font-size: 1.1rem;
@@ -151,53 +150,8 @@ const AuthButton = styled.button`
   }
 `;
 
-const LogoutButton = styled.button`
-  all: unset;
-  cursor: pointer;
-  width: 60%;
-  padding: 1rem 1.5rem;
-  margin-top: auto;
-  background-color: #fcebeb;
-  color: #dc3545;
-  border: 1px solid #dc3545;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  text-align: center;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-  flex-shrink: 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  &:hover {
-    background-color: #dc3545;
-    color: #fff;
-    border-color: #dc3545;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  &:active {
-    background-color: #c82333;
-    border-color: #bd2130;
-  }
-
-  @media (min-width: ${sizes.tablet}) {
-    display: none;
-  }
-`;
-
-interface SidebarProps {
-  onClose?: () => void;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
-  const { user, logout } = useLoginStore();
+const Sidebar = () => {
+  const { user } = useLoginStore();
   const navigate = useNavigate();
 
   const getRoleInKorean = (role: string | undefined) => {
@@ -229,7 +183,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     }
   };
 
-  const sidebarItems = user ? getSidebarItemsByRole(user.role) : [];
+  const sidebarItems = getSidebarItemsByRole(user?.role);
 
   const itemRoutes: { [key: string]: string } = {
     guardian: '/mypage/guardian',
@@ -248,26 +202,17 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     const path = itemRoutes[key];
     if (path) {
       navigate(path);
-      onClose?.();
     } else {
       console.warn(`사이드바 아이템 키 "${key}"에 대한 라우트가 정의되지 않았습니다.`);
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-    onClose?.();
-  };
-
   const handleLoginClick = () => {
     navigate('/login');
-    onClose?.();
   };
 
   const handleSignupClick = () => {
     navigate('/signup');
-    onClose?.();
   };
 
   return (
@@ -300,8 +245,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
       </ProfileSection>
 
       {user && <SidebarMenu items={sidebarItems} onChange={handleSidebarChange} />}
-
-      {user && <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>}
     </SidebarBox>
   );
 };

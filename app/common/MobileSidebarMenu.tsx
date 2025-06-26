@@ -104,7 +104,7 @@ const MobileSidebarMenu: React.FC<MobileSidebarMenuProps> = ({
     <>
       <Overlay className={isOpenInternal ? 'open' : ''} onClick={handleCloseWithAnimation} />
       <SidebarContainer $isOpen={isOpenInternal} ref={sidebarRef}>
-        <Sidebar onClose={handleCloseWithAnimation} />
+        <Sidebar />
       </SidebarContainer>
     </>
   );

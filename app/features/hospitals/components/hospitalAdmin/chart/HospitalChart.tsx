@@ -65,7 +65,7 @@ const NavButton = styled.button<{ disabled?: boolean }>`
 // — styled-components 정의 끝 —
 
 interface StatItem {
-  dateIso: string; // "YYYY-MM-DD"
+  date: string; // "YYYY-MM-DD"
   display: string; // "MM/DD"
   count: number;
 }
@@ -92,7 +92,7 @@ const HospitalChart: React.FC = () => {
   for (let d = weekStart.clone(); !d.isAfter(weekEnd); d = d.add(1, 'day')) {
     const iso = d.format('YYYY-MM-DD');
     fullStats.push({
-      dateIso: iso,
+      date: iso,
       display: d.format('M/D'),
       count: rawMap.get(iso) ?? 0,
     });
@@ -138,7 +138,7 @@ const HospitalChart: React.FC = () => {
             margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
           >
             <XAxis
-              dataKey="dateIso"
+              dataKey="date"
               tick={{ fontSize: 12, fill: '#555' }}
               interval={0}
               axisLine={{ stroke: '#ddd' }}

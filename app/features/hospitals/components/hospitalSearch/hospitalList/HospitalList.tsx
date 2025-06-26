@@ -35,7 +35,7 @@ const List = styled.ul`
   overflow-y: auto;
   width: 100%;
   max-width: 100%;
-  max-height: 250px;
+  max-height: 230px;
 `;
 
 const Card = styled.li<{ selected: boolean }>`

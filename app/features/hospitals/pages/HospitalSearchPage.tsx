@@ -34,7 +34,7 @@ const FullMap = styled(AroundMap)`
 const SidePanel = styled.div`
   position: absolute;
   top: 0px;
-  left: 16px;
+  left: 50px;
   bottom: auto;
   width: 400px;
   background: #fff;

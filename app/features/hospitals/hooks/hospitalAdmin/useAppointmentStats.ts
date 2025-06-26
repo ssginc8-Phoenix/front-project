@@ -27,7 +27,7 @@ export function useAppointmentStats(start: string, end: string) {
 
         const transformed = response.data.map((item: any) => ({
           // ISO 포맷 (fullStats key와 매칭용)
-          dateIso: dayjs(item.date).format('YYYY-MM-DD'),
+          date: dayjs(item.date).format('YYYY-MM-DD'),
           // 차트 축 레이블용
           display: dayjs(item.date).format('MM/DD'),
           count: item.count,

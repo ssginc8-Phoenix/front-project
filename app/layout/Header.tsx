@@ -10,8 +10,8 @@ const sizes = {
   laptopL: '1600px',
   laptop: '1024px',
   tablet: '768px',
-  mobile: '480px', // Existing mobile breakpoint
-  mobileSmall: '360px', // New breakpoint for 360px wide devices
+  mobile: '480px',
+  mobileSmall: '360px',
 };
 
 const media = {
@@ -19,7 +19,7 @@ const media = {
   laptop: `@media (max-width: ${sizes.laptop})`,
   tablet: `@media (max-width: ${sizes.tablet})`,
   mobile: `@media (max-width: ${sizes.mobile})`,
-  mobileSmall: `@media (max-width: ${sizes.mobileSmall})`, // New media query for 360px
+  mobileSmall: `@media (max-width: ${sizes.mobileSmall})`,
 };
 
 const HeaderBar = styled.header`
@@ -103,16 +103,14 @@ const AuthButton = styled.a`
     font-size: 0.85rem;
   }
 
-  // Hide by default for mobile, then show specifically for smaller mobile
   ${media.mobile} {
     display: none;
   }
 
   ${media.mobileSmall} {
-    // Show for screens up to 360px wide
-    display: block; // Or 'inline-block' if you want them next to each other
-    padding: 4px 8px; // Adjust padding for smaller screens if needed
-    font-size: 0.75rem; // Adjust font size for smaller screens if needed
+    display: block;
+    padding: 4px 8px;
+    font-size: 0.75rem;
   }
 `;
 
@@ -248,7 +246,6 @@ const Header = () => {
                 </MobileNotificationWrapper>
               </>
             ) : (
-              // Display AuthButtons for small mobile screens when not logged in
               <AuthButtonsContainer>
                 <AuthButton href="/login">로그인</AuthButton>
                 <AuthButton href="/signup">회원가입</AuthButton>
@@ -270,17 +267,16 @@ const Header = () => {
   );
 };
 
-// New styled component to control the display of AuthButtons
 const AuthButtonsContainer = styled.div`
   display: flex;
-  gap: 0.5rem; // Adjust gap as needed
+  gap: 0.5rem;
 
   ${media.mobile} {
-    display: none; // Hide on default mobile (480px and below)
+    display: none;
   }
 
   ${media.mobileSmall} {
-    display: flex; // Show on smaller mobile (360px and below)
+    display: flex;
   }
 `;
 

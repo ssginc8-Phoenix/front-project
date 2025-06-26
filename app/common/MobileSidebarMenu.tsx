@@ -9,13 +9,6 @@ const sizes = {
   mobile: '480px',
 };
 
-const media = {
-  laptopL: `@media (max-width: ${sizes.laptopL})`,
-  laptop: `@media (max-width: ${sizes.laptop})`,
-  tablet: `@media (max-width: ${sizes.tablet})`,
-  mobile: `@media (max-width: ${sizes.mobile})`,
-};
-
 const Overlay = styled.div`
   position: fixed;
   top: 0;
@@ -49,6 +42,7 @@ const SidebarContainer = styled.div<{ $isOpen: boolean }>`
   transform: translateX(-100%);
   transition: transform 0.3s ease-out;
   overflow-y: auto;
+  overflow-x: hidden;
 
   ${(props) =>
     props.$isOpen &&

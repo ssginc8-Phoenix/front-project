@@ -13,6 +13,7 @@ const PageWrapper = styled.div`
   display: flex;
   gap: 48px;
   min-height: 100vh;
+  padding-left: 1rem;
 `;
 
 const MainSection = styled.div`

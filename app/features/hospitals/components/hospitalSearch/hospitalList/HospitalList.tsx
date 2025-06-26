@@ -5,6 +5,7 @@ import type { HospitalSchedule } from '~/features/hospitals/types/hospitalSchedu
 import { calculateDistance } from '~/features/hospitals/hooks/useDistanceTo';
 import { useCurrentLocation } from '~/features/hospitals/hooks/useCurrentLocation';
 import Loading from '../../common/Loading';
+import { media } from '../../common/breakpoints';
 
 interface HospitalListProps {
   hospitals: Hospital[];
@@ -20,43 +21,55 @@ interface HospitalListProps {
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  height: auto;
+  height: 100%;
+  width: 350px;
+
+  ${media('laptop')`
+    width: 300px;
+  `}
+  ${media('tablet')`
+    width: 100%;
+  `}
 `;
 
 const List = styled.ul`
-  padding: 0;
-  margin: 0;
-  list-style: none;
+  /* 카드 리스트가 남는 공간을 모두 차지 */
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
-
-  flex: none;
+  padding: 0;
+  margin: 0;
+  list-style: none;
   overflow-y: auto;
   width: 100%;
-  max-width: 100%;
-  max-height: 230px;
+
+  /* optional: 반응형 높이 제한 */
+  ${media('laptop')`
+     max-height: 300px;
+   `}
+  ${media('tablet')`
+     max-height: none;
+   `}
 `;
 
 const Card = styled.li<{ selected: boolean }>`
   background: #fff;
   border-radius: 12px;
-  padding: 0rem;
+  padding: 0.75rem 1rem;
   box-shadow: ${({ selected }) =>
     selected ? '0 0 0 3px #a3c2ff' : '0 2px 6px rgba(0, 0, 0, 0.08)'};
   cursor: pointer;
   transition: box-shadow 0.2s;
-  flex: 0 0 auto;
-  width: 350px;
-
-  height: 120px;
-  &:hover {
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  }
+  width: 90%;
 
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.5rem;
+
+  &:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
 `;
 
 const Header = styled.div`
@@ -91,8 +104,10 @@ const Row = styled.div`
 const Pagination = styled.div`
   display: flex;
   justify-content: center;
+  /* 버튼 그룹 폭만큼만 */
+  width: fit-content;
+  margin: 0 auto;
   gap: 8px;
-  /* 패딩 최소화 */
   padding: 0.125rem 0;
   border-top: 1px solid #ddd;
 `;

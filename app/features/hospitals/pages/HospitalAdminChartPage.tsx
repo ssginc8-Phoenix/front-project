@@ -13,6 +13,7 @@ const PageWrapper = styled.div`
   display: flex;
   gap: 48px;
   min-height: 100vh;
+  max-width: 1000px;
   padding-left: 1rem;
 `;
 
@@ -36,6 +37,7 @@ const Title = styled.h2`
 const ChartGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  max-width: 100%;
   gap: 20px;
 `;
 

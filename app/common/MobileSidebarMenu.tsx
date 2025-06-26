@@ -9,13 +9,6 @@ const sizes = {
   mobile: '480px',
 };
 
-const media = {
-  laptopL: `@media (max-width: ${sizes.laptopL})`,
-  laptop: `@media (max-width: ${sizes.laptop})`,
-  tablet: `@media (max-width: ${sizes.tablet})`,
-  mobile: `@media (max-width: ${sizes.mobile})`,
-};
-
 const Overlay = styled.div`
   position: fixed;
   top: 0;

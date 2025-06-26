@@ -34,12 +34,25 @@ const Section = styled.div`
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-height: 60vh;
 `;
 
 const SectionTitle = styled.h2`
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 16px;
+  color: #333;
+`;
+
+const NoAppointmentsMessage = styled.p`
+  color: #777;
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 20px 0;
+  border-top: 1px dashed #eee;
+  margin-top: 10px;
 `;
 
 interface AppointmentDashboardProps {
@@ -90,43 +103,55 @@ const AppointmentDashboard = ({
             {/** 당일 예약내역 */}
             <Section>
               <SectionTitle>당일 예약내역</SectionTitle>
-              {immediateAppointments?.map((app: AppointmentList) => (
-                <DashboardCard
-                  key={app.appointmentId}
-                  doctorName={app.doctorName}
-                  patientName={app.patientName}
-                  appointmentTime={app.appointmentTime}
-                  onClick={() => onSelectAppointment(app.appointmentId)}
-                />
-              ))}
+              {immediateAppointments.length > 0 ? (
+                immediateAppointments.map((app: AppointmentList) => (
+                  <DashboardCard
+                    key={app.appointmentId}
+                    doctorName={app.doctorName}
+                    patientName={app.patientName}
+                    appointmentTime={app.appointmentTime}
+                    onClick={() => onSelectAppointment(app.appointmentId)}
+                  />
+                ))
+              ) : (
+                <NoAppointmentsMessage>아직 당일 예약이 없습니다.</NoAppointmentsMessage>
+              )}
             </Section>
 
             {/* 스케줄 예약내역 */}
             <Section>
               <SectionTitle>스케줄 예약내역</SectionTitle>
-              {scheduledAppointments?.map((app: AppointmentList) => (
-                <DashboardCard
-                  key={app.appointmentId}
-                  doctorName={app.doctorName}
-                  patientName={app.patientName}
-                  appointmentTime={app.appointmentTime}
-                  onClick={() => onSelectAppointment(app.appointmentId)}
-                />
-              ))}
+              {scheduledAppointments.length > 0 ? (
+                scheduledAppointments.map((app: AppointmentList) => (
+                  <DashboardCard
+                    key={app.appointmentId}
+                    doctorName={app.doctorName}
+                    patientName={app.patientName}
+                    appointmentTime={app.appointmentTime}
+                    onClick={() => onSelectAppointment(app.appointmentId)}
+                  />
+                ))
+              ) : (
+                <NoAppointmentsMessage>아직 스케줄 예약이 없습니다.</NoAppointmentsMessage>
+              )}
             </Section>
 
             {/* 접수 대기 내역 */}
             <Section>
               <SectionTitle>접수 대기 내역</SectionTitle>
-              {requestedAppointments?.map((app: AppointmentList) => (
-                <DashboardCard
-                  key={app.appointmentId}
-                  doctorName={app.doctorName}
-                  patientName={app.patientName}
-                  appointmentTime={app.appointmentTime}
-                  onClick={() => onSelectAppointment(app.appointmentId)}
-                />
-              ))}
+              {requestedAppointments.length > 0 ? (
+                requestedAppointments.map((app: AppointmentList) => (
+                  <DashboardCard
+                    key={app.appointmentId}
+                    doctorName={app.doctorName}
+                    patientName={app.patientName}
+                    appointmentTime={app.appointmentTime}
+                    onClick={() => onSelectAppointment(app.appointmentId)}
+                  />
+                ))
+              ) : (
+                <NoAppointmentsMessage>아직 접수 대기 내역이 없습니다.</NoAppointmentsMessage>
+              )}
             </Section>
           </SectionWrapper>
 

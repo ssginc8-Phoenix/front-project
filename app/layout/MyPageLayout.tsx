@@ -12,26 +12,33 @@ const LayoutContainer = styled.div`
 
 const MainContentWrapper = styled.div`
   flex: 1;
+  display: flex;
+  overflow-y: auto;
   padding: 2rem 1rem;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-
-  display: flex;
   gap: 2rem;
+  align-items: flex-start;
+  min-height: 0;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+  }
 `;
 
 const BackGroundColor = styled.div`
   background-color: #f0f4f8;
   border-radius: 1rem;
-
-  flex: 1;
   display: flex;
+  flex: 1;
+  min-height: 0;
 `;
 
 const ContentArea = styled.main`
   flex-grow: 1;
-  overflow-y: auto;
+  padding: 0;
+  min-height: 0;
 `;
 
 const MyPageLayout = () => {

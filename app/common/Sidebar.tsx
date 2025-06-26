@@ -92,7 +92,6 @@ const AuthButtonGroup = styled.div`
   overflow-x: hidden;
   max-width: 100%;
 
-  /* Hide on desktop, show on mobile/tablet */
   ${media.desktop} {
     display: none;
   }

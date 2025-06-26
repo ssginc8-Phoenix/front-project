@@ -13,7 +13,7 @@ export default [
     /** 사이드바 */
     route('guardian', 'routes/patient/guardianManagement.tsx'), // 환자 - 보호자 관리
     route('patient', 'routes/guardian/patientManagement.tsx'), // 보호자 - 환자 관리
-    route('appointments', 'routes/appointment/appointmentDashboard.tsx'), // 역할별 예약 조회 및 관리
+    route('appointments', 'routes/appointment/appointmentList.tsx'), // 역할별 예약 조회 및 관리
     route('calendar', 'routes/calendar/calendar.tsx'), // 역할별 캘린더
     route('review', 'routes/review/reviewMyListPage.tsx'),
     route('qna', 'routes/qna/QnAList.tsx'),
@@ -48,6 +48,7 @@ export default [
 
     /** 예약 요청 */
     route('appointment', 'routes/appointment/appointmentRequest.tsx'),
+    route('appointments', 'routes/appointment/appointmentDashboard.tsx'),
 
     /** CHATBOT 챗봇  */
     route('chatbot', 'routes/chatbot/ChatbotPage.tsx'),

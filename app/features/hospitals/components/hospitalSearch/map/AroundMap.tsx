@@ -8,12 +8,12 @@ declare global {
 }
 
 const MapContainer = styled.div`
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
   position: relative;
+  height: calc(100vh - 128px);
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  overflow: hidden;
 `;
 
 interface LocationCoord {

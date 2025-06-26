@@ -15,7 +15,7 @@ export default [
     route('patient', 'routes/guardian/patientManagement.tsx'), // 보호자 - 환자 관리
     route('appointments', 'routes/appointment/appointmentList.tsx'), // 역할별 예약 조회 및 관리
     route('calendar', 'routes/calendar/calendar.tsx'), // 역할별 캘린더
-    route('review', 'routes/review/reviewMyListPage.tsx'),
+    route('review', 'routes/review/reviewPage.tsx'),
     route('qna', 'routes/qna/QnAList.tsx'),
     route('info', 'routes/info.tsx'),
     route('schedule', 'routes/doctor/doctorSchedule.tsx'),
@@ -36,7 +36,7 @@ export default [
     route('/find-email', 'routes/findEmail.tsx'),
     route('/reset-password', 'routes/passwordResetVerify.tsx'),
     route('/reset-password/set', 'routes/resetPassword.tsx'),
-
+    
     /** 결제  */
     route('/payments/request', 'routes/payments/paymentRequest.tsx'),
     route('/payments/history', 'routes/payments/paymentHistory.tsx'),

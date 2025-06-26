@@ -3,6 +3,24 @@ import Profile from '~/common/Profile';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { Link } from 'react-router-dom';
 import NotificationComponent from '~/features/notification/components/NotificationComponent';
+import { useState } from 'react';
+import MobileSidebarMenu from '~/common/MobileSidebarMenu';
+
+const sizes = {
+  laptopL: '1600px',
+  laptop: '1024px',
+  tablet: '768px',
+  mobile: '480px', // Existing mobile breakpoint
+  mobileSmall: '360px', // New breakpoint for 360px wide devices
+};
+
+const media = {
+  laptopL: `@media (max-width: ${sizes.laptopL})`,
+  laptop: `@media (max-width: ${sizes.laptop})`,
+  tablet: `@media (max-width: ${sizes.tablet})`,
+  mobile: `@media (max-width: ${sizes.mobile})`,
+  mobileSmall: `@media (max-width: ${sizes.mobileSmall})`, // New media query for 360px
+};
 
 const HeaderBar = styled.header`
   padding: 1rem 3rem;
@@ -11,6 +29,18 @@ const HeaderBar = styled.header`
   justify-content: center;
   align-items: center;
   background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  ${media.tablet} {
+    padding: 0.8rem 1.5rem;
+  }
+
+  ${media.mobile} {
+    padding: 0.6rem 1rem;
+  }
 `;
 
 const HeaderContent = styled.div`
@@ -25,16 +55,30 @@ const LogoLink = styled(Link)`
   width: 10%;
   min-width: 80px;
   max-width: 120px;
+
+  ${media.mobile} {
+    min-width: 60px;
+    max-width: 100px;
+  }
 `;
 
 const LogoImage = styled.img`
   width: 100%;
+  height: auto;
 `;
 
 const RightGroup = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
+
+  ${media.tablet} {
+    gap: 0.8rem;
+  }
+
+  ${media.mobile} {
+    gap: 0.5rem;
+  }
 `;
 
 const AuthButton = styled.a`
@@ -47,10 +91,28 @@ const AuthButton = styled.a`
   transition:
     background-color 0.2s,
     color 0.2s;
+  white-space: nowrap;
 
   &:hover {
     background-color: #007bff;
     color: #fff;
+  }
+
+  ${media.tablet} {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  // Hide by default for mobile, then show specifically for smaller mobile
+  ${media.mobile} {
+    display: none;
+  }
+
+  ${media.mobileSmall} {
+    // Show for screens up to 360px wide
+    display: block; // Or 'inline-block' if you want them next to each other
+    padding: 4px 8px; // Adjust padding for smaller screens if needed
+    font-size: 0.75rem; // Adjust font size for smaller screens if needed
   }
 `;
 
@@ -61,13 +123,96 @@ const NavBtn = styled.button`
   color: #444;
   padding: 8px 12px;
   border-radius: 4px;
+  white-space: nowrap;
+
   &:hover {
     background: #f5f5f5;
+  }
+
+  ${media.tablet} {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  ${media.mobile} {
+    display: none;
+  }
+`;
+
+const HamburgerButton = styled.button`
+  all: unset;
+  cursor: pointer;
+  display: none;
+  width: 28px;
+  height: 28px;
+  position: relative;
+  transition: transform 0.3s ease;
+  margin-left: 0.5rem;
+
+  ${media.mobile} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &:before,
+  &:after {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 2px;
+    background-color: #333;
+    transition:
+      transform 0.3s ease,
+      top 0.3s ease,
+      bottom 0.3s ease;
+  }
+
+  &:before {
+    top: 8px;
+  }
+
+  &:after {
+    bottom: 8px;
+  }
+
+  & span {
+    width: 24px;
+    height: 2px;
+    background-color: #333;
+    transition: opacity 0.3s ease;
+  }
+`;
+
+const HiddenOnMobileWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  ${media.mobile} {
+    display: none;
+  }
+`;
+
+const MobileNotificationWrapper = styled.div`
+  display: none;
+  ${media.mobile} {
+    display: block;
   }
 `;
 
 const Header = () => {
   const user = useLoginStore((state) => state.user);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    if (!isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  };
 
   const scrollToSection = (id: string) => {
     if (location.pathname !== '/') {
@@ -76,33 +221,67 @@ const Header = () => {
     }
     const target = document.getElementById(id);
     if (target) target.scrollIntoView({ behavior: 'smooth' });
+    setIsMenuOpen(false);
+    document.body.style.overflow = 'auto';
   };
 
   return (
-    <HeaderBar>
-      <HeaderContent>
-        <LogoLink to="/">
-          <LogoImage src="/logo.png" alt="logo" />
-        </LogoLink>
-        <RightGroup>
-          <NavBtn onClick={() => scrollToSection('about-section')}>서비스 소개</NavBtn>
-          <NavBtn onClick={() => scrollToSection('tel-section')}>고객센터</NavBtn>
+    <>
+      <HeaderBar>
+        <HeaderContent>
+          <LogoLink to="/">
+            <LogoImage src="/logo.png" alt="logo" />
+          </LogoLink>
+          <RightGroup>
+            <NavBtn onClick={() => scrollToSection('about-section')}>서비스 소개</NavBtn>
+            <NavBtn onClick={() => scrollToSection('tel-section')}>고객센터</NavBtn>
 
-          {user ? (
-            <>
-              <NotificationComponent />
-              <Profile name={user.name} imageUrl={user.profileImageUrl} />
-            </>
-          ) : (
-            <>
-              <AuthButton href="/login">로그인</AuthButton>
-              <AuthButton href="/signup">회원가입</AuthButton>
-            </>
-          )}
-        </RightGroup>
-      </HeaderContent>
-    </HeaderBar>
+            {user ? (
+              <>
+                <HiddenOnMobileWrapper>
+                  <NotificationComponent />
+                  <Profile name={user.name} imageUrl={user.profileImageUrl} />
+                </HiddenOnMobileWrapper>
+
+                <MobileNotificationWrapper>
+                  <NotificationComponent />
+                </MobileNotificationWrapper>
+              </>
+            ) : (
+              // Display AuthButtons for small mobile screens when not logged in
+              <AuthButtonsContainer>
+                <AuthButton href="/login">로그인</AuthButton>
+                <AuthButton href="/signup">회원가입</AuthButton>
+              </AuthButtonsContainer>
+            )}
+
+            {user && (
+              <HamburgerButton onClick={toggleMenu} className={isMenuOpen ? 'open' : ''}>
+                <span />
+              </HamburgerButton>
+            )}
+          </RightGroup>
+        </HeaderContent>
+      </HeaderBar>
+      {isMenuOpen && (
+        <MobileSidebarMenu onClose={toggleMenu} user={user} scrollToSection={scrollToSection} />
+      )}
+    </>
   );
 };
+
+// New styled component to control the display of AuthButtons
+const AuthButtonsContainer = styled.div`
+  display: flex;
+  gap: 0.5rem; // Adjust gap as needed
+
+  ${media.mobile} {
+    display: none; // Hide on default mobile (480px and below)
+  }
+
+  ${media.mobileSmall} {
+    display: flex; // Show on smaller mobile (360px and below)
+  }
+`;
 
 export default Header;

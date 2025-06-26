@@ -9,9 +9,7 @@ import MonthlyStatsChart from '~/features/hospitals/components/hospitalAdmin/cha
 
 const PageWrapper = styled.div`
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px; // <-- 통일
   display: flex;
   gap: 48px;
   min-height: 100vh;
@@ -56,8 +54,6 @@ const HospitalAdminChartPage = () => {
 
   return (
     <PageWrapper>
-      <Sidebar />
-
       <MainSection>
         <Title>📊 병원 통계 차트</Title>
         <ChartGrid>

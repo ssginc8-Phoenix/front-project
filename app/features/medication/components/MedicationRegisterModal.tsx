@@ -1,6 +1,5 @@
-// src/features/medication/components/MedicationRegisterModal.tsx
 import { useEffect, useState } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import {
   postMedicationSchedule,
   updateMedicationSchedule,
@@ -8,138 +7,147 @@ import {
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { daysOfWeek } from '~/features/medication/constants/daysOfWeek';
 
-const ModalBox = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60vw;
-  max-width: 700px;
-  max-height: 85vh;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  z-index: 2001;
-`;
-
-const ModalHeader = styled.div`
-  flex: 0 0 auto;
-  padding: 1rem;
-  text-align: center;
-  font-size: 1.25rem;
-  font-weight: bold;
-  border-bottom: 1px solid #eee;
-`;
-
-const ModalBody = styled.div`
-  flex: 1 1 auto;
-  overflow-y: auto;
-  padding: 1rem;
-`;
-
-const ModalFooter = styled.div`
-  flex: 0 0 auto;
-  padding: 1rem;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-`;
-
-const Label = styled.div`
-  margin-top: 1.2rem;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-`;
-
-const Select = styled.select`
-  width: 50%;
-  padding: 0.6rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+// 공통 인풋 스타일
+const inputStyles = css`
+  width: 100%;
+  height: 44px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
   font-size: 1rem;
+  background: #f8fafc;
+  box-sizing: border-box;
 `;
 
 const Input = styled.input`
-  width: 80%;
-  padding: 0.6rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
+  ${inputStyles}
 `;
 
-const ButtonGroup = styled.div`
+const Select = styled.select`
+  ${inputStyles}
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+`;
+
+const ModalContainer = styled.div`
+  width: 600px;
+  max-width: 95vw;
+  max-height: 90vh;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid #eff3f8;
+`;
+
+const HeaderIcon = styled.div`
+  font-size: 1.6rem;
+  background: #e0f2fe;
+  color: #2563eb;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
   justify-content: center;
 `;
 
-const SelectButton = styled.button<{ selected: boolean }>`
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: ${({ selected }) => (selected ? '2px solid #2563eb' : '1px solid #ccc')};
-  background: ${({ selected }) => (selected ? '#eff6ff' : '#fff')};
-  color: ${({ selected }) => (selected ? '#2563eb' : '#333')};
-  font-weight: ${({ selected }) => (selected ? '600' : 'normal')};
+const HeaderTitle = styled.h2`
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+`;
+
+const ModalBody = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  align-items: center;
+`;
+
+const Section = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 480px;
+  padding: 0 1rem;
+`;
+
+const SectionLabel = styled.span`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+`;
+
+const TagGroup = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+`;
+
+const TagButton = styled.button<{ $active?: boolean }>`
+  padding: 0.45rem 0.9rem;
+  border: ${({ $active }) => ($active ? '2px solid #2563eb' : '1px solid #cbd5e1')};
+  border-radius: 9999px;
+  background: ${({ $active }) => ($active ? '#eff6ff' : '#ffffff')};
+  color: ${({ $active }) => ($active ? '#2563eb' : '#475569')};
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 `;
 
-const TimeInput = styled.input`
-  margin-top: 0.5rem;
-  padding: 0.4rem 0.6rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+const Footer = styled.div`
+  padding: 1.25rem 1.75rem;
+  border-top: 1px solid #eff3f8;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
 `;
 
-const ActionButton = styled.button`
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
+const FooterBtn = styled.button<{ primary?: boolean }>`
+  padding: 0.65rem 1.4rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
   border: none;
-  background-color: #2563eb;
-  color: white;
-  font-weight: bold;
   cursor: pointer;
-
-  &:hover {
-    background-color: #1d4ed8;
-  }
-  &:first-child {
-    background-color: #e5e7eb;
-    color: #333;
-    &:hover {
-      background-color: #d1d5db;
-    }
-  }
+  ${({ primary }) =>
+    primary
+      ? `background:#2563eb;color:#ffffff; &:hover{background:#1d4ed8;}`
+      : `background:#f1f5f9;color:#334155; &:hover{background:#e2e8f0;}`};
 `;
 
-interface MedicationData {
-  medicationId: number;
-  medicationName: string;
-  days: string[];
-  startDate: string;
-  endDate: string;
-  times?: { meal: 'morning' | 'lunch' | 'dinner'; time: string }[];
-}
-
-interface PatientInfo {
-  name: string;
-  patientGuardianId: number;
-}
-
-interface Props {
-  date: string;
-  // 수정 모드일 때 단일 ID
-  patientGuardianId?: number;
-  // 전체 모드용 리스트
-  patients: PatientInfo[];
-  initialData?: MedicationData;
-  onClose: () => void;
-}
+const DateRow = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  width: 100%;
+  max-width: 480px;
+  padding: 0 1rem;
+`;
 
 const mealOptions = [
   { value: 'morning', label: '아침' },
@@ -153,82 +161,57 @@ export default function MedicationRegisterModal({
   patients,
   initialData,
   onClose,
-}: Props) {
+}) {
   const { user } = useLoginStore();
 
-  // 수정 모드면 그 ID, 아니면 "전체" 혹은 선택된 환자 ID
   const initialTarget = initialData
     ? String(patientGuardianId!)
     : patientGuardianId !== undefined
       ? String(patientGuardianId)
       : 'all';
-  const [selectedTarget, setSelectedTarget] = useState<string>(initialTarget);
-
+  const [selectedTarget, setSelectedTarget] = useState(initialTarget);
   const [medicationName, setMedicationName] = useState('');
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [selectedDays, setSelectedDays] = useState([]);
   const [startDate, setStartDate] = useState(date);
   const [endDate, setEndDate] = useState(date);
-  const [selectedMeals, setSelectedMeals] = useState<string[]>([]);
-  const [mealTimes, setMealTimes] = useState<Record<string, string>>({
-    morning: '',
-    lunch: '',
-    dinner: '',
-  });
+  const [selectedMeals, setSelectedMeals] = useState([]);
+  const [mealTimes, setMealTimes] = useState({ morning: '', lunch: '', dinner: '' });
 
   useEffect(() => {
     if (!initialData) return;
-
     setMedicationName(initialData.medicationName);
     setSelectedDays(initialData.days);
     setStartDate(initialData.startDate);
     setEndDate(initialData.endDate);
-
-    // mealOptions 순서대로 끼니 로드
     const meals = mealOptions
       .map((m) => m.value)
       .filter((v) => initialData.times?.some((t) => t.meal === v));
     setSelectedMeals(meals);
-
-    const map: Record<string, string> = {};
+    const map = {};
     initialData.times?.forEach((t) => {
       map[t.meal] = t.time.slice(0, 5);
     });
     setMealTimes((prev) => ({ ...prev, ...map }));
   }, [initialData]);
 
-  const toggleDay = (day: string) => {
+  const toggleDay = (day) =>
     setSelectedDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
     );
-  };
-  const toggleMeal = (meal: string) => {
+  const toggleMeal = (meal) =>
     setSelectedMeals((prev) =>
       prev.includes(meal) ? prev.filter((m) => m !== meal) : [...prev, meal],
     );
-  };
 
   const handleSubmit = async () => {
-    if (!initialData && selectedTarget === '') {
-      alert('환자를 선택해주세요.');
-      return;
-    }
-    if (!medicationName.trim()) {
-      alert('약 이름을 입력해주세요.');
-      return;
-    }
-    if (!selectedDays.length || !selectedMeals.length) {
-      alert('요일과 끼니를 모두 선택해주세요.');
-      return;
-    }
+    if (!initialData && selectedTarget === '') return alert('환자를 선택해주세요.');
+    if (!medicationName.trim()) return alert('약 이름을 입력해주세요.');
+    if (!selectedDays.length || !selectedMeals.length)
+      return alert('요일과 끼니를 모두 선택해주세요.');
 
-    const timesPayload = selectedMeals.map((meal) => ({
-      meal,
-      time: `${mealTimes[meal]}:00`,
-    }));
-
+    const timesPayload = selectedMeals.map((meal) => ({ meal, time: `${mealTimes[meal]}:00` }));
     try {
       if (initialData) {
-        // 수정
         await updateMedicationSchedule(initialData.medicationId, {
           newTimes: timesPayload,
           newDays: selectedDays,
@@ -237,12 +220,10 @@ export default function MedicationRegisterModal({
         });
         alert('수정되었습니다.');
       } else {
-        // 등록: 전체 or 선택된 환자
         const targets =
           selectedTarget === 'all'
             ? patients.map((p) => p.patientGuardianId)
             : [Number(selectedTarget)];
-
         for (const pid of targets) {
           await postMedicationSchedule({
             userId: user?.userId ?? 0,
@@ -267,88 +248,98 @@ export default function MedicationRegisterModal({
   };
 
   return (
-    <ModalBox>
-      <ModalHeader>{initialData ? '💊 약 수정' : '💊 약 등록'}</ModalHeader>
-      <ModalBody>
-        {/* 수정 모드가 아닐 때만 환자 선택 */}
-        {!initialData && (
-          <>
-            <Label>👤 환자 선택</Label>
-            <Select value={selectedTarget} onChange={(e) => setSelectedTarget(e.target.value)}>
-              <option value="all">전체</option>
-              {patients.map((p) => (
-                <option key={p.patientGuardianId} value={String(p.patientGuardianId)}>
-                  {p.name}
-                </option>
+    <ModalOverlay>
+      <ModalContainer>
+        <ModalHeader>
+          <HeaderIcon>💊</HeaderIcon>
+          <HeaderTitle>{initialData ? '약 정보 수정' : '약 정보 등록'}</HeaderTitle>
+        </ModalHeader>
+
+        <ModalBody>
+          {!initialData && (
+            <Section>
+              <SectionLabel>환자 선택</SectionLabel>
+              <Select value={selectedTarget} onChange={(e) => setSelectedTarget(e.target.value)}>
+                <option value="all">전체</option>
+                {patients.map((p) => (
+                  <option key={p.patientGuardianId} value={p.patientGuardianId}>
+                    {p.name}
+                  </option>
+                ))}
+              </Select>
+            </Section>
+          )}
+
+          <Section>
+            <SectionLabel>약 이름</SectionLabel>
+            <Input
+              type="text"
+              value={medicationName}
+              onChange={(e) => setMedicationName(e.target.value)}
+              disabled={!!initialData}
+            />
+          </Section>
+
+          <Section>
+            <SectionLabel>복약 요일</SectionLabel>
+            <TagGroup>
+              {daysOfWeek.map((d) => (
+                <TagButton
+                  key={d.value}
+                  $active={selectedDays.includes(d.value)}
+                  onClick={() => toggleDay(d.value)}
+                >
+                  {d.label}
+                </TagButton>
               ))}
-            </Select>
-          </>
-        )}
+            </TagGroup>
+          </Section>
 
-        <Label>💊 약 이름</Label>
-        <Input
-          type="text"
-          value={medicationName}
-          onChange={(e) => setMedicationName(e.target.value)}
-          disabled={!!initialData}
-        />
+          <Section>
+            <SectionLabel>복용 끼니</SectionLabel>
+            <TagGroup>
+              {mealOptions.map((m) => (
+                <TagButton
+                  key={m.value}
+                  $active={selectedMeals.includes(m.value)}
+                  onClick={() => toggleMeal(m.value)}
+                >
+                  {m.label}
+                </TagButton>
+              ))}
+            </TagGroup>
+          </Section>
 
-        <Label>📅 복약 요일</Label>
-        <ButtonGroup>
-          {daysOfWeek.map((d) => (
-            <SelectButton
-              key={d.value}
-              selected={selectedDays.includes(d.value)}
-              onClick={() => toggleDay(d.value)}
-            >
-              {d.label}
-            </SelectButton>
-          ))}
-        </ButtonGroup>
+          {mealOptions
+            .filter((m) => selectedMeals.includes(m.value))
+            .map((m) => (
+              <Section key={m.value}>
+                <SectionLabel>{m.label} 시간</SectionLabel>
+                <Input
+                  type="time"
+                  value={mealTimes[m.value]}
+                  onChange={(e) => setMealTimes((prev) => ({ ...prev, [m.value]: e.target.value }))}
+                />
+              </Section>
+            ))}
 
-        <Label>⏰ 복용 끼니 선택</Label>
-        <ButtonGroup>
-          {mealOptions.map((m) => (
-            <SelectButton
-              key={m.value}
-              selected={selectedMeals.includes(m.value)}
-              onClick={() => toggleMeal(m.value)}
-            >
-              {m.label}
-            </SelectButton>
-          ))}
-        </ButtonGroup>
+          <Section>
+            <SectionLabel>시작일</SectionLabel>
+            <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          </Section>
+          <Section>
+            <SectionLabel>종료일</SectionLabel>
+            <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+          </Section>
+        </ModalBody>
 
-        {/* mealOptions 순서대로 시간 입력 */}
-        {mealOptions
-          .filter((m) => selectedMeals.includes(m.value))
-          .map((m) => (
-            <div key={m.value} style={{ width: '80%' }}>
-              <Label>{m.label} 시간</Label>
-              <TimeInput
-                type="time"
-                value={mealTimes[m.value]}
-                onChange={(e) =>
-                  setMealTimes((prev) => ({
-                    ...prev,
-                    [m.value]: e.target.value,
-                  }))
-                }
-              />
-            </div>
-          ))}
-
-        <Label>📌 복용 시작일</Label>
-        <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-
-        <Label>📌 복용 종료일</Label>
-        <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-      </ModalBody>
-
-      <ModalFooter>
-        <ActionButton onClick={onClose}>취소</ActionButton>
-        <ActionButton onClick={handleSubmit}>{initialData ? '수정하기' : '등록하기'}</ActionButton>
-      </ModalFooter>
-    </ModalBox>
+        <Footer>
+          <FooterBtn onClick={onClose}>취소</FooterBtn>
+          <FooterBtn primary onClick={handleSubmit}>
+            {initialData ? '수정하기' : '등록하기'}
+          </FooterBtn>
+        </Footer>
+      </ModalContainer>
+    </ModalOverlay>
   );
 }

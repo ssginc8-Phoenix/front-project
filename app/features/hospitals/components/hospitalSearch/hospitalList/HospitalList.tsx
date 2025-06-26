@@ -14,6 +14,7 @@ interface HospitalListProps {
   onPageChange: (page: number) => void;
   onHospitalSelect: (hospitalId: number, lat: number, lng: number) => void;
   selectedHospitalId?: number | null;
+  baseLocation?: { lat: number; lng: number };
 }
 
 const Wrapper = styled.div`
@@ -31,18 +32,21 @@ const List = styled.ul`
   gap: 12px;
   flex: 1;
   overflow-y: auto;
+  width: 100%;
+  max-width: 100%;
+  max-height: 370px;
 `;
 
 const Card = styled.li<{ selected: boolean }>`
   background: #fff;
   border-radius: 12px;
-  padding: 1rem;
+  padding: 0.5rem;
   box-shadow: ${({ selected }) =>
     selected ? '0 0 0 3px #a3c2ff' : '0 2px 6px rgba(0, 0, 0, 0.08)'};
   cursor: pointer;
   transition: box-shadow 0.2s;
   flex: 0 0 auto;
-  width: 325px;
+  width: 350px;
 
   height: 120px;
   &:hover {
@@ -107,6 +111,7 @@ const HospitalList: React.FC<HospitalListProps> = ({
   error,
   onHospitalSelect,
   selectedHospitalId,
+  baseLocation,
 }) => {
   const [page, setPage] = useState(1);
   const ITEMS_PER_PAGE = 3;
@@ -141,11 +146,12 @@ const HospitalList: React.FC<HospitalListProps> = ({
             ? `${formatTime(todaySchedule.openTime)} ~ ${formatTime(todaySchedule.closeTime)}`
             : '진료시간 정보 없음';
 
+          const base = baseLocation ?? currentLocation;
           const distance =
-            currentLocation && hospital.latitude && hospital.longitude
+            baseLocation && hospital.latitude && hospital.longitude
               ? calculateDistance(
-                  currentLocation.latitude,
-                  currentLocation.longitude,
+                  baseLocation.lat,
+                  baseLocation.lng,
                   Number(hospital.latitude),
                   Number(hospital.longitude),
                 )

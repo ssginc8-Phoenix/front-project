@@ -249,12 +249,7 @@ const InsuranceRequestPage: React.FC = () => {
     page,
     10,
   );
-  useEffect(() => {
-    if (requestPage) {
-      console.log('[문서 요청 목록] 요청 페이지 데이터:', requestPage);
-      console.log('[문서 요청 목록] 요청 문서 목록:', requestPage.content);
-    }
-  }, [requestPage]);
+
   // 병원 변경 시 진료 초기화
   useEffect(() => setSelectedAppointmentId(null), [selectedHospitalId]);
 

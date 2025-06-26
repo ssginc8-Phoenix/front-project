@@ -1,4 +1,3 @@
-// src/features/calendar/pages/GuardianCalendar.tsx
 import { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -8,7 +7,19 @@ import { getMedicationSchedule } from '~/features/medication/api/medicationAPI';
 import CommonModal from '~/components/common/CommonModal';
 import MedicationRegisterModal from '~/features/medication/components/MedicationRegisterModal';
 import { getMyGuardianInfo } from '~/features/guardian/api/guardianAPI';
-import { Overlay } from '~/features/hospitals/components/waiting/WaitingModal';
+
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 2000; /* 캘린더(보통 1xxx)보다 크게 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 const PageContainer = styled.div`
   display: flex;
@@ -220,6 +231,63 @@ const AddMedicationButton = styled.button`
   }
 `;
 
+const DetailContainer = styled.div`
+  background: #f9fafb;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+`;
+
+const HeaderSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const HeaderIcon = styled.div`
+  font-size: 2rem;
+  background: #e0f2fe;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+`;
+
+const HeaderTitle = styled.h3`
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+`;
+
+const InfoGrid = styled.div`
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  row-gap: 1rem;
+  column-gap: 1rem;
+`;
+
+const Label = styled.div`
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  text-align: right;
+`;
+
+const Value = styled.div`
+  font-size: 1rem;
+  color: #0f172a;
+`;
+
 export default function GuardianCalendar() {
   const [calendarData, setCalendarData] = useState<Record<string, any[]>>({});
   const [fullList, setFullList] = useState<any[]>([]);
@@ -271,7 +339,7 @@ export default function GuardianCalendar() {
 
   useEffect(() => {
     getMyGuardianInfo()
-      .then((info) => setGuardianUserId(info.userId))
+      .then((info) => setGuardianUserId(info.guardianId))
       .catch(console.error);
   }, []);
 
@@ -495,49 +563,53 @@ export default function GuardianCalendar() {
         )}
 
         {itemDetailOpen && selectedItem && (
-          <CommonModal
-            title={`${selectedItem.date} 상세정보`}
-            buttonText="확인"
-            onClose={() => setItemDetailOpen(false)}
-          >
-            <div style={{ textAlign: 'left', lineHeight: '1.6' }}>
-              {selectedItem.itemType === 'MEDICATION' ? (
-                <>
-                  <p>
-                    <strong>환자 이름:</strong> {selectedItem.name}
-                  </p>
-                  <p>
-                    <strong>복약 이름:</strong> {selectedItem.title}
-                  </p>
-                  <p>
-                    <strong>복약 기간:</strong> {selectedItem.startDate} ~ {selectedItem.endDate}
-                  </p>
-                  <p>
-                    <strong>복용 시간:</strong>{' '}
-                    {selectedItem.times && selectedItem.times.length > 0
-                      ? selectedItem.times
-                          .map(
-                            (t: { meal: string; time: string }) =>
-                              `${mealLabel(t.meal)} ${t.time.slice(0, 5)}`,
-                          )
-                          .join(', ')
-                      : '시간 정보 없음'}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p>
-                    <strong>환자:</strong> {selectedItem.name}
-                  </p>
-                  <p>
-                    <strong>진료일:</strong> {selectedItem.date}
-                  </p>
-                  <p>
-                    <strong>시간:</strong> {selectedItem.time}
-                  </p>
-                </>
-              )}
-            </div>
+          <CommonModal title={null} buttonText="확인" onClose={() => setItemDetailOpen(false)}>
+            <DetailContainer>
+              <HeaderSection>
+                <HeaderIcon>{selectedItem.itemType === 'MEDICATION' ? '💊' : '🏥'}</HeaderIcon>
+                <HeaderTitle>{selectedItem.date} 상세 정보</HeaderTitle>
+              </HeaderSection>
+
+              <InfoGrid>
+                {selectedItem.itemType === 'MEDICATION' ? (
+                  <>
+                    <Label>환자 이름</Label>
+                    <Value>{selectedItem.name}</Value>
+
+                    <Label>복약 이름</Label>
+                    <Value>{selectedItem.title}</Value>
+
+                    <Label>복약 기간</Label>
+                    <Value>
+                      {selectedItem.startDate} ~ {selectedItem.endDate}
+                    </Value>
+
+                    <Label>복용 시간</Label>
+                    <Value>
+                      {selectedItem.times && selectedItem.times.length > 0
+                        ? selectedItem.times
+                            .map(
+                              (t: { meal: string; time: string }) =>
+                                `${mealLabel(t.meal)} ${t.time.slice(0, 5)}`,
+                            )
+                            .join(', ')
+                        : '시간 정보 없음'}
+                    </Value>
+                  </>
+                ) : (
+                  <>
+                    <Label>환자</Label>
+                    <Value>{selectedItem.name}</Value>
+
+                    <Label>진료일</Label>
+                    <Value>{selectedItem.date}</Value>
+
+                    <Label>시간</Label>
+                    <Value>{selectedItem.time}</Value>
+                  </>
+                )}
+              </InfoGrid>
+            </DetailContainer>
           </CommonModal>
         )}
       </ContentBox>

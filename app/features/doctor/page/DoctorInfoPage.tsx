@@ -32,9 +32,6 @@ const Title = styled.h2`
 const DoctorInfoPage = () => {
   return (
     <PageWrapper>
-      {/* 사이드바 */}
-      <Sidebar />
-
       {/* 메인 콘텐츠 */}
       <MainSection>
         <Title>👨‍⚕️ 의사 정보 관리</Title>

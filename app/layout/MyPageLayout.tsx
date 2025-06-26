@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { Outlet } from 'react-router';
 import Header from '~/layout/Header';
 import MyPageFooter from '~/layout/MyPageFooter';
+import Sidebar from '~/common/Sidebar';
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -9,29 +10,51 @@ const LayoutContainer = styled.div`
   min-height: 100vh;
 `;
 
-const ContentWrapper = styled.main`
+const MainContentWrapper = styled.div`
   flex: 1;
-  padding: 2rem 1rem; /* 좌우 패딩을 조금 줄이거나, 나중에 max-width와 함께 조정 */
-  max-width: 1400px; /* 최대 너비 설정: 화면이 아무리 커져도 컨텐츠가 너무 넓어지지 않게 함 */
+  display: flex;
+  overflow-y: auto;
+  padding: 2rem 1rem;
+  max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-
-  display: flex;
-  flex-direction: column;
   gap: 2rem;
+  align-items: flex-start;
+  min-height: 0;
 
   @media (max-width: 768px) {
     padding: 1.5rem 1rem;
   }
 `;
 
+const BackGroundColor = styled.div`
+  background-color: #f0f4f8;
+  border-radius: 1rem;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+`;
+
+const ContentArea = styled.main`
+  flex-grow: 1;
+  padding: 0;
+  min-height: 0;
+`;
+
 const MyPageLayout = () => {
   return (
     <LayoutContainer>
       <Header />
-      <ContentWrapper>
-        <Outlet />
-      </ContentWrapper>
+
+      <MainContentWrapper>
+        <BackGroundColor>
+          <Sidebar />
+          <ContentArea>
+            <Outlet />
+          </ContentArea>
+        </BackGroundColor>
+      </MainContentWrapper>
+
       <MyPageFooter />
     </LayoutContainer>
   );

@@ -8,12 +8,10 @@ import {
   getHospitalSchedules,
   updateHospitalSchedules,
   createHospitalSchedule,
-  createWaiting,
 } from '~/features/hospitals/api/hospitalAPI';
 import HospitalDaumPost from '~/features/hospitals/components/hospitalAdmin/info/HospitalDaumPost';
 
 import type { CreateScheduleRequest, HospitalForm } from '~/features/hospitals/types/hospital';
-import WaitModal from '~/features/hospitals/components/RegisterWaitModal';
 import type { ScheduleDTO } from '~/features/hospitals/types/hospitalSchedule';
 
 interface HourRow {
@@ -41,11 +39,7 @@ const dayOfWeekMap: Record<string, CreateScheduleRequest['dayOfWeek']> = {
 
 const mapDayOfWeekBack = (d: CreateScheduleRequest['dayOfWeek']) =>
   Object.keys(dayOfWeekMap).find((key) => dayOfWeekMap[key] === d) || '';
-const timeOptions = Array.from({ length: 24 * 2 }, (_, i) => {
-  const hour = String(Math.floor(i / 2)).padStart(2, '0');
-  const minute = i % 2 === 0 ? '00' : '30';
-  return { label: `${hour}:${minute}`, value: `${hour}:${minute}` };
-});
+
 export const ServiceInputChips: React.FC<{
   services: string[];
   onChange: (arr: string[]) => void;
@@ -106,7 +100,7 @@ const PreviewImage = styled.img`
 const HospitalUpdateForm: React.FC = () => {
   const [hospitalId, setHospitalId] = useState<string | null>(null);
   const [isEdit, setIsEdit] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [, setExistingFileIds] = useState<number[]>([]);
   const [, setPreviewUrls] = useState<string[]>([]);
   const [deletedFileIds, setDeletedFileIds] = useState<number[]>([]);
@@ -161,18 +155,7 @@ const HospitalUpdateForm: React.FC = () => {
       return updated;
     });
   };
-  // 3) 대기 인원 등록 핸들러: 모달에서 입력받은 숫자를 API로 보내고 모달 닫기
-  const handleRegisterWaiting = async (count: number) => {
-    if (!hospitalId) return;
-    try {
-      await createWaiting(Number(hospitalId), count);
-      alert(`대기 인원 ${count}명 등록 완료`);
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error('대기 등록 에러', err);
-      alert('대기 등록에 실패했습니다.');
-    }
-  };
+
   const handleChange =
     (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
@@ -566,16 +549,6 @@ const HospitalUpdateForm: React.FC = () => {
           <Plus size={16} style={{ marginRight: '4px' }} /> 진료시간 추가
         </AddScheduleButton>
       </BusinessHoursWrapper>
-      <Button type="button" variant="secondary" onClick={() => setIsModalOpen(true)}>
-        대기 인원 등록
-      </Button>
-      {isModalOpen && (
-        <WaitModal
-          hospitalId={Number(hospitalId)}
-          onClose={() => setIsModalOpen(false)}
-          onConfirm={handleRegisterWaiting}
-        />
-      )}
 
       <Button type="submit">{isEdit ? '병원 수정' : '병원 등록'}</Button>
     </Form>

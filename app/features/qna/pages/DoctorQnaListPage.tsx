@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import Sidebar from '~/common/Sidebar';
 import Pagination from '~/components/common/Pagination';
 import QaChatModal from '~/features/qna/component/QaChatModal';
 import { useDoctorQnAs } from '~/features/qna/hooks/useDoctorQnAs';
@@ -27,8 +26,6 @@ const DoctorQnaListPage: React.FC = () => {
 
   return (
     <Layout>
-      <Sidebar />
-
       <Content>
         <Header>💬 의사 Q&A</Header>
         <TabBar>

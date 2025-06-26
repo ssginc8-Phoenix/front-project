@@ -52,7 +52,7 @@ export const useAppointmentActions = () => {
 
     try {
       await changeStatus(appointmentId, status);
-      alert(`예약 상태가 '${status}'(으)로 변경되었습니다.`);
+      alert(`예약 상태가 '${statusInKorean(status)}'(으)로 변경되었습니다.`);
       return true;
     } catch (err: any) {
       setError(err);
@@ -71,4 +71,19 @@ export const useAppointmentActions = () => {
     isLoading,
     error,
   };
+};
+
+const statusInKorean = (status: string) => {
+  switch (status) {
+    case 'REQUESTED':
+      return '요청';
+    case 'CONFIRMED':
+      return '승인';
+    case 'CANCELED':
+      return '취소';
+    case 'COMPLETED':
+      return '완료';
+    default:
+      return status;
+  }
 };

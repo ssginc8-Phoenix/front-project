@@ -18,26 +18,6 @@ const formatPhoneNumber = (value: string) => {
   return part1;
 };
 
-const PageWrapper = styled.div`
-  display: flex;
-  min-height: 100vh;
-  background-color: #f0f4f8;
-  font-family: 'Segoe UI', sans-serif;
-`;
-
-const SidebarBox = styled.div`
-  width: 260px;
-  background: white;
-  border-right: 1px solid #e0e0e0;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 0 20px 20px 0;
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
-  flex-shrink: 0;
-`;
-
 const MainSection = styled.section`
   flex: 1;
   padding: 2rem;
@@ -83,22 +63,26 @@ const InputRow = styled.div`
 `;
 
 const Label = styled.label`
-  font-size: 1.07rem;
+  font-size: 0.9rem;
   color: #2c2c2c;
   width: 88px;
   flex-shrink: 0;
 `;
 
-const Input = styled.input`
+const Input = styled.input<{ readOnly?: boolean }>`
   flex: 1;
-  font-size: 1.09rem;
-  padding: 14px 12px;
-  border: 1.7px solid #e2e4e8;
-  border-radius: 7px;
-  background: #f8fafd;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background-color: ${({ readOnly }) => (readOnly ? '#f2f2f2' : '#fff')};
+  color: ${({ readOnly }) => (readOnly ? '#777' : '#000')};
+
   &:focus {
-    border-color: #2261bb;
-    background: #fff;
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    background-color: #fff;
   }
 `;
 
@@ -139,18 +123,22 @@ const Footer = styled.div`
   }
 `;
 
+const ImagePreview = styled.img`
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 88px;
+`;
+
 const GuardianInfoPage = () => {
-  const { user } = useLoginStore();
+  const { user, fetchMyInfo } = useLoginStore();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-  });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '' });
   const [detailAddress, setDetailAddress] = useState('');
-
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
   const [showByeModal, setShowByeModal] = useState(false);
@@ -160,10 +148,9 @@ const GuardianInfoPage = () => {
       try {
         const myInfo = await getUserInfo();
         const formattedPhone = formatPhoneNumber(myInfo.phone || '');
-
         const raw = myInfo.address || '';
-        let main = raw;
-        let detail = '';
+        let main = raw,
+          detail = '';
         const m = raw.match(/^(.*\))\s*(.*)$/);
         if (m) {
           main = m[1];
@@ -176,6 +163,7 @@ const GuardianInfoPage = () => {
           address: main,
         });
         setDetailAddress(detail);
+        setPreviewUrl(myInfo.profileImageUrl || null);
       } catch (error) {
         console.error('Failed to fetch user info', error);
       }
@@ -189,123 +177,85 @@ const GuardianInfoPage = () => {
   const handleDetailAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDetailAddress(e.target.value);
   };
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfileImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const fullAddress = detailAddress ? `${form.address} ${detailAddress}` : form.address;
-      await updateUserInfo({
-        name: form.name,
-        email: form.email,
-        phone: form.phone.replace(/-/g, ''),
-        address: fullAddress,
-      });
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('email', form.email);
+      formData.append('phone', form.phone.replace(/-/g, ''));
+      formData.append('address', fullAddress);
+      if (profileImage) formData.append('profileImage', profileImage);
+      await updateUserInfo(formData);
+      await fetchMyInfo();
       alert('정보가 성공적으로 저장되었습니다.');
-      const updatedInfo = await getUserInfo();
-      const raw = updatedInfo.address || '';
-      let main = raw;
-      let detail = '';
-      const m = raw.match(/^(.*\))\s*(.*)$/);
-      if (m) {
-        main = m[1];
-        detail = m[2];
-      }
-      setForm({
-        name: updatedInfo.name || '',
-        email: updatedInfo.email || '',
-        phone: formatPhoneNumber(updatedInfo.phone || ''),
-        address: main,
-      });
-      setDetailAddress(detail);
     } catch (error) {
       console.error('정보 저장 실패', error);
       alert('정보 저장에 실패했습니다.');
     }
   };
 
-  const handleWithdrawClick = () => setShowConfirm(true);
-  const handleConfirmCancel = () => setShowConfirm(false);
-  const handleConfirmOk = () => {
-    setShowConfirm(false);
-    setShowPwModal(true);
-  };
-  const handlePwModalClose = () => setShowPwModal(false);
-  const handlePwSuccess = () => {
-    setShowPwModal(false);
-    alert('회원 탈퇴 완료 (가짜)');
-    setShowByeModal(true);
-  };
-  const handleByeClose = () => {
-    setShowByeModal(false);
-    navigate('/');
-  };
-
   return (
     <>
-      <PageWrapper>
-        <SidebarBox>
-          <Sidebar />
-        </SidebarBox>
-
-        <MainSection>
-          <GuardianInfoHeader>
-            <Name>{user?.name}님 정보</Name>
-          </GuardianInfoHeader>
-
-          <InfoFormBox onSubmit={handleSave}>
-            {/* 이름, 이메일, 전화번호 */}
-            <InputRow>
-              <Label htmlFor="name">이름</Label>
-              <Input id="name" name="name" value={form.name} readOnly />
-            </InputRow>
-            <InputRow>
-              <Label htmlFor="email">이메일</Label>
-              <Input id="email" name="email" value={form.email} readOnly />
-            </InputRow>
-            <InputRow>
-              <Label htmlFor="phone">전화번호</Label>
-              <Input
-                id="phone"
-                name="phone"
-                value={form.phone}
-                onChange={handlePhoneChange}
-                placeholder="전화번호 입력 (010-1234-5678)"
-              />
-            </InputRow>
-
-            {/* 도로명 주소 검색 */}
-            <InputRow>
-              <Label htmlFor="address">주소</Label>
-              <div style={{ flex: 1 }}>
-                <DaumPost
-                  address={form.address}
-                  setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
-                />
-              </div>
-            </InputRow>
-
-            {/* 상세 주소 입력 */}
-            <InputRow>
-              <Label htmlFor="detailAddress">상세 주소</Label>
-              <Input
-                id="detailAddress"
-                type="text"
-                value={detailAddress}
-                onChange={handleDetailAddressChange}
-                placeholder="상세주소 입력 (예: 111동 1234호)"
-              />
-            </InputRow>
-
-            <SaveButton type="submit">저장</SaveButton>
-          </InfoFormBox>
-
-          <Footer>
-            <span onClick={handleWithdrawClick}>회원탈퇴</span>
-          </Footer>
-        </MainSection>
-      </PageWrapper>
-
-      <ReusableModal open={showConfirm} onClose={handleConfirmCancel} hideCloseButton>
+      <MainSection>
+        <GuardianInfoHeader>
+          <Name>{user?.name}님 정보</Name>
+        </GuardianInfoHeader>
+        <InfoFormBox onSubmit={handleSave}>
+          <InputRow>
+            <Label htmlFor="name">이름</Label>
+            <Input id="name" value={form.name} readOnly />
+          </InputRow>
+          <InputRow>
+            <Label htmlFor="email">이메일</Label>
+            <Input id="email" value={form.email} readOnly />
+          </InputRow>
+          <InputRow>
+            <Label htmlFor="phone">전화번호</Label>
+            <Input
+              id="phone"
+              value={form.phone}
+              onChange={handlePhoneChange}
+              placeholder="010-1234-5678"
+            />
+          </InputRow>
+          <InputRow>
+            <Label htmlFor="address">주소</Label>
+            <DaumPost
+              address={form.address}
+              setAddress={(addr) => setForm((prev) => ({ ...prev, address: addr }))}
+            />
+          </InputRow>
+          <InputRow>
+            <Label htmlFor="detailAddress">상세 주소</Label>
+            <Input
+              id="detailAddress"
+              value={detailAddress}
+              onChange={handleDetailAddressChange}
+              placeholder="예: 111동 1234호"
+            />
+          </InputRow>
+          <InputRow>
+            <Label htmlFor="profileImage">프로필 이미지</Label>
+            <Input id="profileImage" type="file" accept="image/*" onChange={handleImageChange} />
+          </InputRow>
+          {previewUrl && <ImagePreview src={previewUrl} alt="미리보기" />}
+          <SaveButton type="submit">저장</SaveButton>
+        </InfoFormBox>
+        <Footer>
+          <span onClick={() => setShowConfirm(true)}>회원탈퇴</span>
+        </Footer>
+      </MainSection>
+      <ReusableModal open={showConfirm} onClose={() => setShowConfirm(false)} hideCloseButton>
         <div
           style={{ fontSize: '1.13rem', fontWeight: 600, marginBottom: 24, textAlign: 'center' }}
         >
@@ -313,7 +263,7 @@ const GuardianInfoPage = () => {
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
           <button
-            onClick={handleConfirmCancel}
+            onClick={() => setShowConfirm(false)}
             style={{
               background: '#f3f3f3',
               borderRadius: 16,
@@ -321,16 +271,15 @@ const GuardianInfoPage = () => {
               padding: '10px 24px',
               color: '#555',
               fontWeight: 500,
-              fontSize: '1.05rem',
-              cursor: 'pointer',
-              transition: 'background 0.16s',
-              '&:hover': { background: '#e0e0e0' },
             }}
           >
             취소
           </button>
           <button
-            onClick={handleConfirmOk}
+            onClick={() => {
+              setShowConfirm(false);
+              setShowPwModal(true);
+            }}
             style={{
               background: '#ff4646',
               borderRadius: 16,
@@ -338,18 +287,29 @@ const GuardianInfoPage = () => {
               padding: '10px 24px',
               color: '#fff',
               fontWeight: 600,
-              fontSize: '1.05rem',
-              cursor: 'pointer',
-              transition: 'background 0.16s',
-              '&:hover': { background: '#cc3737' },
             }}
           >
             탈퇴하기
           </button>
         </div>
       </ReusableModal>
-      <PasswordModal open={showPwModal} onClose={handlePwModalClose} onSuccess={handlePwSuccess} />
-      <ReusableModal open={showByeModal} onClose={handleByeClose} hideCloseButton>
+      <PasswordModal
+        open={showPwModal}
+        onClose={() => setShowPwModal(false)}
+        onSuccess={() => {
+          setShowPwModal(false);
+          alert('회원 탈퇴 완료 (가짜)');
+          setShowByeModal(true);
+        }}
+      />
+      <ReusableModal
+        open={showByeModal}
+        onClose={() => {
+          setShowByeModal(false);
+          navigate('/');
+        }}
+        hideCloseButton
+      >
         <div
           style={{
             color: '#00499e',
@@ -365,7 +325,10 @@ const GuardianInfoPage = () => {
           안녕히 가세요!
         </div>
         <button
-          onClick={handleByeClose}
+          onClick={() => {
+            setShowByeModal(false);
+            navigate('/');
+          }}
           style={{
             marginTop: 20,
             padding: '12px 24px',

@@ -94,7 +94,7 @@ const AppointmentRequestPage = () => {
     try {
       const result = await createAppointment(payload);
       alert('예약이 접수되었습니다.');
-      navigate('/appointments');
+      navigate('/mypage/appointments');
       reset();
     } catch (error) {
       console.error('예약 실패: ', error);

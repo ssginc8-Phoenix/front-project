@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router';
 import styled from 'styled-components';
 
-import Sidebar from '~/common/Sidebar'; // ← 사이드바
 import { useReviewList } from '~/features/reviews/hooks/useReviewList';
 import * as reviewAPI from '~/features/reviews/api/reviewAPI';
 import { getAppointment } from '~/features/appointment/api/appointmentAPI';
@@ -91,8 +90,6 @@ export default function ReviewMyListPage() {
   /* ─── 렌더링 ─────────────────────────────────── */
   return (
     <Layout>
-      <Sidebar />
-
       <Content>
         <Header>
           <Title>✏️ 나의 리뷰 관리</Title>

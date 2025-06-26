@@ -35,9 +35,6 @@ const AdminDashboard = () => {
   return (
     <>
       <PageWrapper>
-        {/* 사이드바 */}
-        <Sidebar />
-
         {/* 메인 콘텐츠 */}
         <MainSection>
           <Title>🏥 병원 대시보드</Title>

@@ -199,43 +199,56 @@ const HospitalCreateForm: React.FC = () => {
       return [...prev.slice(0, insertPos), newRow, ...prev.slice(insertPos)];
     });
   };
+  const parseTime = (timeStr: string) => {
+    if (!timeStr) return null; // ← 빈 값은 명시적으로 null 반환
+    const [h, m] = timeStr.split(':').map(Number);
+    return new Date(0, 0, 0, h, m);
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const hasValidSchedule = businessHours.some(({ open, close }) => open && close);
+    if (!hasValidSchedule) {
+      alert('진료시간을 최소 1개 이상 등록해주세요.');
+      return;
+    }
     for (const { dayOfWeek, open, close, lunchStart, lunchEnd } of businessHours) {
-      // ① 빈 데이터(오픈/종료 둘 다 빈 값)는 건너뛰기
-      if (!open && !close && !lunchStart && !lunchEnd) {
-        continue;
-      }
+      const dayLabel = reverseDayOfWeekMap[dayOfWeek];
 
-      // ② 진료 시작/종료는 둘 다 있어야 함
+      if (!open && !close && !lunchStart && !lunchEnd) continue;
+
       if (!open || !close) {
-        alert(`${dayOfWeek}의 진료 시작·종료 시간을 모두 입력해주세요.`);
+        alert(`${dayLabel}의 진료 시작·종료 시간을 모두 입력해주세요.`);
         return;
       }
 
-      // ③ 진료 시작 < 종료
-      if (open >= close) {
-        alert(`${dayOfWeek} 진료 시작시간은 종료시간보다 빠르게 입력해야 합니다.`);
+      const openTime = parseTime(open);
+      const closeTime = parseTime(close);
+      const lunchStartTime = parseTime(lunchStart);
+      const lunchEndTime = parseTime(lunchEnd);
+
+      if (!openTime || !closeTime) {
+        alert(`${dayLabel}의 진료시간이 잘못되었습니다.`);
         return;
       }
 
-      // ④ 점심이 있으면 진료시간 내부에 있어야 함
-      if (lunchStart) {
-        if (lunchStart < open || lunchStart >= close) {
-          alert(`${dayOfWeek} 점심 시작시간은 진료시간(${open}~${close}) 안에 있어야 합니다.`);
-          return;
-        }
-      }
-      if (lunchEnd) {
-        if (lunchEnd <= open || lunchEnd > close) {
-          alert(`${dayOfWeek} 점심 종료시간은 진료시간(${open}~${close}) 안에 있어야 합니다.`);
-          return;
-        }
+      if (openTime >= closeTime) {
+        alert(`${dayLabel} 진료 시작시간은 종료시간보다 빨라야 합니다.`);
+        return;
       }
 
-      // ⑤ 점심 시작 < 점심 종료
-      if (lunchStart && lunchEnd && lunchStart >= lunchEnd) {
-        alert(`${dayOfWeek} 점심 시작시간은 점심 종료시간보다 빠르게 입력해야 합니다.`);
+      if (lunchStartTime && (lunchStartTime < openTime || lunchStartTime >= closeTime)) {
+        alert(`${dayLabel} 점심 시작시간은 진료시간 내에 있어야 합니다.`);
+        return;
+      }
+
+      if (lunchEndTime && (lunchEndTime <= openTime || lunchEndTime > closeTime)) {
+        alert(`${dayLabel} 점심 종료시간은 진료시간 내에 있어야 합니다.`);
+        return;
+      }
+
+      if (lunchStartTime && lunchEndTime && lunchStartTime >= lunchEndTime) {
+        alert(`${dayLabel} 점심 시작시간은 점심 종료시간보다 빨라야 합니다.`);
         return;
       }
     }
@@ -305,10 +318,10 @@ const HospitalCreateForm: React.FC = () => {
       const schedulePayloads = businessHours.map(
         ({ dayOfWeek, open, close, lunchStart, lunchEnd }) => ({
           dayOfWeek,
-          openTime: open ? `${open}:00` : '00:00:00',
-          closeTime: close ? `${close}:00` : '00:00:00',
-          lunchStart: lunchStart ? `${lunchStart}:00` : '00:00:00',
-          lunchEnd: lunchEnd ? `${lunchEnd}:00` : '00:00:00',
+          openTime: open ? `${open}:00` : null,
+          closeTime: close ? `${close}:00` : null,
+          lunchStart: lunchStart ? `${lunchStart}:00` : null,
+          lunchEnd: lunchEnd ? `${lunchEnd}:00` : null,
         }),
       );
 
@@ -441,7 +454,7 @@ const HospitalCreateForm: React.FC = () => {
                 phoneNumber: formatted,
               }));
             }}
-            placeholder="예: 010-1234-5678"
+            placeholder="예: 0507-1234-5678"
           />
 
           {formErrors.phoneNumber && <Error>{formErrors.phoneNumber}</Error>}

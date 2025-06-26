@@ -66,7 +66,7 @@ const AppointmentUpdateModal = ({
   // '예약 완료' 버튼을 보여줄지 여부 (예약 승인 상태일 때만)
   const canShowCompleteButton = appointment?.status === 'CONFIRMED';
 
-  // 결제 요청 버튼ㅇ르 보여줄지 여부 (온라인 결제 타입이고, 완료 상태일 때)
+  // 결제 요청 버튼을 보여줄지 여부 (온라인 결제 타입이고, 완료 상태일 때)
   const canRequestPayment =
     appointment?.paymentType === 'ONLINE' && appointment?.status === 'COMPLETED';
 
@@ -104,6 +104,17 @@ const AppointmentUpdateModal = ({
   /** 결제 요청 페이지로 이동 */
   const handlePaymentRequest = () => {
     navigate(`/payments/request?appointmentId=${appointment?.appointmentId}`);
+  };
+
+  const getPaymentMethodInKorean = (method: string) => {
+    switch (method) {
+      case 'ONSITE':
+        return '현장 수납';
+      case 'ONLINE':
+        return '앱 내 결제';
+      default:
+        return method;
+    }
   };
 
   return (
@@ -178,7 +189,7 @@ const AppointmentUpdateModal = ({
 
                 <Section>
                   <SectionTitle>수납 방법</SectionTitle>
-                  <InfoText>{appointment.paymentType}</InfoText>
+                  <InfoText>{getPaymentMethodInKorean(appointment.paymentType)}</InfoText>
                 </Section>
 
                 <ButtonStack>

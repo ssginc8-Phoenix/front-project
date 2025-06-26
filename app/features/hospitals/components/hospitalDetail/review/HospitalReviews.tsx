@@ -56,9 +56,9 @@ const KeywordGroup = styled.div`
   flex-wrap: wrap;
   gap: 0.5rem;
 `;
-
-const KeywordTag = styled.span`
-  background-color: #3b82f6;
+const KeywordTag = styled.span<{ polarity?: 'positive' | 'negative' | 'neutral' }>`
+  background-color: ${({ polarity }) =>
+    polarity === 'negative' ? '#F1A89E' : '#60a5fa'}; // 빨강/파랑
   color: white;
   padding: 4px 10px;
   border-radius: 12px;
@@ -113,7 +113,48 @@ const keywordLabelMap: Record<KeywordType, string> = {
   INSURANCE_BUREAUCRACY: '보험 처리가 번거로워요',
   LATE_RECEIPT: '영수증/서류 처리 지연',
 };
+const keywordPolarityMap: Record<KeywordType, 'positive' | 'negative' | 'neutral'> = {
+  // ✅ 긍정 키워드
+  THOROUGH: 'positive',
+  FRIENDLY_DOCTOR: 'positive',
+  FAST: 'positive',
+  SHORT_WAIT: 'positive',
+  PROFESSIONAL: 'positive',
+  SENIOR_FRIENDLY: 'positive',
+  CLEAN_HOSPITAL: 'positive',
+  NICE_FACILITY: 'positive',
+  EASY_PARKING: 'positive',
+  GOOD_LOCATION: 'positive',
+  COMFORTABLE_ATMOS: 'positive',
+  FAIR_PRICE: 'positive',
+  EASY_INSURANCE: 'positive',
+  FAST_RESULTS: 'positive',
+  ENOUGH_CONSULT: 'positive',
+  WANT_RETURN: 'positive',
+  FAST_PAYMENT: 'positive',
 
+  // ❌ 부정 키워드
+  UNFRIENDLY_EXAM: 'negative',
+  LACK_EXPLANATION: 'negative',
+  POOR_COMMUNICATION: 'negative',
+  NO_EFFECT_TREAT: 'negative',
+  LONG_WAIT: 'negative',
+  WAIT_AFTER_BOOK: 'negative',
+  LACK_GUIDE: 'negative',
+  COMPLEX_PAYMENT: 'negative',
+  DIRTY_HOSPITAL: 'negative',
+  WORRY_CLEAN: 'negative',
+  TIGHT_WAIT_AREA: 'negative',
+  NO_PARKING_SPACE: 'negative',
+  CONFUSING_SIGNAGE: 'negative',
+  NO_WHEELCHAIR_ACCESS: 'negative',
+  NO_GUARDIAN_SPACE: 'negative',
+  EXPENSIVE: 'negative',
+  PUSH_UNNECESSARY: 'negative',
+  LACK_FEE_EXPLAN: 'negative',
+  INSURANCE_BUREAUCRACY: 'negative',
+  LATE_RECEIPT: 'negative',
+};
 const HospitalReviews: React.FC<HospitalReviewsProps> = ({ hospitalId }) => {
   const [page, setPage] = useState(0);
   const { reviews, totalPages, loading, error } = useHospitalReviews(hospitalId, page, 5);
@@ -128,6 +169,7 @@ const HospitalReviews: React.FC<HospitalReviewsProps> = ({ hospitalId }) => {
 
     return (
       <>
+        <SectionTitle>키워드 통계</SectionTitle>
         <KeywordStatsChart reviews={reviews} />
       </>
     );
@@ -151,7 +193,9 @@ const HospitalReviews: React.FC<HospitalReviewsProps> = ({ hospitalId }) => {
             <ReviewContent>{review.contents}</ReviewContent>
             <KeywordGroup>
               {review.keywords.map((kw) => (
-                <KeywordTag key={kw}>{keywordLabelMap[kw]}</KeywordTag>
+                <KeywordTag key={kw} polarity={keywordPolarityMap[kw]}>
+                  {keywordLabelMap[kw]}
+                </KeywordTag>
               ))}
             </KeywordGroup>
           </ReviewCard>

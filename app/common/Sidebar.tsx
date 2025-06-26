@@ -20,7 +20,17 @@ const SidebarBox = styled.div`
   border-radius: 0 20px 20px 0;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
+  min-height: 0;
+
+  /** ㅡㅡㅡㅡㅡ 스크롤 바 숨김 ㅡㅡㅡㅡㅡㅡㅡ */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
+
+const SidebarContent = styled.div``;
 
 const ProfileSection = styled.div`
   display: flex;
@@ -87,16 +97,17 @@ const Sidebar = () => {
 
   // 각 사이드바 아이템 키에 대한 라우트 정의
   const itemRoutes: { [key: string]: string } = {
-    guardian: '/guardian',
-    patient: '/mypage',
-    appointment: '/appointments', // 예약 조회 및 관리 페이지
-    calendar: '/calendar',
-    review: '/review',
-    qna: '/qna',
-    info: '/info',
-    schedule: '/schedule',
-    chart: '/chart',
-    cs: '/cs',
+    guardian: '/mypage/guardian',
+    patient: '/mypage/patient',
+    appointment: '/mypage/appointments', // 예약 조회 및 관리 페이지
+    appointmentDashboard: '/appointments',
+    calendar: '/mypage/calendar',
+    review: '/mypage/review',
+    qna: '/mypage/qna',
+    info: '/mypage/info',
+    schedule: '/mypage/schedule',
+    chart: '/mypage/chart',
+    cs: '/mypage/cs',
   };
 
   const handleSidebarChange = (key: string) => {
@@ -110,19 +121,21 @@ const Sidebar = () => {
 
   return (
     <SidebarBox>
-      <ProfileSection>
-        <ProfileImage
-          src={
-            user?.profileImageUrl ??
-            'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png'
-          }
-          alt="프로필 사진"
-        />
-        <ProfileName>{user?.name ?? '이름 로딩 중'}님</ProfileName>
-        <ProfileRole>{getRoleInKorean(user?.role)}</ProfileRole>
-      </ProfileSection>
+      <SidebarContent>
+        <ProfileSection>
+          <ProfileImage
+            src={
+              user?.profileImageUrl ??
+              'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png'
+            }
+            alt="프로필 사진"
+          />
+          <ProfileName>{user?.name ?? '이름 로딩 중'}님</ProfileName>
+          <ProfileRole>{getRoleInKorean(user?.role)}</ProfileRole>
+        </ProfileSection>
 
-      <SidebarMenu items={sidebarItems} onChange={handleSidebarChange} />
+        <SidebarMenu items={sidebarItems} onChange={handleSidebarChange} />
+      </SidebarContent>
     </SidebarBox>
   );
 };

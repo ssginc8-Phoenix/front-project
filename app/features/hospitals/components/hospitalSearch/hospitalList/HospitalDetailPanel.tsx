@@ -15,7 +15,7 @@ const Panel = styled.div`
   flex-direction: column;
   background: white;
   padding: 1rem;
-  height: 600px;
+  height: 700px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   gap: 0.25rem;
@@ -151,7 +151,7 @@ const SecondaryButton = styled.button`
 const SliderContainer = styled.div`
   position: relative;
   width: 100%;
-  height: 35vh;
+  height: 50vh;
   margin-bottom: 1rem;
   overflow: hidden;
   border-radius: 0.75rem;

@@ -3,7 +3,7 @@ export interface NotificationList {
   content: string;
   type: string;
   referenceId: number;
-  isRead: boolean;
+  read: boolean;
   createdAt: string;
   readAt: string;
 }

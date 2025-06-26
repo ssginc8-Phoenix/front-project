@@ -29,7 +29,7 @@ export default [
     route('patient', 'routes/guardian/patientManagement.tsx'), // 보호자 - 환자 관리
     route('appointments', 'routes/appointment/appointmentDashboard.tsx'), // 역할별 예약 조회 및 관리
     route('calendar', 'routes/calendar/calendar.tsx'), // 역할별 캘린더
-    route('review', 'features/reviews/pages/ReviewMyListPage.tsx'),
+    route('review', 'routes/review/reviewPage.tsx'),
     route('qna', 'routes/qna/QnAList.tsx'),
     route('info', 'routes/info.tsx'),
     route('schedule', 'routes/doctor/doctorSchedule.tsx'),

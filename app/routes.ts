@@ -36,7 +36,7 @@ export default [
     route('/find-email', 'routes/findEmail.tsx'),
     route('/reset-password', 'routes/passwordResetVerify.tsx'),
     route('/reset-password/set', 'routes/resetPassword.tsx'),
-    
+
     /** 결제  */
     route('/payments/request', 'routes/payments/paymentRequest.tsx'),
     route('/payments/history', 'routes/payments/paymentHistory.tsx'),
@@ -54,5 +54,5 @@ export default [
     route('chatbot', 'routes/chatbot/ChatbotPage.tsx'),
   ]),
 
-  route('*', 'routes/NotFound.tsx'),
+  route('*', 'routes/notFound.tsx'),
 ] satisfies RouteConfig;

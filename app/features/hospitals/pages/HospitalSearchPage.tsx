@@ -15,8 +15,10 @@ import PatientSelector from '~/features/hospitals/components/hospitalSearch/hosp
 
 const MapContainer = styled.div`
   position: relative;
-  height: 90vh;
-  overflow-x: hidden;
+  height: 100%;
+  width: 110%;
+  margin-left: calc(-50vw + 50%);
+  overflow: hidden;
 `;
 
 const FullMap = styled(AroundMap)`
@@ -25,13 +27,15 @@ const FullMap = styled(AroundMap)`
   right: 0;
   bottom: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
 `;
 
 const SidePanel = styled.div`
   position: absolute;
-  top: 16px;
+  top: 0px;
   left: 16px;
-  bottom: 16px;
+  bottom: auto;
   width: 400px;
   background: #fff;
   border-radius: 8px;

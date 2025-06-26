@@ -11,11 +11,11 @@ const LayoutContainer = styled.div`
 
 const ContentWrapper = styled.main`
   flex: 1;
-  padding: 2rem 1rem; /* 좌우 패딩을 조금 줄이거나, 나중에 max-width와 함께 조정 */
-  max-width: 2000px; /* 최대 너비 설정: 화면이 아무리 커져도 컨텐츠가 너무 넓어지지 않게 함 */
-  width: 100%;
-  margin: 0 auto;
-
+  padding: 1rem 0rem; /* 좌우 패딩을 조금 줄이거나, 나중에 max-width와 함께 조정 */
+  max-width: none; /* 최대 너비 설정: 화면이 아무리 커져도 컨텐츠가 너무 넓어지지 않게 함 */
+  width: 99%;
+  margin: 0;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 2rem;

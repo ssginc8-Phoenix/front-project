@@ -35,6 +35,10 @@ const BackGroundColor = styled.div`
   min-height: 0;
 `;
 
+const SidebarContainer = styled.div`
+  display: none;
+`;
+
 const ContentArea = styled.main`
   flex-grow: 1;
   padding: 0;
@@ -48,7 +52,9 @@ const MyPageLayout = () => {
 
       <MainContentWrapper>
         <BackGroundColor>
-          <Sidebar />
+          <SidebarContainer>
+            <Sidebar />
+          </SidebarContainer>
           <ContentArea>
             <Outlet />
           </ContentArea>

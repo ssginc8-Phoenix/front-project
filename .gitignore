@@ -176,4 +176,8 @@ Thumbs.db
 # Vite 관련 캐시
 .vite/
 
+package.json
+package-lock.json
+yarn.lock
+
 # End of https://www.toptal.com/developers/gitignore/api/react,intellij

@@ -3,19 +3,29 @@ import styled from 'styled-components';
 import { useDoctor } from '../../../hooks/useDoctor';
 import type { Doctor } from '../../../types/doctor.d';
 
+const TabContent = styled.div`
+  padding-top: 0.5rem;
+`;
+
 const List = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 1rem 0;
 `;
 
 const DoctorCard = styled.div`
   display: flex;
   align-items: center;
-  background: #f3f4f6; /* 전체 배경 */
+  justify-content: space-between;
+  background: #f3f4f6;
   border-radius: 0.75rem;
   padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+`;
+
+const LeftInfo = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const ProfileImage = styled.img`
@@ -28,9 +38,14 @@ const ProfileImage = styled.img`
 
 const Info = styled.div`
   display: flex;
-  align-items: center;
+  flex-direction: column;
   margin-left: 1rem;
-  flex: 1;
+`;
+
+const NameSpec = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 const Name = styled.span`
@@ -39,8 +54,18 @@ const Name = styled.span`
   color: #111827;
 `;
 
-const TabContent = styled.div`
-  padding-top: 0.5rem;
+const Specialization = styled.span`
+  font-size: 0.875rem;
+  color: #4b5563;
+`;
+
+const Capacity = styled.span`
+  background-color: #eef2ff;
+  color: #4338ca;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
 `;
 
 interface HospitalDoctorProps {
@@ -62,10 +87,16 @@ const HospitalDoctor: React.FC<HospitalDoctorProps> = ({ hospitalId }) => {
         <List>
           {doctorsList.map((doctor) => (
             <DoctorCard key={doctor.doctorId}>
-              <ProfileImage src={doctor.imageUrl || '/default-avatar.png'} alt={doctor.name} />
-              <Info>
-                <Name>{doctor.name}</Name>
-              </Info>
+              <LeftInfo>
+                <ProfileImage src={doctor.imageUrl || '/default-avatar.png'} alt={doctor.name} />
+                <Info>
+                  <NameSpec>
+                    <Name>{doctor.name}</Name>
+                    <Specialization>{doctor.specialization}</Specialization>
+                  </NameSpec>
+                </Info>
+              </LeftInfo>
+              <Capacity>대기 {doctor.capacityPerHalfHour}명</Capacity>
             </DoctorCard>
           ))}
         </List>

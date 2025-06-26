@@ -101,7 +101,7 @@ const AuthButtonGroup = styled.div`
 const AuthButton = styled.button`
   all: unset;
   cursor: pointer;
-  width: 90%;
+  width: 70%;
   padding: 1rem 1.5rem;
   border-radius: 12px;
   font-size: 1.1rem;

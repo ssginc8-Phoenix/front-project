@@ -10,7 +10,8 @@ const sizes = {
   laptopL: '1600px',
   laptop: '1024px',
   tablet: '768px',
-  mobile: '480px',
+  mobile: '480px', // Existing mobile breakpoint
+  mobileSmall: '360px', // New breakpoint for 360px wide devices
 };
 
 const media = {
@@ -18,6 +19,7 @@ const media = {
   laptop: `@media (max-width: ${sizes.laptop})`,
   tablet: `@media (max-width: ${sizes.tablet})`,
   mobile: `@media (max-width: ${sizes.mobile})`,
+  mobileSmall: `@media (max-width: ${sizes.mobileSmall})`, // New media query for 360px
 };
 
 const HeaderBar = styled.header`
@@ -101,8 +103,16 @@ const AuthButton = styled.a`
     font-size: 0.85rem;
   }
 
+  // Hide by default for mobile, then show specifically for smaller mobile
   ${media.mobile} {
     display: none;
+  }
+
+  ${media.mobileSmall} {
+    // Show for screens up to 360px wide
+    display: block; // Or 'inline-block' if you want them next to each other
+    padding: 4px 8px; // Adjust padding for smaller screens if needed
+    font-size: 0.75rem; // Adjust font size for smaller screens if needed
   }
 `;
 
@@ -238,15 +248,18 @@ const Header = () => {
                 </MobileNotificationWrapper>
               </>
             ) : (
-              <>
+              // Display AuthButtons for small mobile screens when not logged in
+              <AuthButtonsContainer>
                 <AuthButton href="/login">로그인</AuthButton>
                 <AuthButton href="/signup">회원가입</AuthButton>
-              </>
+              </AuthButtonsContainer>
             )}
 
-            <HamburgerButton onClick={toggleMenu} className={isMenuOpen ? 'open' : ''}>
-              <span />
-            </HamburgerButton>
+            {user && (
+              <HamburgerButton onClick={toggleMenu} className={isMenuOpen ? 'open' : ''}>
+                <span />
+              </HamburgerButton>
+            )}
           </RightGroup>
         </HeaderContent>
       </HeaderBar>
@@ -256,5 +269,19 @@ const Header = () => {
     </>
   );
 };
+
+// New styled component to control the display of AuthButtons
+const AuthButtonsContainer = styled.div`
+  display: flex;
+  gap: 0.5rem; // Adjust gap as needed
+
+  ${media.mobile} {
+    display: none; // Hide on default mobile (480px and below)
+  }
+
+  ${media.mobileSmall} {
+    display: flex; // Show on smaller mobile (360px and below)
+  }
+`;
 
 export default Header;

@@ -42,6 +42,7 @@ const SidebarContainer = styled.div<{ $isOpen: boolean }>`
   transform: translateX(-100%);
   transition: transform 0.3s ease-out;
   overflow-y: auto;
+  overflow-x: hidden;
 
   ${(props) =>
     props.$isOpen &&

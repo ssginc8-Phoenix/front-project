@@ -5,6 +5,38 @@ import AppointmentUpdateModal from '~/features/appointment/components/update/Upd
 import WaitModal from '~/features/hospitals/components/waiting/RegisterWaitModal';
 import styled from 'styled-components';
 
+const TopSectionContainer = styled.div`
+  display: flex;
+  justify-content: space-between; /* 양 끝 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
+  background-color: #ffffff;
+  border-radius: 16px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto 20px auto;
+  box-sizing: border-box;
+`;
+
+const StyledButton = styled.button`
+  background: #007bff; /* 파란색 배경 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px; /* 패딩 조정 */
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+
+  &:active {
+    background-color: #004085;
+  }
+`;
+
 const AppointmentDashboardPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
@@ -18,9 +50,10 @@ const AppointmentDashboardPage = () => {
 
   return (
     <>
-      <DatePickerSection selectedDate={selectedDate} onChangeDate={setSelectedDate} />
-
-      <StyledButton onClick={() => setShowWaitModal(true)}>대기 인원 설정</StyledButton>
+      <TopSectionContainer>
+        <DatePickerSection selectedDate={selectedDate} onChangeDate={setSelectedDate} />
+        <StyledButton onClick={() => setShowWaitModal(true)}>대기 인원 설정</StyledButton>
+      </TopSectionContainer>
 
       {showWaitModal && <WaitModal onClose={() => setShowWaitModal(false)} />}
 
@@ -42,18 +75,3 @@ const AppointmentDashboardPage = () => {
 };
 
 export default AppointmentDashboardPage;
-const StyledButton = styled.button`
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #1e40af;
-  }
-`;

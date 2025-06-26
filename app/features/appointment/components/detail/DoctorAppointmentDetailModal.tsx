@@ -38,6 +38,17 @@ const DoctorAppointmentDetailModal = ({
     isRefetching,
   } = useAppointmentDetail(appointmentId);
 
+  const getPaymentMethodInKorean = (method: string) => {
+    switch (method) {
+      case 'ONSITE':
+        return '현장 수납';
+      case 'ONLINE':
+        return '앱 내 결제';
+      default:
+        return method;
+    }
+  };
+
   return (
     <>
       <Overlay>
@@ -79,7 +90,6 @@ const DoctorAppointmentDetailModal = ({
               <Section>
                 <SectionTitle>환자 정보</SectionTitle>
                 <InfoText>{appointment.patientName}</InfoText>
-                {/* 주민등록번호 : 민감정보 보여주는 게 맞는가? */}
               </Section>
 
               <Section>
@@ -106,7 +116,7 @@ const DoctorAppointmentDetailModal = ({
 
               <Section>
                 <SectionTitle>수납 방법</SectionTitle>
-                <InfoText>{appointment.paymentType}</InfoText>
+                <InfoText>{getPaymentMethodInKorean(appointment.paymentType)}</InfoText>
               </Section>
 
               <ButtonGroup>

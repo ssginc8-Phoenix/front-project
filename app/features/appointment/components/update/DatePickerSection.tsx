@@ -1,8 +1,8 @@
-import DatePicker, { type DatePickerProps } from 'react-datepicker';
+import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import styled from 'styled-components';
 
-const StyledDatePicker = styled(DatePicker)<DatePickerProps>`
+const StyledDatePicker = styled(DatePicker)`
   padding: 10px 15px;
   border: 1px solid #dcdcdc; /* 옅은 회색 테두리 */
   border-radius: 8px; /* 둥근 모서리 */

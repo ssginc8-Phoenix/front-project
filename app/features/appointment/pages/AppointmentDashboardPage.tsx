@@ -42,6 +42,7 @@ const AppointmentDashboardPage = () => {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(false);
   const [showWaitModal, setShowWaitModal] = useState(false);
+
   // 모달 닫을 때 리스트 갱신도 트리거
   const handleCloseModal = () => {
     setSelectedAppointmentId(null);

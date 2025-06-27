@@ -59,7 +59,7 @@ const formatAppointmentTime = (isoString: string) => {
   const month = `${date.getMonth() + 1}`.padStart(2, '0');
   const day = `${date.getDate()}`.padStart(2, '0');
   const hours = `${date.getHours()}`.padStart(2, '0');
-  const minutes = `${date.getMinutes()}`.padStart(2, '0');
+  const minutes = `${date.getMinutes()}`.padStart(1, '0');
   return `${year}.${month}.${day} ${hours}시 ${minutes}분`;
 };
 
@@ -102,9 +102,9 @@ const AppointmentCard = ({ appointment, onClick }: AppointmentCardProps) => {
           <HospitalName> {appointment.hospitalName} </HospitalName>
           <StatusBadge status={appointment.status}> {statusKorean} </StatusBadge>
         </TopRow>
-        <InfoText> {appointment.doctorName} </InfoText>
+        <InfoText> {appointment.doctorName} 의사 </InfoText>
         <InfoText> {formatAppointmentTime(appointment.appointmentTime)} </InfoText>
-        <InfoText> {appointment.patientName} </InfoText>
+        <InfoText> {appointment.patientName} 환자 </InfoText>
 
         {appointment.status === 'COMPLETED' && !appointment.hasReview && (
           <ReviewButton

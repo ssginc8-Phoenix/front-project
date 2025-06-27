@@ -25,6 +25,7 @@ const useLoginStore = create<LoginState>()(
             userId: myInfo.userId,
             name: myInfo.name,
             profileImageUrl: myInfo.profileImageUrl,
+            isSuspended: myInfo.isSuspended,
             role: myInfo.role,
           },
         });
@@ -50,6 +51,7 @@ const useLoginStore = create<LoginState>()(
               userId: myInfo.userId,
               name: myInfo.name,
               profileImageUrl: myInfo.profileImageUrl,
+              isSuspended: myInfo.isSuspended,
               role: myInfo.role,
             },
           });

@@ -7,9 +7,9 @@ import Sidebar from '~/common/Sidebar';
 // ------------------- 스타일 정의 -------------------
 const PageWrapper = styled.div`
   width: 100%;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding-left: 1rem;
   display: flex;
   gap: 48px;
   min-height: 100vh;

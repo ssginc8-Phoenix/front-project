@@ -6,9 +6,7 @@ import {
   markNotificationAsRead,
 } from '~/features/notification/api/notificationAPI';
 import { useEffect, useRef, useState } from 'react';
-import { onMessage } from '@firebase/messaging';
 import type { NotificationList } from '~/types/notification';
-import { messaging } from '~/features/fcm/firebase';
 import {
   DateTime,
   MessageContent,
@@ -40,26 +38,30 @@ const NotificationComponent = () => {
   const [shake, setShake] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const bellIconRef = useRef<HTMLDivElement>(null);
 
   // 서버에서 알림 목록 조회
   const fetchNotifications = async () => {
     try {
       const data = await getNotifications();
       setNotifications(data);
+      return data;
     } catch (err) {
       console.error('알림 조회 실패: ', err);
+      return [];
     }
   };
 
   // 알림 드롭다운 열릴 때 안 읽은 알림 모두 읽음 처리
   const markAllUnreadAsRead = async () => {
-    console.log('모두 읽음 처리');
+    const unreadNotifications = notifications.filter((n) => !n.read);
 
     // 읽지 않은 알림만 필터링
-    const unreadNotifications = notifications.filter((n) => !n.isRead);
     for (const notification of unreadNotifications) {
       try {
         await markNotificationAsRead(notification.notificationId);
+        console.log(`알림 ${notification.notificationId} 읽음 처리 성공`);
       } catch (error) {
         console.error(`알림 ${notification.notificationId} 읽음 처리 실패: `, error);
       }
@@ -73,8 +75,6 @@ const NotificationComponent = () => {
    * 읽은 알림 모두 삭제
    */
   const handleDeleteReadNotifications = async () => {
-    console.log('읽은 알림 모두 삭제');
-
     try {
       await deleteReadNotifications();
 
@@ -128,19 +128,40 @@ const NotificationComponent = () => {
     }
   }, [user]); // user가 변경될 때만 실행
 
+  // 외부 클릭 감지 로직
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // 알림창이 열려있고, 클릭된 요소가 알림창 내부도 아니고, 벨 아이콘도 아니라면 닫기
+      if (
+        visible &&
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node) &&
+        bellIconRef.current &&
+        !bellIconRef.current.contains(event.target as Node)
+      ) {
+        setVisible(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [visible]);
+
   if (!user) return null; // 로그인 안 된 경우 컴포넌트 렌더링 안 함
 
   return (
     <BellWrapper>
-      <BellIcon onClick={toggleDropdown} $shake={shake}>
+      <BellIcon onClick={toggleDropdown} $shake={shake} ref={bellIconRef}>
         <Bell size={24} strokeWidth={2} />
       </BellIcon>
-      {notifications.some((n) => !n.isRead) && <RedDot />}
+      {notifications.some((n) => !n.read) && <RedDot />}
 
       <Audio ref={audioRef} src="/sounds/notification.mp3" />
 
       {visible && (
-        <NotificationBox>
+        <NotificationBox ref={notificationRef}>
           <NotificationHeader>
             <h4>알림</h4>
             <DeleteButton onClick={handleDeleteReadNotifications} title="읽은 알림 모두 삭제">
@@ -160,12 +181,13 @@ const NotificationComponent = () => {
                 if (data.type === '결제 요청' && data.referenceId) {
                   navigate(`/payments/history?paymentRequestId=${data.referenceId}`);
                 }
+                setVisible(false);
               };
 
               return (
                 <NotificationItem
                   key={data.notificationId}
-                  isRead={data.isRead}
+                  isRead={data.read}
                   onClick={handleClick}
                   style={{ cursor: 'pointer' }}
                 >

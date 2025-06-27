@@ -50,9 +50,9 @@ const PatientSelector: React.FC<Props> = ({ onSelect, onLocate }) => {
   const handlePatientSelect = async (patient: PatientSummary) => {
     try {
       const coords = await getCoordsFromAddress(patient.address);
-      if (onLocate) onLocate(coords); // ⬅️ 마커 위치 조정
+      if (onLocate) onLocate(coords);
     } catch (e) {
-      console.error('주소 → 좌표 변환 실패:', e);
+      console.error(e);
     }
   };
 
@@ -62,9 +62,10 @@ const PatientSelector: React.FC<Props> = ({ onSelect, onLocate }) => {
     const selected = patients.find((p) => p.patientId === id);
     if (selected) {
       if (onSelect) onSelect(selected);
-      handlePatientSelect(selected); // ⬅️ 이걸로 마커 찍기
+      handlePatientSelect(selected);
     }
   };
+  const selectedPatient = patients.find((p) => p.patientId === selectedId);
   return (
     <Container>
       <Label htmlFor="patient-select">👤 환자 선택</Label>
@@ -76,8 +77,38 @@ const PatientSelector: React.FC<Props> = ({ onSelect, onLocate }) => {
           </option>
         ))}
       </Select>
+
+      {/* ➊ 선택된 환자를 아래에 표시 */}
+      {selectedPatient && (
+        <SelectedInfo>
+          <span>선택된 환자: {selectedPatient.name}</span>
+          {/* ➋ 다시 눌러도 지도 리센터 */}
+          <ResetButton onClick={() => handlePatientSelect(selectedPatient)}>
+            위치 재설정
+          </ResetButton>
+        </SelectedInfo>
+      )}
     </Container>
   );
 };
 
 export default PatientSelector;
+const SelectedInfo = styled.div`
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+const ResetButton = styled.button`
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover {
+    background: #2563eb;
+  }
+`;

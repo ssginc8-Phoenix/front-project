@@ -75,45 +75,67 @@ const CardRow = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
   margin-top: 1rem;
-  @media (min-width: 640px) {
-    flex-direction: row;
+  padding: 0 16px;
+
+  @media (max-width: 640px) {
+    padding: 0 12px;
   }
 `;
 
 const Card = styled(Link)`
-  flex: 1 1 320px;
-  background: #1d2938;
-  border-radius: 12px;
-  padding: 18px 22px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  background-color: #1d2938;
+  border-radius: 10px;
+  padding: 10px 14px;
+  height: 48px;
   text-decoration: none;
-  color: #fff;
+  color: #ffffff;
+
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 480px) {
+    height: 44px;
+    padding: 8px 12px;
+  }
 `;
 
 const CardIcon = styled.img`
-  width: 44px;
-  height: 44px;
+  width: 26px;
+  height: 26px;
+  margin-right: 10px;
+
+  @media (max-width: 480px) {
+    width: 22px;
+    height: 22px;
+    margin-right: 8px;
+  }
 `;
 
 const CardTitle = styled.span`
-  font-size: 1.05rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const Badge = styled.span`
-  background: #4478ff;
-  color: #fff;
-  font-size: 0.75rem;
+  background-color: #6c8cff;
+  color: white;
+  font-size: 0.65rem;
   font-weight: 600;
   padding: 2px 6px;
   border-radius: 4px;
+  margin-left: 8px;
+
+  @media (max-width: 480px) {
+    font-size: 0.6rem;
+    padding: 1px 4px;
+  }
 `;
 
 const LinksRow = styled.div`

@@ -38,6 +38,7 @@ export default function MyPageFooter() {
     </FooterBar>
   );
 }
+
 const FooterBar = styled.footer`
   width: 100%;
   background: #243345;
@@ -58,10 +59,11 @@ const FooterContent = styled.div`
   margin: 0 auto;
   flex-wrap: wrap;
 
-  @media (max-width: 768px) {
+  @media (max-width: 480px) {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    padding: 0 1rem;
   }
 `;
 
@@ -75,6 +77,12 @@ const LinksRow = styled.div`
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
+  justify-content: flex-start;
+
+  @media (max-width: 480px) {
+    justify-content: center;
+    gap: 1rem;
+  }
 `;
 
 const PolicyLink = styled(Link)`
@@ -85,12 +93,20 @@ const PolicyLink = styled(Link)`
   &:hover {
     text-decoration: underline;
   }
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const InfoText = styled.p`
   font-size: 0.8125rem;
   line-height: 1.6;
   color: #ddd;
+
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
+  }
 `;
 
 const BottomWrapper = styled.div`
@@ -98,6 +114,10 @@ const BottomWrapper = styled.div`
   display: flex;
   justify-content: center;
   margin-top: 1.5rem;
+
+  @media (max-width: 480px) {
+    margin-top: 1rem;
+  }
 `;
 
 const CopyrightText = styled.p`

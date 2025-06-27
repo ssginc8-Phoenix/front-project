@@ -20,8 +20,6 @@ const MainContentWrapper = styled.div`
   width: 100%;
   margin: 0 auto;
   gap: 2rem;
-  align-items: flex-start;
-  min-height: 0;
 
   @media (max-width: 768px) {
     padding: 1.5rem 1rem;
@@ -33,10 +31,11 @@ const BackGroundColor = styled.div`
   border-radius: 1rem;
   display: flex;
   flex: 1;
-  min-height: 0;
 `;
 
 const SidebarContainer = styled.div`
+  display: flex;
+
   @media (max-width: 768px) {
     display: none;
   }
@@ -45,7 +44,6 @@ const SidebarContainer = styled.div`
 const ContentArea = styled.main`
   flex-grow: 1;
   padding: 0;
-  min-height: 0;
 `;
 
 const MyPageLayout = () => {

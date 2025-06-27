@@ -10,35 +10,112 @@ import {
 } from '~/features/user/api/UserAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
 
+// --- 반응형 디자인을 위한 공통 사이즈 및 미디어 쿼리 정의 ---
+const sizes = {
+  laptopL: '1600px',
+  laptop: '1024px',
+  tablet: '768px',
+  mobile: '480px',
+  mobileSmall: '360px',
+};
+
+const media = {
+  laptopL: `@media (max-width: ${sizes.laptopL})`,
+  laptop: `@media (max-width: ${sizes.laptop})`,
+  tablet: `@media (max-width: ${sizes.tablet})`,
+  mobile: `@media (max-width: ${sizes.mobile})`,
+  mobileSmall: `@media (max-width: ${sizes.mobileSmall})`,
+};
+
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 80px 40px;
+  padding: 80px 40px; /* 기본 데스크탑 패딩 */
   min-height: 100vh;
-  margin-bottom: 5rem;
+  margin-bottom: 5rem; /* 기본 데스크탑 하단 여백 */
+  width: 100%; /* 부모 너비에 맞춤 */
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+
+  ${media.tablet} {
+    padding: 60px 30px; /* 태블릿 패딩 조정 */
+    margin-bottom: 4rem;
+  }
+
+  ${media.mobile} {
+    padding: 30px 20px; /* 모바일 패딩 조정 */
+    margin-bottom: 2rem;
+  }
+
+  ${media.mobileSmall} {
+    padding: 20px 15px; /* 모바일 360px 기준 패딩 조정 */
+    margin-bottom: 1rem;
+  }
 `;
 
 const FormContainer = styled.div`
-  width: 720px;
+  width: 720px; /* 기본 데스크탑 너비 */
+  max-width: 90%; /* 화면이 좁아질 때 컨테이너가 잘리지 않도록 최대 너비 설정 */
   background-color: #ffffff;
-  padding: 48px 64px;
+  padding: 48px 64px; /* 기본 데스크탑 패딩 */
   border-radius: 16px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+
+  ${media.tablet} {
+    width: 95%; /* 태블릿에서 너비 조정 */
+    padding: 40px 50px;
+  }
+
+  ${media.mobile} {
+    width: 100%; /* 모바일에서 너비 100%로 설정하여 화면에 꽉 차게 */
+    padding: 30px 25px; /* 모바일 패딩 조정 */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05); /* 모바일에서 그림자 약화 */
+  }
+
+  ${media.mobileSmall} {
+    padding: 20px 15px; /* 모바일 360px 기준 패딩 조정 */
+  }
 `;
 
 const Title = styled.h1`
-  font-size: 2.2rem;
+  font-size: 2.2rem; /* 기본 데스크탑 폰트 크기 */
   font-weight: bold;
   color: #222;
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 40px; /* 기본 데스크탑 마진 */
+
+  ${media.tablet} {
+    font-size: 2rem;
+    margin-bottom: 30px;
+  }
+
+  ${media.mobile} {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+  }
+
+  ${media.mobileSmall} {
+    font-size: 1.6rem; /* 모바일 360px 기준 폰트 크기 */
+    margin-bottom: 20px;
+  }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 24px; /* 기본 데스크탑 간격 */
+
+  ${media.tablet} {
+    gap: 20px;
+  }
+
+  ${media.mobile} {
+    gap: 16px; /* 모바일 간격 조정 */
+  }
+
+  ${media.mobileSmall} {
+    gap: 12px; /* 모바일 360px 기준 간격 조정 */
+  }
 `;
 
 const FieldGroup = styled.div`
@@ -47,14 +124,24 @@ const FieldGroup = styled.div`
 `;
 
 const Label = styled.label`
-  font-size: 1rem;
+  font-size: 1rem; /* 기본 폰트 크기 */
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 8px; /* 기본 마진 */
+
+  ${media.mobile} {
+    font-size: 0.95rem; /* 모바일에서 폰트 크기 줄임 */
+    margin-bottom: 6px;
+  }
+
+  ${media.mobileSmall} {
+    font-size: 0.9rem; /* 모바일 360px 기준 폰트 크기 */
+    margin-bottom: 4px;
+  }
 `;
 
 const Input = styled.input`
-  padding: 14px 16px;
-  font-size: 1rem;
+  padding: 14px 16px; /* 기본 패딩 */
+  font-size: 1rem; /* 기본 폰트 크기 */
   border: 1px solid #ccc;
   border-radius: 8px;
   flex: 1;
@@ -64,12 +151,30 @@ const Input = styled.input`
     border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
   }
+
+  ${media.mobile} {
+    padding: 12px 14px; /* 모바일 패딩 조정 */
+    font-size: 0.95rem; /* 모바일 폰트 크기 조정 */
+  }
+
+  ${media.mobileSmall} {
+    padding: 10px 12px; /* 모바일 360px 기준 패딩 조정 */
+    font-size: 0.9rem; /* 모바일 360px 기준 폰트 크기 조정 */
+  }
 `;
 
 const FileInputWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 12px; /* 기본 간격 */
+
+  ${media.mobile} {
+    gap: 10px;
+  }
+
+  ${media.mobileSmall} {
+    gap: 8px;
+  }
 `;
 
 const HiddenFileInput = styled.input.attrs({ type: 'file' })`
@@ -77,80 +182,171 @@ const HiddenFileInput = styled.input.attrs({ type: 'file' })`
 `;
 
 const FileLabel = styled.label`
-  padding: 10px 18px;
+  padding: 10px 18px; /* 기본 패딩 */
   background-color: #007bff;
   color: white;
   font-weight: 600;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.95rem; /* 기본 폰트 크기 */
+  white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 */
 
   &:hover {
     background-color: #005fcc;
   }
+
+  ${media.mobile} {
+    padding: 8px 14px; /* 모바일 패딩 조정 */
+    font-size: 0.9rem; /* 모바일 폰트 크기 조정 */
+  }
+
+  ${media.mobileSmall} {
+    padding: 6px 10px; /* 모바일 360px 기준 패딩 조정 */
+    font-size: 0.85rem; /* 모바일 360px 기준 폰트 크기 조정 */
+  }
 `;
 
 const FileName = styled.span`
-  font-size: 0.95rem;
+  font-size: 0.95rem; /* 기본 폰트 크기 */
   color: #333;
+  word-break: break-all; /* 파일 이름이 너무 길면 줄바꿈되도록 */
+  flex: 1; /* 남은 공간 차지 */
+  overflow: hidden; /* 넘치는 내용 숨김 */
+  text-overflow: ellipsis; /* 넘치는 내용 ...으로 표시 */
+
+  ${media.mobile} {
+    font-size: 0.9rem; /* 모바일 폰트 크기 조정 */
+  }
+
+  ${media.mobileSmall} {
+    font-size: 0.85rem; /* 모바일 360px 기준 폰트 크기 조정 */
+  }
 `;
 
 const Button = styled.button`
-  margin-top: 40px;
-  padding: 16px;
-  font-size: 1.1rem;
+  margin-top: 40px; /* 기본 마진 */
+  padding: 16px; /* 기본 패딩 */
+  font-size: 1.1rem; /* 기본 폰트 크기 */
   font-weight: bold;
   color: white;
   background-color: #007bff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  width: 100%; /* 너비 100%로 설정 */
 
   &:hover {
     background-color: #005fcc;
+  }
+
+  ${media.tablet} {
+    margin-top: 30px;
+    padding: 14px;
+    font-size: 1.05rem;
+  }
+
+  ${media.mobile} {
+    margin-top: 25px;
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  ${media.mobileSmall} {
+    margin-top: 20px; /* 모바일 360px 기준 마진 */
+    padding: 10px; /* 모바일 360px 기준 패딩 */
+    font-size: 0.95rem; /* 모바일 360px 기준 폰트 크기 */
   }
 `;
 
 const InputWithActionButtonGroup = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 12px; /* 기본 간격 */
+
+  ${media.mobile} {
+    flex-direction: column; /* 모바일에서 세로로 쌓이도록 변경 */
+    gap: 8px; /* 모바일 간격 조정 */
+  }
+
+  ${media.mobileSmall} {
+    gap: 6px;
+  }
 `;
 
 const ActionButton = styled.button`
-  padding: 12px 20px;
-  font-size: 0.95rem;
+  padding: 12px 20px; /* 기본 패딩 */
+  font-size: 0.95rem; /* 기본 폰트 크기 */
   background-color: #333;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 */
 
   &:hover {
     background-color: #5593ff;
   }
+
+  ${media.mobile} {
+    padding: 10px 16px; /* 모바일 패딩 조정 */
+    font-size: 0.9rem; /* 모바일 폰트 크기 조정 */
+    width: 100%; /* 모바일에서 너비 100%로 설정 */
+  }
+
+  ${media.mobileSmall} {
+    padding: 8px 12px; /* 모바일 360px 기준 패딩 조정 */
+    font-size: 0.85rem; /* 모바일 360px 기준 폰트 크기 조정 */
+  }
 `;
 
 const EmailCheckMessage = styled.div<{ success: boolean }>`
-  font-size: 0.85rem;
+  font-size: 0.85rem; /* 기본 폰트 크기 */
   color: ${(props) => (props.success ? '#007bff' : 'red')};
   margin-top: 4px;
   min-height: 20px;
+
+  ${media.mobile} {
+    font-size: 0.8rem; /* 모바일 폰트 크기 조정 */
+  }
+
+  ${media.mobileSmall} {
+    font-size: 0.75rem; /* 모바일 360px 기준 폰트 크기 조정 */
+  }
 `;
 
 const ErrorMessage = styled.div`
-  font-size: 0.85rem;
+  font-size: 0.85rem; /* 기본 폰트 크기 */
   color: red;
   margin-top: 4px;
+
+  ${media.mobile} {
+    font-size: 0.8rem; /* 모바일 폰트 크기 조정 */
+  }
+
+  ${media.mobileSmall} {
+    font-size: 0.75rem; /* 모바일 360px 기준 폰트 크기 조정 */
+  }
 `;
 
 const Notice = styled.div`
   background-color: #eef1f6;
-  padding: 12px 16px;
+  padding: 12px 16px; /* 기본 패딩 */
   border-radius: 8px;
-  font-size: 0.95rem;
-  margin-bottom: 2rem;
+  font-size: 0.95rem; /* 기본 폰트 크기 */
+  margin-bottom: 2rem; /* 기본 마진 */
   color: #444;
   line-height: 1.6;
+
+  ${media.mobile} {
+    padding: 10px 14px; /* 모바일 패딩 조정 */
+    font-size: 0.9rem; /* 모바일 폰트 크기 조정 */
+    margin-bottom: 1.5rem;
+  }
+
+  ${media.mobileSmall} {
+    padding: 8px 12px; /* 모바일 360px 기준 패딩 조정 */
+    font-size: 0.85rem; /* 모바일 360px 기준 폰트 크기 조정 */
+    margin-bottom: 1rem;
+  }
 `;
 
 const UserSignupForm = () => {

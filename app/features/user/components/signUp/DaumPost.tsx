@@ -1,11 +1,6 @@
 import styled from 'styled-components';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 
-interface DaumPostProps {
-  address: string;
-  setAddress: (address: string) => void;
-}
-
 // --- 반응형 디자인을 위한 공통 사이즈 및 미디어 쿼리 정의 ---
 const sizes = {
   laptopL: '1600px',
@@ -23,28 +18,34 @@ const media = {
   mobileSmall: `@media (max-width: ${sizes.mobileSmall})`,
 };
 
+interface DaumPostProps {
+  address: string;
+  setAddress: (address: string) => void;
+}
+
 const Container = styled.div`
   display: flex;
-  gap: 0.5rem; /* 요소 간 기본 간격 */
+  gap: 0.5rem; /* 기본 간격 */
   align-items: center;
-  width: 100%; /* 부모 너비에 맞춰 확장 */
-  box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
-  flex-wrap: wrap; /* 작은 화면에서 요소들이 줄 바꿈되도록 설정 */
+  width: 100%; /* 부모 너비에 맞춤 */
 
   ${media.mobile} {
-    flex-direction: column; /* 모바일에서는 세로로 쌓이도록 변경 */
-    gap: 0.75rem; /* 세로로 쌓일 때 간격 늘림 */
+    flex-direction: column; /* 모바일에서 세로로 쌓이도록 변경 */
+    gap: 0.8rem; /* 모바일에서 간격 조정 */
     align-items: stretch; /* 세로 정렬 시 너비를 채우도록 */
+  }
+
+  ${media.mobileSmall} {
+    gap: 0.6rem; /* 모바일 360px 기준 간격 조정 */
   }
 `;
 
 const AddressInput = styled.input`
-  flex: 1; /* 남은 공간을 유동적으로 차지 */
-  padding: 0.75rem;
+  padding: 14px 16px; /* 기본 패딩 */
+  font-size: 1rem; /* 기본 폰트 크기 */
   border: 1px solid #ccc;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+  border-radius: 8px;
+  flex: 1;
 
   &:focus {
     outline: none;
@@ -52,51 +53,41 @@ const AddressInput = styled.input`
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
   }
 
-  ${media.tablet} {
-    padding: 0.65rem;
-    font-size: 0.95rem;
-  }
-
   ${media.mobile} {
-    width: 100%; /* 모바일에서는 전체 너비를 사용 */
-    padding: 0.6rem;
-    font-size: 0.9rem;
+    padding: 12px 14px; /* 모바일 패딩 조정 */
+    font-size: 0.95rem; /* 모바일 폰트 크기 조정 */
   }
 
   ${media.mobileSmall} {
-    font-size: 0.85rem;
+    padding: 10px 12px; /* 모바일 360px 기준 패딩 조정 */
+    font-size: 0.9rem; /* 모바일 360px 기준 폰트 크기 조정 */
   }
 `;
 
 const SearchButton = styled.button`
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 1.25rem; /* 기본 패딩 */
   border-radius: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 0.95rem; /* 기본 폰트 크기 */
   font-weight: 600;
   background-color: #007bff;
   color: white;
   border: none;
   cursor: pointer;
-  white-space: nowrap; /* 버튼 텍스트가 줄 바꿈되지 않도록 */
-  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+  white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 */
 
   &:hover {
     background-color: #005fcc;
   }
 
-  ${media.tablet} {
-    padding: 0.65rem 1rem;
-    font-size: 0.9rem;
-  }
-
   ${media.mobile} {
-    width: 100%; /* 모바일에서는 전체 너비를 사용 */
-    padding: 0.6rem 0.8rem;
-    font-size: 0.85rem;
+    padding: 0.65rem 1rem; /* 모바일 패딩 조정 */
+    font-size: 0.9rem; /* 모바일 폰트 크기 조정 */
+    width: 100%; /* 모바일에서 너비 100%로 설정 */
   }
 
   ${media.mobileSmall} {
-    font-size: 0.8rem;
+    padding: 0.55rem 0.8rem; /* 모바일 360px 기준 패딩 조정 */
+    font-size: 0.85rem; /* 모바일 360px 기준 폰트 크기 조정 */
   }
 `;
 
@@ -109,7 +100,7 @@ const DaumPost: React.FC<DaumPostProps> = ({ address, setAddress }) => {
       onComplete: (data: any) => {
         let fullAddress = data.address;
         let extraAddress = '';
-        // const localAddress = `${data.sido} ${data.sigungu}`; // 이 변수는 사용되지 않으므로 제거했습니다.
+        // const localAddress = `${data.sido} ${data.sigungu}`; // 사용되지 않으므로 주석 처리하거나 제거 가능
 
         if (data.addressType === 'R') {
           if (data.bname !== '') {

@@ -7,7 +7,7 @@ const MenuWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding: 0.5rem;
+  padding: 0rem 0.5rem 0.5rem 0;
 
   ${media('tablet')`
     flex-direction: column;
@@ -21,8 +21,8 @@ const InputGroup = styled.div`
   flex-wrap: wrap;
 `;
 const SearchInput = styled.input`
-  flex: 1 1 300px;
-  min-width: 250px;
+  flex: 1 1 320px;
+  min-width: 320px;
 
   /* 기본 스타일 */
   padding: 0.75rem 1rem;
@@ -63,7 +63,7 @@ const Select = styled.select`
 `;
 
 const SearchButton = styled.button`
-  padding: 0.8rem 1.5rem;
+  padding: 0.8rem 2.4rem;
   background-color: #007bff;
   color: white;
   border: none;

@@ -27,6 +27,7 @@ const SidePanelWrapper = styled.div`
   right: 10px;
   bottom: 16px;
   display: flex;
+  pointer-events: none;
   z-index: 1000;
   gap: 1rem;
 
@@ -39,13 +40,19 @@ const SidePanelWrapper = styled.div`
 
   /* 모바일에서는 숨김 */
     ${media('mobile')`
-    display: none;
+    display:none;
+     width: 100% !important;
+    height: 100vh;       /* 헤더 높이만큼 빼고 쓰려면 calc(100vh - 헤더높이px) */
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    
   `}
 `;
 
 /** 데스크탑/태블릿용 사이드 패널 */
 const SidePanel = styled.div`
   width: 400px;
+  pointer-events: auto;
   height: 100%; /* 화면 높이 100% 채움 */
   display: flex;
   flex-direction: column; /* 내부를 컬럼 flex 로 */
@@ -73,11 +80,11 @@ const ContentWrapper = styled.div`
 /** 전체 화면 지도 컨테이너 */
 export const MapContainer = styled.div`
   position: relative;
-  height: 100%;
-  width: 110%;
+  height: 80vh;
+  width: 130vw;
   margin-left: calc(-50vw + 50%);
-  overflow: hidden;
 
+  touch-action: none;
   ${media('laptopL')`
     width: 100%;
   `}
@@ -108,7 +115,7 @@ const Drawer = styled.div<{ open: boolean }>`
   `}
   position: fixed;
   left: 0;
-  bottom: 0;
+  bottom: 30px;
   width: 100%;
   height: 50vh;
   background: #fff;
@@ -117,7 +124,7 @@ const Drawer = styled.div<{ open: boolean }>`
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
   transform: translateY(${(p) => (p.open ? '0' : 'calc(100% - 40px)')});
   transition: transform 0.3s ease-in-out;
-  z-index: 1000;
+  z-index: 2000;
 
   ${media('tablet')`
     height: 60vh;
@@ -344,30 +351,34 @@ const HospitalSearchPage: React.FC = () => {
   );
 
   return (
-    <MapContainer>
-      <FullMap
-        hospitals={hospitals}
-        center={mapCenter}
-        currentLocation={currentLocation}
-        onMarkerClick={onMarkerClick}
-        patientMarker={patientMarker}
-      />
+    <>
+      {/* ① MapContainer 시작 */}
+      <MapContainer>
+        <FullMap
+          hospitals={hospitals}
+          center={mapCenter}
+          currentLocation={currentLocation}
+          onMarkerClick={onMarkerClick}
+          patientMarker={patientMarker}
+        />
 
-      {/* 데스크탑/태블릿용 사이드 패널 */}
-      <SidePanelWrapper>
-        <SidePanel>
-          <ContentWrapper>{panelBody}</ContentWrapper>
-        </SidePanel>
-      </SidePanelWrapper>
+        {/* 데스크탑/태블릿용 사이드 패널 */}
+        <SidePanelWrapper>
+          <SidePanel>
+            <ContentWrapper>{panelBody}</ContentWrapper>
+          </SidePanel>
+        </SidePanelWrapper>
+      </MapContainer>
+      {/* ① MapContainer 끝 */}
 
-      {/* 모바일 전용 하단 드로어 */}
+      {/* ② MapContainer 밖에 있는 모바일 드로어 */}
       <Drawer open={drawerOpen}>
         <Handle onClick={() => setDrawerOpen((o) => !o)}>
           {drawerOpen ? <ChevronDown size={24} /> : <ChevronUp size={24} />}
         </Handle>
         <PanelContent>{panelBody}</PanelContent>
       </Drawer>
-    </MapContainer>
+    </>
   );
 };
 

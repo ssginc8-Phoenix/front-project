@@ -13,7 +13,7 @@ interface User {
   name: string;
   profileImageUrl: string;
   isSuspended: boolean;
-  role: string;
+  role: UserRole;
 }
 
 interface PatientRequest {
@@ -51,3 +51,5 @@ interface ResetPassword {
   email: string;
   password: string;
 }
+
+export type UserRole = 'PATIENT' | 'GUARDIAN' | 'DOCTOR' | 'HOSPITAL_ADMIN' | 'ADMIN';

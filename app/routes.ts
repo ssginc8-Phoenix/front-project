@@ -2,8 +2,8 @@ import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
   route('hospital', 'layout/MapLayout.tsx', [
-    route(':hospitalId', 'routes/hospital/hospitalDetail.tsx'),
     route('search', 'routes/hospital/hospitalSearch.tsx'),
+    route(':hospitalId', 'routes/hospital/hospitalDetail.tsx'),
     route('create', 'routes/hospital/hospitalCreate.tsx'),
   ]),
 
@@ -26,7 +26,6 @@ export default [
   route('', 'layout/MainLayout.tsx', [
     /** HOME */
     index('routes/main.tsx'),
-    route('hospital/main', 'routes/hospital/HospitalMainPage.tsx'),
 
     /** 로그인, 회원가입 관련  */
     route('/login', 'routes/login.tsx'),
@@ -54,5 +53,7 @@ export default [
     route('chatbot', 'routes/chatbot/ChatbotPage.tsx'),
   ]),
 
+  /**ㅡㅡㅡㅡㅡㅡ 에러 페이지 ㅡㅡㅡㅡㅡㅡㅡ*/
   route('*', 'routes/notFound.tsx'),
+  route('/unauthorized', 'routes/unauthorized.tsx'),
 ] satisfies RouteConfig;

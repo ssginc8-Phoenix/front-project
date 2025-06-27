@@ -5,7 +5,7 @@ import { routeAuthMap } from '~/config/routeAuthMap';
 export default function guardianInvite() {
   return (
     <AuthGuard allowedRoles={routeAuthMap['/myPage/guardian']}>
-      <GuardianManagementPage />;
+      <GuardianManagementPage />
     </AuthGuard>
   );
 }

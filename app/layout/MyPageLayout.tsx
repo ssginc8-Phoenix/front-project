@@ -3,6 +3,7 @@ import { Outlet } from 'react-router';
 import Header from '~/layout/Header';
 import MyPageFooter from '~/layout/MyPageFooter';
 import Sidebar from '~/common/Sidebar';
+import GlobalStyle from '~/components/styled/GlobalStyle';
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -49,22 +50,25 @@ const ContentArea = styled.main`
 
 const MyPageLayout = () => {
   return (
-    <LayoutContainer>
-      <Header />
+    <>
+      <GlobalStyle />
+      <LayoutContainer>
+        <Header />
 
-      <MainContentWrapper>
-        <BackGroundColor>
-          <SidebarContainer>
-            <Sidebar />
-          </SidebarContainer>
-          <ContentArea>
-            <Outlet />
-          </ContentArea>
-        </BackGroundColor>
-      </MainContentWrapper>
+        <MainContentWrapper>
+          <BackGroundColor>
+            <SidebarContainer>
+              <Sidebar />
+            </SidebarContainer>
+            <ContentArea>
+              <Outlet />
+            </ContentArea>
+          </BackGroundColor>
+        </MainContentWrapper>
 
-      <MyPageFooter />
-    </LayoutContainer>
+        <MyPageFooter />
+      </LayoutContainer>
+    </>
   );
 };
 

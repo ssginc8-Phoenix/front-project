@@ -15,7 +15,7 @@ const Overlay = styled.div`
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.4);
-  z-index: 2000; /* 캘린더(보통 1xxx)보다 크게 */
+  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,8 +24,11 @@ const Overlay = styled.div`
 const PageContainer = styled.div`
   display: flex;
   justify-content: center;
-  padding: 3rem 2rem;
+  padding: 1.5rem 1rem; /* 모바일에서 패딩 줄임 */
   min-height: 100vh;
+  @media (min-width: 768px) {
+    padding: 3rem 2rem; /* 태블릿 이상에서 패딩 유지 */
+  }
 `;
 
 const ContentBox = styled.div`
@@ -33,28 +36,38 @@ const ContentBox = styled.div`
   flex-direction: column;
   width: 100%;
   max-width: 1000px;
-  gap: 2rem;
+  gap: 1.5rem; /* 모바일에서 간격 줄임 */
+  @media (min-width: 768px) {
+    gap: 2rem; /* 태블릿 이상에서 간격 유지 */
+  }
 `;
 
 const Header = styled.div`
   display: flex;
+  flex-direction: column; /* 모바일에서 세로로 배치 */
   justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: flex-start; /* 모바일에서 왼쪽 정렬 */
+  gap: 1rem; /* 모바일에서 요소 간 간격 추가 */
+  @media (min-width: 768px) {
+    flex-direction: row; /* 태블릿 이상에서 가로로 배치 */
+    align-items: center;
+    gap: 0; /* 가로 배치 시 간격 초기화 */
+  }
 `;
 
 const Legend = styled.div`
   display: flex;
-  gap: 1.25rem;
+  flex-wrap: wrap; /* 작은 화면에서 줄바꿈 */
+  gap: 1rem; /* 모바일에서 간격 줄임 */
   .legend-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 0.8rem; /* 모바일에서 폰트 크기 줄임 */
   }
   .dot {
-    width: 12px;
-    height: 12px;
+    width: 10px; /* 모바일에서 크기 줄임 */
+    height: 10px; /* 모바일에서 크기 줄임 */
     border-radius: 50%;
   }
   .appointment-dot {
@@ -62,6 +75,16 @@ const Legend = styled.div`
   }
   .medication-dot {
     background-color: #267e3e;
+  }
+  @media (min-width: 768px) {
+    gap: 1.25rem;
+    .legend-item {
+      font-size: 0.9rem;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+    }
   }
 `;
 
@@ -73,15 +96,13 @@ export const StyledList = styled.ul`
 
 export const StyledItem = styled.li<{ itemType: 'MEDICATION' | 'APPOINTMENT' }>`
   display: grid;
-  grid-template-columns: 44px 1fr auto;
+  grid-template-columns: 40px 1fr auto; /* 모바일에서 아이콘 크기 줄임 */
   align-items: center;
-
-  padding: 1rem 1.25rem;
-  margin-bottom: 0.7rem;
-  border-radius: 14px;
+  padding: 0.8rem 1rem; /* 모바일에서 패딩 줄임 */
+  margin-bottom: 0.6rem; /* 모바일에서 마진 줄임 */
+  border-radius: 12px; /* 모바일에서 테두리 둥글기 줄임 */
   background: ${({ itemType }) => (itemType === 'MEDICATION' ? '#f4fcf7' : '#f6f9fe')};
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 모바일에서 그림자 약하게 */
   position: relative;
   &::before {
     content: '';
@@ -89,67 +110,94 @@ export const StyledItem = styled.li<{ itemType: 'MEDICATION' | 'APPOINTMENT' }>`
     left: 0;
     top: 0;
     bottom: 0;
-    width: 6px;
-    border-radius: 14px 0 0 14px;
+    width: 4px; /* 모바일에서 너비 줄임 */
+    border-radius: 12px 0 0 12px; /* 모바일에서 테두리 둥글기 줄임 */
     background: ${({ itemType }) => (itemType === 'MEDICATION' ? '#34c759' : '#2563eb')};
   }
-
   cursor: pointer;
   transition: transform 0.12s ease;
   &:hover {
     transform: translateY(-2px);
   }
-
   .icon {
-    width: 44px;
-    height: 44px;
+    width: 40px; /* 모바일에서 크기 줄임 */
+    height: 40px; /* 모바일에서 크기 줄임 */
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.35rem;
+    font-size: 1.2rem; /* 모바일에서 폰트 크기 줄임 */
     background: ${({ itemType }) => (itemType === 'MEDICATION' ? '#d1fadf' : '#dbe8ff')};
   }
-
   .text {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.2rem; /* 모바일에서 간격 줄임 */
     .title {
-      font:
-        600 1rem/1.25 'Pretendard',
-        sans-serif;
+      font-size: 0.9rem; /* 모바일에서 폰트 크기 줄임 */
+      font-weight: 600;
       color: ${({ itemType }) => (itemType === 'MEDICATION' ? '#15803d' : '#1e3a8a')};
     }
     .patient {
-      font:
-        500 0.82rem/1.3 'Pretendard',
-        sans-serif;
+      font-size: 0.75rem; /* 모바일에서 폰트 크기 줄임 */
+      font-weight: 500;
       color: #64748b;
     }
   }
-
   .time {
-    font:
-      600 0.9rem/1 'Pretendard',
-      sans-serif;
+    font-size: 0.8rem; /* 모바일에서 폰트 크기 줄임 */
+    font-weight: 600;
     color: #475569;
     white-space: nowrap;
+  }
+
+  @media (min-width: 768px) {
+    grid-template-columns: 44px 1fr auto;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.7rem;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    &::before {
+      width: 6px;
+      border-radius: 14px 0 0 14px;
+    }
+    .icon {
+      width: 44px;
+      height: 44px;
+      font-size: 1.35rem;
+    }
+    .text {
+      gap: 0.25rem;
+      .title {
+        font-size: 1rem;
+      }
+      .patient {
+        font-size: 0.82rem;
+      }
+    }
+    .time {
+      font-size: 0.9rem;
+    }
   }
 `;
 
 const PatientSelector = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.4rem; /* 모바일에서 간격 줄임 */
+  justify-content: center; /* 모바일에서 중앙 정렬 */
+  @media (min-width: 768px) {
+    gap: 0.5rem;
+    justify-content: flex-start; /* 태블릿 이상에서 왼쪽 정렬 */
+  }
 `;
 
 const PatientButton = styled.button`
-  padding: 0.5rem 0.9rem;
+  padding: 0.4rem 0.7rem; /* 모바일에서 패딩 줄임 */
   border: none;
-  border-radius: 6px;
+  border-radius: 5px; /* 모바일에서 테두리 둥글기 줄임 */
   background-color: #eef2f7;
-  font-size: 0.85rem;
+  font-size: 0.75rem; /* 모바일에서 폰트 크기 줄임 */
   cursor: pointer;
   transition: background-color 0.2s;
   &.active {
@@ -160,21 +208,26 @@ const PatientButton = styled.button`
   &:hover {
     background-color: #dbeafe;
   }
+  @media (min-width: 768px) {
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+  }
 `;
 
 const CalendarWrapper = styled.div`
   .react-calendar {
     width: 100%;
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    padding: 1rem;
+    border-radius: 12px; /* 모바일에서 테두리 둥글기 줄임 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* 모바일에서 그림자 약하게 */
+    padding: 0.8rem; /* 모바일에서 패딩 줄임 */
     border: none;
   }
   .react-calendar__tile {
-    border-radius: 12px;
-    padding: 0.75rem 0.5rem;
-    min-height: 100px;
+    border-radius: 10px; /* 모바일에서 테두리 둥글기 줄임 */
+    padding: 0.5rem 0.3rem; /* 모바일에서 패딩 줄임 */
+    min-height: 80px; /* 모바일에서 높이 줄임 */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -194,13 +247,13 @@ const CalendarWrapper = styled.div`
     width: 100%;
   }
   .calendar-event {
-    font-size: 0.7rem;
-    padding: 3px 6px;
-    margin-top: 2px;
-    border-radius: 6px;
+    font-size: 0.65rem; /* 모바일에서 폰트 크기 줄임 */
+    padding: 2px 4px; /* 모바일에서 패딩 줄임 */
+    margin-top: 1px; /* 모바일에서 마진 줄임 */
+    border-radius: 4px; /* 모바일에서 테두리 둥글기 줄임 */
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px; /* 모바일에서 간격 줄임 */
     word-break: keep-all;
     cursor: pointer;
   }
@@ -215,77 +268,129 @@ const CalendarWrapper = styled.div`
   .react-calendar__month-view__days__day:nth-child(7n) {
     color: black !important;
   }
+
+  @media (min-width: 768px) {
+    .react-calendar {
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      padding: 1rem;
+    }
+    .react-calendar__tile {
+      border-radius: 12px;
+      padding: 0.75rem 0.5rem;
+      min-height: 100px;
+    }
+    .calendar-event {
+      font-size: 0.7rem;
+      padding: 3px 6px;
+      margin-top: 2px;
+      border-radius: 6px;
+      gap: 4px;
+    }
+  }
 `;
 
 const AddMedicationButton = styled.button`
   align-self: flex-end;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.9rem;
+  padding: 0.5rem 1rem; /* 모바일에서 패딩 줄임 */
+  font-size: 0.8rem; /* 모바일에서 폰트 크기 줄임 */
   border: 1px dashed #1d4ed8;
   color: #1d4ed8;
-  border-radius: 8px;
+  border-radius: 6px; /* 모바일에서 테두리 둥글기 줄임 */
   background: #fff;
   cursor: pointer;
   &:hover {
     background-color: #e0edff;
   }
+  @media (min-width: 768px) {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
 `;
 
 const DetailContainer = styled.div`
   background: #f9fafb;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  border-radius: 12px; /* 모바일에서 테두리 둥글기 줄임 */
+  padding: 1.5rem; /* 모바일에서 패딩 줄임 */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); /* 모바일에서 그림자 약하게 */
   display: flex;
   flex-direction: column;
-  gap: 1.6rem;
+  gap: 1.2rem; /* 모바일에서 간격 줄임 */
   position: relative;
-  max-width: 500px;
+  max-width: 100%; /* 모바일에서 너비 100% */
   margin: 0 auto;
+  @media (min-width: 768px) {
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    gap: 1.6rem;
+    max-width: 500px;
+  }
 `;
 
 const HeaderSection = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem; /* 모바일에서 간격 줄임 */
 `;
 
 const HeaderIcon = styled.div`
-  font-size: 2rem;
+  font-size: 1.8rem; /* 모바일에서 폰트 크기 줄임 */
   background: #e0f2fe;
   border-radius: 50%;
-  width: 48px;
-  height: 48px;
+  width: 40px; /* 모바일에서 크기 줄임 */
+  height: 40px; /* 모바일에서 크기 줄임 */
   display: flex;
   align-items: center;
   justify-content: center;
   color: #2563eb;
+  @media (min-width: 768px) {
+    font-size: 2rem;
+    width: 48px;
+    height: 48px;
+  }
 `;
 
 const HeaderTitle = styled.h3`
-  font-size: 1.25rem;
+  font-size: 1.1rem; /* 모바일에서 폰트 크기 줄임 */
   font-weight: 600;
   color: #1e293b;
   margin: 0;
+  @media (min-width: 768px) {
+    font-size: 1.25rem;
+  }
 `;
 
 const InfoGrid = styled.div`
   display: grid;
-  grid-template-columns: 120px 1fr;
-  row-gap: 1rem;
-  column-gap: 1rem;
+  grid-template-columns: 80px 1fr; /* 모바일에서 라벨 컬럼 너비 줄임 */
+  row-gap: 0.8rem; /* 모바일에서 행 간격 줄임 */
+  column-gap: 0.8rem; /* 모바일에서 열 간격 줄임 */
+  @media (min-width: 768px) {
+    grid-template-columns: 120px 1fr;
+    row-gap: 1rem;
+    column-gap: 1rem;
+  }
 `;
 
 const Label = styled.div`
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* 모바일에서 폰트 크기 줄임 */
   font-weight: 500;
   color: #475569;
   text-align: right;
+  @media (min-width: 768px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const Value = styled.div`
-  font-size: 1rem;
+  font-size: 0.95rem; /* 모바일에서 폰트 크기 줄임 */
   color: #0f172a;
+  word-break: break-word; /* 긴 텍스트 줄바꿈 */
+  @media (min-width: 768px) {
+    font-size: 1rem;
+  }
 `;
 
 export default function GuardianCalendar() {

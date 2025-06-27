@@ -10,21 +10,73 @@ import {
 } from '~/features/user/api/UserAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
 
+// --- 반응형 디자인을 위한 공통 사이즈 및 미디어 쿼리 정의 ---
+const sizes = {
+  laptopL: '1600px',
+  laptop: '1024px',
+  tablet: '768px',
+  mobile: '480px',
+  mobileSmall: '360px',
+};
+
+const media = {
+  laptopL: `@media (max-width: ${sizes.laptopL})`,
+  laptop: `@media (max-width: ${sizes.laptop})`,
+  tablet: `@media (max-width: ${sizes.tablet})`,
+  mobile: `@media (max-width: ${sizes.mobile})`,
+  mobileSmall: `@media (max-width: ${sizes.mobileSmall})`,
+};
+
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 80px 40px;
-  min-height: 100vh;
+  align-items: flex-start; /* FormContainer가 Wrapper의 상단에 정렬되도록 */
+  padding: 80px 40px; /* 기본 데스크톱 패딩 */
+  min-height: 100vh; /* 뷰포트 높이보다 작아도 최소한 뷰포트만큼 차지 */
   margin-bottom: 5rem;
+  width: 100%; /* 부모의 전체 너비를 사용하도록 */
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+
+  ${media.tablet} {
+    padding: 60px 20px; /* 태블릿에서는 패딩 줄임 */
+    margin-bottom: 3rem;
+  }
+
+  ${media.mobile} {
+    padding: 30px 15px; /* 모바일에서는 패딩 더 줄임 */
+    margin-bottom: 2rem;
+  }
+
+  ${media.mobileSmall} {
+    padding: 20px 10px; /* 아주 작은 모바일에서는 최소 패딩 */
+    margin-bottom: 1rem;
+  }
 `;
 
 const FormContainer = styled.div`
-  width: 720px;
+  width: 720px; /* 기본 데스크톱 너비 */
   background-color: #ffffff;
-  padding: 48px 64px;
+  padding: 48px 64px; /* 기본 데스크톱 패딩 */
   border-radius: 16px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+
+  ${media.tablet} {
+    width: 90%; /* 태블릿에서는 화면의 90% 너비 */
+    max-width: 720px; /* 최대 너비는 유지 */
+    padding: 40px 48px; /* 태블릿 패딩 줄임 */
+  }
+
+  ${media.mobile} {
+    width: 100%; /* 모바일에서는 거의 전체 너비 사용 */
+    padding: 24px 24px; /* 모바일 패딩 더 줄임 */
+    border-radius: 8px; /* 모바일에서 모서리 둥글기 줄임 */
+    box-shadow: none; /* 모바일에서 그림자 제거 (선택 사항, 깔끔하게) */
+  }
+
+  ${media.mobileSmall} {
+    padding: 16px 16px; /* 아주 작은 모바일에서 최소 패딩 */
+  }
 `;
 
 const Title = styled.h1`
@@ -33,12 +85,35 @@ const Title = styled.h1`
   color: #222;
   text-align: center;
   margin-bottom: 40px;
+
+  ${media.tablet} {
+    font-size: 2rem;
+    margin-bottom: 30px;
+  }
+
+  ${media.mobile} {
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+  }
+
+  ${media.mobileSmall} {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 24px; /* 필드 그룹 간의 간격 */
+
+  ${media.tablet} {
+    gap: 20px;
+  }
+
+  ${media.mobile} {
+    gap: 16px;
+  }
 `;
 
 const FieldGroup = styled.div`
@@ -50,6 +125,16 @@ const Label = styled.label`
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 8px;
+
+  ${media.tablet} {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+
+  ${media.mobile} {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+  }
 `;
 
 const Input = styled.input`
@@ -57,12 +142,23 @@ const Input = styled.input`
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 8px;
-  flex: 1;
+  flex: 1; /* InputWithActionButtonGroup 내부에서 유동적으로 너비 차지 */
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
 
   &:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+  }
+
+  ${media.tablet} {
+    padding: 12px 14px;
+    font-size: 0.95rem;
+  }
+
+  ${media.mobile} {
+    padding: 10px 12px;
+    font-size: 0.9rem;
   }
 `;
 
@@ -70,6 +166,11 @@ const FileInputWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap; /* 작은 화면에서 요소들이 줄 바꿈되도록 */
+
+  ${media.mobile} {
+    gap: 8px;
+  }
 `;
 
 const HiddenFileInput = styled.input.attrs({ type: 'file' })`
@@ -84,15 +185,38 @@ const FileLabel = styled.label`
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.95rem;
+  white-space: nowrap; /* 텍스트 줄 바꿈 방지 */
 
   &:hover {
     background-color: #005fcc;
+  }
+
+  ${media.tablet} {
+    padding: 9px 16px;
+    font-size: 0.9rem;
+  }
+
+  ${media.mobile} {
+    padding: 8px 14px;
+    font-size: 0.85rem;
   }
 `;
 
 const FileName = styled.span`
   font-size: 0.95rem;
   color: #333;
+  flex: 1; /* 남은 공간을 차지하도록 */
+  overflow: hidden; /* 긴 파일 이름이 넘치지 않도록 */
+  text-overflow: ellipsis; /* 넘칠 경우 ...으로 표시 */
+  white-space: nowrap; /* 줄 바꿈 방지 */
+
+  ${media.tablet} {
+    font-size: 0.9rem;
+  }
+
+  ${media.mobile} {
+    font-size: 0.85rem;
+  }
 `;
 
 const Button = styled.button`
@@ -105,15 +229,34 @@ const Button = styled.button`
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
 
   &:hover {
     background-color: #005fcc;
+  }
+
+  ${media.tablet} {
+    margin-top: 30px;
+    padding: 14px;
+    font-size: 1rem;
+  }
+
+  ${media.mobile} {
+    margin-top: 24px;
+    padding: 12px;
+    font-size: 0.95rem;
   }
 `;
 
 const InputWithActionButtonGroup = styled.div`
   display: flex;
   gap: 12px;
+  flex-wrap: wrap; /* 작은 화면에서 버튼이 줄 바꿈되도록 */
+
+  ${media.mobile} {
+    flex-direction: column; /* 모바일에서는 세로로 쌓이도록 */
+    gap: 8px;
+  }
 `;
 
 const ActionButton = styled.button`
@@ -124,9 +267,22 @@ const ActionButton = styled.button`
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  white-space: nowrap; /* 텍스트 줄 바꿈 방지 */
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
 
   &:hover {
     background-color: #5593ff;
+  }
+
+  ${media.tablet} {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+  }
+
+  ${media.mobile} {
+    width: 100%; /* 모바일에서는 버튼이 꽉 차도록 */
+    padding: 10px 12px;
+    font-size: 0.85rem;
   }
 `;
 
@@ -134,13 +290,22 @@ const EmailCheckMessage = styled.div<{ success: boolean }>`
   font-size: 0.85rem;
   color: ${(props) => (props.success ? '#007bff' : 'red')};
   margin-top: 4px;
-  min-height: 20px;
+  min-height: 20px; /* 메시지가 없어도 레이아웃 흔들림 방지 */
+
+  ${media.tablet} {
+    font-size: 0.8rem;
+  }
 `;
 
 const ErrorMessage = styled.div`
   font-size: 0.85rem;
   color: red;
   margin-top: 4px;
+  min-height: 20px; /* 메시지가 없어도 레이아웃 흔들림 방지 */
+
+  ${media.tablet} {
+    font-size: 0.8rem;
+  }
 `;
 
 const Notice = styled.div`
@@ -151,6 +316,19 @@ const Notice = styled.div`
   margin-bottom: 2rem;
   color: #444;
   line-height: 1.6;
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+
+  ${media.tablet} {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  ${media.mobile} {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const UserSignupForm = () => {
@@ -190,9 +368,13 @@ const UserSignupForm = () => {
   const isValidRRN = (rrn: string) => /^\d{6}-\d{7}$/.test(rrn);
 
   const formatPhoneNumber = (value: string) => {
-    if (value.length === 11) return value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-    if (value.length === 10) return value.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-    return value;
+    // 숫자만 남기고 최대 11자리로 제한
+    const digitsOnly = value.replace(/[^0-9]/g, '').slice(0, 11);
+    if (digitsOnly.length === 11) return digitsOnly.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+    if (digitsOnly.length === 10 && digitsOnly.startsWith('010'))
+      return digitsOnly.replace(/(\d{3})(\d{4})(\d{3})/, '$1-$2-$3'); // 010-xxxx-xxx 형태 방지
+    if (digitsOnly.length === 10) return digitsOnly.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    return digitsOnly;
   };
 
   const validatePassword = (password: string): string => {
@@ -222,7 +404,7 @@ const UserSignupForm = () => {
 
   const formatRRN = (value: string) => {
     const digits = value.replace(/[^0-9]/g, '').slice(0, 13);
-    return digits.length <= 6 ? digits : digits.slice(0, 6) + '-' + digits.slice(6);
+    return digits.length <= 6 ? digits : `${digits.slice(0, 6)}-${digits.slice(6)}`;
   };
 
   const roleTitleMap: Record<string, string> = {
@@ -256,7 +438,7 @@ const UserSignupForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!emailChecked) {
+    if (!emailChecked || !isEmailCheckSuccess) {
       setEmailCheckMessage('이메일 중복 확인을 해주세요.');
       setIsEmailCheckSuccess(false);
       emailRef.current?.focus();
@@ -269,23 +451,29 @@ const UserSignupForm = () => {
       return;
     }
 
+    const passwordValidationMsg = validatePassword(password);
+    if (passwordValidationMsg) {
+      setPasswordError(passwordValidationMsg);
+      passwordRef.current?.focus();
+      return;
+    } else {
+      setPasswordError(''); // 오류 메시지 초기화
+    }
+
     if (!isValidPhone(phone)) {
       setPhoneError('휴대폰 번호 형식이 올바르지 않습니다.');
       phoneRef.current?.focus();
       return;
+    } else {
+      setPhoneError('');
     }
 
     if (role === 'PATIENT' && !isValidRRN(residentRegistrationNumber)) {
       setRrnError('주민등록번호 형식이 올바르지 않습니다.');
       rrnRef.current?.focus();
       return;
-    }
-
-    const passwordValidationMsg = validatePassword(password);
-    if (passwordValidationMsg) {
-      setPasswordError(passwordValidationMsg);
-      passwordRef.current?.focus();
-      return;
+    } else {
+      setRrnError('');
     }
 
     const formData = new FormData();
@@ -297,14 +485,14 @@ const UserSignupForm = () => {
     if (profileImage) formData.append('profileImage', profileImage);
     formData.append('role', role);
 
-    const response = await submitEmailSignup(formData);
-
-    if (role === 'PATIENT') {
-      await submitPatientInfo({ userId: response.userId, residentRegistrationNumber });
-    }
-
     try {
-      await login({ email, password });
+      const response = await submitEmailSignup(formData);
+
+      if (role === 'PATIENT') {
+        await submitPatientInfo({ userId: response.userId, residentRegistrationNumber });
+      }
+
+      await login({ email, password }); // 자동 로그인 시도
 
       if (role === 'HOSPITAL_ADMIN') {
         navigate('/hospital/create');
@@ -312,8 +500,10 @@ const UserSignupForm = () => {
         navigate('/');
       }
     } catch (err) {
-      console.error('자동 로그인 실패:', err);
-      navigate('/login');
+      console.error('회원가입 또는 자동 로그인 실패:', err);
+      // 사용자에게 에러 메시지를 보여주는 모달 등을 추가할 수 있습니다.
+      // 예: setError('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+      navigate('/login'); // 실패 시 로그인 페이지로 리다이렉트
     }
   };
 
@@ -323,13 +513,19 @@ const UserSignupForm = () => {
         <Title>{roleTitleMap[role] || '회원가입'}</Title>
         <Form onSubmit={handleSubmit} encType="multipart/form-data">
           <FieldGroup>
-            <Label>이메일</Label>
+            <Label htmlFor="email">이메일</Label>
             <InputWithActionButtonGroup>
               <Input
+                id="email"
                 ref={emailRef}
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailChecked(false); // 이메일 변경 시 중복 확인 초기화
+                  setIsEmailCheckSuccess(false);
+                  setEmailCheckMessage('');
+                }}
                 required
               />
               <ActionButton type="button" onClick={handleEmailCheck}>
@@ -340,20 +536,25 @@ const UserSignupForm = () => {
           </FieldGroup>
 
           <FieldGroup>
-            <Label>비밀번호</Label>
+            <Label htmlFor="password">비밀번호</Label>
             <Notice>8자 이상, 영문/숫자/특수문자 중 2가지 이상 포함</Notice>
             <Input
+              id="password"
               ref={passwordRef}
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordError(validatePassword(e.target.value)); // 실시간 비밀번호 유효성 검사
+              }}
               required
             />
           </FieldGroup>
 
           <FieldGroup>
-            <Label>비밀번호 확인</Label>
+            <Label htmlFor="confirmPassword">비밀번호 확인</Label>
             <Input
+              id="confirmPassword"
               ref={confirmPasswordRef}
               type="password"
               value={confirmPassword}
@@ -361,11 +562,15 @@ const UserSignupForm = () => {
               required
             />
             {passwordError && <ErrorMessage>{passwordError}</ErrorMessage>}
+            {password !== confirmPassword && confirmPassword && (
+              <ErrorMessage>비밀번호가 일치하지 않습니다.</ErrorMessage>
+            )}
           </FieldGroup>
 
           <FieldGroup>
-            <Label>이름</Label>
+            <Label htmlFor="name">이름</Label>
             <Input
+              id="name"
               ref={nameRef}
               type="text"
               value={name}
@@ -375,8 +580,9 @@ const UserSignupForm = () => {
           </FieldGroup>
 
           <FieldGroup>
-            <Label>휴대폰 번호</Label>
+            <Label htmlFor="phone">휴대폰 번호</Label>
             <Input
+              id="phone"
               ref={phoneRef}
               type="tel"
               value={formatPhoneNumber(phone)}
@@ -384,21 +590,22 @@ const UserSignupForm = () => {
               onChange={(e) => {
                 const digitsOnly = e.target.value.replace(/[^0-9]/g, '').slice(0, 11);
                 setPhone(digitsOnly);
+                setPhoneError(''); // 입력 시 오류 메시지 초기화
               }}
               required
             />
-
             {phoneError && <ErrorMessage>{phoneError}</ErrorMessage>}
           </FieldGroup>
 
           <FieldGroup>
-            <Label>주소</Label>
+            <Label htmlFor="address">주소</Label>
             <DaumPost address={address} setAddress={setAddress} />
           </FieldGroup>
 
           <FieldGroup>
-            <Label>상세 주소</Label>
+            <Label htmlFor="detailAddress">상세 주소</Label>
             <Input
+              id="detailAddress"
               type="text"
               value={detailAddress}
               onChange={(e) => setDetailAddress(e.target.value)}
@@ -407,8 +614,9 @@ const UserSignupForm = () => {
 
           {role === 'PATIENT' && (
             <FieldGroup>
-              <Label>주민등록번호</Label>
+              <Label htmlFor="residentRegistrationNumber">주민등록번호</Label>
               <Input
+                id="residentRegistrationNumber"
                 ref={rrnRef}
                 type="text"
                 placeholder="123456-1234567 (-를 빼고 입력해주세요)"
@@ -416,6 +624,7 @@ const UserSignupForm = () => {
                 onChange={(e) => {
                   const digits = e.target.value.replace(/[^0-9]/g, '').slice(0, 13);
                   setResidentRegistrationNumber(formatRRN(digits));
+                  setRrnError(''); // 입력 시 오류 메시지 초기화
                 }}
                 required
               />
@@ -424,7 +633,7 @@ const UserSignupForm = () => {
           )}
 
           <FieldGroup>
-            <Label>프로필 이미지</Label>
+            <Label htmlFor="profileImage">프로필 이미지</Label>
             <FileInputWrapper>
               <FileLabel htmlFor="profileImage">파일 선택</FileLabel>
               <HiddenFileInput

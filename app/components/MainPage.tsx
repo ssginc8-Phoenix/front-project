@@ -56,7 +56,9 @@ export default function MainPage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
-    if (!user) fetchMyInfo();
+    if (!user) {
+      fetchMyInfo();
+    }
   }, [user, fetchMyInfo]);
 
   const sliderSettings = {

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useHospitalDetail } from '~/features/hospitals/hooks/useHospitalDetail';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
+import useLoginStore from '~/features/user/stores/LoginStore';
 
 interface HospitalDetailPanelProps {
   hospitalId: number;
@@ -199,6 +200,8 @@ const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, o
   const panelRef = useRef<HTMLDivElement>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [current, setCurrent] = useState(0);
+  const { user } = useLoginStore();
+  const role = user?.role;
 
   useEffect(() => {
     if (panelRef.current) panelRef.current.scrollTop = 0;
@@ -268,7 +271,9 @@ const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, o
         <div>{hospital.serviceNames?.map((svc, i) => <ServiceTag key={i}>{svc}</ServiceTag>)}</div>
 
         <ActionGroup>
-          <PrimaryButton onClick={handleAppointmentClick}>진료 접수</PrimaryButton>
+          {role === 'GUARDIAN' && (
+            <PrimaryButton onClick={handleAppointmentClick}>진료 접수</PrimaryButton>
+          )}
           <SecondaryButton onClick={() => navigate(`/hospital/${hospitalId}`)}>
             상세 보기
           </SecondaryButton>

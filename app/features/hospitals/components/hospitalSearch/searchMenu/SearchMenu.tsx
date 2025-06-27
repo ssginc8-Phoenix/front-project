@@ -1,37 +1,58 @@
 // src/components/hospitalSearch/searchMenu/SearchMenu.tsx
 import React, { useState, useLayoutEffect } from 'react';
 import styled from 'styled-components';
+import { media } from '~/features/hospitals/components/common/breakpoints';
 
 const MenuWrapper = styled.div`
-  background-color: #ffffff;
-  padding: 0.5rem;
-  border-bottom: 1px solid #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  border-radius: 0 0 8px 8px;
-`;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0rem 0.5rem 0.5rem 0;
 
+  ${media('tablet')`
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.25rem;
+  `}
+`;
 const InputGroup = styled.div`
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
 `;
-
 const SearchInput = styled.input`
-  flex: 1 1 300px;
-  max-width: 250px;
-  min-width: 290px;
-  padding: 0.8rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-`;
+  flex: 1 1 320px;
+  min-width: 320px;
 
+  /* 기본 스타일 */
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  /* 플레이스홀더 컬러 */
+  &::placeholder {
+    color: #999;
+  }
+
+  /* 포커스 시 강조 */
+  &:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    outline: none;
+    background-color: #fff;
+  }
+
+  /* 모바일 대응 */
+  ${media('mobile')`
+    min-width: auto;
+    width: 100%;
+  `}
+`;
 const Select = styled.select`
   padding: 0.8rem 1rem;
   border: 1px solid #ccc;
@@ -42,7 +63,7 @@ const Select = styled.select`
 `;
 
 const SearchButton = styled.button`
-  padding: 0.8rem 1.5rem;
+  padding: 0.8rem 2.4rem;
   background-color: #007bff;
   color: white;
   border: none;

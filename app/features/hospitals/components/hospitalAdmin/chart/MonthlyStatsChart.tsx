@@ -1,27 +1,40 @@
+// MonthlyHalfChart.tsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import dayjs from 'dayjs';
 import localeData from 'dayjs/plugin/localeData';
 import 'dayjs/locale/ko';
+import isoWeek from 'dayjs/plugin/isoWeek';
 import { useAppointmentStats } from '~/features/hospitals/hooks/hospitalAdmin/useAppointmentStats';
+import { useMediaQuery } from '~/features/hospitals/hooks/useMediaQuery';
+import { breakpoints, media } from '~/features/hospitals/components/common/breakpoints';
 
 dayjs.extend(localeData);
+dayjs.extend(isoWeek);
 dayjs.locale('ko');
 
 const Container = styled.div`
   width: 100%;
+  height: 100%;
   background: #fff;
   padding: 1rem;
-  align-items: center;
+
+  ${media('mobile')`
+    padding: 0.75rem;
+  `}
 `;
 
 const Title = styled.h2`
   font-size: 1.5rem;
-  padding-left: 3rem;
   font-weight: 600;
   color: #00499e;
-  margin-bottom: 6rem;
+  margin-bottom: 1rem;
+
+  ${media('mobile')`
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  `}
 `;
 
 const ToggleContainer = styled.div`
@@ -29,6 +42,11 @@ const ToggleContainer = styled.div`
   justify-content: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
+
+  ${media('mobile')`
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  `}
 `;
 
 const ToggleButton = styled.button<{ active: boolean }>`
@@ -43,18 +61,32 @@ const ToggleButton = styled.button<{ active: boolean }>`
   transition:
     background 0.2s,
     color 0.2s;
+
   &:hover {
     background: #4e73df;
     color: #fff;
   }
+
+  ${media('mobile')`
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+  `}
 `;
 
 const ChartWrapper = styled.div`
-  display: flex;
-  justify-content: center;
+  width: 100%;
+  height: 400px;
+
+  ${media('tablet')`
+    height: 320px;
+  `}
+  ${media('mobile')`
+    height: 350px;
+  `}
 `;
 
 export const MonthlyHalfChart: React.FC = () => {
+  const isMobile = useMediaQuery(`(max-width: ${breakpoints.mobile}px)`);
   const [half, setHalf] = useState<'first' | 'second'>('first');
   const year = dayjs().year();
 
@@ -88,20 +120,20 @@ export const MonthlyHalfChart: React.FC = () => {
     value: monthlyMap[m] || 0,
   }));
 
-  // 간격 & 크기 조절
-  const barSize = 35;
-  const barGap = 40;
+  // 모바일/데스크탑 각각 바 크기·간격 설정
+  const barSize = isMobile ? 20 : 35;
+  const barGap = isMobile ? 20 : 40;
 
   return (
     <Container>
-      <Title>월별 진료 통계 ({half === 'first' ? '상반기' : '하반기'})</Title>
+      <Title>월별 진료 통계</Title>
 
       <ToggleContainer>
         <ToggleButton active={half === 'first'} onClick={() => setHalf('first')}>
-          상반기 (1~6월)
+          상반기 1~6월
         </ToggleButton>
         <ToggleButton active={half === 'second'} onClick={() => setHalf('second')}>
-          하반기 (7~12월)
+          하반기 7~12월
         </ToggleButton>
       </ToggleContainer>
 
@@ -109,31 +141,30 @@ export const MonthlyHalfChart: React.FC = () => {
         <p>📊 데이터를 불러오는 중입니다...</p>
       ) : (
         <ChartWrapper>
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
-              margin={{ top: 20, right: 20, left: 20, bottom: 10 }}
+              margin={{ top: 16, right: 16, left: 16, bottom: 16 }}
               barGap={barGap}
-              barCategoryGap="30%"
             >
               <XAxis
                 dataKey="month"
                 interval={0}
-                tickFormatter={(val) => dayjs(`${val}-01`).format('M월')}
-                tick={{ fontSize: 12, fill: '#555' }}
-                axisLine={{ stroke: '#ccc' }}
+                tickFormatter={(m) => dayjs(`${m}-01`).format('M월')}
+                tick={{ fontSize: isMobile ? 10 : 12, fill: '#555' }}
+                axisLine={{ stroke: '#ddd' }}
                 tickLine={false}
               />
               <YAxis
                 dataKey="value"
-                tick={{ fontSize: 12, fill: '#555' }}
-                axisLine={{ stroke: '#ccc' }}
+                tick={{ fontSize: isMobile ? 10 : 12, fill: '#555' }}
+                axisLine={{ stroke: '#ddd' }}
                 tickLine={false}
                 allowDecimals={false}
               />
               <Tooltip
                 formatter={(v) => [`${v}건`, '진료 수']}
-                labelFormatter={(label) => `📅 ${label}`}
+                labelFormatter={(l) => `📅 ${l}`}
                 contentStyle={{
                   backgroundColor: '#fff',
                   borderRadius: 8,

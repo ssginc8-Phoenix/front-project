@@ -14,6 +14,9 @@ export const Card = styled.div<{ isSelected?: boolean }>`
   box-sizing: border-box;
 
   @media (max-width: 768px) {
-    flex: 1 1 100%;
+    flex: 0 0 70%;
+    max-width: 400px;
+
+    margin: 1rem auto;
   }
 `;

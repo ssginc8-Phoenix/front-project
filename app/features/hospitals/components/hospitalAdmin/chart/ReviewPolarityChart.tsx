@@ -1,11 +1,113 @@
+// ReviewPolarityChart.tsx
 import React, { useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import styled from 'styled-components';
 import { useReviews } from '~/features/hospitals/hooks/hospitalAdmin/useReviews';
 import type { KeywordType } from '~/features/hospitals/types/review';
 import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
+import { media } from '../../common/breakpoints';
 
-// ✅ 이 부분이 기존 키워드 맵 전체
+// … KeywordTypeMap 생략 …
+
+const Container = styled.div`
+  width: 100%;
+  background: #fff;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+
+  ${media('tablet')`
+    padding: 1rem;
+    gap: 1.5rem;
+  `}
+
+  ${media('mobile')`
+    padding: 0.75rem;
+    gap: 1rem;
+  `}
+`;
+
+const Title = styled.h2`
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #00499e;
+
+  ${media('tablet')`
+    font-size: 1.5rem;
+  `}
+  ${media('mobile')`
+    font-size: 1.25rem;
+  `}
+`;
+
+const ChartWrapper = styled.div`
+  width: 100%;
+  /* 데스크탑 기본 높이 */
+  height: 350px;
+  padding-top: 1rem;
+  padding-bottom: 0.5rem;
+
+  ${media('tablet')`
+    height: 280px;
+  `}
+  ${media('mobile')`
+    height: 220px;
+  `}
+`;
+
+const KeywordSection = styled.div`
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 1rem;
+
+  ${media('tablet')`
+    flex-wrap: wrap;
+    gap: 1rem;
+  `}
+  ${media('mobile')`
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  `}
+`;
+
+const KeywordBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 45%;
+
+  ${media('mobile')`
+    width: 100%;
+  `}
+`;
+
+const KeywordTitle = styled.h3`
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+
+  ${media('mobile')`
+    font-size: 1rem;
+  `}
+`;
+
+const KeywordList = styled.ul`
+  list-style: disc;
+  padding-left: 1.25rem;
+`;
+
+const KeywordItem = styled.li`
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+
+  ${media('mobile')`
+    font-size: 0.9rem;
+  `}
+`;
 const KeywordTypeMap: Record<
   KeywordType,
   { label: string; category: string; polarity: 'POSITIVE' | 'NEGATIVE' }
@@ -105,57 +207,6 @@ const KeywordTypeMap: Record<
   LATE_RECEIPT: { label: '영수증/서류 처리 지연', category: 'COST_ADMIN', polarity: 'NEGATIVE' },
 };
 
-// ✅ 스타일 컴포넌트들
-const Container = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2rem;
-`;
-
-const Title = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #00499e;
-`;
-
-const ChartWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  height: 300px;
-  width: 100%;
-`;
-
-const KeywordSection = styled.div`
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  margin-top: 1rem;
-`;
-
-const KeywordBox = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const KeywordTitle = styled.h3`
-  font-size: 1rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-`;
-
-const KeywordList = styled.ul`
-  list-style: disc;
-  padding-left: 1rem;
-`;
-
-const KeywordItem = styled.li`
-  font-size: 0.9rem;
-  margin-bottom: 0.25rem;
-`;
-
 const ReviewPolarityChart: React.FC<{ hospitalId: number }> = ({ hospitalId }) => {
   const { data: reviewsRaw, loading } = useReviews(hospitalId);
   const reviews = reviewsRaw ?? [];
@@ -174,7 +225,7 @@ const ReviewPolarityChart: React.FC<{ hospitalId: number }> = ({ hospitalId }) =
     if (!loading && reviews.length > 0) {
       console.table(keywordCounts);
     }
-  }, [loading, reviews.length, keywordCounts]);
+  }, [loading, reviews.length]);
 
   if (loading) return <p>🔄 리뷰 데이터를 불러오는 중...</p>;
   if (reviews.length === 0) return <p>리뷰가 아직 없습니다.</p>;
@@ -201,7 +252,6 @@ const ReviewPolarityChart: React.FC<{ hospitalId: number }> = ({ hospitalId }) =
     .filter(([kw]) => KeywordTypeMap[kw].polarity === 'POSITIVE')
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3);
-
   const negativeTop3 = sorted
     .filter(([kw]) => KeywordTypeMap[kw].polarity === 'NEGATIVE')
     .sort((a, b) => b[1] - a[1])
@@ -215,6 +265,7 @@ const ReviewPolarityChart: React.FC<{ hospitalId: number }> = ({ hospitalId }) =
   return (
     <Container>
       <Title>리뷰 키워드 통계 ({counts.positive + counts.negative}개)</Title>
+
       <ChartWrapper>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -228,13 +279,10 @@ const ReviewPolarityChart: React.FC<{ hospitalId: number }> = ({ hospitalId }) =
               label={({ name, percent }) => `${name}: ${(percent! * 100).toFixed(0)}%`}
             >
               {chartData.map((entry, idx) => (
-                <Cell
-                  key={`cell-${idx}`}
-                  fill={entry.name === '긍정 리뷰' ? '#4caf50' : '#f44336'}
-                />
+                <Cell key={idx} fill={entry.name === '긍정 리뷰' ? '#4caf50' : '#f44336'} />
               ))}
             </Pie>
-            <Tooltip formatter={(value: number) => `${value}건`} />
+            <Tooltip formatter={(v: number) => `${v}건`} />
           </PieChart>
         </ResponsiveContainer>
       </ChartWrapper>
@@ -243,20 +291,19 @@ const ReviewPolarityChart: React.FC<{ hospitalId: number }> = ({ hospitalId }) =
         <KeywordBox>
           <KeywordTitle>상위 3개 긍정 키워드</KeywordTitle>
           <KeywordList>
-            {positiveTop3.map(([kw, count]) => (
+            {positiveTop3.map(([kw, cnt]) => (
               <KeywordItem key={kw}>
-                {emojiMap[kw]} {KeywordTypeMap[kw].label}: {count}회
+                {emojiMap[kw]} {KeywordTypeMap[kw].label}: {cnt}회
               </KeywordItem>
             ))}
           </KeywordList>
         </KeywordBox>
-
         <KeywordBox>
           <KeywordTitle>상위 3개 부정 키워드</KeywordTitle>
           <KeywordList>
-            {negativeTop3.map(([kw, count]) => (
+            {negativeTop3.map(([kw, cnt]) => (
               <KeywordItem key={kw}>
-                {emojiMap[kw]} {KeywordTypeMap[kw].label}: {count}회
+                {emojiMap[kw]} {KeywordTypeMap[kw].label}: {cnt}회
               </KeywordItem>
             ))}
           </KeywordList>

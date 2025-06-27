@@ -27,6 +27,10 @@ const AddressInput = styled.input`
     border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
   }
+  @media (max-width: 480px) {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
 `;
 
 const SearchButton = styled.button`
@@ -41,6 +45,10 @@ const SearchButton = styled.button`
 
   &:hover {
     background-color: #005fcc;
+  }
+  @media (max-width: 480px) {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.65rem;
   }
 `;
 
@@ -88,7 +96,7 @@ const HospitalDaumPost = forwardRef<HTMLInputElement, DaumPostProps>(
           ref={ref} // ✅ 여기에 ref를 전달
         />
         <SearchButton type="button" onClick={handleClick}>
-          주소 검색
+          검색
         </SearchButton>
       </Container>
     );

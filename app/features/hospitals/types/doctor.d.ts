@@ -20,6 +20,7 @@ export interface Doctor {
   hospitalId: number;
   specialization: Specialization;
   imageUrl?: never;
+  capacityPerHalfHour: number;
 }
 
 export interface PagedDoctorResponse {

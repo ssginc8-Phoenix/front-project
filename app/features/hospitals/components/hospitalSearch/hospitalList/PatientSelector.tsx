@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { getGuardianPatients } from '~/features/guardian/api/guardianAPI';
 import type { PatientSummary } from '~/features/hospitals/types/patient';
 import { getCoordsFromAddress } from '~/features/hospitals/api/geocode';
+import useLoginStore from '~/features/user/stores/LoginStore';
 
 interface Props {
   onSelect?: (patient: PatientSummary) => void;
@@ -35,7 +36,8 @@ const Select = styled.select`
 const PatientSelector: React.FC<Props> = ({ onSelect, onLocate }) => {
   const [patients, setPatients] = useState<PatientSummary[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-
+  const { user } = useLoginStore();
+  const role = user?.role;
   useEffect(() => {
     getGuardianPatients()
       .then((data) => {
@@ -66,6 +68,10 @@ const PatientSelector: React.FC<Props> = ({ onSelect, onLocate }) => {
     }
   };
   const selectedPatient = patients.find((p) => p.patientId === selectedId);
+  if (role !== 'GUARDIAN') {
+    return null;
+  }
+
   return (
     <Container>
       <Label htmlFor="patient-select">👤 환자 선택</Label>

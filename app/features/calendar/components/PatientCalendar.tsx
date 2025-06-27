@@ -698,7 +698,7 @@ export default function PatientCalendar() {
                             (t: { meal: string; time: string }) =>
                               `${mealLabel(t.meal)} ${t.time.slice(0, 5)}`,
                           )
-                          .join(', ')
+                          .join('\n')
                       : '시간 정보 없음'}
                   </Value>
                 </>

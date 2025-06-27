@@ -188,6 +188,7 @@ const Sidebar = () => {
     guardian: '/mypage/guardian',
     patient: '/mypage/patient',
     appointment: '/mypage/appointments',
+    appointmentDashboard: '/appointments',
     calendar: '/mypage/calendar',
     review: '/mypage/review',
     qna: '/mypage/qna',

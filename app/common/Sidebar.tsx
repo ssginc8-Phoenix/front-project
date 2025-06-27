@@ -59,7 +59,6 @@ const ProfileImage = styled.img<{ $hasUser: boolean }>`
   margin-bottom: 8px;
   border: 4px solid ${(props) => (props.$hasUser ? '#007bff' : '#e0e0e0')};
   max-width: 100%;
-  height: auto;
 `;
 
 const ProfileName = styled.div`

@@ -11,8 +11,8 @@ const LayoutContainer = styled.div`
 
 const ContentWrapper = styled.main`
   flex: 1;
-  padding: 1rem 0rem; /* 좌우 패딩을 조금 줄이거나, 나중에 max-width와 함께 조정 */
-  max-width: none; /* 최대 너비 설정: 화면이 아무리 커져도 컨텐츠가 너무 넓어지지 않게 함 */
+  padding: 1rem 0rem;
+  max-width: none;
   width: 99%;
   margin: 0;
   overflow-x: hidden;
@@ -25,6 +25,17 @@ const ContentWrapper = styled.main`
   }
 `;
 
+// Footer를 감싸고 모바일에서는 숨기기 위한 Wrapper
+const FooterWrapper = styled.div`
+  /* 기본적으로 보여주기 */
+  display: block;
+
+  /* 모바일 이하 화면에서는 숨김 */
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
 const MapLayout = () => {
   return (
     <LayoutContainer>
@@ -32,7 +43,11 @@ const MapLayout = () => {
       <ContentWrapper>
         <Outlet />
       </ContentWrapper>
-      <Footer />
+
+      {/* Footer를 Wrapper로 감싸서 모바일에서 숨김 처리 */}
+      <FooterWrapper>
+        <Footer />
+      </FooterWrapper>
     </LayoutContainer>
   );
 };

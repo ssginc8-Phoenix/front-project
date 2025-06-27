@@ -416,7 +416,7 @@ const Label = styled.div`
   font-size: 0.9rem;
   font-weight: 500;
   color: #475569;
-  text-align: right;
+  text-align: center;
 
   ${media.mobile} {
     font-size: 0.85rem;

@@ -1,14 +1,13 @@
 import { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import CommonModal from '~/components/common/CommonModal';
 import {
   checkEmailDuplicate,
   submitEmailSignup,
   submitPatientInfo,
-  login,
 } from '~/features/user/api/UserAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
+import useLoginStore from '~/features/user/stores/LoginStore';
 
 // --- 반응형 디자인을 위한 공통 사이즈 및 미디어 쿼리 정의 ---
 const sizes = {
@@ -353,6 +352,7 @@ const UserSignupForm = () => {
   const [searchParams] = useSearchParams();
   const role = searchParams.get('role') || '';
   const navigate = useNavigate();
+  const { login } = useLoginStore();
 
   // Input 상태
   const [email, setEmail] = useState('');

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import {
   registerHospital,
   updateHospital,
@@ -13,6 +13,8 @@ import HospitalDaumPost from '~/features/hospitals/components/hospitalAdmin/info
 
 import type { CreateScheduleRequest, HospitalForm } from '~/features/hospitals/types/hospital';
 import type { ScheduleDTO } from '~/features/hospitals/types/hospitalSchedule';
+import { media } from '~/features/hospitals/components/common/breakpoints';
+import { useMediaQuery } from '~/features/hospitals/hooks/useMediaQuery';
 
 interface HourRow {
   hospitalScheduleId?: number;
@@ -100,7 +102,7 @@ const PreviewImage = styled.img`
 const HospitalUpdateForm: React.FC = () => {
   const [hospitalId, setHospitalId] = useState<string | null>(null);
   const [isEdit, setIsEdit] = useState(false);
-
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const [, setExistingFileIds] = useState<number[]>([]);
   const [, setPreviewUrls] = useState<string[]>([]);
   const [deletedFileIds, setDeletedFileIds] = useState<number[]>([]);
@@ -109,6 +111,9 @@ const HospitalUpdateForm: React.FC = () => {
   const businessNumberRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
+
+  // 아코디언 열림 상태: idx별 true/false
+
   const [form, setForm] = useState({
     name: '',
     address: '',
@@ -136,6 +141,15 @@ const HospitalUpdateForm: React.FC = () => {
       lunchEnd: '',
     })),
   );
+  const [openAccordion, setOpenAccordion] = useState<boolean[]>(businessHours.map(() => false));
+  const toggleAccordion = (idx: number) => {
+    setOpenAccordion((prev) => {
+      const next = [...prev];
+      next[idx] = !next[idx];
+      return next;
+    });
+  };
+
   // 이미지 삭제 시
   const handleRemoveImage = (idx: number) => {
     setPreviewItems((prev) => {
@@ -485,68 +499,141 @@ const HospitalUpdateForm: React.FC = () => {
       </FieldWrapper>
       <BusinessHoursWrapper>
         <Label>진료시간</Label>
-        {businessHours.map((row, idx) => (
-          <DayRow key={idx}>
-            <StyledSelect
-              value={dayOfWeekMap[row.day]}
-              onChange={(e) => {
-                const kor = Object.entries(dayOfWeekMap).find(
-                  ([, val]) => val === e.target.value,
-                )?.[0];
-                if (!kor) return;
-                setBusinessHours((prev) => {
-                  const updated = [...prev];
-                  updated[idx] = { ...updated[idx], day: kor };
-                  return updated;
-                });
-              }}
-            >
-              {Object.entries(dayOfWeekMap).map(([kor, eng]) => (
-                <option key={eng} value={eng}>
-                  {kor}
-                </option>
-              ))}
-            </StyledSelect>
-            <span style={{ fontWeight: 500 }}>진료:</span>
-            {/* 오픈/종료 (input type="time" 적용) */}
-            <InputTime
-              type="time"
-              step="1800"
-              value={row.open}
-              onChange={(e) => handleScheduleChange(idx, 'open', e.target.value)}
-            />
-            <Separator>~</Separator>
-            <InputTime
-              type="time"
-              step="1800"
-              value={row.close}
-              onChange={(e) => handleScheduleChange(idx, 'close', e.target.value)}
-            />
 
-            <span style={{ fontWeight: 500 }}>점심:</span>
+        {businessHours.map((row, idx) => {
+          if (!isMobile) {
+            // PC: 풀 로우
+            return (
+              <DayRow key={idx}>
+                <StyledSelect
+                  value={dayOfWeekMap[row.day]}
+                  onChange={(e) => {
+                    const kor = Object.entries(dayOfWeekMap).find(
+                      ([, val]) => val === e.target.value,
+                    )?.[0];
+                    if (!kor) return;
+                    setBusinessHours((prev) => {
+                      const updated = [...prev];
+                      updated[idx] = { ...updated[idx], day: kor };
+                      return updated;
+                    });
+                  }}
+                >
+                  {Object.entries(dayOfWeekMap).map(([kor, eng]) => (
+                    <option key={eng} value={eng}>
+                      {kor}
+                    </option>
+                  ))}
+                </StyledSelect>
 
-            {/* 점심 시작/종료 (input type="time" 적용) */}
-            <InputTime
-              type="time"
-              step="1800"
-              value={row.lunchStart}
-              onChange={(e) => handleScheduleChange(idx, 'lunchStart', e.target.value)}
-            />
-            <Separator>~</Separator>
-            <InputTime
-              type="time"
-              step="1800"
-              value={row.lunchEnd}
-              onChange={(e) => handleScheduleChange(idx, 'lunchEnd', e.target.value)}
-            />
+                <span style={{ fontWeight: 500 }}>진료:</span>
+                <InputTime
+                  type="time"
+                  step="1800"
+                  value={row.open}
+                  onChange={(e) => handleScheduleChange(idx, 'open', e.target.value)}
+                />
+                <Separator>~</Separator>
+                <InputTime
+                  type="time"
+                  step="1800"
+                  value={row.close}
+                  onChange={(e) => handleScheduleChange(idx, 'close', e.target.value)}
+                />
 
-            <RemoveScheduleButton type="button" onClick={() => handleRemoveSchedule(idx)}>
-              <X size={16} />
-            </RemoveScheduleButton>
-          </DayRow>
-        ))}
+                <span style={{ fontWeight: 500 }}>점심:</span>
+                <InputTime
+                  type="time"
+                  step="1800"
+                  value={row.lunchStart}
+                  onChange={(e) => handleScheduleChange(idx, 'lunchStart', e.target.value)}
+                />
+                <Separator>~</Separator>
+                <InputTime
+                  type="time"
+                  step="1800"
+                  value={row.lunchEnd}
+                  onChange={(e) => handleScheduleChange(idx, 'lunchEnd', e.target.value)}
+                />
+
+                <RemoveScheduleButton type="button" onClick={() => handleRemoveSchedule(idx)}>
+                  <X size={16} />
+                </RemoveScheduleButton>
+              </DayRow>
+            );
+          } else {
+            // Mobile: 아코디언
+            return (
+              <AccordionRow key={idx}>
+                <AccordionHeader onClick={() => toggleAccordion(idx)}>
+                  {row.day}
+                  {openAccordion[idx] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </AccordionHeader>
+                <AccordionPanel open={openAccordion[idx]}>
+                  <DayRow>
+                    <StyledSelect
+                      value={dayOfWeekMap[row.day]}
+                      onChange={(e) => {
+                        const kor = Object.entries(dayOfWeekMap).find(
+                          ([, val]) => val === e.target.value,
+                        )?.[0];
+                        if (!kor) return;
+                        setBusinessHours((prev) => {
+                          const updated = [...prev];
+                          updated[idx] = { ...updated[idx], day: kor };
+                          return updated;
+                        });
+                      }}
+                    >
+                      {Object.entries(dayOfWeekMap).map(([kor, eng]) => (
+                        <option key={eng} value={eng}>
+                          {kor}
+                        </option>
+                      ))}
+                    </StyledSelect>
+
+                    <span style={{ fontWeight: 500 }}>진료:</span>
+                    <InputTime
+                      type="time"
+                      step="1800"
+                      value={row.open}
+                      onChange={(e) => handleScheduleChange(idx, 'open', e.target.value)}
+                    />
+                    <Separator>~</Separator>
+                    <InputTime
+                      type="time"
+                      step="1800"
+                      value={row.close}
+                      onChange={(e) => handleScheduleChange(idx, 'close', e.target.value)}
+                    />
+
+                    <span style={{ fontWeight: 500 }}>점심:</span>
+                    <InputTime
+                      type="time"
+                      step="1800"
+                      value={row.lunchStart}
+                      onChange={(e) => handleScheduleChange(idx, 'lunchStart', e.target.value)}
+                    />
+                    <Separator>~</Separator>
+                    <InputTime
+                      type="time"
+                      step="1800"
+                      value={row.lunchEnd}
+                      onChange={(e) => handleScheduleChange(idx, 'lunchEnd', e.target.value)}
+                    />
+
+                    <RemoveScheduleButton type="button" onClick={() => handleRemoveSchedule(idx)}>
+                      <X size={16} />
+                    </RemoveScheduleButton>
+                  </DayRow>
+                </AccordionPanel>
+              </AccordionRow>
+            );
+          }
+        })}
+
         <AddScheduleButton type="button" onClick={handleAddSchedule}>
-          <Plus size={16} style={{ marginRight: '4px' }} /> 진료시간 추가
+          <Plus size={16} style={{ marginRight: 4 }} /> 진료시간 추가
         </AddScheduleButton>
       </BusinessHoursWrapper>
 
@@ -747,6 +834,13 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  ${media('mobile')`
+   max-width: 250px;
+    margin: 1rem auto;
+    padding: 1rem;
+    gap: 0.75rem;
+  `}
 `;
 const FileLabel = styled.label`
   display: inline-block;
@@ -759,15 +853,26 @@ const FileLabel = styled.label`
   &:hover {
     background-color: #003c80;
   }
+  ${media('mobile')`
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  `}
 `;
 const FieldWrapper = styled.div`
   display: flex;
   flex-direction: column;
+  ${media('mobile')`
+    width: 100%;
+  `}
 `;
 const Label = styled.label`
   margin-bottom: 0.5rem;
   font-weight: 600;
   color: #374151;
+  ${media('mobile')`
+     font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+  `}
 `;
 const Input = styled.input`
   border: 1px solid #d1d5db;
@@ -778,6 +883,10 @@ const Input = styled.input`
   &:focus {
     box-shadow: 0 0 0 2px #60a5fa;
   }
+  ${media('mobile')`
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  `}
 `;
 
 const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
@@ -798,6 +907,10 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
         ? 'linear-gradient(to right,#2563eb,#1e40af)'
         : 'linear-gradient(to right,#4338ca,#312e81)'};
   }
+  ${media('mobile')`
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  `}
 `;
 const AddScheduleButton = styled.button`
   margin-top: 0.75rem;
@@ -825,6 +938,9 @@ const BusinessHoursWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  ${media('mobile')`
+    flex-direction: column;
+  `}
 `;
 
 const DayRow = styled.div`
@@ -836,6 +952,13 @@ const DayRow = styled.div`
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   background: #f9fafb;
+
+  ${media('mobile')`
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    font-size: 0.85rem;
+  `}
 `;
 
 const StyledSelect = styled.select`
@@ -867,15 +990,23 @@ const ThumbnailsRow = styled.div`
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
+  scroll-snap-type: x mandatory;
   padding: 0.5rem 0;
+  ${media('mobile')`
+    gap: 0.25rem;
+  `}
 `;
 const ThumbnailWrapper = styled.div`
   position: relative;
-  width: 120px;
-  height: 150px;
+  width: 150px;
+  height: 200px;
   flex-shrink: 0;
   border-radius: 8px;
   overflow: hidden;
+  ${media('mobile')`
+    max-width: 180px;
+    width: 60vw;
+  `}
 `;
 
 const RemoveThumbnailButton = styled.button.attrs({ type: 'button' })`
@@ -893,4 +1024,31 @@ const RemoveThumbnailButton = styled.button.attrs({ type: 'button' })`
   justify-content: center;
   cursor: pointer;
   z-index: 1;
+`;
+
+const AccordionRow = styled.div`
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+`;
+const AccordionHeader = styled.button.attrs({ type: 'button' })`
+  width: 100%;
+  padding: 0.75rem;
+  background: #fff;
+  text-align: left;
+  font-weight: 600;
+`;
+const AccordionPanel = styled.div<{ open: boolean }>`
+  max-height: ${({ open }) => (open ? '500px' : '0')};
+  opacity: ${({ open }) => (open ? 1 : 0)};
+  padding: ${({ open }) => (open ? '0.5rem 0' : '0 0')};
+  overflow: hidden;
+  background: #f9fafb;
+
+  /* max-height, padding, opacity 모두 0.3초 동안 부드럽게 전환 */
+  transition:
+    max-height 0.3s ease,
+    padding 0.3s ease,
+    opacity 0.3s ease;
 `;

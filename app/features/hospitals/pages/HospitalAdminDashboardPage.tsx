@@ -3,16 +3,23 @@ import styled from 'styled-components';
 import HospitalUpdateForm from '~/features/hospitals/components/hospitalAdmin/info/HospitalUpdateForm';
 
 import Sidebar from '~/common/Sidebar';
+import { media } from '~/features/hospitals/components/common/breakpoints';
 
 // ------------------- 스타일 정의 -------------------
 const PageWrapper = styled.div`
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
-  padding-left: 1rem;
+  padding: 0.5rem;
   display: flex;
   gap: 48px;
   min-height: 100vh;
+  ${media('mobile')`
+      flex-direction: column;
+    padding: 0;          /* 모바일에서 완전 제로 패딩 */
+    gap: 1px;
+    
+  `}
 `;
 
 const MainSection = styled.div`
@@ -28,6 +35,12 @@ const Title = styled.h2`
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 2rem; // <-- 여백 맞춤
+  ${media('mobile')`
+      flex-direction: column;
+    padding: 0;          /* 모바일에서 완전 제로 패딩 */
+    gap: 1px;
+    
+  `}
 `;
 
 // ------------------- 컴포넌트 -------------------

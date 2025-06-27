@@ -7,6 +7,23 @@ import { getPatientCalendar } from '~/features/calendar/api/CalendarAPI';
 import { getMedicationSchedule } from '~/features/medication/api/medicationAPI';
 import CommonModal from '~/components/common/CommonModal';
 
+// --- 반응형 디자인을 위한 공통 사이즈 및 미디어 쿼리 정의 ---
+const sizes = {
+  laptopL: '1600px',
+  laptop: '1024px',
+  tablet: '768px',
+  mobile: '480px',
+  mobileSmall: '360px', // Target for 360x740
+};
+
+const media = {
+  laptopL: `@media (max-width: ${sizes.laptopL})`,
+  laptop: `@media (max-width: ${sizes.laptop})`,
+  tablet: `@media (max-width: ${sizes.tablet})`,
+  mobile: `@media (max-width: ${sizes.mobile})`,
+  mobileSmall: `@media (max-width: ${sizes.mobileSmall})`,
+};
+
 interface CalendarItem {
   date: string;
   itemType: 'MEDICATION' | 'APPOINTMENT';
@@ -27,6 +44,21 @@ const Wrapper = styled.div`
   padding: 2rem;
   font-family: 'Segoe UI', sans-serif;
   min-height: 100vh;
+  background-color: #f5f7fa; /* Ensure background color consistency */
+
+  ${media.tablet} {
+    padding: 1.5rem;
+  }
+
+  ${media.mobile} {
+    padding: 1rem 0.75rem;
+    gap: 1rem;
+  }
+
+  ${media.mobileSmall} {
+    padding: 0.8rem 0.5rem;
+    gap: 0.8rem;
+  }
 `;
 
 const Legend = styled.div`
@@ -49,6 +81,20 @@ const Legend = styled.div`
   }
   .medication-dot {
     background: #267e3e;
+  }
+
+  ${media.mobile} {
+    font-size: 0.8rem;
+    gap: 1rem;
+    .dot {
+      width: 10px;
+      height: 10px;
+    }
+  }
+
+  ${media.mobileSmall} {
+    font-size: 0.75rem;
+    gap: 0.8rem;
   }
 `;
 
@@ -105,12 +151,106 @@ const CalendarWrapper = styled.div`
   .react-calendar__month-view__days__day:nth-child(7n) {
     color: black !important;
   }
+
+  /* React Calendar Specific Adjustments for responsiveness */
+  .react-calendar__navigation button {
+    font-size: 1rem;
+  }
+
+  .react-calendar__month-view__weekdays__weekday {
+    font-size: 0.9rem;
+  }
+
+  .react-calendar__tile abbr {
+    font-size: 1rem;
+  }
+
+  ${media.tablet} {
+    .react-calendar {
+      padding: 0.8rem;
+    }
+    .react-calendar__tile {
+      min-height: 80px;
+      padding: 0.6rem 0.4rem;
+    }
+    .calendar-event {
+      font-size: 0.65rem;
+      padding: 2px 5px;
+    }
+    .react-calendar__navigation button {
+      font-size: 0.9rem;
+    }
+    .react-calendar__month-view__weekdays__weekday {
+      font-size: 0.8rem;
+    }
+    .react-calendar__tile abbr {
+      font-size: 0.9rem;
+    }
+  }
+
+  ${media.mobile} {
+    .react-calendar {
+      padding: 0.6rem;
+    }
+    .react-calendar__tile {
+      min-height: 60px;
+      padding: 0.5rem 0.3rem;
+    }
+    .calendar-event {
+      font-size: 0.6rem;
+      padding: 2px 4px;
+      margin-top: 1px;
+    }
+    .react-calendar__navigation button {
+      font-size: 0.8rem;
+    }
+    .react-calendar__month-view__weekdays__weekday {
+      font-size: 0.7rem;
+    }
+    .react-calendar__tile abbr {
+      font-size: 0.8rem;
+    }
+  }
+
+  ${media.mobileSmall} {
+    .react-calendar {
+      padding: 0.4rem;
+    }
+    .react-calendar__tile {
+      min-height: 50px;
+      padding: 0.4rem 0.2rem;
+    }
+    .calendar-event {
+      font-size: 0.55rem;
+      padding: 1px 3px;
+    }
+    .react-calendar__navigation button {
+      font-size: 0.7rem;
+    }
+    .react-calendar__month-view__weekdays__weekday {
+      font-size: 0.65rem;
+    }
+    .react-calendar__tile abbr {
+      font-size: 0.75rem;
+    }
+    .calendar-day-wrapper > div:last-child {
+      font-size: 0.6rem !important; /* Adjust "see more" text size */
+    }
+  }
 `;
 
 const StyledList = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
+
+  ${media.mobile} {
+    font-size: 0.9rem;
+  }
+
+  ${media.mobileSmall} {
+    font-size: 0.85rem;
+  }
 `;
 
 const StyledItem = styled.li<{ itemType: 'MEDICATION' | 'APPOINTMENT' }>`
@@ -177,6 +317,56 @@ const StyledItem = styled.li<{ itemType: 'MEDICATION' | 'APPOINTMENT' }>`
     color: #475569;
     white-space: nowrap;
   }
+
+  ${media.mobile} {
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.6rem;
+    grid-template-columns: 36px 1fr auto; /* Adjust grid columns for mobile */
+    &::before {
+      width: 4px; /* Thinner border for mobile */
+    }
+    .icon {
+      width: 36px;
+      height: 36px;
+      font-size: 1.1rem;
+    }
+    .info {
+      .title {
+        font-size: 0.9rem;
+      }
+      .desc {
+        font-size: 0.75rem;
+      }
+    }
+    .time {
+      font-size: 0.8rem;
+    }
+  }
+
+  ${media.mobileSmall} {
+    padding: 0.7rem 0.8rem;
+    margin-bottom: 0.5rem;
+    grid-template-columns: 32px 1fr auto; /* Adjust grid columns for small mobile */
+    &::before {
+      width: 3px; /* Even thinner border */
+    }
+    .icon {
+      width: 32px;
+      height: 32px;
+      font-size: 1rem;
+    }
+    .info {
+      .title {
+        font-size: 0.85rem;
+      }
+      .desc {
+        font-size: 0.7rem;
+      }
+    }
+    .time {
+      font-size: 0.75rem;
+    }
+  }
 `;
 
 const DetailContainer = styled.div`
@@ -190,12 +380,32 @@ const DetailContainer = styled.div`
   position: relative;
   max-width: 500px;
   margin: 0 auto;
+
+  ${media.tablet} {
+    padding: 1.5rem;
+    gap: 1.2rem;
+  }
+
+  ${media.mobile} {
+    padding: 1.2rem;
+    gap: 1rem;
+    max-width: 95%;
+  }
+
+  ${media.mobileSmall} {
+    padding: 1rem;
+    gap: 0.8rem;
+  }
 `;
 
 const HeaderSection = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+
+  ${media.mobile} {
+    gap: 0.5rem;
+  }
 `;
 
 const HeaderIcon = styled.div`
@@ -208,6 +418,18 @@ const HeaderIcon = styled.div`
   align-items: center;
   justify-content: center;
   color: #2563eb;
+
+  ${media.mobile} {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+  }
+
+  ${media.mobileSmall} {
+    font-size: 1.2rem;
+    width: 36px;
+    height: 36px;
+  }
 `;
 
 const HeaderTitle = styled.h3`
@@ -215,6 +437,14 @@ const HeaderTitle = styled.h3`
   font-weight: 600;
   color: #1e293b;
   margin: 0;
+
+  ${media.mobile} {
+    font-size: 1.1rem;
+  }
+
+  ${media.mobileSmall} {
+    font-size: 1rem;
+  }
 `;
 
 const InfoGrid = styled.div`
@@ -222,18 +452,51 @@ const InfoGrid = styled.div`
   grid-template-columns: 120px 1fr;
   row-gap: 1rem;
   column-gap: 1rem;
+
+  ${media.tablet} {
+    grid-template-columns: 100px 1fr;
+    column-gap: 0.8rem;
+  }
+
+  ${media.mobile} {
+    grid-template-columns: 80px 1fr;
+    row-gap: 0.8rem;
+    column-gap: 0.6rem;
+  }
+
+  ${media.mobileSmall} {
+    grid-template-columns: 70px 1fr;
+    row-gap: 0.7rem;
+  }
 `;
 
 const Label = styled.div`
   font-size: 0.9rem;
   font-weight: 500;
   color: #475569;
-  text-align: right;
+  text-align: center; /* Align right for consistency with other details */
+
+  ${media.mobile} {
+    font-size: 0.85rem;
+  }
+
+  ${media.mobileSmall} {
+    font-size: 0.8rem;
+  }
 `;
 
 const Value = styled.div`
   font-size: 1rem;
   color: #0f172a;
+  text-align: left; /* Ensure value text aligns left */
+
+  ${media.mobile} {
+    font-size: 0.95rem;
+  }
+
+  ${media.mobileSmall} {
+    font-size: 0.9rem;
+  }
 `;
 
 const mealLabel = (meal: string) => {
@@ -254,6 +517,7 @@ export default function PatientCalendar() {
   const [modalDate, setModalDate] = useState<string>('');
   const [selectedItem, setSelectedItem] = useState<CalendarItem | null>(null);
   const [itemDetailOpen, setItemDetailOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false); // New state for mobile detection
 
   const groupByDate = (items: CalendarItem[]) =>
     items.reduce(
@@ -278,6 +542,19 @@ export default function PatientCalendar() {
       }
     })();
   }, [activeDate]);
+
+  // Effect to update isMobile state on resize
+  useEffect(() => {
+    const checkMobile = () => {
+      // Use the actual 'mobile' breakpoint value from `sizes`
+      setIsMobile(window.innerWidth <= parseInt(sizes.mobile, 10));
+    };
+
+    checkMobile(); // Check on mount
+    window.addEventListener('resize', checkMobile); // Add resize listener
+
+    return () => window.removeEventListener('resize', checkMobile); // Cleanup
+  }, []);
 
   const openDetail = async (item: CalendarItem) => {
     if (item.itemType === 'MEDICATION' && item.relatedId) {
@@ -323,7 +600,17 @@ export default function PatientCalendar() {
             key={i}
             className={`calendar-event ${it.itemType === 'MEDICATION' ? 'medication' : 'appointment'}`}
           >
-            {it.itemType === 'MEDICATION' ? <>💊 {it.title}</> : <>🏥 {it.title}</>}
+            {isMobile ? ( // Conditional rendering based on isMobile state
+              it.itemType === 'MEDICATION' ? (
+                <>복약</>
+              ) : (
+                <>진료</>
+              )
+            ) : it.itemType === 'MEDICATION' ? (
+              <>💊 {it.title}</>
+            ) : (
+              <>🏥 {it.title}</>
+            )}
           </div>
         ))}
         {items.length > 3 && (

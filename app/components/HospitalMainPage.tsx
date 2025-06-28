@@ -26,28 +26,56 @@ const news = [
   { id: 4, title: '카카오 로그인 연동 기능 개선 완료', date: '2025.05.28' },
 ];
 
+const MobileLine = styled.span`
+  display: inline;
+
+  @media (max-width: 480px) {
+    display: block;
+  }
+`;
+
 const features = [
   {
     title: '주변 병원',
-    desc: '근처 병원을 살펴보세요',
+    desc: (
+      <>
+        <MobileLine>근처 병원을 </MobileLine>
+        <MobileLine>찾아보세요</MobileLine>
+      </>
+    ),
     icon: '/location.png',
     route: '/hospital/search',
   },
   {
     title: '예약 관리',
-    desc: '예약·대기 현황을 관리하세요',
+    desc: (
+      <>
+        <MobileLine>예약 현황을 </MobileLine>
+        <MobileLine>관리하세요</MobileLine>
+      </>
+    ),
     icon: '/appointment.png',
     route: '/appointments',
   },
   {
     title: '캘린더',
-    desc: '일정을 한눈에 확인하세요',
+    desc: (
+      <>
+        <MobileLine>일정을 한눈에 </MobileLine>
+        <MobileLine>파악하세요</MobileLine>
+      </>
+    ),
     icon: '/calendar.png',
     route: '/calendar',
   },
   {
     title: '서류 등록',
-    desc: '서류를 간편하게 등록하세요',
+    desc: (
+      <>
+        <MobileLine>서류를 손쉽게 </MobileLine>
+        <MobileLine>등록하세요</MobileLine>
+      </>
+    ),
     icon: '/document.png',
     route: '/documents/admin',
   },
@@ -98,7 +126,7 @@ export default function HospitalMainPage() {
             </>
           )}
         </Greeting>
-        <p className="subtitle">편리한 의료 서비스를 한곳에서 이용하세요.</p>
+        <p className="subtitle">편리한 의료 서비스 DOCTO에서 이용하세요.</p>
 
         <GuideGrid>
           {features.map(({ title, desc, icon, route }) => (
@@ -110,6 +138,27 @@ export default function HospitalMainPage() {
           ))}
         </GuideGrid>
       </GuideSection>
+
+      <AboutBlock className="mobile-only">
+        <AboutText>
+          <h5>
+            <strong>AI REVIEW BRIEFING</strong>
+          </h5>
+          <h3>
+            <strong>AI 리뷰 요약 기능으로</strong>
+            <br />
+            후기를 한눈에 파악하세요
+          </h3>
+          <p>
+            사용자 리뷰를 분석하여
+            <br />
+            병원의 장점과 개선점을 간단히 요약해드립니다.
+          </p>
+        </AboutText>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {hospitalId && <ReviewSummaryCard hospitalId={hospitalId} />}
+        </div>
+      </AboutBlock>
 
       <InfoBoards>
         <Board>
@@ -157,12 +206,13 @@ export default function HospitalMainPage() {
         </TelCard>
       </InfoBoards>
 
-      <AboutBlock id="about-section">
+      <AboutBlock className="pc-only">
         <AboutText>
           <h5>AI REVIEW BRIEFING</h5>
           <h3>
             <strong>AI 리뷰 요약 기능으로</strong>
-            <br /> 후기를 한눈에 파악하세요
+            <br />
+            후기를 한눈에 파악하세요
           </h3>
           <p>
             사용자 리뷰를 분석하여
@@ -170,14 +220,14 @@ export default function HospitalMainPage() {
             병원의 장점과 개선점을 간단히 요약해드립니다.
           </p>
         </AboutText>
-
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {hospitalId && <ReviewSummaryCard hospitalId={hospitalId} />}
         </div>
       </AboutBlock>
 
-      <AboutBlock reverse>
-        <AboutImage src="/images/about-2.jpg" alt="원스톱 헬스케어 관리" />
+      {/* 병원 소개 블록 (PC 전용) */}
+      <AboutBlock reverse className="pc-only">
+        <AboutImage src="/images/about-2.jpg" />
         <AboutText>
           <h5>EASY HOSPITAL ADMINISTRATION</h5>
           <h3>
@@ -187,12 +237,15 @@ export default function HospitalMainPage() {
           <p>
             실시간 예약 현황 관리와 서류 등록으로
             <br />
-            병원을 더욱 쉽게 관리할수있습니다.
+            병원을 더욱 쉽게 관리할 수 있습니다.
           </p>
         </AboutText>
       </AboutBlock>
 
-      <ChatBtn onClick={() => setIsChatOpen(true)}>🤖</ChatBtn>
+      <ChatBtn onClick={() => setIsChatOpen(true)}>
+        <img src="chatbot.png" alt="챗봇" />
+      </ChatBtn>
+
       {isChatOpen && (
         <ChatModalOverlay onClick={() => setIsChatOpen(false)}>
           <ChatModal onClick={(e) => e.stopPropagation()}>
@@ -204,13 +257,23 @@ export default function HospitalMainPage() {
   );
 }
 
+// 광고 캐러셀
 const AdCarousel = styled.section`
   position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100vw;
-  max-width: 100%;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
   overflow: hidden;
+
+  .slick-dots {
+    bottom: 12px;
+  }
+
+  @media (max-width: 768px) {
+    width: 100vw;
+    max-width: 100%;
+    margin: 0;
+  }
 `;
 
 const AdImage = styled.img`
@@ -218,8 +281,14 @@ const AdImage = styled.img`
   height: 420px;
   object-fit: cover;
   display: block;
+
+  @media (max-width: 768px) {
+    height: 250px;
+    width: 100vw;
+  }
 `;
 
+// 가이드 섹션
 const GuideSection = styled.section`
   text-align: center;
   padding: 80px 16px 60px;
@@ -232,7 +301,12 @@ const GuideSection = styled.section`
     max-width: 760px;
     margin: 0 auto 40px;
   }
+
+  @media (max-width: 360px) {
+    padding: 40px 12px 32px;
+  }
 `;
+
 const Greeting = styled.h3`
   font-size: 1.9rem;
   margin-bottom: 10px;
@@ -240,59 +314,130 @@ const Greeting = styled.h3`
   strong {
     font-weight: 800;
   }
+
+  @media (max-width: 480px) {
+    font-size: 1.4rem;
+  }
 `;
+
 const GuideGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 26px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
   max-width: 1000px;
   margin: 0 auto;
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
 `;
+
 const GuideCard = styled.div`
   background: #fff;
   border-radius: 10px;
-  padding: 32px 20px;
+  padding: 16px 12px;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.2s;
+  transition: 0.2s;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    img {
+      animation: bounce 0.6s ease-in-out infinite;
+    }
   }
 
   img {
-    width: 70px;
-    height: 70px;
-    margin-bottom: 14px;
+    width: 53px;
+    height: 53px;
+    margin-top: 10px;
   }
+
   h4 {
-    font-size: 1.05rem;
-    margin-bottom: 6px;
+    font-size: 1rem;
+    margin-bottom: 2px;
   }
+
   p {
     font-size: 0.85rem;
     color: #777;
-    line-height: 1.4;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px 8px;
+
+    img {
+      width: 42px;
+      height: 42px;
+      margin-bottom: 6px;
+    }
+
+    h4 {
+      font-size: 0.95rem;
+      margin-bottom: 1px;
+    }
+
+    p {
+      font-size: 0.78rem;
+      line-height: 1.2;
+    }
+  }
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
   }
 `;
 
+// 공지/뉴스/고객센터
 const InfoBoards = styled.section`
   width: 100%;
   max-width: 1200px;
-  margin: 40px auto;
+  margin: 60px auto;
   padding: 0 16px;
   display: flex;
-  gap: 0;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    margin: 10px auto 10px;
+    padding: 0 12px;
+  }
 `;
+
 const Board = styled.div`
-  flex: 1 1 0;
+  flex: 1;
   background: #fff;
   border: 1px solid #e5e5e5;
-  border-right: none;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+
   &:last-of-type {
     border-right: 1px solid #e5e5e5;
   }
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
+
 const BoardHeader = styled.div`
   padding: 16px 20px;
   display: flex;
@@ -302,33 +447,44 @@ const BoardHeader = styled.div`
   font-size: 1rem;
   border-bottom: 1px solid #e5e5e5;
 `;
+
 const MoreBtn = styled.button`
   all: unset;
   cursor: pointer;
   font-size: 1.25rem;
   line-height: 1;
   color: #888;
+
   &:hover {
     color: #555;
   }
 `;
+
 const BoardBody = styled.ul`
   padding: 18px 20px;
+
+  @media (max-width: 360px) {
+    padding: 14px 16px;
+  }
 `;
+
 const BoardItem = styled.li`
   display: flex;
   justify-content: space-between;
   gap: 12px;
   font-size: 0.9rem;
   line-height: 1.45;
+
   &:not(:last-of-type) {
     margin-bottom: 12px;
   }
+
   .tit {
     max-width: 60%;
     font-weight: 500;
     color: #222;
   }
+
   time {
     font-size: 0.8rem;
     color: #999;
@@ -346,45 +502,101 @@ const TelCard = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1px;
+
+  .caption {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  .tel {
+    font-size: 1.8rem;
+    font-weight: 800;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .time {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  small {
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    border-radius: 8px;
+    padding: 24px 18px;
+    margin-top: 8px;
+    margin-bottom: 20px;
+  }
 `;
 
+// 소개 영역
 const AboutBlock = styled.section<{ reverse?: boolean }>`
   max-width: 1000px;
-  margin: 10px auto;
+  margin: 60px auto;
   padding: 0 16px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 1px;
   grid-template-areas: ${({ reverse }) => (reverse ? '"img txt"' : '"txt img"')};
   align-items: center;
 
-  @media (max-width: 860px) {
+  @media (max-width: 768px) {
+    margin-top: 0.1px;
     grid-template-columns: 1fr;
-    grid-template-areas: 'img' 'txt';
+    grid-template-areas: 'txt' 'img';
+  }
+
+  &.mobile-only {
+    display: none;
+
+    @media (max-width: 768px) {
+      display: grid;
+      margin-bottom: 10px;
+    }
+  }
+
+  &.pc-only {
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 `;
+
 const AboutText = styled.div`
   grid-area: txt;
+
   h5 {
     font-size: 0.9rem;
     color: #c2d7ff;
     letter-spacing: 2px;
     margin-bottom: 12px;
   }
+
   h3 {
     font-size: 1.8rem;
     margin-bottom: 16px;
+
     strong {
       font-weight: 800;
     }
   }
+
   p {
     font-size: 0.95rem;
     line-height: 1.6;
     color: #666;
-    margin-bottom: 26px;
+    margin-bottom: 0.1px;
   }
 `;
+
 const AboutImage = styled.img`
   grid-area: img;
   width: 100%;
@@ -392,21 +604,36 @@ const AboutImage = styled.img`
   object-fit: cover;
 `;
 
+// 챗봇 버튼 & 모달
 const ChatBtn = styled.button`
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: #c2d7ff;
-  color: #fff;
-  border: none;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  width: 64px;
-  height: 64px;
-  font-size: 28px;
+  border: none;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  z-index: 999;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+  img {
+    width: 90%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s;
+  }
 `;
+
 const ChatModalOverlay = styled.div`
   position: fixed;
   inset: 0;
@@ -414,8 +641,9 @@ const ChatModalOverlay = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 998;
+  z-index: 2000;
 `;
+
 const ChatModal = styled.div`
   width: 100%;
   max-width: 480px;
@@ -424,4 +652,9 @@ const ChatModal = styled.div`
   border-radius: 16px;
   overflow: hidden;
   z-index: 999;
+
+  @media (max-width: 480px) {
+    width: 90vw;
+    height: 85vh;
+  }
 `;

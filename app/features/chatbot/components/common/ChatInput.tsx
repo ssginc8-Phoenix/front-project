@@ -32,7 +32,16 @@ const Form = styled.form`
 
 const Input = styled.textarea`
   flex: 1;
-  resize: none;
+  resize: none; // ✅ 크기 조절 비활성화
+  overflow-y: auto; // 또는 hidden으로도 가능
+  scrollbar-width: none; // ✅ Firefox에서 스크롤 숨기기
+  -ms-overflow-style: none; // ✅ IE/Edge
+
+  &::-webkit-scrollbar {
+    // ✅ Chrome/Safari에서 스크롤 숨기기
+    display: none;
+  }
+
   border: 1px solid #ddd;
   border-radius: 20px;
   padding: 10px 14px;

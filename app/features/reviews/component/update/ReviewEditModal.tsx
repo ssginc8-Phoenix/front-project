@@ -61,7 +61,7 @@ export function ReviewEditModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="리뷰를 수정해주세요!"
+      title=""
       actions={
         <Button onClick={handleSave} disabled={!isValid || loading}>
           {loading ? '저장 중…' : '수정하기'}

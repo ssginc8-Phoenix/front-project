@@ -1,44 +1,5 @@
 import styled from 'styled-components';
 
-export const Overlay = styled.div`
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(4px);
-`;
-
-export const Container = styled.div`
-  position: relative;
-  width: 90%;
-  max-width: 900px;
-  max-height: 80vh;
-  background-color: #ffffff;
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-  margin: 1rem;
-  overflow-y: auto;
-  padding: 2rem 1.5rem;
-`;
-
-export const CloseButton = styled.button`
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  color: #6b7280;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.25rem;
-
-  &:hover {
-    color: #374151;
-  }
-`;
-
 export const HeaderWrapper = styled.div`
   text-align: center;
   margin-bottom: 1.5rem;
@@ -155,10 +116,11 @@ export const Textarea = styled.textarea`
     outline: none;
     box-shadow: 0 0 0 2px rgba(0, 73, 158, 0.5);
   }
-`;
 
-export const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: center;
-  padding: 1rem 0;
+  @media (max-width: 480px) {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: 10rem;
+  }
 `;

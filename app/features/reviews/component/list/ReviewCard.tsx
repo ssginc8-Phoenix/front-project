@@ -1,5 +1,7 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
+import { useMediaQuery } from 'react-responsive';
+
 import type { ReviewMyListResponse } from '~/features/reviews/types/review';
 import { GOOD_OPTIONS, BAD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
 
@@ -10,7 +12,9 @@ interface ReviewCardProps {
   onDelete: () => void;
 }
 
-export const ReviewCard: React.FC<ReviewCardProps> = ({ review, onClick, onEdit, onDelete }) => {
+export function ReviewCard({ review, onClick, onEdit, onDelete }: ReviewCardProps) {
+  const isMobile = useMediaQuery({ maxWidth: 480 });
+
   const formattedDate = (iso: string) => {
     const d = new Date(iso);
     const yyyy = d.getFullYear();
@@ -27,37 +31,41 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review, onClick, onEdit,
     return { label: value, type: 'unknown' as const };
   };
 
+  // 모바일에서는 리뷰 3개만 보이도록
+  const displayKeywords = isMobile ? review.keywords.slice(0, 3) : review.keywords;
+
   return (
     <CardContainer onClick={onClick}>
+      <DeleteButton
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+        title="삭제"
+      >
+        ×
+      </DeleteButton>
+
       <CardHeader>
         <HeaderLeft>
           <HospitalText>{review.hospitalName}</HospitalText>
-          <DoctorText>{review.doctorName} 원장</DoctorText>
+          <DoctorNameRow>
+            <DoctorText>{review.doctorName} 원장</DoctorText>
+            <EditButton
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              title="수정"
+            >
+              ✏️
+            </EditButton>
+          </DoctorNameRow>
         </HeaderLeft>
-        <HeaderRight>
-          <IconButton
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-            title="수정"
-          >
-            ✏️
-          </IconButton>
-          <IconButton
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            title="삭제"
-          >
-            🗑️
-          </IconButton>
-        </HeaderRight>
       </CardHeader>
 
       <KeywordsWrapper>
-        {review.keywords.map((kw) => {
+        {displayKeywords.map((kw) => {
           const { label, type } = getLabelByValue(kw);
           return (
             <KeywordTag key={kw} type={type}>
@@ -68,16 +76,15 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review, onClick, onEdit,
       </KeywordsWrapper>
 
       <ContentText>
-        {review.contents.length > 30 ? `${review.contents.slice(0, 30)}` : review.contents}
+        {review.contents.length > 30 ? `${review.contents.slice(0, 30)}...` : review.contents}
       </ContentText>
 
       <Footer>
         <DateText>{formattedDate(review.createdAt)}</DateText>
-        {/*<AuthorText>{appointmentId.patientName}</AuthorText>*/}
       </Footer>
     </CardContainer>
   );
-};
+}
 
 const CardContainer = styled.div`
   position: relative;
@@ -86,6 +93,22 @@ const CardContainer = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   padding: 1.5rem;
   cursor: pointer;
+  width: 100%;
+`;
+
+const DeleteButton = styled.button`
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #9ca3af;
+  cursor: pointer;
+
+  &:hover {
+    color: #dc2626;
+  }
 `;
 
 const CardHeader = styled.div`
@@ -111,18 +134,19 @@ const DoctorText = styled.span`
   color: #111827;
 `;
 
-const HeaderRight = styled.div`
+const DoctorNameRow = styled.div`
   display: flex;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 0.4rem;
 `;
 
-const IconButton = styled.button`
+const EditButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1rem;
-  padding: 0.25rem;
   color: #6b7280;
+
   &:hover {
     color: #374151;
   }
@@ -140,6 +164,7 @@ const KeywordTag = styled.span<{ type: 'good' | 'bad' | 'unknown' }>`
   font-weight: 500;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
+
   ${({ type }) =>
     type === 'good'
       ? css`

@@ -91,9 +91,7 @@ export default function ReviewMyListPage() {
   return (
     <Layout>
       <Content>
-        <Header>
-          <Title>✏️ 나의 리뷰 관리</Title>
-        </Header>
+        <Title>✏️ 리뷰 관리</Title>
         <Divider />
 
         {loading && <InfoText>로딩 중…</InfoText>}
@@ -193,11 +191,6 @@ const Content = styled.main`
   display: flex;
   flex-direction: column;
   align-items: center;
-`;
-
-const Header = styled.div`
-  text-align: center;
-  margin-bottom: 1rem;
 `;
 
 const Title = styled.h1`

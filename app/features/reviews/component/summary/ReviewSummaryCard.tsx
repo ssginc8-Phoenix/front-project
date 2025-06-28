@@ -43,7 +43,7 @@ const ReviewSummaryCard: React.FC<Props> = ({ hospitalId }) => {
               <Icon>🧠</Icon>
               <TitleBox>
                 <Title>AI 브리핑</Title>
-                <SubTitle>사용자 리뷰를 기반으로 요약된 내용입니다</SubTitle>
+                <SubTitle>🛈사용자 리뷰를 기반으로 요약된 내용입니다</SubTitle>
               </TitleBox>
             </Header>
 

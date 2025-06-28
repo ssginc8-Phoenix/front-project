@@ -16,6 +16,12 @@ export const Card = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+
+  @media (max-width: 480px) {
+    padding: 1.2rem;
+    max-width: 130vw;
+    border-radius: 14px;
+  }
 `;
 
 export const Header = styled.div`
@@ -28,6 +34,18 @@ export const Icon = styled.div`
   font-size: 1.5rem;
   margin-right: 0.8rem;
   line-height: 1;
+
+  animation: bounce 1.2s infinite ease-in-out;
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.3);
+    }
+  }
 `;
 
 export const TitleBox = styled.div`

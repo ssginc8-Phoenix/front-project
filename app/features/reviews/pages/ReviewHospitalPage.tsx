@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import Sidebar from '~/common/Sidebar';
 import Pagination from '~/components/common/Pagination';
 import { useHospitalReviews } from '~/features/reviews/hooks/useHospitalReviews';
 import type { HospitalReviewResponse } from '~/features/reviews/types/review';
@@ -58,7 +57,6 @@ export default function ReviewHospitalPage() {
 
   return (
     <Layout>
-      <Sidebar /> {/* ← 사이드바 */}
       <Content>
         <Header>
           <Title>📋 {hospitalName} 리뷰 목록</Title>

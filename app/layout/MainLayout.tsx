@@ -28,7 +28,8 @@ const ContentWrapper = styled.main`
 
   @media (max-width: 480px) {
     margin: 0;
-    padding: 1.5rem 0.5rem;
+    //padding: 1.5rem 0.5rem;
+    padding: 0;
   }
 `;
 

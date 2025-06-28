@@ -49,6 +49,14 @@ const Wrapper = styled.div`
   background-color: #fff;
   border-radius: 16px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 480px) {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
 `;
 
 const Header = styled.div`

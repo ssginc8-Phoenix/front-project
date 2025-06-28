@@ -48,10 +48,16 @@ const BotIcon = styled.div`
 
 const Bubble = styled.div<{ isUser: boolean }>`
   background-color: ${({ isUser }) => (isUser ? '#C2D7FF' : '#F1F0F0')};
-  color: ${({ isUser }) => (isUser ? '#000' : '#000')};
+  color: #000;
   padding: 10px 14px;
   border-radius: 20px;
-  max-width: 70%;
+  max-width: 85%;
+  width: fit-content;
+
+  @media (min-width: 768px) {
+    max-width: 420px;
+  }
+
   white-space: pre-line;
   line-height: 1.5;
   font-size: 14px;

@@ -8,6 +8,11 @@ const Form = styled.form`
   background-color: #f9f9f9;
   padding: 2rem;
   border-radius: 1rem;
+
+  @media (max-width: 360px) {
+    gap: 1rem;
+    padding: 1.5rem;
+  }
 `;
 
 const FieldGroup = styled.div`
@@ -19,6 +24,11 @@ const Label = styled.label`
   font-weight: 600;
   font-size: 0.95rem;
   margin-bottom: 0.5rem;
+
+  @media (max-width: 360px) {
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+  }
 `;
 
 const Input = styled.input`
@@ -30,6 +40,11 @@ const Input = styled.input`
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+  }
+
+  @media (max-width: 360px) {
+    padding: 0.6rem;
+    font-size: 0.9rem;
   }
 `;
 
@@ -45,12 +60,22 @@ const Button = styled.button`
   &:hover {
     background-color: #005fcc;
   }
+
+  @media (max-width: 360px) {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
 `;
 
 const ErrorMessage = styled.p`
   font-size: 0.85rem;
   color: red;
   margin-top: 0.5rem;
+
+  @media (max-width: 360px) {
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+  }
 `;
 
 interface Props {

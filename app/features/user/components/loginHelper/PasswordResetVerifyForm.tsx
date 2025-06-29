@@ -114,7 +114,7 @@ const PasswordResetVerifyForm = ({ onSendCode, onVerifyCode, onSuccess }: Props)
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
-  const [timer, setTimer] = useState(300); // 5 minutes
+  const [timer, setTimer] = useState(300);
   const [isCodeSent, setIsCodeSent] = useState(false);
 
   useEffect(() => {
@@ -122,9 +122,8 @@ const PasswordResetVerifyForm = ({ onSendCode, onVerifyCode, onSuccess }: Props)
     if (isCodeSent && timer > 0) {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     } else if (timer === 0 && isCodeSent) {
-      // 타이머가 0이 되면 인증 코드 재전송 활성화 (선택 사항)
-      // setError('인증 유효 시간이 만료되었습니다. 다시 시도해주세요.');
-      // setIsCodeSent(false); // 재전송 버튼 활성화를 위해
+      setError('인증 유효 시간이 만료되었습니다. 다시 시도해주세요.');
+      setIsCodeSent(false);
     }
     return () => clearInterval(interval);
   }, [isCodeSent, timer]);
@@ -142,10 +141,10 @@ const PasswordResetVerifyForm = ({ onSendCode, onVerifyCode, onSuccess }: Props)
       setError('이메일을 입력해주세요.');
       return;
     }
-    setError(''); // Clear previous error
+    setError('');
     onSendCode(email);
     setIsCodeSent(true);
-    setTimer(300); // Reset timer on send
+    setTimer(300);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -196,16 +195,14 @@ const PasswordResetVerifyForm = ({ onSendCode, onVerifyCode, onSuccess }: Props)
             type="text"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder="6자리 숫자 코드 입력"
+            placeholder="이메일로 전송된 코드 입력"
             required
           />
           {error && <ErrorMessage>{error}</ErrorMessage>}
         </FieldGroup>
       )}
-      {/* Main submit button outside of the conditional rendering based on isCodeSent for clarity */}
       <Button type="submit">비밀번호 재설정 페이지로 이동</Button>
       {error && !isCodeSent && <ErrorMessage>{error}</ErrorMessage>}{' '}
-      {/* Display error for initial email input */}
     </Form>
   );
 };

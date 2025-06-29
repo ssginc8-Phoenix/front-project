@@ -12,6 +12,19 @@ const Wrapper = styled.div`
   border: 1px solid #ddd;
   border-radius: 1rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+
+  /* Responsive adjustments for Wrapper */
+  @media (max-width: 768px) {
+    width: calc(100% - 2rem); /* Full width with horizontal padding */
+    margin: 5rem 1rem; /* Adjust top/bottom margin, add side margin */
+    padding: 1.5rem;
+  }
+
+  @media (max-width: 360px) {
+    width: calc(100% - 2rem); /* Maximize width on smallest screens */
+    margin: 3rem 1rem; /* Further reduce top margin for mobile */
+    padding: 1rem;
+  }
 `;
 
 const Title = styled.h1`
@@ -19,12 +32,24 @@ const Title = styled.h1`
   font-weight: 700;
   text-align: center;
   margin-bottom: 1.5rem;
+
+  /* Responsive adjustments for Title */
+  @media (max-width: 360px) {
+    font-size: 1.3rem; /* Smaller font size for mobile */
+    margin-bottom: 1rem;
+  }
 `;
 
 const Description = styled.p`
   text-align: center;
   margin-bottom: 2rem;
   color: #555;
+
+  /* Responsive adjustments for Description */
+  @media (max-width: 360px) {
+    font-size: 0.9rem; /* Smaller font size for mobile */
+    margin-bottom: 1.5rem;
+  }
 `;
 
 const Message = styled.div`
@@ -32,6 +57,12 @@ const Message = styled.div`
   font-size: 0.95rem;
   text-align: center;
   color: #333;
+
+  /* Responsive adjustments for Message */
+  @media (max-width: 360px) {
+    font-size: 0.85rem; /* Smaller font size for mobile */
+    margin-top: 0.8rem;
+  }
 `;
 
 const FindEmailPage = () => {
@@ -43,7 +74,7 @@ const FindEmailPage = () => {
       const response = await findEmail({ name, phone });
       setEmail(response.email);
     } catch {
-      setEmail('');
+      setEmail(''); // 이메일을 찾지 못했을 경우 빈 문자열로 설정
     } finally {
       setModalOpen(true);
     }

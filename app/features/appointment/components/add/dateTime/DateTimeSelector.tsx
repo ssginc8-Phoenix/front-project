@@ -10,18 +10,30 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
 `;
 
 const Title = styled.h2`
   font-size: 1.25rem;
   font-weight: 700;
   color: #00499e;
+
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const SectionTitle = styled.h3`
   font-size: 1.125rem;
   font-weight: 600;
   color: #1f2937;
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
 `;
 
 const TimeGrid = styled.div`
@@ -43,6 +55,11 @@ const TimeButton = styled.button<{ selected: boolean; disabled: boolean }>`
   &:hover {
     background-color: ${({ selected, disabled }) =>
       disabled ? '#e5e7eb' : selected ? '#2563eb' : '#e5e7eb'};
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.4rem;
+    font-size: 0.85rem;
   }
 `;
 
@@ -72,6 +89,14 @@ const DateTimeSelector = ({ doctorId, patientId }: DateTimeSelectorProps) => {
   } = useTimeSlots(doctorId, patientId, dateString, {
     enabled: !!doctorId && !!dateString && isDoctorWorkingOnSelectedDate,
   });
+
+  /** 30일 => 30으로 `일`을 없애기 */
+  const formatCalendarDay = (locale: string | undefined, date: Date) => {
+    // locale은 사용하지 않지만, 타입 시그니처에 맞춰 인자로 받음
+    // 날짜(일) 숫자만 문자열로 반환
+    return date.getDate().toString();
+  };
+
   return (
     <Wrapper>
       <div>
@@ -101,6 +126,7 @@ const DateTimeSelector = ({ doctorId, patientId }: DateTimeSelectorProps) => {
               }
               return '';
             }}
+            formatDay={formatCalendarDay}
           />
         </StyledCalendarWrapper>
       </div>

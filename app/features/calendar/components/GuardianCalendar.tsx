@@ -456,22 +456,25 @@ const AddMedicationButton = styled.button`
   border-radius: 8px;
   background: #fff;
   cursor: pointer;
+  transition: background-color 0.2s;
   &:hover {
     background-color: #e0edff;
   }
 
   ${media.mobile} {
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-    border-radius: 6px;
+    padding: 0.6rem 1.2rem; /* Slightly larger padding for better touch target */
+    font-size: 0.85rem; /* Slightly larger font size */
+    border-radius: 7px;
     align-self: center; /* Center button on mobile */
-    width: fit-content; /* Adjust width to content */
+    width: 100%; /* Take up more width but not full */
+    max-width: 200px; /* Prevent it from getting too wide on slightly larger mobiles */
   }
 
   ${media.mobileSmall} {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.75rem;
-    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    width: 100%; /* Adjust width for very small screens */
   }
 `;
 
@@ -668,7 +671,8 @@ export default function GuardianCalendar() {
   // Effect to update isMobile state on resize
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= parseInt(sizes.mobile, 10));
+      // Use window.innerWidth for a more reliable check for mobile breakpoint
+      setIsMobile(window.innerWidth <= parseInt(sizes.mobile.replace('px', ''), 10));
     };
 
     checkMobile(); // Check on mount
@@ -706,7 +710,7 @@ export default function GuardianCalendar() {
       setSelectedItem({ ...item, ...detail });
     } else {
       setSelectedItem(item);
-      console.log(selectedItem);
+      console.log(selectedItem); // This console.log will show the state before it's updated in the next render cycle
     }
     setItemDetailOpen(true);
   };
@@ -736,7 +740,7 @@ export default function GuardianCalendar() {
             key={`${ds}-${idx}`}
             className={`calendar-event ${item.itemType === 'MEDICATION' ? 'medication' : 'appointment'}`}
             onClick={(e) => {
-              e.stopPropagation();
+              e.stopPropagation(); // Prevent calendar tile click from firing
               openDetail(item);
             }}
           >
@@ -757,7 +761,7 @@ export default function GuardianCalendar() {
           <div
             style={{ fontSize: '0.7rem', color: '#888', cursor: 'pointer' }}
             onClick={(e) => {
-              e.stopPropagation();
+              e.stopPropagation(); // Prevent calendar tile click from firing
               setModalItems(items);
               setModalDate(ds);
               setModalOpen(true);
@@ -811,7 +815,7 @@ export default function GuardianCalendar() {
 
         <AddMedicationButton
           onClick={() => {
-            setSelectedItem(null);
+            setSelectedItem(null); // Ensure no previous item is selected when opening for new registration
             setRegisterModalOpen(true);
           }}
         >
@@ -860,9 +864,9 @@ export default function GuardianCalendar() {
                     : undefined
                 }
                 onClose={async () => {
-                  await fetchData();
+                  await fetchData(); // Re-fetch data after modal closes to update calendar
                   setRegisterModalOpen(false);
-                  setSelectedItem(null);
+                  setSelectedItem(null); // Clear selected item
                 }}
               />
             </div>
@@ -881,10 +885,10 @@ export default function GuardianCalendar() {
                 .sort((a, b) => (a.time ?? '').localeCompare(b.time ?? ''))
                 .map((item) => (
                   <StyledItem
-                    key={item.relatedId ?? item.title}
+                    key={item.relatedId ?? item.title} // Use a more robust key if possible, e.g., unique ID from backend
                     itemType={item.itemType}
                     onClick={() => {
-                      setModalOpen(false);
+                      setModalOpen(false); // Close the list modal first
                       openDetail(item);
                     }}
                   >

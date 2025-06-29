@@ -1,6 +1,11 @@
 import styled from 'styled-components';
 import Button from '~/components/styled/Button';
 import DateTimeSelector from '~/features/appointment/components/add/dateTime/DateTimeSelector';
+import {
+  Modal,
+  Title,
+  ButtonGroup,
+} from '~/features/appointment/components/common/AppointmentModal.styles';
 
 const Overlay = styled.div`
   position: fixed;
@@ -9,28 +14,7 @@ const Overlay = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
-`;
-
-const Modal = styled.div`
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  width: 90%;
-  max-width: 540px;
-`;
-
-const Title = styled.h2`
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-  gap: 1rem;
+  z-index: 99999;
 `;
 
 interface DateTimeSelectorModalProps {
@@ -39,6 +23,7 @@ interface DateTimeSelectorModalProps {
   doctorId: number;
   patientId: number;
   onConfirm: () => void;
+  appointmentId: number;
 }
 
 const DateTimeSelectorModal = ({
@@ -47,6 +32,7 @@ const DateTimeSelectorModal = ({
   doctorId,
   patientId,
   onConfirm,
+  appointmentId,
 }: DateTimeSelectorModalProps) => {
   if (!isOpen) return null;
 

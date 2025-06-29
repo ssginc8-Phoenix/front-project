@@ -1,99 +1,33 @@
 import { useAppointmentDetail } from '~/features/appointment/hooks/useAppointmentDetail';
 import LoadingIndicator from '~/components/common/LoadingIndicator';
 import ErrorMessage from '~/components/common/ErrorMessage';
-import styled from 'styled-components';
 import Button from '~/components/styled/Button';
 import { RefreshButton } from '~/components/styled/RefreshButton';
 import { FiRefreshCw } from 'react-icons/fi';
 import { useAppointmentActions } from '~/features/appointment/hooks/useAppointmentActions';
-import { useEffect, useRef, useState } from 'react';
-import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
-import dayjs from 'dayjs';
-import DateTimeSelectorModal from '~/features/appointment/components/detail/DateTimeSelectorModal';
-
-const Overlay = styled.div`
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-`;
-
-const Modal = styled.div`
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  width: 90%;
-  max-width: 540px;
-`;
-
-const Header = styled.div`
-  margin-bottom: 1rem;
-`;
-
-const TitleRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const Title = styled.h2`
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #0066ff;
-  margin-bottom: 0.25rem;
-`;
-
-const HospitalName = styled.div`
-  font-size: 1rem;
-  font-weight: 600;
-  color: #000;
-  margin-top: 0.5rem;
-`;
-
-const SubInfo = styled.div`
-  font-size: 0.75rem;
-  color: #666;
-  margin-top: 0.25rem;
-  line-height: 1.4;
-`;
-
-const Divider = styled.hr`
-  border: none;
-  border-top: 1px solid #e5e7eb; // 연한 회색 선
-  margin: 1rem 0;
-`;
-
-const Section = styled.div`
-  margin-bottom: 1.5rem;
-`;
-
-const SectionTitle = styled.div`
-  font-weight: 600;
-  color: #1d4ed8;
-  margin-bottom: 0.25rem;
-`;
-
-const InfoText = styled.p`
-  margin: 0;
-  color: #333;
-  line-height: 1.5;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
-`;
+import { useEffect, useRef } from 'react';
+import {
+  Overlay,
+  Modal,
+  Header,
+  TitleRow,
+  Title,
+  HospitalName,
+  SubInfo,
+  Divider,
+  Section,
+  SectionTitle,
+  InfoText,
+  ButtonGroup,
+} from '~/features/appointment/components/common/AppointmentModal.styles';
+import LoginStore from '~/features/user/stores/LoginStore';
 
 interface AppointmentDetailModalProps {
   appointmentId: number;
   isOpen: boolean;
   onClose: () => void;
   onRefreshList: () => void;
+  onRescheduleInitiated: (appointmentId: number, doctorId: number, patientId: number) => void;
 }
 
 const AppointmentDetailModal = ({
@@ -101,6 +35,7 @@ const AppointmentDetailModal = ({
   isOpen,
   onClose,
   onRefreshList,
+  onRescheduleInitiated,
 }: AppointmentDetailModalProps) => {
   const {
     data: appointment,
@@ -109,11 +44,10 @@ const AppointmentDetailModal = ({
     refetch,
     isRefetching,
   } = useAppointmentDetail(appointmentId);
+  const { user } = LoginStore();
+  const role = user?.role;
 
-  const { cancelAppointment, rescheduleAppointment } = useAppointmentActions();
-
-  const [isDateTimeSelectorModalOpen, setDateTimeSelectorModalOpen] = useState(false);
-  const { date, time, setDate, setTime } = useAppointmentStore();
+  const { cancelAppointment } = useAppointmentActions();
 
   const canModify = appointment?.status === 'REQUESTED' || appointment?.status === 'CONFIRMED';
 
@@ -141,27 +75,6 @@ const AppointmentDetailModal = ({
     if (!appointment) return;
     const success = await cancelAppointment(appointment.appointmentId);
     if (success) {
-      onRefreshList();
-      onClose();
-    }
-  };
-
-  /** 재예약 */
-  const handleReschedule = async () => {
-    if (!appointment || !date || !time) {
-      alert('날짜와 시간을 선택해주세요.');
-      return;
-    }
-
-    const newDateTime = dayjs(
-      `${dayjs(date).format('YYYY-MM-DD')} ${time}`,
-      'YYYY-MM-DD HH:mm:ss',
-    ).format('YYYY-MM-DDTHH:mm:ss');
-
-    const success = await rescheduleAppointment(appointment.appointmentId, newDateTime);
-    if (success) {
-      refetch();
-      setDateTimeSelectorModalOpen(false);
       onRefreshList();
       onClose();
     }
@@ -248,12 +161,25 @@ const AppointmentDetailModal = ({
                 <InfoText>{getPaymentMethodInKorean(appointment.paymentType)}</InfoText>
               </Section>
 
-              {canModify && (
+              {role == 'GUARDIAN' && canModify && (
                 <ButtonGroup>
                   <Button $variant="secondary" onClick={handleCancel}>
                     예약 취소
                   </Button>
-                  <Button $variant="primary" onClick={() => setDateTimeSelectorModalOpen(true)}>
+                  <Button
+                    $variant="primary"
+                    onClick={() => {
+                      if (appointment) {
+                        // 부모 컴포넌트에 재예약 시작을 알리고 필요한 ID 전달
+                        onRescheduleInitiated(
+                          appointment.appointmentId,
+                          appointment.doctorId,
+                          appointment.patientId,
+                        );
+                        onClose(); // AppointmentDetailModal 닫기
+                      }
+                    }}
+                  >
                     재예약
                   </Button>
                 </ButtonGroup>
@@ -268,16 +194,6 @@ const AppointmentDetailModal = ({
           )}
         </Modal>
       </Overlay>
-
-      {appointment && (
-        <DateTimeSelectorModal
-          isOpen={isDateTimeSelectorModalOpen}
-          onClose={() => setDateTimeSelectorModalOpen(false)}
-          doctorId={appointment.doctorId}
-          patientId={appointment.patientId}
-          onConfirm={handleReschedule}
-        />
-      )}
     </>
   );
 };

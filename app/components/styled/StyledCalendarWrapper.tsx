@@ -8,11 +8,13 @@ export const StyledCalendarWrapper = styled.div`
     padding: 1rem;
     font-family: 'Inter', sans-serif;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
   }
 
   .react-calendar__navigation {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 1rem;
   }
 
@@ -34,15 +36,27 @@ export const StyledCalendarWrapper = styled.div`
     margin-bottom: 0.5rem;
   }
 
-  .react-calendar__tile {
+  .react-calendar__month-view__weekdays abbr {
+    text-decoration: none;
+  }
+
+  .react-calendar .react-calendar__tile {
     border: none;
     padding: 0.75rem 0.5rem;
     text-align: center;
     background: none;
     border-radius: 0.5rem;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
     font-size: 0.875rem;
     cursor: pointer;
+    position: relative;
+
+    @media (max-width: 480px) {
+      /* 더 넓은 모바일 범위에 적용 */
+      padding: 0.6rem 0.2rem;
+      min-height: 35px;
+      font-size: 0.8rem; /* 모바일에서 날짜 숫자 폰트 크기 조절 */
+    }
   }
 
   .react-calendar__tile:hover {
@@ -75,5 +89,11 @@ export const StyledCalendarWrapper = styled.div`
     background-color: #e0e0e0 !important; /* 다른 색상으로 변경하여 구별 */
     color: #808080 !important;
     text-decoration: line-through !important;
+  }
+
+  @media (max-width: 480px) {
+    .react-calendar__tile abbr::after {
+      content: none;
+    }
   }
 `;

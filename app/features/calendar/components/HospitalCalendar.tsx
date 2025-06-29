@@ -476,7 +476,6 @@ export default function HospitalCalendar() {
     const fetchData = async () => {
       const res = await getHospitalCalendar(year, month);
       setFullList(res.calendarItemLists);
-      // Ensure unique doctor names
       const uniqueDoctorNames = [...new Set(res.calendarItemLists.map((d: any) => d.name))];
       setDoctorNames(uniqueDoctorNames);
       updateCalendarData(res.calendarItemLists, '전체');

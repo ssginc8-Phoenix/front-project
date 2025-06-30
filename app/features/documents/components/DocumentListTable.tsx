@@ -1,9 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import type { DocumentResponseDTO } from '~/features/documents/types/insurance';
-
 import { getMyHospital } from '~/features/hospitals/api/hospitalAPI';
-import { useAdminDocumentList, useApprove, useAttachFile } from '../hooks/useDocumentRequests';
+import { useApprove, useAttachFile } from '../hooks/useDocumentRequests';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface Props {
@@ -12,7 +11,7 @@ interface Props {
   onApprove: (id: number, approved: boolean, reason?: string) => void;
 }
 
-// --- Styled Components ---
+// ─── 데스크탑 전용 스타일 ─────────────────────────────────────────────────
 const Container = styled.div`
   width: 100%;
   overflow-x: auto;
@@ -94,9 +93,55 @@ const ActionContainer = styled.div`
   display: flex;
   align-items: center;
 `;
-// ----------------------------
 
-const DocumentListTable: React.FC<Props> = ({ data, onAttach, onApprove }) => {
+// ─── 모바일 전용 스타일 ─────────────────────────────────────────────────
+const ResponsiveTable = styled(Table)`
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+const CardList = styled.div`
+  display: none;
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+`;
+const Card = styled.div`
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  row-gap: 0.75rem;
+  column-gap: 1rem;
+`;
+const CardAction = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+`;
+const Label = styled.span`
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  align-self: center;
+`;
+const Value = styled.div`
+  font-size: 0.95rem;
+  color: #2c3e50;
+`;
+const FileInputMobile = styled(FileInput)`
+  width: 100%;
+`;
+const ButtonMobile = styled(Button)`
+  width: 100%;
+  margin: 0;
+`;
+
+// ─── 컴포넌트 ─────────────────────────────────────────────────────────────
+const DocumentListTable: React.FC<Props> = ({ data }) => {
   const [selectedFiles, setSelectedFiles] = useState<Record<number, File>>({});
   const [activeTab, setActiveTab] = useState<'all' | 'approved' | 'rejected' | 'requested'>(
     'requested',
@@ -105,72 +150,64 @@ const DocumentListTable: React.FC<Props> = ({ data, onAttach, onApprove }) => {
   const attachMutation = useAttachFile();
   const approveMutation = useApprove();
   const qc = useQueryClient();
+
   useEffect(() => {
     (async () => {
-      const res = await getMyHospital(); // 현재 관리자 병원 조회
+      const res = await getMyHospital();
       setHospitalId(res.hospitalId);
     })();
   }, []);
-
-  const { data: docs = [] } = useAdminDocumentList(hospitalId ?? undefined);
 
   const statusLabelMap: Record<string, string> = {
     REQUESTED: '요청됨',
     APPROVED: '승인됨',
     REJECTED: '반려됨',
   };
-  // sort by documentId
+
   const sorted = useMemo(() => {
     if (!Array.isArray(data)) return [];
     return [...data].sort((a, b) => a.documentId - b.documentId);
   }, [data]);
 
-  // filter by tab
   const filtered = useMemo(() => {
     if (activeTab === 'all') return sorted;
     if (activeTab === 'approved') return sorted.filter((d) => d.status === 'APPROVED');
     if (activeTab === 'rejected') return sorted.filter((d) => d.status === 'REJECTED');
-    // requested
     return sorted.filter((d) => d.status === 'REQUESTED');
   }, [sorted, activeTab]);
 
   const handleFileChange = (id: number, file: File) => {
     setSelectedFiles((prev) => ({ ...prev, [id]: file }));
   };
+
   const handleApprove = (id: number, approved: boolean, reason?: string) => {
     approveMutation.mutate(
       { id, dto: { approved, reason } },
       {
-        onSuccess: (data) => {
-          alert(approved ? '문서가 승인되었습니다.' : '문서가 반려되었습니다.');
-        },
-        onError: (err: Error) => {
-          alert(`처리에 실패했습니다: ${err.message}`);
-        },
+        onSuccess: () => alert(approved ? '문서가 승인되었습니다.' : '문서가 반려되었습니다.'),
+        onError: (err: Error) => alert(`처리에 실패했습니다: ${err.message}`),
       },
     );
   };
+
   const handleUploadClick = (id: number) => {
     const file = selectedFiles[id];
-    if (!file) {
-      alert('먼저 파일을 선택해주세요.');
-      return;
-    }
+    if (!file) return alert('먼저 파일을 선택해주세요.');
     attachMutation.mutate(
       { id, file },
       {
         onSuccess: () => {
           alert('파일이 업로드되었습니다.');
-          qc.invalidateQueries(['adminDocs', hospitalId]);
+          qc.invalidateQueries({
+            queryKey: ['adminDocs', hospitalId],
+          });
           setSelectedFiles((prev) => {
             const p = { ...prev };
             delete p[id];
             return p;
           });
         },
-        onError: (err: Error) => {
-          alert(`업로드에 실패했습니다: ${err.message}`);
-        },
+        onError: (err: Error) => alert(`업로드에 실패했습니다: ${err.message}`),
       },
     );
   };
@@ -179,23 +216,20 @@ const DocumentListTable: React.FC<Props> = ({ data, onAttach, onApprove }) => {
     <Container>
       <TabBar>
         <Tab active={activeTab === 'requested'} onClick={() => setActiveTab('requested')}>
-          {' '}
-          요청{' '}
+          요청
         </Tab>
         <Tab active={activeTab === 'approved'} onClick={() => setActiveTab('approved')}>
-          {' '}
-          승인{' '}
+          승인
         </Tab>
         <Tab active={activeTab === 'rejected'} onClick={() => setActiveTab('rejected')}>
-          {' '}
-          반려{' '}
+          반려
         </Tab>
         <Tab active={activeTab === 'all'} onClick={() => setActiveTab('all')}>
-          {' '}
-          전체{' '}
+          전체
         </Tab>
       </TabBar>
-      <Table>
+
+      <ResponsiveTable>
         <thead>
           <Tr>
             <Th>ID</Th>
@@ -216,10 +250,9 @@ const DocumentListTable: React.FC<Props> = ({ data, onAttach, onApprove }) => {
                 <FileInput
                   type="file"
                   accept="application/pdf,image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleFileChange(doc.documentId, file);
-                  }}
+                  onChange={(e) =>
+                    e.target.files?.[0] && handleFileChange(doc.documentId, e.target.files[0])
+                  }
                   disabled={doc.status !== 'REQUESTED'}
                 />
               </Td>
@@ -229,8 +262,7 @@ const DocumentListTable: React.FC<Props> = ({ data, onAttach, onApprove }) => {
                   onClick={() => handleUploadClick(doc.documentId)}
                   disabled={!selectedFiles[doc.documentId] || doc.status !== 'REQUESTED'}
                 >
-                  {' '}
-                  업로드{' '}
+                  업로드
                 </Button>
               </Td>
               <Td>
@@ -257,7 +289,63 @@ const DocumentListTable: React.FC<Props> = ({ data, onAttach, onApprove }) => {
             </Tr>
           ))}
         </tbody>
-      </Table>
+      </ResponsiveTable>
+
+      <CardList>
+        {filtered.map((doc) => (
+          <Card key={doc.documentId}>
+            <Label>ID</Label>
+            <Value>{doc.documentId}</Value>
+            <Label>상태</Label>
+            <Value>{statusLabelMap[doc.status] || doc.status}</Value>
+            <Label>사유</Label>
+            <Value>{doc.rejectionReason || '-'}</Value>
+            <Label>첨부</Label>
+            <Value>
+              <FileInputMobile
+                type="file"
+                accept="application/pdf,image/*"
+                onChange={(e) =>
+                  e.target.files?.[0] && handleFileChange(doc.documentId, e.target.files[0])
+                }
+                disabled={doc.status !== 'REQUESTED'}
+              />
+            </Value>
+            <Label>업로드</Label>
+            <Value>
+              <ButtonMobile
+                variant="primary"
+                onClick={() => handleUploadClick(doc.documentId)}
+                disabled={!selectedFiles[doc.documentId] || doc.status !== 'REQUESTED'}
+              >
+                업로드
+              </ButtonMobile>
+            </Value>
+            <Label>액션</Label>
+            <Value>
+              <CardAction>
+                <ButtonMobile
+                  variant="primary"
+                  disabled={doc.status !== 'REQUESTED'}
+                  onClick={() => handleApprove(doc.documentId, true)}
+                >
+                  승인
+                </ButtonMobile>
+                <ButtonMobile
+                  variant="danger"
+                  disabled={doc.status !== 'REQUESTED'}
+                  onClick={() => {
+                    const reason = window.prompt('반려 사유를 입력하세요:');
+                    if (reason) handleApprove(doc.documentId, false, reason.trim());
+                  }}
+                >
+                  반려
+                </ButtonMobile>
+              </CardAction>
+            </Value>
+          </Card>
+        ))}
+      </CardList>
     </Container>
   );
 };

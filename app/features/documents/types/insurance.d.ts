@@ -1,11 +1,3 @@
-/** 백엔드 DTO와 일치시키는 형태 */
-export interface DocumentResponseDTO {
-  documentId: number;
-  status: DocumentStatus;
-  rejectionReason?: string;
-  downloadUrl?: string;
-}
-
 import { DocumentStatus } from './DocumentStatus';
 export interface DocumentResponseDTO {
   documentId: number;
@@ -13,6 +5,7 @@ export interface DocumentResponseDTO {
   rejectionReason?: string;
   downloadUrl?: string;
   type: string;
+  originalName: string;
 }
 export interface UserDocumentRequestDTO {
   requesterId: number;

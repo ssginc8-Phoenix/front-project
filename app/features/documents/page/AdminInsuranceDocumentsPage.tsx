@@ -50,7 +50,7 @@ const AdminInsuranceDocumentsPage: React.FC = () => {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h1>관리자용 보험 서류 관리</h1>
+      <h1>보험 서류 관리</h1>
       <DocumentListTable
         data={docs?.content ?? []}
         onAttach={handleAttach}

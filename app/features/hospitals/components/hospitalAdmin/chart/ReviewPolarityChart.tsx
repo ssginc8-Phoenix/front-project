@@ -53,7 +53,7 @@ const ChartWrapper = styled.div`
     height: 280px;
   `}
   ${media('mobile')`
-    height: 220px;
+    height: 250px;
   `}
 `;
 

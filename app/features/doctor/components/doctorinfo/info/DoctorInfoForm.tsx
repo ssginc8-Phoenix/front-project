@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { getMyDoctorInfo, updateDoctorProfile } from '~/features/doctor/api/doctorAPI';
 import loginStore from '~/features/user/stores/LoginStore';
+import { media } from '~/features/hospitals/components/common/breakpoints';
 
 const Form = styled.form`
   max-width: 48rem;
@@ -13,6 +14,12 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  ${media('mobile')`
+    max-width: 280px;
+    width: 120vw;
+    padding: 1rem;
+    gap: 1rem;
+  `}
 `;
 const FieldWrapper = styled.div`
   display: flex;
@@ -32,6 +39,10 @@ const Input = styled.input`
   &:focus {
     box-shadow: 0 0 0 2px #60a5fa;
   }
+  ${media('mobile')`
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  `}
 `;
 const ImagePreview = styled.img`
   width: 120px;
@@ -39,6 +50,11 @@ const ImagePreview = styled.img`
   border-radius: 50%;
   object-fit: cover;
   margin-top: 0.5rem;
+  ${media('mobile')`
+    width: 80px;
+    height: 80px;
+    margin-top: 0.25rem;
+  `}
 `;
 const SaveButton = styled.button`
   padding: 0.75rem;

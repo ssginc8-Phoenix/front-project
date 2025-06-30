@@ -527,7 +527,7 @@ const HospitalCreateForm: React.FC = () => {
           <Label>진료시간</Label>
           {businessHours.map((row, idx) => (
             <ScheduleRow key={idx}>
-              <SelectDay
+              <DaySelect
                 value={row.dayOfWeek}
                 onChange={(e) => handleScheduleChange(idx, 'dayOfWeek', e.target.value)}
               >
@@ -536,55 +536,55 @@ const HospitalCreateForm: React.FC = () => {
                     {kor}
                   </option>
                 ))}
-              </SelectDay>
-              <span style={{ fontWeight: 500 }}>진료:</span>
-              <InputTime
-                type="time"
-                step="1800" /* 30분 단위 */
-                value={row.open}
-                onChange={(e) => handleScheduleChange(idx, 'open', e.target.value)}
-              />
+              </DaySelect>
 
-              <Separator>~</Separator>
+              <TreatGroup>
+                <GroupLabel>진료:</GroupLabel>
+                <TreatStartTime
+                  type="time"
+                  step="1800"
+                  value={row.open}
+                  onChange={(e) => handleScheduleChange(idx, 'open', e.target.value)}
+                />
+                <TreatEndTime
+                  type="time"
+                  step="1800"
+                  value={row.close}
+                  onChange={(e) => handleScheduleChange(idx, 'close', e.target.value)}
+                />
+              </TreatGroup>
 
-              <InputTime
-                type="time"
-                step="1800"
-                value={row.close}
-                onChange={(e) => handleScheduleChange(idx, 'close', e.target.value)}
-              />
-
-              <LunchLabel>점심:</LunchLabel>
-
-              <InputTime
-                type="time"
-                step="1800"
-                value={row.lunchStart}
-                onChange={(e) => handleScheduleChange(idx, 'lunchStart', e.target.value)}
-              />
-
-              <Separator>~</Separator>
-
-              <InputTime
-                type="time"
-                step="1800"
-                value={row.lunchEnd}
-                onChange={(e) => handleScheduleChange(idx, 'lunchEnd', e.target.value)}
-              />
-              <CopyScheduleButton
-                type="button"
-                onClick={() => handleCopySchedule(idx)}
-                title="이 행 복사"
-              >
-                <Copy size={16} />
-              </CopyScheduleButton>
-              <RemoveScheduleButton type="button" onClick={() => handleRemoveSchedule(idx)}>
-                <X size={16} />
-              </RemoveScheduleButton>
+              <LunchGroup>
+                <GroupLabel>점심:</GroupLabel>
+                <LunchStartTime
+                  type="time"
+                  step="1800"
+                  value={row.lunchStart}
+                  onChange={(e) => handleScheduleChange(idx, 'lunchStart', e.target.value)}
+                />
+                <LunchEndTime
+                  type="time"
+                  step="1800"
+                  value={row.lunchEnd}
+                  onChange={(e) => handleScheduleChange(idx, 'lunchEnd', e.target.value)}
+                />
+              </LunchGroup>
+              <ButtonRow>
+                <CopyScheduleButton
+                  type="button"
+                  onClick={() => handleCopySchedule(idx)}
+                  title="이 행 복사"
+                >
+                  <Copy size={16} />
+                </CopyScheduleButton>
+                <RemoveScheduleButton type="button" onClick={() => handleRemoveSchedule(idx)}>
+                  <X size={16} />
+                </RemoveScheduleButton>
+              </ButtonRow>
             </ScheduleRow>
           ))}
 
-          <AddScheduleButton onClick={handleAddSchedule}>
+          <AddScheduleButton type="button" onClick={handleAddSchedule}>
             <Plus size={16} /> 진료시간 추가
           </AddScheduleButton>
         </FieldWrapper>
@@ -598,7 +598,8 @@ export default HospitalCreateForm;
 
 const Form = styled.form`
   max-width: 100%;
-  margin: 2rem auto;
+  box-sizing: border-box;
+  margin: 1rem auto;
   padding: 2rem;
   background: #fff;
   border-radius: 1rem;
@@ -606,26 +607,31 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  @media (max-width: 768px) {
+    margin: 0.5rem auto;
+    width: calc(100% - 1rem);
+    padding: 0 0.5rem;
+  }
 `;
+
 const FieldWrapper = styled.div`
   display: flex;
   flex-direction: column;
 `;
+
 const Label = styled.label`
   font-weight: 600;
   margin-bottom: 0.5rem;
 `;
+
 const Input = styled.input`
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 0.375rem;
   font-size: 1rem;
 `;
-const SelectDay = styled.select`
-  padding: 0.5rem;
-  border-radius: 0.375rem;
-  border: 1px solid #d1d5db;
-`;
+
 const InputTime = styled.input`
   padding: 0.5rem;
   border: 1px solid #d1d5db;
@@ -633,45 +639,59 @@ const InputTime = styled.input`
   background: white;
   font-size: 0.875rem;
 
-  /* iOS Safari, Chrome on Android 등의 기본 시계 스타일 유지하면서 */
-  /* Firefox 에서는 placeholder 폰트 크기 조정이 필요할 수 있습니다 */
   &::-webkit-calendar-picker-indicator {
     cursor: pointer;
   }
-
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
   }
+
+  @media (max-width: 768px) {
+    text-align: center;
+    height: 2.5rem;
+    width: 45%; /* shrink to fit two per line */
+    box-sizing: border-box;
+    margin-bottom: 0.5rem; /* give a bit of vertical gap */
+  }
 `;
+
 const PreviewWrapper = styled.div`
   display: flex;
   gap: 0.5rem;
   margin-top: 1rem;
-  /* 고정 크기 제거, 가로 스크롤 허용 */
   width: 100%;
   overflow-x: auto;
   padding-bottom: 0.5rem;
 `;
+
 const RemoveScheduleButton = styled.button`
   background: transparent;
   border: none;
   color: #e11d48;
   cursor: pointer;
+
+  @media (max-width: 768px) {
+    grid-area: remove;
+  }
 `;
-const ScheduleRow = styled.div`
+
+const CopyScheduleButton = styled.button`
+  background: transparent;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  padding: 0.25rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-`;
-const Separator = styled.span`
-  font-size: 1.2rem;
-  color: #333;
-`;
-const LunchLabel = styled.span`
-  font-weight: 500;
+
+  &:hover {
+    color: #2563eb;
+  }
+
+  @media (max-width: 768px) {
+    grid-area: copy;
+  }
 `;
 
 const PreviewImage = styled.img`
@@ -681,6 +701,7 @@ const PreviewImage = styled.img`
   border-radius: 0.5rem;
   object-fit: cover;
 `;
+
 const FileInput = styled.input`
   display: none;
 `;
@@ -705,10 +726,12 @@ const BigTextArea = styled.textarea`
   height: 3.5rem;
   font-size: 1rem;
 `;
+
 const Error = styled.div`
   color: red;
   font-size: 0.875rem;
 `;
+
 const Button = styled.button`
   margin-top: 1rem;
   background: #2563eb;
@@ -722,6 +745,7 @@ const Button = styled.button`
     background: #1d4ed8;
   }
 `;
+
 const AddScheduleButton = styled.button`
   margin-top: 0.75rem;
   display: inline-flex;
@@ -737,11 +761,13 @@ const AddScheduleButton = styled.button`
     background: #2563eb;
   }
 `;
+
 const ServiceInputWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 `;
+
 const ServiceChip = styled.div`
   display: flex;
   align-items: center;
@@ -751,6 +777,7 @@ const ServiceChip = styled.div`
   padding: 4px 8px;
   font-size: 0.875rem;
 `;
+
 const RemoveButton = styled.button`
   background: transparent;
   border: none;
@@ -760,6 +787,7 @@ const RemoveButton = styled.button`
   display: flex;
   align-items: center;
 `;
+
 const ServiceInput = styled.input`
   border: 1px solid #d1d5db;
   border-radius: 9999px;
@@ -768,8 +796,9 @@ const ServiceInput = styled.input`
   outline: none;
   width: 140px;
 `;
+
 const GlobalStyle = createGlobalStyle`
-  /* TimePicker 휠 패널 너비/높이 조정 */
+  /* TimePicker wheel panel sizing */
   .custom-wheel-timepicker .ant-picker-time-panel-column {
     width: 4rem !important;
     max-height: 250px !important;
@@ -779,15 +808,146 @@ const GlobalStyle = createGlobalStyle`
     padding: 0.25rem 0;
   }
 `;
-const CopyScheduleButton = styled.button`
-  background: transparent;
-  border: none;
-  color: #3b82f6;
-  cursor: pointer;
-  padding: 0.25rem;
+const DaySelect = styled.select`
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+
+  @media (max-width: 768px) {
+    grid-area: day;
+    height: 2.5rem;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+`;
+
+const TreatStartTime = styled(InputTime)`
+  @media (max-width: 768px) {
+    grid-area: treat1;
+    width: 40%;
+    box-sizing: border-box;
+    margin-bottom: 0.5rem;
+  }
+`;
+
+const TreatEndTime = styled(InputTime)`
+  @media (max-width: 768px) {
+    grid-area: treat2;
+    width: 40%;
+    box-sizing: border-box;
+    margin-bottom: 0.5rem;
+  }
+`;
+
+const LunchStartTime = styled(InputTime)`
+  @media (max-width: 768px) {
+    grid-area: lunch1;
+    width: 40%;
+    box-sizing: border-box;
+    margin-bottom: 0.5rem;
+  }
+`;
+
+const LunchEndTime = styled(InputTime)`
+  @media (max-width: 768px) {
+    grid-area: lunch2;
+    width: 40%;
+    box-sizing: border-box;
+    margin-bottom: 0.5rem;
+  }
+`;
+const TimeGroup = styled.div`
   display: flex;
   align-items: center;
-  &:hover {
-    color: #2563eb;
+  gap: 0.5rem;
+
+  /* 모바일에서는 100% 너비에 두 개씩 정렬하고 싶다면 이렇게 */
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  &.treat {
+    @media (max-width: 768px) {
+      grid-area: treat;
+    }
+  }
+
+  &.lunch {
+    @media (max-width: 768px) {
+      grid-area: lunch;
+    }
+  }
+`;
+
+const GroupLabel = styled.span`
+  font-weight: 500;
+  white-space: nowrap;
+`;
+const TreatGroup = styled(TimeGroup)`
+  @media (max-width: 768px) {
+    grid-area: treat;
+  }
+`;
+const LunchGroup = styled(TimeGroup)`
+  @media (max-width: 768px) {
+    grid-area: lunch;
+  }
+`;
+const ScheduleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    /* 세로 스택 */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+
+    /* 1) 요일 드롭다운: 보이게, 전체 폭, 아래 여백 */
+    ${DaySelect} {
+      width: 100%;
+      padding: 0.5rem;
+      box-sizing: border-box;
+    }
+
+    /* 2) 진료·점심 그룹: 세로 스택 안에서 row로 */
+    ${TreatGroup}, ${LunchGroup} {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+
+      ${GroupLabel} {
+        flex: none;
+        white-space: nowrap;
+      }
+      input {
+        flex: 1;
+      }
+    }
+
+    /* 3) 버튼은 마지막에 모아서 우측 정렬 */
+    ${CopyScheduleButton}, ${RemoveScheduleButton} {
+      align-self: flex-end;
+    }
+  }
+`;
+const ButtonRow = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+
+  @media (min-width: 769px) {
+    /* 데스크탑에선 필요 없으니 숨김 */
+    display: none;
   }
 `;

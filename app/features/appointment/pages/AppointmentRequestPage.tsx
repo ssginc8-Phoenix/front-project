@@ -14,12 +14,18 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import LoginStore from '~/features/user/stores/LoginStore';
 import { useNavigate } from 'react-router';
+import { media } from '~/components/styled/GlobalStyle';
 
 const ButtonGroup = styled.div`
   display: flex;
   justify-content: center;
   gap: 1rem;
   margin-top: 2rem;
+
+  ${media.mobile} {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const AppointmentRequestPage = () => {
@@ -55,6 +61,11 @@ const AppointmentRequestPage = () => {
   };
 
   const dateTime = formatDateTime(date, time);
+
+  const handleCancel = () => {
+    reset();
+    navigate('/hospital/search');
+  };
 
   const handlePreSubmit = () => {
     if (!patientId || !doctorId || !date || !time || !fullSymptom || !paymentMethod) {
@@ -114,7 +125,7 @@ const AppointmentRequestPage = () => {
       <PaymentMethodSelector />
 
       <ButtonGroup>
-        <Button $variant={'secondary'} onClick={() => reset()}>
+        <Button $variant={'secondary'} onClick={handleCancel}>
           취소
         </Button>
         <Button $variant="primary" onClick={handlePreSubmit}>

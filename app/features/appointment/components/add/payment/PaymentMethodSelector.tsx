@@ -1,36 +1,13 @@
-import styled from 'styled-components';
 import PaymentMethodCard from '~/features/appointment/components/add/payment/PaymentMethodCard';
-import { useState } from 'react';
 import { FaCreditCard, FaStore } from 'react-icons/fa';
 import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
-
-const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const TitleBox = styled.div`
-  margin-bottom: 1rem;
-`;
-
-const Title = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #00499e;
-`;
-
-const Description = styled.p`
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-`;
-
-const CardList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-`;
+import {
+  Wrapper,
+  Description,
+  TitleBox,
+  Title,
+  CardList,
+} from '~/features/appointment/components/add/Selector.styles';
 
 const PAYMENT_OPTIONS = [
   {

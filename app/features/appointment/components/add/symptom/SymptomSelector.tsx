@@ -1,29 +1,7 @@
-import styled from 'styled-components';
 import SymptomCheckboxList from '~/features/appointment/components/add/symptom/SymptomCheckboxList';
 import Textarea from '~/components/styled/Textarea';
 import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
-
-const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const TitleBox = styled.div`
-  margin-bottom: 1rem;
-`;
-
-const Title = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #00499e;
-`;
-
-const Description = styled.p`
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-`;
+import { Description, Title, TitleBox, Wrapper } from '../Selector.styles';
 
 const SymptomSelector = () => {
   const { selectedSymptoms, setSelectedSymptoms, extraSymptom, setExtraSymptom } =

@@ -1,10 +1,17 @@
 import styled from 'styled-components';
 import { useEffect } from 'react';
+import { media } from '~/components/styled/GlobalStyle';
 
 const CheckboxContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  ${media.mobile} {
+    gap: 0.4rem;
+    margin-bottom: 0;
+  }
 `;
 
 const Label = styled.label.withConfig({
@@ -22,6 +29,11 @@ const Label = styled.label.withConfig({
 
   &:hover {
     background-color: ${({ isChecked }) => (isChecked ? '#bfdbfe' : '#f3f4f6')};
+  }
+
+  ${media.mobile} {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
   }
 `;
 

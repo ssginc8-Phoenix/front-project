@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { media } from '~/components/styled/GlobalStyle';
 
 export const Card = styled.div<{ isSelected: boolean }>`
   flex: calc(50% - 0.5rem);
@@ -12,8 +13,12 @@ export const Card = styled.div<{ isSelected: boolean }>`
   background-color: ${({ isSelected }) => (isSelected ? '#dbeafe' : '#ffffff')};
   box-sizing: border-box;
 
-  @media (max-width: 768px) {
-    flex: 1 1 100%; /* 모바일에선 1개씩 */
+  ${media.mobile} {
+    width: 100%;
+    padding: 0.8rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
   }
 `;
 

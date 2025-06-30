@@ -5,28 +5,7 @@ import ErrorMessage from '~/components/common/ErrorMessage';
 import DoctorCard from '~/features/appointment/components/add/doctor/DoctorCard';
 import { useDoctorList } from '~/features/doctor/hooks/useDoctorList';
 import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
-
-const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const TitleBox = styled.div`
-  margin-bottom: 1rem;
-`;
-
-const Title = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #00499e;
-`;
-
-const CardList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-`;
+import { CardList, Description, Title, TitleBox, Wrapper } from '../Selector.styles';
 
 interface DoctorSelectorProps {
   hospitalId: number;
@@ -44,6 +23,7 @@ const DoctorSelector = ({ hospitalId }: DoctorSelectorProps) => {
     <Wrapper>
       <TitleBox>
         <Title>의사 선택</Title>
+        <Description>진료받으실 의사를 선택해주세요.</Description>
       </TitleBox>
 
       {loading && <LoadingIndicator />}

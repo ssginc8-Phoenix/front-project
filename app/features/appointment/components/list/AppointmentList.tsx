@@ -6,7 +6,13 @@ import Pagination from '~/components/common/Pagination';
 import { useEffect, useState } from 'react';
 import type { AppointmentList } from '~/types/appointment';
 import { useAppointmentListByFilter } from '~/features/appointment/hooks/useAppointmentListByFilter';
-import { Wrapper, Title, PaginationWrapper, ContentBody } from '~/components/styled/MyPage.styles';
+import {
+  Wrapper,
+  Title,
+  PaginationWrapper,
+  ContentBody,
+  Icon,
+} from '~/components/styled/MyPage.styles';
 
 const TabContainer = styled.div`
   display: flex;
@@ -141,7 +147,10 @@ const AppointmentListComponent = ({
 
   return (
     <Wrapper>
-      <Title>예약 관리</Title>
+      <Title>
+        <Icon>📋</Icon>
+        예약 관리
+      </Title>
 
       <TabContainer>
         <TabButton $isActive={filterType === 'active'} onClick={() => handleTabChange('active')}>

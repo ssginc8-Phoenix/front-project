@@ -38,7 +38,11 @@ const dayOfWeekMap: Record<string, CreateScheduleRequest['dayOfWeek']> = {
   토요일: 'SATURDAY',
   일요일: 'SUNDAY',
 };
-
+const timeOptions = Array.from({ length: 48 }, (_, i) => {
+  const hour = String(Math.floor(i / 2)).padStart(2, '0');
+  const minute = i % 2 === 0 ? '00' : '30';
+  return { label: `${hour}:${minute}`, value: `${hour}:${minute}` };
+});
 const mapDayOfWeekBack = (d: CreateScheduleRequest['dayOfWeek']) =>
   Object.keys(dayOfWeekMap).find((key) => dayOfWeekMap[key] === d) || '';
 
@@ -570,62 +574,68 @@ const HospitalUpdateForm: React.FC = () => {
                   {openAccordion[idx] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </AccordionHeader>
                 <AccordionPanel open={openAccordion[idx]}>
-                  <DayRow>
-                    <StyledSelect
-                      value={dayOfWeekMap[row.day]}
-                      onChange={(e) => {
-                        const kor = Object.entries(dayOfWeekMap).find(
-                          ([, val]) => val === e.target.value,
-                        )?.[0];
-                        if (!kor) return;
-                        setBusinessHours((prev) => {
-                          const updated = [...prev];
-                          updated[idx] = { ...updated[idx], day: kor };
-                          return updated;
-                        });
-                      }}
-                    >
-                      {Object.entries(dayOfWeekMap).map(([kor, eng]) => (
-                        <option key={eng} value={eng}>
-                          {kor}
-                        </option>
-                      ))}
-                    </StyledSelect>
+                  {/* 진료 */}
+                  <FieldRow>
+                    <FieldGroup>
+                      <Label>진료:</Label>
+                      <TimeSelect
+                        value={row.open}
+                        onChange={(e) => handleScheduleChange(idx, 'open', e.target.value)}
+                      >
+                        <option value="">시작</option>
+                        {timeOptions.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </TimeSelect>
+                      <Separator>~</Separator>
+                      <TimeSelect
+                        value={row.close}
+                        onChange={(e) => handleScheduleChange(idx, 'close', e.target.value)}
+                      >
+                        <option value="">종료</option>
+                        {timeOptions.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </TimeSelect>
+                    </FieldGroup>
+                  </FieldRow>
 
-                    <span style={{ fontWeight: 500 }}>진료:</span>
-                    <InputTime
-                      type="time"
-                      step="1800"
-                      value={row.open}
-                      onChange={(e) => handleScheduleChange(idx, 'open', e.target.value)}
-                    />
-                    <Separator>~</Separator>
-                    <InputTime
-                      type="time"
-                      step="1800"
-                      value={row.close}
-                      onChange={(e) => handleScheduleChange(idx, 'close', e.target.value)}
-                    />
-
-                    <span style={{ fontWeight: 500 }}>점심:</span>
-                    <InputTime
-                      type="time"
-                      step="1800"
-                      value={row.lunchStart}
-                      onChange={(e) => handleScheduleChange(idx, 'lunchStart', e.target.value)}
-                    />
-                    <Separator>~</Separator>
-                    <InputTime
-                      type="time"
-                      step="1800"
-                      value={row.lunchEnd}
-                      onChange={(e) => handleScheduleChange(idx, 'lunchEnd', e.target.value)}
-                    />
-
-                    <RemoveScheduleButton type="button" onClick={() => handleRemoveSchedule(idx)}>
-                      <X size={16} />
-                    </RemoveScheduleButton>
-                  </DayRow>
+                  {/* 점심 */}
+                  <FieldRow>
+                    <FieldGroup>
+                      <Label>점심:</Label>
+                      <TimeSelect
+                        value={row.lunchStart}
+                        onChange={(e) => handleScheduleChange(idx, 'lunchStart', e.target.value)}
+                      >
+                        <option value="">시작</option>
+                        {timeOptions.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </TimeSelect>
+                      <Separator>~</Separator>
+                      <TimeSelect
+                        value={row.lunchEnd}
+                        onChange={(e) => handleScheduleChange(idx, 'lunchEnd', e.target.value)}
+                      >
+                        <option value="">종료</option>
+                        {timeOptions.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </TimeSelect>
+                    </FieldGroup>
+                  </FieldRow>
+                  <RemoveScheduleButton type="button" onClick={() => handleRemoveSchedule(idx)}>
+                    <X size={16} />
+                  </RemoveScheduleButton>
                 </AccordionPanel>
               </AccordionRow>
             );
@@ -836,7 +846,7 @@ const Form = styled.form`
   gap: 1rem;
 
   ${media('mobile')`
-   max-width: 250px;
+   max-width: 290px;
     margin: 1rem auto;
     padding: 1rem;
     gap: 0.75rem;
@@ -971,7 +981,7 @@ const InputTime = styled.input`
   padding: 0.5rem;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
-  width: 110px;
+  width: 130px;
   background: white;
   font-size: 0.875rem;
 
@@ -980,11 +990,13 @@ const InputTime = styled.input`
   &::-webkit-calendar-picker-indicator {
     cursor: pointer;
   }
-
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
   }
+  ${media('mobile')`
+    width: 30%;
+  `}
 `;
 const ThumbnailsRow = styled.div`
   display: flex;
@@ -1033,22 +1045,70 @@ const AccordionRow = styled.div`
   margin-bottom: 0.5rem;
 `;
 const AccordionHeader = styled.button.attrs({ type: 'button' })`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   background: #fff;
-  text-align: left;
   font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #f3f4f6;
+  }
 `;
 const AccordionPanel = styled.div<{ open: boolean }>`
-  max-height: ${({ open }) => (open ? '500px' : '0')};
+  max-height: ${({ open }) => (open ? '400px' : '0')};
   opacity: ${({ open }) => (open ? 1 : 0)};
-  padding: ${({ open }) => (open ? '0.5rem 0' : '0 0')};
+  padding: ${({ open }) => (open ? '1rem' : '0')};
   overflow: hidden;
+  padding-left: 1.5rem;
+  overflow-y: hidden;
+  overflow-x: visible;
   background: #f9fafb;
-
-  /* max-height, padding, opacity 모두 0.3초 동안 부드럽게 전환 */
   transition:
     max-height 0.3s ease,
     padding 0.3s ease,
     opacity 0.3s ease;
+
+  /* 입력 UI 간격 정리 */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+const FieldRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: #fff;
+  border-radius: 0.5rem;
+  gap: 0.5rem;
+  ${media('mobile')`
+    padding: 0.25rem;
+    gap: 0.25rem;
+  `}
+`;
+
+const FieldGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  ${media('mobile')`
+    gap: 0.25rem;
+  `}
+`;
+
+const TimeSelect = styled.select`
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  width: 150px;
+  background: white;
+  font-size: 0.8rem;
+
+  ${media('mobile')`
+    width: 36%;
+  `}
 `;

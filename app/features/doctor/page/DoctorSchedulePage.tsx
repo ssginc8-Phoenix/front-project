@@ -1,6 +1,6 @@
 import styled from 'styled-components';
+import { Title } from '~/components/styled/MyPage.styles';
 import DoctorScheduleForm from '~/features/doctor/components/doctorinfo/schedule/DoctorScheduleForm';
-import Sidebar from '~/common/Sidebar';
 
 // ------------------- 스타일 정의 -------------------
 const PageWrapper = styled.div`
@@ -11,6 +11,13 @@ const PageWrapper = styled.div`
   display: flex;
   gap: 48px;
   min-height: 100vh;
+  box-sizing: border-box; /* ← 추가 */
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 24px;
+    padding: 10px 5px;
+  }
 `;
 
 const MainSection = styled.div`
@@ -18,26 +25,15 @@ const MainSection = styled.div`
   min-width: 0;
 `;
 
-const Title = styled.h2`
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #00499e;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-`;
-
 // ------------------- 컴포넌트 -------------------
 const DoctorSchedulePage = () => {
   return (
     <PageWrapper>
       {/* 사이드바 */}
-      <Sidebar />
 
       {/* 메인 콘텐츠 */}
       <MainSection>
-        <Title>📅 진료 스케줄 관리</Title>
+        <Title>스케줄 관리</Title>
         <DoctorScheduleForm />
       </MainSection>
     </PageWrapper>

@@ -5,7 +5,7 @@ import { useQnAchat } from '~/features/qna/hooks/useQnAchat';
 interface Props {
   qnaId: number;
   onClose: () => void;
-  onChange?: () => void; // ✅ 추가: 외부에서 QnA 리스트 갱신 콜백
+  onChange?: () => void;
   showInput?: boolean;
   isDoctor?: boolean;
 }
@@ -54,9 +54,26 @@ export default function QaChatModal({
           {isCommentsError && <p>답변을 불러오지 못했습니다.</p>}
 
           {detail && (
-            <MessageRow isDoctor={false}>
-              <Bubble isDoctor={false}>{detail.content}</Bubble>
-            </MessageRow>
+            <>
+              <InfoBox>
+                <InfoRow>
+                  <strong>보호자</strong>: {detail.guardianName} 님
+                </InfoRow>
+                <InfoRow>
+                  <strong>환자</strong>: {detail.patientName} 님
+                </InfoRow>
+                <InfoRow>
+                  <strong>증상</strong>: {detail.symptom}
+                </InfoRow>
+                <InfoRow>
+                  <strong>예약일</strong>: {detail.appointmentTime}
+                </InfoRow>
+              </InfoBox>
+
+              <MessageRow isDoctor={false}>
+                <Bubble isDoctor={false}>{detail.content}</Bubble>
+              </MessageRow>
+            </>
           )}
 
           {comments?.map((c) => (
@@ -92,9 +109,7 @@ export default function QaChatModal({
                         <EditButton
                           onClick={() =>
                             remove(c.commentId).then(() => {
-                              // 모달 닫기
                               onClose();
-                              // 대기중 탭에서 새로고침하도록 외부에서 처리
                             })
                           }
                         >
@@ -132,7 +147,6 @@ export default function QaChatModal({
   );
 }
 
-/* styled-components 생략 없이 그대로 아래에 포함 */
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
@@ -244,4 +258,19 @@ const EditButton = styled.button`
   padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
+`;
+
+// 예약 상세 정보 박스
+const InfoBox = styled.div`
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #333;
+`;
+
+const InfoRow = styled.div`
+  margin-bottom: 0.4rem;
 `;

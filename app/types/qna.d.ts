@@ -15,4 +15,8 @@ export interface QaPostResponse {
   updatedAt: string;
   answered: boolean;
   status: 'PENDING' | 'COMPLETED';
+  guardianName: string;
+  patientName: string;
+  symptom: string;
+  appointmentTime: string;
 }

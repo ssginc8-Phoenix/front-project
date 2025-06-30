@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import Pagination from '~/components/common/Pagination';
 import QaChatModal from '~/features/qna/component/QaChatModal';
 import { useDoctorQnAs } from '~/features/qna/hooks/useDoctorQnAs';
-
 import {
   Wrapper,
   Title as StyledTitle,
@@ -33,28 +32,16 @@ const DoctorQnaListPage: React.FC = () => {
         <Emoji>💬</Emoji> 의사 Q&A
       </StyledTitle>
 
-      <ContentBody>
-        <TabBar>
-          <Tab
-            active={tab === 'PENDING'}
-            onClick={() => {
-              setTab('PENDING');
-              setPage(0);
-            }}
-          >
-            대기중 ({pendingQuery.data?.totalElements ?? 0})
-          </Tab>
-          <Tab
-            active={tab === 'COMPLETED'}
-            onClick={() => {
-              setTab('COMPLETED');
-              setPage(0);
-            }}
-          >
-            완료됨 ({completedQuery.data?.totalElements ?? 0})
-          </Tab>
-        </TabBar>
+      <TabContainer>
+        <TabButton $isActive={tab === 'PENDING'} onClick={() => setTab('PENDING')}>
+          대기중 ({pendingQuery.data?.totalElements ?? 0})
+        </TabButton>
+        <TabButton $isActive={tab === 'COMPLETED'} onClick={() => setTab('COMPLETED')}>
+          완료 ({completedQuery.data?.totalElements ?? 0})
+        </TabButton>
+      </TabContainer>
 
+      <ContentBody>
         {data.content.length === 0 ? (
           <Centered>해당 상태의 질문이 없습니다.</Centered>
         ) : (
@@ -110,25 +97,44 @@ const Centered = styled.p`
   color: #6b7280;
 `;
 
-const TabBar = styled.div`
+const TabContainer = styled.div`
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  justify-content: flex-end;
   margin-bottom: 24px;
+  border-bottom: 1.5px solid #d6d6d6;
+
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 480px) {
+    margin-bottom: 15px;
+  }
 `;
 
-const Tab = styled.button<{ active: boolean }>`
-  padding: 10px 24px;
-  border-radius: 999px;
+const TabButton = styled.button<{ $isActive: boolean }>`
+  padding: 10px 20px;
   border: none;
-  font-size: 1rem;
-  font-weight: ${({ active }) => (active ? 700 : 500)};
-  background-color: ${({ active }) => (active ? '#005fcc' : '#f1f3f5')};
-  color: ${({ active }) => (active ? '#fff' : '#333')};
-  transition: background-color 0.2s;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: ${(props) => (props.$isActive ? 'bold' : 'normal')};
+  color: ${(props) => (props.$isActive ? '#007bff' : '#555')};
+  border-bottom: ${(props) => (props.$isActive ? '2px solid #007bff' : 'none')};
+  transition: all 0.3s ease;
 
   &:hover {
-    background-color: ${({ active }) => (active ? '#004da8' : '#e4e7ea')};
+    color: #007bff;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    padding: 8px 15px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+    padding: 7px 12px;
   }
 `;
 

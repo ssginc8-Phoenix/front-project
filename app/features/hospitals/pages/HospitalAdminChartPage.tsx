@@ -7,6 +7,7 @@ import { useMyHospitalId } from '~/features/hospitals/hooks/useMyHospitalId';
 import { Card } from '~/features/hospitals/components/hospitalAdmin/ui/card';
 import { useMediaQuery } from '~/features/hospitals/hooks/useMediaQuery';
 import { media } from '~/features/hospitals/components/common/breakpoints';
+import { Title } from '~/components/styled/MyPage.styles';
 
 const PageWrapper = styled.div`
   width: 100%;
@@ -26,21 +27,6 @@ const MainSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 24px;
-`;
-
-const Title = styled.h2`
-  font-size: 2rem;
-  font-weight: 700;
-  color: #00499e;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-
-  ${media('mobile')`
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-  `}
 `;
 
 const ChartGrid = styled.div`
@@ -80,7 +66,14 @@ const TabButton = styled.button<{ active: boolean }>`
     color: #fff;
   }
 `;
+const Emoji = styled.span`
+  display: none;
 
+  /* mobile 뷰에만 보이게 */
+  ${media('mobile')`
+    display: inline;
+  `}
+`;
 const HospitalAdminChartPage: React.FC = () => {
   const { hospitalId, loading } = useMyHospitalId();
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -92,7 +85,9 @@ const HospitalAdminChartPage: React.FC = () => {
   return (
     <PageWrapper>
       <MainSection>
-        <Title>📊 병원 통계 차트</Title>
+        <Title>
+          <Emoji>📊️</Emoji> 병원 통계 관리
+        </Title>
 
         {isMobile ? (
           <>

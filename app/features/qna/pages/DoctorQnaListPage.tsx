@@ -5,29 +5,35 @@ import Pagination from '~/components/common/Pagination';
 import QaChatModal from '~/features/qna/component/QaChatModal';
 import { useDoctorQnAs } from '~/features/qna/hooks/useDoctorQnAs';
 
+import {
+  Wrapper,
+  Title as StyledTitle,
+  ContentBody,
+  PaginationWrapper,
+} from '~/components/styled/MyPage.styles';
+
 const PAGE_SIZE = 10;
 
 const DoctorQnaListPage: React.FC = () => {
   const [tab, setTab] = useState<'PENDING' | 'COMPLETED'>('PENDING');
   const [page, setPage] = useState(0);
 
-  // 건수만 표시하기 위한 쿼리
   const pendingQuery = useDoctorQnAs('PENDING', 0, 1);
   const completedQuery = useDoctorQnAs('COMPLETED', 0, 1);
-
-  // 실제 리스트 쿼리
   const { data, isLoading, isError, refetch } = useDoctorQnAs(tab, page, PAGE_SIZE);
 
   const [openId, setOpenId] = useState<number | null>(null);
 
-  /* ─────── 렌더링 ─────── */
   if (isLoading) return <Centered>로딩 중…</Centered>;
   if (isError || !data) return <Centered>목록을 불러올 수 없습니다.</Centered>;
 
   return (
-    <Layout>
-      <Content>
-        <Header>💬 의사 Q&A</Header>
+    <Wrapper>
+      <StyledTitle>
+        <Emoji>💬</Emoji> 의사 Q&A
+      </StyledTitle>
+
+      <ContentBody>
         <TabBar>
           <Tab
             active={tab === 'PENDING'}
@@ -69,46 +75,31 @@ const DoctorQnaListPage: React.FC = () => {
             onPageChange={(newPage) => setPage(newPage)}
           />
         </PaginationWrapper>
-      </Content>
+      </ContentBody>
 
-      {/* Q&A 모달 */}
       {openId !== null && (
         <QaChatModal
           qnaId={openId}
           onClose={() => {
             setOpenId(null);
-            setTab('PENDING'); // 모달 닫히면 대기중 탭으로
+            setTab('PENDING');
             setPage(0);
-            refetch(); // 목록 갱신
+            refetch();
           }}
           showInput={tab === 'PENDING'}
           isDoctor
         />
       )}
-    </Layout>
+    </Wrapper>
   );
 };
 
-const Layout = styled.div`
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-`;
+const Emoji = styled.span`
+  display: none;
 
-const Content = styled.main`
-  flex: 1;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const Header = styled.h2`
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #00499e;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  @media (max-width: 768px) {
+    display: inline;
+  }
 `;
 
 const Centered = styled.p`
@@ -176,12 +167,6 @@ const Snippet = styled.p`
 const Meta = styled.div`
   font-size: 0.85rem;
   color: #999;
-`;
-
-const PaginationWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 3rem;
 `;
 
 export default DoctorQnaListPage;

@@ -3,13 +3,19 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import styled from 'styled-components';
 
-import Sidebar from '~/common/Sidebar';
 import Pagination from '~/components/common/Pagination';
 import { useMyAppointmentList } from '../hooks/useMyAppointmentList';
 import type { AppointmentList, Appointment } from '~/types/appointment';
 import QaChatModal from '~/features/qna/component/QaChatModal';
 import CommonModal from '~/components/common/CommonModal';
 import { deleteQaPost } from '~/features/qna/api/qnaAPI';
+
+import {
+  Wrapper,
+  Title as StyledTitle,
+  ContentBody,
+  PaginationWrapper,
+} from '~/components/styled/MyPage.styles';
 
 interface AppointmentWithQna extends Appointment {
   qnaStatus: 'PENDING' | 'COMPLETED';
@@ -94,14 +100,12 @@ const QnAListPage = () => {
   if (errorDetails) return <CenterText>{errorDetails}</CenterText>;
 
   return (
-    <Layout>
-      {/* 오른쪽 본문 */}
-      <Content>
-        <Header>
-          <Title>💬 Q&A</Title>
-        </Header>
-        <Divider />
+    <Wrapper>
+      <StyledTitle>
+        <Emoji>💬</Emoji> Q&A
+      </StyledTitle>
 
+      <ContentBody>
         {items.length > 0 ? (
           <List>
             {items.map((appt) => {
@@ -136,16 +140,15 @@ const QnAListPage = () => {
           <CenterText>질문이 없습니다.</CenterText>
         )}
 
-        <PaginationContainer>
+        <PaginationWrapper>
           <Pagination
             currentPage={page}
             totalPages={listPage.totalPages}
             onPageChange={(newPage) => setPage(newPage)}
           />
-        </PaginationContainer>
-      </Content>
+        </PaginationWrapper>
+      </ContentBody>
 
-      {/* 모달들 */}
       {openId !== null && (
         <QaChatModal qnaId={openId} onClose={() => setOpenId(null)} showInput={false} />
       )}
@@ -154,7 +157,7 @@ const QnAListPage = () => {
           이 질문을 정말 삭제하시겠습니까?
         </CommonModal>
       )}
-    </Layout>
+    </Wrapper>
   );
 };
 
@@ -163,33 +166,12 @@ function maskName(name: string) {
   return name[0] + '*'.repeat(name.length - 1);
 }
 
-const Layout = styled.div`
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-`;
+const Emoji = styled.span`
+  display: none;
 
-const Content = styled.main`
-  flex: 1;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const Header = styled.div`
-  text-align: center;
-  margin-bottom: 1rem;
-`;
-
-const Title = styled.h1`
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #00499e;
-`;
-
-const Divider = styled.hr`
-  margin: 0.75rem 0 2rem;
+  @media (max-width: 768px) {
+    display: inline;
+  }
 `;
 
 const List = styled.div`
@@ -261,12 +243,6 @@ const Badge = styled.span<{ $status: string }>`
   padding: 0.25rem 0.5rem;
   border-radius: 9999px;
   margin-right: 0.5rem;
-`;
-
-const PaginationContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
 `;
 
 const CenterText = styled.p`

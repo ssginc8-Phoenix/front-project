@@ -11,10 +11,12 @@ const LayoutContainer = styled.div`
 
 const ContentWrapper = styled.main`
   flex: 1;
-  padding: 1rem 0rem;
+
   max-width: none;
-  width: 99%;
-  margin: 0;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+
   overflow-x: hidden;
   display: flex;
   flex-direction: column;

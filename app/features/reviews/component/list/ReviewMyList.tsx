@@ -45,7 +45,9 @@ export function ReviewMyListComponent({
 const ListContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  align-items: center;
+  width: 100%;
+  gap: 1.5rem;
 `;
 
 const PaginationWrapper = styled.div`

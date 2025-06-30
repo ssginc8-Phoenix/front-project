@@ -91,9 +91,11 @@ const CardContainer = styled.div`
   background-color: #ffffff;
   border-radius: 0.75rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
   cursor: pointer;
   width: 100%;
+  max-width: 1800px;
+  min-height: 160px;
+  padding: 1.5rem;
 `;
 
 const DeleteButton = styled.button`

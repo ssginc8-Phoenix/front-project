@@ -9,6 +9,13 @@ import { HospitalReviewCard } from '~/features/reviews/component/list/HospitalRe
 import { ReportModal } from '~/features/reviews/component/update/ReportModal';
 import { getMyHospital } from '~/features/hospitals/api/hospitalAPI';
 
+import {
+  Wrapper,
+  Title as StyledTitle,
+  ContentBody,
+  PaginationWrapper,
+} from '~/components/styled/MyPage.styles';
+
 export default function ReviewHospitalPage() {
   const [hospitalId, setHospitalId] = useState<number | null>(null);
   const [hospitalName, setHospitalName] = useState<string>('');
@@ -16,7 +23,6 @@ export default function ReviewHospitalPage() {
   const [selectedReviewId, setSelectedReviewId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  /* ─── 병원 ID 및 이름 조회 ─── */
   useEffect(() => {
     (async () => {
       try {
@@ -29,10 +35,8 @@ export default function ReviewHospitalPage() {
     })();
   }, []);
 
-  /* ─── 리뷰 목록 조회 ─── */
   const { reviews, pagination, loading, error } = useHospitalReviews(hospitalId ?? -1, page, 5);
 
-  /* ─── 신고 핸들러 ─── */
   const handleReport = (reviewId: number) => {
     setSelectedReviewId(reviewId);
     setIsModalOpen(true);
@@ -50,19 +54,17 @@ export default function ReviewHospitalPage() {
     }
   };
 
-  /* ─── 렌더링 분기 ─── */
   if (!hospitalId) return <Centered>병원 정보 로딩 중…</Centered>;
   if (loading) return <Centered>리뷰 로딩 중…</Centered>;
   if (error) return <ErrorText>{error}</ErrorText>;
 
   return (
-    <Layout>
-      <Content>
-        <Header>
-          <Title>📋 {hospitalName} 리뷰 목록</Title>
-        </Header>
-        <Divider />
+    <Wrapper>
+      <StyledTitle>
+        <Emoji>📋</Emoji> {hospitalName} 리뷰 목록
+      </StyledTitle>
 
+      <ContentBody>
         {reviews.length === 0 ? (
           <EmptyMessage>아직 등록된 리뷰가 없습니다.</EmptyMessage>
         ) : (
@@ -73,7 +75,7 @@ export default function ReviewHospitalPage() {
           ))
         )}
 
-        {pagination.totalPages > 1 && (
+        {pagination.totalPages > 0 && (
           <PaginationWrapper>
             <Pagination
               currentPage={pagination.currentPage}
@@ -90,38 +92,22 @@ export default function ReviewHospitalPage() {
             onConfirm={handleConfirmReport}
           />
         )}
-      </Content>
-    </Layout>
+      </ContentBody>
+    </Wrapper>
   );
 }
 
-const Layout = styled.div`
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
+const Emoji = styled.span`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: inline;
+  }
 `;
 
-const Content = styled.main`
-  flex: 1;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const Header = styled.div`
-  text-align: center;
-  margin-bottom: 1rem;
-`;
-
-const Title = styled.h1`
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #00499e;
-`;
-
-const Divider = styled.hr`
-  margin: 0.75rem 0 2rem;
+const CardWrapper = styled.div`
+  position: relative;
+  margin-bottom: 1.5rem;
 `;
 
 const EmptyMessage = styled.p`
@@ -133,17 +119,6 @@ const EmptyMessage = styled.p`
 const ErrorText = styled.div`
   color: red;
   text-align: center;
-`;
-
-const CardWrapper = styled.div`
-  position: relative;
-  margin-bottom: 1.5rem;
-`;
-
-const PaginationWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
 `;
 
 const Centered = styled.div`

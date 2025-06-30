@@ -4,6 +4,12 @@ import styled from 'styled-components';
 import Pagination from '~/components/common/Pagination';
 import QaChatModal from '~/features/qna/component/QaChatModal';
 import { useDoctorQnAs } from '~/features/qna/hooks/useDoctorQnAs';
+import {
+  Wrapper,
+  Title as StyledTitle,
+  ContentBody,
+  PaginationWrapper,
+} from '~/components/styled/MyPage.styles';
 
 const PAGE_SIZE = 10;
 
@@ -11,44 +17,31 @@ const DoctorQnaListPage: React.FC = () => {
   const [tab, setTab] = useState<'PENDING' | 'COMPLETED'>('PENDING');
   const [page, setPage] = useState(0);
 
-  // 건수만 표시하기 위한 쿼리
   const pendingQuery = useDoctorQnAs('PENDING', 0, 1);
   const completedQuery = useDoctorQnAs('COMPLETED', 0, 1);
-
-  // 실제 리스트 쿼리
   const { data, isLoading, isError, refetch } = useDoctorQnAs(tab, page, PAGE_SIZE);
 
   const [openId, setOpenId] = useState<number | null>(null);
 
-  /* ─────── 렌더링 ─────── */
   if (isLoading) return <Centered>로딩 중…</Centered>;
   if (isError || !data) return <Centered>목록을 불러올 수 없습니다.</Centered>;
 
   return (
-    <Layout>
-      <Content>
-        <Header>💬 의사 Q&A</Header>
-        <TabBar>
-          <Tab
-            active={tab === 'PENDING'}
-            onClick={() => {
-              setTab('PENDING');
-              setPage(0);
-            }}
-          >
-            대기중 ({pendingQuery.data?.totalElements ?? 0})
-          </Tab>
-          <Tab
-            active={tab === 'COMPLETED'}
-            onClick={() => {
-              setTab('COMPLETED');
-              setPage(0);
-            }}
-          >
-            완료됨 ({completedQuery.data?.totalElements ?? 0})
-          </Tab>
-        </TabBar>
+    <Wrapper>
+      <StyledTitle>
+        <Emoji>💬</Emoji> 의사 Q&A
+      </StyledTitle>
 
+      <TabContainer>
+        <TabButton $isActive={tab === 'PENDING'} onClick={() => setTab('PENDING')}>
+          대기중 ({pendingQuery.data?.totalElements ?? 0})
+        </TabButton>
+        <TabButton $isActive={tab === 'COMPLETED'} onClick={() => setTab('COMPLETED')}>
+          완료 ({completedQuery.data?.totalElements ?? 0})
+        </TabButton>
+      </TabContainer>
+
+      <ContentBody>
         {data.content.length === 0 ? (
           <Centered>해당 상태의 질문이 없습니다.</Centered>
         ) : (
@@ -69,46 +62,31 @@ const DoctorQnaListPage: React.FC = () => {
             onPageChange={(newPage) => setPage(newPage)}
           />
         </PaginationWrapper>
-      </Content>
+      </ContentBody>
 
-      {/* Q&A 모달 */}
       {openId !== null && (
         <QaChatModal
           qnaId={openId}
           onClose={() => {
             setOpenId(null);
-            setTab('PENDING'); // 모달 닫히면 대기중 탭으로
+            setTab('PENDING');
             setPage(0);
-            refetch(); // 목록 갱신
+            refetch();
           }}
           showInput={tab === 'PENDING'}
           isDoctor
         />
       )}
-    </Layout>
+    </Wrapper>
   );
 };
 
-const Layout = styled.div`
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-`;
+const Emoji = styled.span`
+  display: none;
 
-const Content = styled.main`
-  flex: 1;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const Header = styled.h2`
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #00499e;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  @media (max-width: 768px) {
+    display: inline;
+  }
 `;
 
 const Centered = styled.p`
@@ -119,25 +97,44 @@ const Centered = styled.p`
   color: #6b7280;
 `;
 
-const TabBar = styled.div`
+const TabContainer = styled.div`
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  justify-content: flex-end;
   margin-bottom: 24px;
+  border-bottom: 1.5px solid #d6d6d6;
+
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 480px) {
+    margin-bottom: 15px;
+  }
 `;
 
-const Tab = styled.button<{ active: boolean }>`
-  padding: 10px 24px;
-  border-radius: 999px;
+const TabButton = styled.button<{ $isActive: boolean }>`
+  padding: 10px 20px;
   border: none;
-  font-size: 1rem;
-  font-weight: ${({ active }) => (active ? 700 : 500)};
-  background-color: ${({ active }) => (active ? '#005fcc' : '#f1f3f5')};
-  color: ${({ active }) => (active ? '#fff' : '#333')};
-  transition: background-color 0.2s;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: ${(props) => (props.$isActive ? 'bold' : 'normal')};
+  color: ${(props) => (props.$isActive ? '#007bff' : '#555')};
+  border-bottom: ${(props) => (props.$isActive ? '2px solid #007bff' : 'none')};
+  transition: all 0.3s ease;
 
   &:hover {
-    background-color: ${({ active }) => (active ? '#004da8' : '#e4e7ea')};
+    color: #007bff;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    padding: 8px 15px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+    padding: 7px 12px;
   }
 `;
 
@@ -176,12 +173,6 @@ const Snippet = styled.p`
 const Meta = styled.div`
   font-size: 0.85rem;
   color: #999;
-`;
-
-const PaginationWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 3rem;
 `;
 
 export default DoctorQnaListPage;

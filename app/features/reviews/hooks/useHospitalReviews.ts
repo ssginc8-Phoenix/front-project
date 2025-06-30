@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import type { HospitalReviewResponse, Page } from '~/features/reviews/types/review';
 import { getHospitalReviews } from '~/features/reviews/api/reviewAPI';
 
-export function useHospitalReviews(hospitalId: number, page: number, size: number = 10) {
+export function useHospitalReviews(hospitalId: number | null, page: number, size: number = 10) {
   const [data, setData] = useState<Page<HospitalReviewResponse> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (hospitalId === null || hospitalId < 0) return;
+
     setLoading(true);
     setError(null);
 

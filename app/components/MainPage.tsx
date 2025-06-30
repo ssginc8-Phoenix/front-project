@@ -214,7 +214,9 @@ export default function MainPage() {
         </AboutText>
       </AboutBlock>
 
-      <ChatBtn onClick={() => setIsChatOpen(true)}>🤖</ChatBtn>
+      <ChatBtn onClick={() => setIsChatOpen(true)}>
+        <img src="chatbot.png" alt="챗봇" />
+      </ChatBtn>
       {isChatOpen && (
         <ChatModalOverlay onClick={() => setIsChatOpen(false)}>
           <ChatModal onClick={(e) => e.stopPropagation()}>
@@ -558,25 +560,30 @@ const AboutImage = styled.img`
 // 챗봇 버튼 & 모달
 const ChatBtn = styled.button`
   position: fixed;
-  bottom: 24px;
-  left: 24px;
-  background: #c2d7ff;
-  color: #fff;
-  border: none;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  width: 64px;
-  height: 64px;
-  font-size: 28px;
+  border: none;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  z-index: 999;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 
-  @media (max-width: 360px) {
-    bottom: 16px;
-    right: 16px;
-    width: 48px;
-    height: 48px;
-    font-size: 22px;
+  img {
+    width: 90%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s;
   }
 `;
 

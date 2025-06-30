@@ -18,28 +18,31 @@ import type { ReviewMyListResponse } from '~/features/reviews/types/review';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { BAD_OPTIONS, GOOD_OPTIONS } from '~/features/reviews/constants/keywordOptions';
 
+import {
+  Wrapper,
+  Title as StyledTitle,
+  ContentBody,
+  PaginationWrapper,
+} from '~/components/styled/MyPage.styles';
+
 type LocationState = { appointmentId: number };
 
 export default function ReviewMyListPage() {
-  /* ─── 기본 준비 ─────────────────────────────── */
   const { state } = useLocation();
   const { appointmentId } = (state as LocationState) || { appointmentId: 0 };
 
   const user = useLoginStore((s) => s.user);
   if (!user) return <CenteredText>로그인 후 이용해주세요.</CenteredText>;
 
-  /* ─── 리뷰 목록 ─────────────────────────────── */
   const [page, setPage] = useState(0);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { reviews, totalPages, loading, error } = useReviewList(page, 5, refreshTrigger);
 
-  /* ─── 예약(appointment) 정보 (리뷰 작성용) ─── */
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   useEffect(() => {
     if (appointmentId) getAppointment(appointmentId).then(setAppointment);
   }, [appointmentId]);
 
-  /* ─── 모달 상태 ─────────────────────────────── */
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [createDone, setCreateDone] = useState(false);
 
@@ -52,7 +55,6 @@ export default function ReviewMyListPage() {
   const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [deleteDone, setDeleteDone] = useState(false);
 
-  /* ─── 핸들러 ─────────────────────────────────── */
   const handleCreateDone = () => {
     setCreateOpen(false);
     setCreateDone(true);
@@ -87,13 +89,13 @@ export default function ReviewMyListPage() {
     setRefreshTrigger((t) => t + 1);
   };
 
-  /* ─── 렌더링 ─────────────────────────────────── */
   return (
-    <Layout>
-      <Content>
-        <Title>✏️ 리뷰 관리</Title>
-        <Divider />
+    <Wrapper>
+      <StyledTitle>
+        <Emoji>✏️</Emoji> 리뷰 관리
+      </StyledTitle>
 
+      <ContentBody>
         {loading && <InfoText>로딩 중…</InfoText>}
         {error && <ErrorText>{error}</ErrorText>}
 
@@ -108,9 +110,10 @@ export default function ReviewMyListPage() {
             onDeleteReview={openDelete}
           />
         )}
-      </Content>
 
-      {/* ─── 모달들 ─────────────────────────────── */}
+        <PaginationWrapper />
+      </ContentBody>
+
       {isCreateOpen && appointment && (
         <ReviewCreateModal
           isOpen={isCreateOpen}
@@ -173,35 +176,9 @@ export default function ReviewMyListPage() {
         onClose={() => setDeleteDone(false)}
         message="리뷰가 삭제되었습니다!"
       />
-    </Layout>
+    </Wrapper>
   );
 }
-
-/* ─── styled-components ───────────────────────── */
-
-const Layout = styled.div`
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-`;
-
-const Content = styled.main`
-  flex: 1;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const Title = styled.h1`
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #00499e;
-`;
-
-const Divider = styled.hr`
-  margin: 0.75rem 0 2rem;
-`;
 
 const InfoText = styled.p`
   text-align: center;
@@ -219,4 +196,12 @@ const CenteredText = styled.p`
   align-items: center;
   justify-content: center;
   color: #6b7280;
+`;
+
+const Emoji = styled.span`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: inline;
+  }
 `;

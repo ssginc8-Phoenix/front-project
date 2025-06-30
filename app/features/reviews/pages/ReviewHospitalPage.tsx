@@ -15,6 +15,7 @@ import {
   ContentBody,
   PaginationWrapper,
 } from '~/components/styled/MyPage.styles';
+import { getMyDoctorInfo } from '~/features/doctor/api/doctorAPI';
 
 export default function ReviewHospitalPage() {
   const [hospitalId, setHospitalId] = useState<number | null>(null);
@@ -26,11 +27,20 @@ export default function ReviewHospitalPage() {
   useEffect(() => {
     (async () => {
       try {
-        const hospital = await getMyHospital();
-        setHospitalId(hospital.hospitalId);
-        setHospitalName(hospital.name);
+        // 병원 관리자 먼저 시도
+        try {
+          const hospital = await getMyHospital();
+          setHospitalId(hospital.hospitalId);
+          setHospitalName(hospital.name);
+          return;
+        } catch {
+          // 병원 관리자 아님 → 의사로 fallback
+          const doctor = await getMyDoctorInfo();
+          setHospitalId(doctor.hospitalId);
+          setHospitalName(doctor.hospitalName);
+        }
       } catch (err) {
-        console.error('병원 정보 조회 실패:', err);
+        console.error('병원 ID 조회 실패:', err);
       }
     })();
   }, []);

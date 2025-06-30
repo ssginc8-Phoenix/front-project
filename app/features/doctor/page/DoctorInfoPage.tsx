@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import DoctorInfoForm from '~/features/doctor/components/doctorinfo/info/DoctorInfoForm';
-import Sidebar from '~/common/Sidebar';
+import { Title } from '~/components/styled/MyPage.styles';
+import { media } from '~/features/hospitals/components/common/breakpoints';
 
 // ------------------- 스타일 정의 -------------------
 const PageWrapper = styled.div`
@@ -12,20 +13,17 @@ const PageWrapper = styled.div`
   gap: 48px;
   min-height: 100vh;
 `;
+const Emoji = styled.span`
+  display: none;
 
+  /* mobile 뷰에만 보이게 */
+  ${media('mobile')`
+    display: inline;
+  `}
+`;
 const MainSection = styled.div`
   flex: 1;
   min-width: 0;
-`;
-
-const Title = styled.h2`
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #00499e;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
 `;
 
 // ------------------- 컴포넌트 -------------------
@@ -34,7 +32,9 @@ const DoctorInfoPage = () => {
     <PageWrapper>
       {/* 메인 콘텐츠 */}
       <MainSection>
-        <Title>👨‍⚕️ 의사 정보 관리</Title>
+        <Title>
+          <Emoji>👨‍⚕️</Emoji> 의사 정보 관리
+        </Title>
         <DoctorInfoForm />
       </MainSection>
     </PageWrapper>

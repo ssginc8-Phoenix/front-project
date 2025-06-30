@@ -219,35 +219,6 @@ const DashboardButton = styled.button`
   }
 `;
 
-const CenterSection = styled.section`
-  display: flex;
-  justify-content: center;
-  margin-top: 30px;
-`;
-
-const CenterButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 48px;
-  background-color: #eaf1fe;
-  color: #2261bb;
-  font-weight: 700;
-  border-radius: 26px;
-  border: none;
-  font-size: 1.18rem;
-  box-shadow: none;
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    box-shadow 0.15s;
-
-  &:hover {
-    background-color: #dbe8fb;
-    box-shadow: none;
-  }
-`;
-
 // --- 컴포넌트
 export const GuardianMyPage = () => {
   const navigate = useNavigate();

@@ -1,4 +1,3 @@
-import styled from 'styled-components';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import useLoginStore from '~/features/user/stores/LoginStore';
@@ -6,7 +5,20 @@ import { getUserInfo, updateUserInfo } from '~/features/patient/api/userAPI';
 import DaumPost from '~/features/user/components/signUp/DaumPost';
 import ReusableModal from '~/features/patient/components/ReusableModal';
 import { PasswordModal } from '~/features/patient/components/PasswordModal';
-import Sidebar from '~/common/Sidebar';
+import { ContentBody, Icon, media, Title, Wrapper } from '~/components/styled/MyPage.styles';
+import {
+  CustomFileInputButton,
+  HiddenInput,
+  ImagePreview,
+  ImageUploadContainer,
+  InfoFormBox,
+  Input,
+  InputRow,
+  Label,
+  Name,
+  SaveButton,
+  Footer,
+} from '~/components/styled/Info.styles';
 
 const formatPhoneNumber = (value: string) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -17,119 +29,6 @@ const formatPhoneNumber = (value: string) => {
   if (digits.length > 3) return `${part1}-${part2}`;
   return part1;
 };
-
-const MainSection = styled.section`
-  flex: 1;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  max-width: 900px;
-  margin-left: 48px;
-`;
-
-const GuardianInfoHeader = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 2rem;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #00499e;
-`;
-
-const Name = styled.div`
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #00499e;
-`;
-
-const InfoFormBox = styled.form`
-  margin: 0;
-  width: 100%;
-  max-width: none;
-  padding: 38px 28px 32px;
-  background: #fff;
-  border-radius: 22px;
-  box-shadow: 0 4px 24px rgba(34, 97, 187, 0.09);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-`;
-
-const InputRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 22px;
-`;
-
-const Label = styled.label`
-  font-size: 0.9rem;
-  color: #2c2c2c;
-  width: 88px;
-  flex-shrink: 0;
-`;
-
-const Input = styled.input<{ readOnly?: boolean }>`
-  flex: 1;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  background-color: ${({ readOnly }) => (readOnly ? '#f2f2f2' : '#fff')};
-  color: ${({ readOnly }) => (readOnly ? '#777' : '#000')};
-
-  &:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
-    background-color: #fff;
-  }
-`;
-
-const SaveButton = styled.button`
-  margin: 28px auto 0;
-  padding: 12px 52px;
-  background: #00499e;
-  color: #fff;
-  font-weight: 700;
-  font-size: 1.13rem;
-  border-radius: 19px;
-  border: none;
-  cursor: pointer;
-  transition: background 0.16s;
-  &:hover {
-    background: #003a7a;
-  }
-`;
-
-const Footer = styled.div`
-  margin-top: 32px;
-  text-align: center;
-  color: #999;
-  font-size: 1.01rem;
-  letter-spacing: 0.04rem;
-  span {
-    color: #00499e;
-    cursor: pointer;
-    border: none;
-    background: none;
-    margin: 0 8px;
-    font-weight: 500;
-    font-size: 1.03rem;
-    transition: color 0.12s;
-    &:hover {
-      color: #ff4646;
-    }
-  }
-`;
-
-const ImagePreview = styled.img`
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-left: 88px;
-`;
 
 const GuardianInfoPage = () => {
   const { user, fetchMyInfo } = useLoginStore();
@@ -205,11 +104,13 @@ const GuardianInfoPage = () => {
   };
 
   return (
-    <>
-      <MainSection>
-        <GuardianInfoHeader>
-          <Name>{user?.name}님 정보</Name>
-        </GuardianInfoHeader>
+    <Wrapper>
+      <Title>
+        <Icon>⚙️</Icon>
+        <Name>{user?.name}</Name>님 정보
+      </Title>
+
+      <ContentBody>
         <InfoFormBox onSubmit={handleSave}>
           <InputRow>
             <Label htmlFor="name">이름</Label>
@@ -244,17 +145,24 @@ const GuardianInfoPage = () => {
               placeholder="예: 111동 1234호"
             />
           </InputRow>
-          <InputRow>
+          <ImageUploadContainer>
             <Label htmlFor="profileImage">프로필 이미지</Label>
-            <Input id="profileImage" type="file" accept="image/*" onChange={handleImageChange} />
-          </InputRow>
-          {previewUrl && <ImagePreview src={previewUrl} alt="미리보기" />}
-          <SaveButton type="submit">저장</SaveButton>
+            {previewUrl && <ImagePreview src={previewUrl} alt="미리보기" />}
+            <HiddenInput
+              id="profileImage"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+            <CustomFileInputButton htmlFor="profileImage">이미지 선택</CustomFileInputButton>
+          </ImageUploadContainer>
+          <SaveButton type="submit">정보 저장</SaveButton>
         </InfoFormBox>
         <Footer>
           <span onClick={() => setShowConfirm(true)}>회원탈퇴</span>
         </Footer>
-      </MainSection>
+      </ContentBody>
+
       <ReusableModal open={showConfirm} onClose={() => setShowConfirm(false)} hideCloseButton>
         <div
           style={{ fontSize: '1.13rem', fontWeight: 600, marginBottom: 24, textAlign: 'center' }}
@@ -345,7 +253,7 @@ const GuardianInfoPage = () => {
           확인
         </button>
       </ReusableModal>
-    </>
+    </Wrapper>
   );
 };
 

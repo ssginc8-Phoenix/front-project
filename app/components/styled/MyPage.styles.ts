@@ -1,5 +1,13 @@
 import styled from 'styled-components';
 
+export const media = {
+  laptopL: `@media (max-width: 1600px)`,
+  laptop: `@media (max-width: 1024px)`,
+  tablet: `@media (max-width: 768px)`,
+  mobile: `@media (max-width: 480px)`,
+  mobileSmall: `@media (max-width: 360px)`,
+};
+
 export const Wrapper = styled.div`
   padding: 2rem;
   width: 100%;
@@ -7,14 +15,27 @@ export const Wrapper = styled.div`
   min-height: calc(100vh - 100px);
   display: flex;
   flex-direction: column;
+  margin-left: 0;
 
-  @media (max-width: 768px) {
+  ${media.tablet} {
     padding: 1.5rem 1rem;
     min-height: calc(100vh - 80px);
   }
 
-  @media (max-width: 480px) {
+  ${media.mobile} {
     padding: 1rem 0.8rem;
+  }
+
+  ${media.mobileSmall} {
+    padding: 0.8rem;
+  }
+`;
+
+export const Icon = styled.div`
+  display: none;
+
+  ${media.mobileSmall} {
+    display: block;
   }
 `;
 
@@ -26,13 +47,27 @@ export const Title = styled.h1`
   align-items: center;
   gap: 8px;
 
-  @media (max-width: 768px) {
+  ${media.tablet} {
     font-size: 1.3rem;
     margin-bottom: 20px;
   }
 
-  @media (max-width: 480px) {
+  ${media.mobile} {
     font-size: 1.2rem;
+  }
+`;
+
+export const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 480px) {
+    margin-bottom: 15px;
   }
 `;
 
@@ -53,11 +88,11 @@ export const PaginationWrapper = styled.div`
   box-sizing: border-box;
   padding-top: 2rem;
 
-  @media (max-width: 768px) {
+  ${media.tablet} {
     padding-top: 1.5rem;
   }
 
-  @media (max-width: 480px) {
+  ${media.mobile} {
     padding-top: 1rem;
   }
 `;

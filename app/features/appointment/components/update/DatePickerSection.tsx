@@ -1,6 +1,7 @@
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import styled from 'styled-components';
+import { media } from '~/components/styled/GlobalStyle';
 
 const StyledDatePicker = styled(DatePicker)`
   padding: 10px 15px;
@@ -29,6 +30,31 @@ const StyledDatePicker = styled(DatePicker)`
   /* .react-datepicker-wrapper는 DatePicker input을 감싸는 div입니다. */
   &.react-datepicker-wrapper {
     display: inline-block; /* 너비가 자동으로 조절되도록 */
+    width: auto; /* 기본 너비를 유연하게 설정 */
+
+    ${media.mobile} {
+      width: 100%; /* 모바일에서 너비 꽉 채움 */
+    }
+  }
+
+  ${media.mobile} {
+    padding: 12px 15px; /* 모바일에서 패딩 줄임 */
+    font-size: 0.95rem; /* 모바일에서 폰트 크기 줄임 */
+    width: 75%;
+  }
+
+  /* 팝업 달력 자체 스타일 (모바일 반응형) */
+  .react-datepicker {
+    font-family: 'Noto Sans KR', sans-serif; /* 폰트 일관성 유지 */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+    ${media.mobile} {
+      width: 100%; /* 모바일에서 달력 팝업 너비 꽉 채움 */
+      max-width: 320px; /* 너무 커지지 않도록 최대 너비 설정 */
+      font-size: 0.9rem; /* 폰트 크기 조정 */
+    }
   }
 
   /* 팝업 달력의 헤더 (월, 연도 네비게이션) */
@@ -36,11 +62,18 @@ const StyledDatePicker = styled(DatePicker)`
     background-color: #f8f8f8; /* 옅은 회색 배경 */
     border-bottom: 1px solid #e0e0e0;
     padding-top: 10px;
+
+    ${media.mobile} {
+      padding-top: 8px; /* 모바일에서 패딩 줄임 */
+    }
   }
 
   /* 요일 이름 */
   .react-datepicker__day-name {
     color: #555;
+    ${media.mobile} {
+      font-size: 0.8rem; /* 모바일에서 폰트 크기 줄임 */
+    }
   }
 
   /* 선택된 날짜 */
@@ -73,6 +106,20 @@ const StyledDatePicker = styled(DatePicker)`
   .react-datepicker__year-dropdown {
     border: 1px solid #dcdcdc;
     border-radius: 4px;
+
+    ${media.mobile} {
+      font-size: 0.85rem; /* 모바일에서 폰트 크기 줄임 */
+    }
+  }
+
+  /* 날짜 셀 자체 (일) */
+  .react-datepicker__day {
+    ${media.mobile} {
+      width: 1.8rem; /* 모바일에서 날짜 셀 너비 조정 */
+      height: 1.8rem; /* 모바일에서 날짜 셀 높이 조정 */
+      line-height: 1.8rem; /* 텍스트 세로 중앙 정렬 */
+      font-size: 0.85rem; /* 모바일에서 폰트 크기 줄임 */
+    }
   }
 `;
 
@@ -91,6 +138,7 @@ const DatePickerSection = ({ selectedDate, onChangeDate }: DatePickerSectionProp
       dateFormat="yyyy-MM-dd"
       isClearable={false}
       placeholderText="날짜 선택"
+      popperPlacement="bottom-end"
     />
   );
 };

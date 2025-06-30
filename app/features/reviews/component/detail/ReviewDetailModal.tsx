@@ -35,11 +35,17 @@ export function ReviewDetailModal({ isOpen, review, onClose }: Props) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <Content>
-        <HospitalName>{review.hospitalName}</HospitalName>
-        <DoctorName>{review.doctorName} 원장</DoctorName>
-        {/*<PatientName>환자: {review.patientName}</PatientName>*/}
-
-        <DateTime>{formatDateTime(review.createdAt)}</DateTime>
+        <InfoBlock>
+          <LabelRow>
+            <Label>병원명 :</Label> {review.hospitalName}
+          </LabelRow>
+          <LabelRow>
+            <Label>원장 :</Label> {review.doctorName} 원장
+          </LabelRow>
+          <LabelRow>
+            <Label>예약일 :</Label> {formatDateTime(review.createdAt)}
+          </LabelRow>
+        </InfoBlock>
 
         <Tags>
           {review.keywords.map((k) => {
@@ -52,61 +58,67 @@ export function ReviewDetailModal({ isOpen, review, onClose }: Props) {
           })}
         </Tags>
 
-        <FullText>{review.contents}</FullText>
+        <ContentBox>{review.contents}</ContentBox>
       </Content>
     </Modal>
   );
 }
 
-// ------------------- styled-components -------------------
-
 const Content = styled.div`
-  padding: 1rem 2rem;
+  padding: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
 `;
 
-const HospitalName = styled.h3`
-  text-align: center;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 0.25rem;
-`;
-
-const DoctorName = styled.h2`
-  text-align: center;
-  margin-bottom: 0.25rem;
-  font-size: 1.25rem;
-  font-weight: bold;
-`;
-
-const DateTime = styled.p`
-  text-align: center;
-  color: #6b7280;
+const InfoBlock = styled.div`
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+const LabelRow = styled.div`
+  font-size: 0.95rem;
+  color: #374151;
+`;
+
+const Label = styled.span`
+  font-weight: bold;
+  margin-right: 0.5rem;
 `;
 
 const Tags = styled.div`
   display: flex;
-  gap: 0.5rem;
-  justify-content: center;
   flex-wrap: wrap;
-  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  justify-content: center;
 `;
 
 const Tag = styled.span<{ type: 'good' | 'bad' | 'unknown' }>`
-  padding: 0.25rem 0.75rem;
+  padding: 0.35rem 0.8rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
   ${({ type }) =>
     type === 'good'
-      ? `background: #ecf2fe; color:#00499e;`
+      ? `background-color: #e6f0ff; color: #00499e;`
       : type === 'bad'
-        ? `background: #fbeaea; color:#ba1a1a;`
-        : `background: #f5f5f5; color:#6b7280;`}
+        ? `background-color: #ffe6e6; color: #c0392b;`
+        : `background-color: #f3f4f6; color: #6b7280;`}
 `;
 
-const FullText = styled.p`
-  white-space: pre-wrap;
+const ContentBox = styled.div`
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 0.95rem;
   line-height: 1.6;
-  color: #374151;
+  white-space: pre-wrap;
+
+  @media (max-width: 480px) {
+    font-size: 1.05rem;
+    padding: 1rem;
+  }
 `;

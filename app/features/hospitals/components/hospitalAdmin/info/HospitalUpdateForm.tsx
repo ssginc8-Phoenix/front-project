@@ -15,6 +15,7 @@ import type { CreateScheduleRequest, HospitalForm } from '~/features/hospitals/t
 import type { ScheduleDTO } from '~/features/hospitals/types/hospitalSchedule';
 import { media } from '~/features/hospitals/components/common/breakpoints';
 import { useMediaQuery } from '~/features/hospitals/hooks/useMediaQuery';
+import Textarea from '~/components/styled/Textarea';
 
 interface HourRow {
   hospitalScheduleId?: number;
@@ -207,7 +208,6 @@ const HospitalUpdateForm: React.FC = () => {
       setExistingFileIds(d.fileIds || []);
       setPreviewUrls(d.imageUrls || []);
       const sch = await getHospitalSchedules(d.hospitalId);
-      console.log('[getMyHospital] raw schedules:', sch);
       setBusinessHours(mapSchedules(sch));
     })();
   }, []);
@@ -296,20 +296,7 @@ const HospitalUpdateForm: React.FC = () => {
     } catch {
       alert('저장 중 오류가 발생했습니다.');
     }
-    console.group('%c[HospitalUpdate] Request payload', 'color: #4f46e5; font-weight: bold;');
-    console.log(
-      '  • 유지할 기존 파일 IDs:',
-      previewItems.filter((i) => i.id).map((i) => i.id),
-    );
-    console.log('  • 삭제할 파일 IDs:', deletedFileIds);
-    console.log(
-      '  • 업로드할 새 파일 객체들:',
-      previewItems.filter((i) => i.file).map((i) => i.file),
-    );
-    console.log('  • raw FormData entries:');
-    for (const [key, value] of fd.entries()) {
-      console.log(`     – ${key}:`, value);
-    }
+
     console.groupEnd();
   };
 
@@ -340,31 +327,35 @@ const HospitalUpdateForm: React.FC = () => {
           multiple
           onChange={handleFilesChange}
         />
-        <FileLabel htmlFor="hospitalImage">이미지 선택</FileLabel>
-        <ThumbnailsRow>
-          {previewItems.map((item, idx) => (
-            <ThumbnailWrapper
-              key={idx}
-              onClick={() => {
-                if (item.id != null) {
-                  alert(`File ID: ${item.id}`);
-                } else {
-                  alert('새로 업로드된 파일입니다.');
-                }
-              }}
-            >
-              <PreviewImage src={item.url} />
-              <RemoveThumbnailButton
-                onClick={(e) => {
-                  e.stopPropagation(); // 클릭 전파 막기
-                  handleRemoveImage(idx);
+        <PreviewWrapper>
+          <ThumbnailsRow>
+            {previewItems.map((item, idx) => (
+              <ThumbnailWrapper
+                key={idx}
+                onClick={() => {
+                  if (item.id != null) {
+                    alert(`File ID: ${item.id}`);
+                  } else {
+                    alert('새로 업로드된 파일입니다.');
+                  }
                 }}
               >
-                ×
-              </RemoveThumbnailButton>
-            </ThumbnailWrapper>
-          ))}
-        </ThumbnailsRow>
+                <PreviewImage src={item.url} />
+                <RemoveThumbnailButton
+                  onClick={(e) => {
+                    e.stopPropagation(); // 클릭 전파 막기
+                    handleRemoveImage(idx);
+                  }}
+                >
+                  ×
+                </RemoveThumbnailButton>
+              </ThumbnailWrapper>
+            ))}
+          </ThumbnailsRow>
+          <ImageUploadButtonWrapper>
+            <FileLabel htmlFor="hospitalImage">이미지 업로드</FileLabel>
+          </ImageUploadButtonWrapper>
+        </PreviewWrapper>
       </FieldWrapper>
       <FieldWrapper>
         <Label>병원 명</Label>
@@ -475,8 +466,7 @@ const HospitalUpdateForm: React.FC = () => {
       </FieldWrapper>
       <FieldWrapper>
         <Label>소개글</Label>
-        <Input
-          as="textarea"
+        <Textarea
           rows={3}
           value={form.intro}
           onChange={handleChange('intro')}
@@ -485,8 +475,7 @@ const HospitalUpdateForm: React.FC = () => {
       </FieldWrapper>
       <FieldWrapper>
         <Label>공지사항</Label>
-        <Input
-          as="textarea"
+        <Textarea
           rows={3}
           value={form.notice}
           onChange={handleChange('notice')}
@@ -574,6 +563,9 @@ const HospitalUpdateForm: React.FC = () => {
                   {openAccordion[idx] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </AccordionHeader>
                 <AccordionPanel open={openAccordion[idx]}>
+                  <RemoveScheduleButton type="button" onClick={() => handleRemoveSchedule(idx)}>
+                    <X size={16} />
+                  </RemoveScheduleButton>
                   {/* 진료 */}
                   <FieldRow>
                     <FieldGroup>
@@ -633,9 +625,6 @@ const HospitalUpdateForm: React.FC = () => {
                       </TimeSelect>
                     </FieldGroup>
                   </FieldRow>
-                  <RemoveScheduleButton type="button" onClick={() => handleRemoveSchedule(idx)}>
-                    <X size={16} />
-                  </RemoveScheduleButton>
                 </AccordionPanel>
               </AccordionRow>
             );
@@ -853,20 +842,18 @@ const Form = styled.form`
   `}
 `;
 const FileLabel = styled.label`
-  display: inline-block;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.8rem;
   background-color: #2563eb;
   color: white;
-  font-weight: 600;
-  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
   cursor: pointer;
+  white-space: nowrap;
+
   &:hover {
-    background-color: #003c80;
+    background-color: #1e40af;
   }
-  ${media('mobile')`
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-  `}
 `;
 const FieldWrapper = styled.div`
   display: flex;
@@ -887,6 +874,7 @@ const Label = styled.label`
 const Input = styled.input`
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
+  font-size: 1rem;
   padding: 0.75rem;
   outline: none;
   transition: box-shadow 0.2s;
@@ -937,12 +925,22 @@ const AddScheduleButton = styled.button`
     background: #2563eb;
   }
 `;
-
 const RemoveScheduleButton = styled.button`
   background: transparent;
   border: none;
   color: #e11d48;
   cursor: pointer;
+  font-size: 1.25rem;
+  z-index: 10;
+
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+
+  ${media('mobile')`
+    top: 0.2rem;
+    right: 0rem;
+  `}
 `;
 const BusinessHoursWrapper = styled.div`
   display: flex;
@@ -955,6 +953,7 @@ const BusinessHoursWrapper = styled.div`
 
 const DayRow = styled.div`
   display: flex;
+  position: relative;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -1000,13 +999,17 @@ const InputTime = styled.input`
 `;
 const ThumbnailsRow = styled.div`
   display: flex;
+  flex-wrap: nowrap; /* 줄바꿈 방지 */
   gap: 0.5rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 0.5rem 0;
-  ${media('mobile')`
-    gap: 0.25rem;
-  `}
+  white-space: nowrap; /* 텍스트 기준 줄바꿈 방지 */
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.5rem;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 const ThumbnailWrapper = styled.div`
   position: relative;
@@ -1016,8 +1019,8 @@ const ThumbnailWrapper = styled.div`
   border-radius: 8px;
   overflow: hidden;
   ${media('mobile')`
-    max-width: 180px;
-    width: 60vw;
+    width: 80vw;
+    flex-shrink: 0;
   `}
 `;
 
@@ -1059,6 +1062,7 @@ const AccordionHeader = styled.button.attrs({ type: 'button' })`
   }
 `;
 const AccordionPanel = styled.div<{ open: boolean }>`
+  position: relative;
   max-height: ${({ open }) => (open ? '400px' : '0')};
   opacity: ${({ open }) => (open ? 1 : 0)};
   padding: ${({ open }) => (open ? '1rem' : '0')};
@@ -1066,7 +1070,7 @@ const AccordionPanel = styled.div<{ open: boolean }>`
   padding-left: 1.5rem;
   overflow-y: hidden;
   overflow-x: visible;
-  background: #f9fafb;
+  background: #fff;
   transition:
     max-height 0.3s ease,
     padding 0.3s ease,
@@ -1111,4 +1115,24 @@ const TimeSelect = styled.select`
   ${media('mobile')`
     width: 36%;
   `}
+`;
+const PreviewWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  overflow-x: auto;
+  gap: 1rem;
+  overflow-x: visible;
+  width: 100%;
+
+  ${media('mobile')`
+    flex-direction: column; 
+     width: 100%;
+  `}
+`;
+
+const ImageUploadButtonWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  height: 100%;
 `;

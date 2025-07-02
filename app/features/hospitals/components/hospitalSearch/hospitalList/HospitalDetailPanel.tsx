@@ -16,7 +16,7 @@ const Panel = styled.div`
   flex-direction: column;
   background: white;
   padding: 1rem;
-  height: 700px;
+  max-height: 700px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   gap: 0.25rem;
@@ -252,7 +252,6 @@ const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, o
             )}
           </SliderContainer>
         )}
-
         {/* 헤더 & 기본 정보 */}
         <Header>
           <HospitalName>{hospital.name}</HospitalName>
@@ -260,16 +259,13 @@ const HospitalDetailPanel: React.FC<HospitalDetailPanelProps> = ({ hospitalId, o
             <Tag>대기 {hospital.waiting ?? 0}명</Tag>
             <CloseButton onClick={onClose}>✕</CloseButton>
           </div>
-        </Header>
-
-        <SectionLabel>📍 병원 소개</SectionLabel>
-        <Text>{hospital.introduction || '소개 정보 없음'}</Text>
-
-        <SectionLabel>📌 공지사항</SectionLabel>
+        </Header>{' '}
+        <br />
+        <SectionLabel>📍 병원 소개</SectionLabel> <br />
+        <Text>{hospital.introduction || '소개 정보 없음'}</Text> <br />
+        <SectionLabel>📌 공지사항</SectionLabel> <br />
         <Text>{hospital.notice || '공지사항 없음'}</Text>
-
         <div>{hospital.serviceNames?.map((svc, i) => <ServiceTag key={i}>{svc}</ServiceTag>)}</div>
-
         <ActionGroup>
           {role === 'GUARDIAN' && (
             <PrimaryButton onClick={handleAppointmentClick}>진료 접수</PrimaryButton>

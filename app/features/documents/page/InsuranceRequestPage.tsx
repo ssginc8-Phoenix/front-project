@@ -228,7 +228,33 @@ const CloseButton = styled.button`
   font-size: 1.25rem;
   cursor: pointer;
 `;
-
+const StatusLegend = styled.div`
+  margin: 1rem 0;
+  font-size: 0.85rem;
+  color: #666;
+  display: flex;
+  gap: 1.5rem;
+`;
+const StatusColor = styled.span<{ color: string }>`
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: ${({ color }) => color};
+  margin-right: 0.5rem;
+`;
+const StatusBar = styled.div<{ status: string }>`
+  width: 100%;
+  height: 16px;
+  border-radius: 8px;
+  background-color: ${({ status }) =>
+    status === 'APPROVED' ? '#27ae60' : status === 'REJECTED' ? '#e74c3c' : '#f39c12'};
+`;
+const StatusText = styled.span<{ status: string }>`
+  font-weight: 600;
+  color: ${({ status }) =>
+    status === 'APPROVED' ? '#27ae60' : status === 'REJECTED' ? '#e74c3c' : '#f39c12'};
+`;
 // --- Global Style ---
 const GlobalStyle = createGlobalStyle`
   html, body { margin: 0; padding: 0; overflow-x: hidden; }
@@ -261,7 +287,15 @@ const documentTypes = [
   { value: 'CLAIM_FORM', label: '보험 청구서' },
   { value: 'OTHER', label: '기타' },
 ];
-
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return isMobile;
+};
 const InsuranceRequestPage: React.FC = () => {
   const { user } = useLoginStore();
   const queryClient = useQueryClient();
@@ -284,6 +318,8 @@ const InsuranceRequestPage: React.FC = () => {
     10,
   );
 
+  const isMobile = useIsMobile();
+  const [step, setStep] = useState<'hospital' | 'appointment' | 'document'>('hospital');
   const hospitals = useMemo(() => {
     const map = new Map<number, string>();
     appointments.forEach((a) => map.set(a.hospitalId, a.hospitalName));
@@ -338,96 +374,194 @@ const InsuranceRequestPage: React.FC = () => {
 
         {activeTab === 'request' && (
           <Section>
-            <SectionLabel>1. 병원 선택</SectionLabel>
-            <SelectWrapper>
-              <Selected onClick={() => setHospitalDropdownOpen((p) => !p)}>
-                {selectedHospitalId
-                  ? hospitals.find((h) => h.id === selectedHospitalId)?.name
-                  : '병원을 선택하세요'}
-              </Selected>
-              {hospitalDropdownOpen && (
-                <Dropdown>
-                  {hospitals.map((h) => (
-                    <Option
-                      key={h.id}
-                      selected={h.id === selectedHospitalId}
-                      onClick={() => {
-                        setSelectedHospitalId(h.id);
-                        setHospitalDropdownOpen(false);
+            {isMobile ? (
+              <>
+                {step === 'hospital' && (
+                  <>
+                    <SectionLabel>1. 병원 선택</SectionLabel>
+                    <SelectWrapper>
+                      <Selected onClick={() => setHospitalDropdownOpen((p) => !p)}>
+                        {selectedHospitalId
+                          ? hospitals.find((h) => h.id === selectedHospitalId)?.name
+                          : '병원을 선택하세요'}
+                      </Selected>
+                      {hospitalDropdownOpen && (
+                        <Dropdown>
+                          {hospitals.map((h) => (
+                            <Option
+                              key={h.id}
+                              selected={h.id === selectedHospitalId}
+                              onClick={() => {
+                                setSelectedHospitalId(h.id);
+                                setHospitalDropdownOpen(false);
+                                setStep('appointment');
+                              }}
+                            >
+                              {h.name}
+                            </Option>
+                          ))}
+                        </Dropdown>
+                      )}
+                    </SelectWrapper>
+                  </>
+                )}
+                {step === 'appointment' && selectedHospitalId && (
+                  <>
+                    <SectionLabel>2. 진료 선택</SectionLabel>
+                    <AppointmentWrapper>
+                      <Selected onClick={() => setAppointmentDropdownOpen((p) => !p)}>
+                        {selectedAppointmentId
+                          ? (() => {
+                              const a = appointments.find(
+                                (x) => x.appointmentId === selectedAppointmentId,
+                              )!;
+                              return `${new Date(a.appointmentTime).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })} / ${a.doctorName}`;
+                            })()
+                          : '진료를 선택하세요'}
+                      </Selected>
+                      {appointmentDropdownOpen && (
+                        <AppointmentDropdown>
+                          {appointments
+                            .filter((a) => a.hospitalId === selectedHospitalId)
+                            .map((a) => (
+                              <AppointmentOption
+                                key={a.appointmentId}
+                                selected={a.appointmentId === selectedAppointmentId}
+                                onClick={() => {
+                                  setSelectedAppointmentId(a.appointmentId);
+                                  setAppointmentDropdownOpen(false);
+                                  setStep('document');
+                                }}
+                              >
+                                {new Date(a.appointmentTime).toLocaleString('ko-KR', {
+                                  dateStyle: 'short',
+                                  timeStyle: 'short',
+                                })}{' '}
+                                / {a.doctorName}
+                              </AppointmentOption>
+                            ))}
+                        </AppointmentDropdown>
+                      )}
+                    </AppointmentWrapper>
+                  </>
+                )}
+                {step === 'document' && selectedAppointmentId && (
+                  <>
+                    <SectionLabel>3. 서류 종류</SectionLabel>
+                    <DocTypeGrid>
+                      {documentTypes.map((dt) => (
+                        <Card
+                          key={dt.value}
+                          active={selectedDocumentType === dt.value}
+                          onClick={() => setSelectedDocumentType(dt.value)}
+                          type="button"
+                        >
+                          {dt.label}
+                        </Card>
+                      ))}
+                    </DocTypeGrid>
+                    <DocumentRequestForm
+                      hospitalId={selectedHospitalId}
+                      appointmentId={selectedAppointmentId}
+                      documentType={selectedDocumentType}
+                      onSuccess={() => {
+                        setActiveTab('status');
+                        queryClient.invalidateQueries({ queryKey: ['myDocumentRequests', userId] });
                       }}
+                    />
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                <SectionLabel>1. 병원 선택</SectionLabel>
+                <SelectWrapper>
+                  <Selected onClick={() => setHospitalDropdownOpen((p) => !p)}>
+                    {selectedHospitalId
+                      ? hospitals.find((h) => h.id === selectedHospitalId)?.name
+                      : '병원을 선택하세요'}
+                  </Selected>
+                  {hospitalDropdownOpen && (
+                    <Dropdown>
+                      {hospitals.map((h) => (
+                        <Option
+                          key={h.id}
+                          selected={h.id === selectedHospitalId}
+                          onClick={() => {
+                            setSelectedHospitalId(h.id);
+                            setHospitalDropdownOpen(false);
+                          }}
+                        >
+                          {h.name}
+                        </Option>
+                      ))}
+                    </Dropdown>
+                  )}
+                </SelectWrapper>
+
+                <SectionLabel>2. 진료 선택</SectionLabel>
+                <AppointmentWrapper>
+                  <Selected
+                    disabled={!selectedHospitalId}
+                    onClick={() => selectedHospitalId && setAppointmentDropdownOpen((p) => !p)}
+                  >
+                    {selectedAppointmentId
+                      ? (() => {
+                          const a = appointments.find(
+                            (x) => x.appointmentId === selectedAppointmentId,
+                          )!;
+                          return `${new Date(a.appointmentTime).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })} / ${a.doctorName}`;
+                        })()
+                      : '진료를 선택하세요'}
+                  </Selected>
+                  {appointmentDropdownOpen && (
+                    <AppointmentDropdown>
+                      {appointments
+                        .filter((a) => a.hospitalId === selectedHospitalId)
+                        .map((a) => (
+                          <AppointmentOption
+                            key={a.appointmentId}
+                            selected={a.appointmentId === selectedAppointmentId}
+                            onClick={() => {
+                              setSelectedAppointmentId(a.appointmentId);
+                              setAppointmentDropdownOpen(false);
+                            }}
+                          >
+                            {new Date(a.appointmentTime).toLocaleString('ko-KR', {
+                              dateStyle: 'short',
+                              timeStyle: 'short',
+                            })}{' '}
+                            / {a.doctorName}
+                          </AppointmentOption>
+                        ))}
+                    </AppointmentDropdown>
+                  )}
+                </AppointmentWrapper>
+
+                <SectionLabel>3. 서류 종류</SectionLabel>
+                <DocTypeGrid>
+                  {documentTypes.map((dt) => (
+                    <Card
+                      key={dt.value}
+                      active={selectedDocumentType === dt.value}
+                      onClick={() => setSelectedDocumentType(dt.value)}
+                      type="button"
                     >
-                      {h.name}
-                    </Option>
+                      {dt.label}
+                    </Card>
                   ))}
-                </Dropdown>
-              )}
-            </SelectWrapper>
-
-            <SectionLabel>2. 진료 선택</SectionLabel>
-            <AppointmentWrapper>
-              <Selected
-                disabled={!selectedHospitalId}
-                onClick={() => selectedHospitalId && setAppointmentDropdownOpen((p) => !p)}
-              >
-                {selectedAppointmentId
-                  ? (() => {
-                      const a = appointments.find(
-                        (x) => x.appointmentId === selectedAppointmentId,
-                      )!;
-                      return `${new Date(a.appointmentTime).toLocaleString('ko-KR', {
-                        dateStyle: 'short',
-                        timeStyle: 'short',
-                      })} / ${a.doctorName}`;
-                    })()
-                  : '진료를 선택하세요'}
-              </Selected>
-              {appointmentDropdownOpen && (
-                <AppointmentDropdown>
-                  {appointments
-                    .filter((a) => a.hospitalId === selectedHospitalId)
-                    .map((a) => (
-                      <AppointmentOption
-                        key={a.appointmentId}
-                        selected={a.appointmentId === selectedAppointmentId!}
-                        onClick={() => {
-                          setSelectedAppointmentId(a.appointmentId);
-                          setAppointmentDropdownOpen(false);
-                        }}
-                      >
-                        {new Date(a.appointmentTime).toLocaleString('ko-KR', {
-                          dateStyle: 'short',
-                          timeStyle: 'short',
-                        })}{' '}
-                        / {a.doctorName}
-                      </AppointmentOption>
-                    ))}
-                </AppointmentDropdown>
-              )}
-            </AppointmentWrapper>
-
-            <SectionLabel>3. 서류 종류</SectionLabel>
-            <DocTypeGrid>
-              {documentTypes.map((dt) => (
-                <Card
-                  key={dt.value}
-                  active={selectedDocumentType === dt.value}
-                  onClick={() => setSelectedDocumentType(dt.value)}
-                  type="button"
-                >
-                  {dt.label}
-                </Card>
-              ))}
-            </DocTypeGrid>
-
-            <DocumentRequestForm
-              hospitalId={selectedHospitalId}
-              appointmentId={selectedAppointmentId ?? 0}
-              documentType={selectedDocumentType}
-              onSuccess={() => {
-                setActiveTab('status');
-                queryClient.invalidateQueries({ queryKey: ['myDocumentRequests', userId] });
-              }}
-            />
+                </DocTypeGrid>
+                <DocumentRequestForm
+                  hospitalId={selectedHospitalId}
+                  appointmentId={selectedAppointmentId ?? 0}
+                  documentType={selectedDocumentType}
+                  onSuccess={() => {
+                    setActiveTab('status');
+                    queryClient.invalidateQueries({ queryKey: ['myDocumentRequests', userId] });
+                  }}
+                />
+              </>
+            )}
           </Section>
         )}
 
@@ -437,6 +571,17 @@ const InsuranceRequestPage: React.FC = () => {
               <Loading>서류 요청 목록 불러오는 중…</Loading>
             ) : (
               <>
+                <StatusLegend>
+                  <div>
+                    <StatusColor color="#f39c12" /> 요청
+                  </div>
+                  <div>
+                    <StatusColor color="#27ae60" /> 승인
+                  </div>
+                  <div>
+                    <StatusColor color="#e74c3c" /> 반려
+                  </div>
+                </StatusLegend>
                 <Table>
                   <thead>
                     <tr>
@@ -453,31 +598,36 @@ const InsuranceRequestPage: React.FC = () => {
                         <Td colSpan={5}>요청된 문서가 없습니다.</Td>
                       </tr>
                     ) : (
-                      requestPage?.content.map((doc: DocumentResponseDTO) => (
-                        <tr key={doc.documentId}>
-                          <Td>{doc.documentId}</Td>
-                          <Td>{documentTypeLabels[doc.type] || doc.type}</Td>
-                          <Td>{statusLabelMap[doc.status]}</Td>
-                          <CenteredTd>
-                            {doc.status === 'REJECTED' ? (
-                              <IconButton
-                                onClick={() => setModalReason(doc.rejectionReason ?? null)}
-                              >
-                                <AlertIcon size={18} />
-                              </IconButton>
-                            ) : (
-                              '-'
-                            )}
-                          </CenteredTd>
-                          <Td>
-                            {doc.status === 'APPROVED' && (
-                              <IconButton onClick={() => handleDownload(doc)}>
-                                <DownloadIcon size={18} />
-                              </IconButton>
-                            )}
-                          </Td>
-                        </tr>
-                      ))
+                      requestPage?.content
+                        .slice()
+                        .sort((a, b) => b.documentId - a.documentId)
+                        .map((doc: DocumentResponseDTO) => (
+                          <tr key={doc.documentId}>
+                            <Td>{doc.documentId}</Td>
+                            <Td>{documentTypeLabels[doc.type] || doc.type}</Td>
+                            <Td>
+                              <StatusBar status={doc.status} />
+                            </Td>
+                            <CenteredTd>
+                              {doc.status === 'REJECTED' ? (
+                                <IconButton
+                                  onClick={() => setModalReason(doc.rejectionReason ?? null)}
+                                >
+                                  <AlertIcon size={18} />
+                                </IconButton>
+                              ) : (
+                                '-'
+                              )}
+                            </CenteredTd>
+                            <Td>
+                              {doc.status === 'APPROVED' && (
+                                <IconButton onClick={() => handleDownload(doc)}>
+                                  <DownloadIcon size={18} />
+                                </IconButton>
+                              )}
+                            </Td>
+                          </tr>
+                        ))
                     )}
                   </tbody>
                 </Table>

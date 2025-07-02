@@ -18,21 +18,22 @@ const Container = styled.div`
 `;
 const TabBar = styled.div`
   display: flex;
+  justify-content: flex-end; // 오른쪽 정렬
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 30px;
 `;
 const Tab = styled.button<{ active: boolean }>`
   padding: 8px 16px;
   font-size: 0.9rem;
   font-weight: 500;
   color: ${({ active }) => (active ? '#fff' : '#34495e')};
-  background: ${({ active }) => (active ? '#2980b9' : 'transparent')};
+  background: ${({ active }) => (active ? '#007bff' : 'transparent')};
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: background 0.2s;
   &:hover {
-    background: ${({ active }) => (active ? '#1c5983' : '#ecf0f1')};
+    background: ${({ active }) => (active ? '#007bff' : '#ecf0f1')};
   }
 `;
 const Table = styled.table`
@@ -41,7 +42,7 @@ const Table = styled.table`
   border-spacing: 0 12px;
 `;
 const Th = styled.th`
-  text-align: left;
+  text-align: center;
   padding: 12px 16px;
   font-size: 0.95rem;
   color: #34495e;
@@ -54,6 +55,7 @@ const Tr = styled.tr`
 const Td = styled.td`
   padding: 12px 16px;
   font-size: 0.95rem;
+  text-align: center;
   color: #2c3e50;
   vertical-align: middle;
   &:first-child {
@@ -66,7 +68,22 @@ const Td = styled.td`
   }
 `;
 const FileInput = styled.input`
+  display: none; // 기본 input 숨김
+`;
+
+const FileLabel = styled.label`
+  display: inline-block;
+  padding: 6px 12px;
   font-size: 0.9rem;
+  font-weight: 500;
+  color: #fff;
+  background-color: #7f8c8d;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  &:hover {
+    background-color: #616a6b;
+  }
 `;
 const Button = styled.button<{ variant?: 'primary' | 'danger' }>`
   padding: 8px 14px;
@@ -91,7 +108,10 @@ const Button = styled.button<{ variant?: 'primary' | 'danger' }>`
 `;
 const ActionContainer = styled.div`
   display: flex;
+  justify-content: center;
   align-items: center;
+  height: 100%;
+  gap: 0.5rem;
 `;
 
 // ─── 모바일 전용 스타일 ─────────────────────────────────────────────────
@@ -133,7 +153,7 @@ const Value = styled.div`
   color: #2c3e50;
 `;
 const FileInputMobile = styled(FileInput)`
-  width: 100%;
+  display: none;
 `;
 const ButtonMobile = styled(Button)`
   width: 100%;
@@ -159,9 +179,9 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
   }, []);
 
   const statusLabelMap: Record<string, string> = {
-    REQUESTED: '요청됨',
-    APPROVED: '승인됨',
-    REJECTED: '반려됨',
+    REQUESTED: '요청',
+    APPROVED: '승인',
+    REJECTED: '반려',
   };
 
   const sorted = useMemo(() => {
@@ -245,9 +265,13 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
             <Tr key={doc.documentId}>
               <Td>{doc.documentId}</Td>
               <Td>{statusLabelMap[doc.status] || doc.status}</Td>
-              <Td>{doc.rejectionReason || '-'}</Td>
+              <Td style={{ textAlign: doc.rejectionReason ? 'left' : 'center' }}>
+                {doc.rejectionReason || '-'}
+              </Td>
               <Td>
+                <FileLabel htmlFor={`file-${doc.documentId}`}>파일 선택</FileLabel>
                 <FileInput
+                  id={`file-${doc.documentId}`}
                   type="file"
                   accept="application/pdf,image/*"
                   onChange={(e) =>
@@ -267,23 +291,22 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
               </Td>
               <Td>
                 <ActionContainer>
-                  <Button
-                    variant="primary"
-                    disabled={doc.status !== 'REQUESTED'}
-                    onClick={() => handleApprove(doc.documentId, true)}
-                  >
-                    승인
-                  </Button>
-                  <Button
-                    variant="danger"
-                    disabled={doc.status !== 'REQUESTED'}
-                    onClick={() => {
-                      const reason = window.prompt('반려 사유를 입력하세요:');
-                      if (reason) handleApprove(doc.documentId, false, reason.trim());
-                    }}
-                  >
-                    반려
-                  </Button>
+                  {doc.status === 'REQUESTED' && (
+                    <>
+                      <Button variant="primary" onClick={() => handleApprove(doc.documentId, true)}>
+                        승인
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={() => {
+                          const reason = window.prompt('반려 사유를 입력하세요:');
+                          if (reason) handleApprove(doc.documentId, false, reason.trim());
+                        }}
+                      >
+                        반려
+                      </Button>
+                    </>
+                  )}
                 </ActionContainer>
               </Td>
             </Tr>
@@ -299,10 +322,15 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
             <Label>상태</Label>
             <Value>{statusLabelMap[doc.status] || doc.status}</Value>
             <Label>사유</Label>
-            <Value>{doc.rejectionReason || '-'}</Value>
+            <Value style={{ textAlign: doc.rejectionReason ? 'left' : 'center' }}>
+              {doc.rejectionReason || '-'}
+            </Value>
             <Label>첨부</Label>
             <Value>
+              <FileLabel htmlFor={`file-mobile-${doc.documentId}`}>파일 선택</FileLabel>
               <FileInputMobile
+                as="input"
+                id={`file-mobile-${doc.documentId}`}
                 type="file"
                 accept="application/pdf,image/*"
                 onChange={(e) =>
@@ -323,25 +351,25 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
             </Value>
             <Label>액션</Label>
             <Value>
-              <CardAction>
-                <ButtonMobile
-                  variant="primary"
-                  disabled={doc.status !== 'REQUESTED'}
-                  onClick={() => handleApprove(doc.documentId, true)}
-                >
-                  승인
-                </ButtonMobile>
-                <ButtonMobile
-                  variant="danger"
-                  disabled={doc.status !== 'REQUESTED'}
-                  onClick={() => {
-                    const reason = window.prompt('반려 사유를 입력하세요:');
-                    if (reason) handleApprove(doc.documentId, false, reason.trim());
-                  }}
-                >
-                  반려
-                </ButtonMobile>
-              </CardAction>
+              {doc.status === 'REQUESTED' && (
+                <CardAction>
+                  <ButtonMobile
+                    variant="primary"
+                    onClick={() => handleApprove(doc.documentId, true)}
+                  >
+                    승인
+                  </ButtonMobile>
+                  <ButtonMobile
+                    variant="danger"
+                    onClick={() => {
+                      const reason = window.prompt('반려 사유를 입력하세요:');
+                      if (reason) handleApprove(doc.documentId, false, reason.trim());
+                    }}
+                  >
+                    반려
+                  </ButtonMobile>
+                </CardAction>
+              )}
             </Value>
           </Card>
         ))}

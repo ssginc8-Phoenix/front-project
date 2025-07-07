@@ -31,6 +31,7 @@ const TabBar = styled.div`
   margin-bottom: 2rem;
 `;
 const Tab = styled.button<{ active: boolean }>`
+  /* 기존 스타일들… */
   padding: 0.5rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
@@ -40,8 +41,36 @@ const Tab = styled.button<{ active: boolean }>`
   color: ${({ active }) => (active ? '#fff' : '#34495e')};
   background: ${({ active }) => (active ? '#2980b9' : '#ecf0f1')};
   transition: background 0.2s;
+
+  /* 1) 모바일 터치 하이라이트 투명하게 */
+  -webkit-tap-highlight-color: transparent;
+
   &:hover {
     background: ${({ active }) => (active ? '#1c5983' : '#d0d7de')};
+  }
+
+  /* 2) 눌렀을 때도 둥글게 유지 */
+  &:active {
+    outline: none; /* 혹시 포커스 아웃라인 생겨도 지워주고 */
+    border-radius: 0.75rem; /* 동일한 둥글기 强제 적용 */
+    background: ${({ active }) =>
+      active ? '#1b4f72' /* 원하시는 active-bg 색상 조절 */ : '#d0d7de'};
+  }
+
+  &:focus {
+    outline: none; /* 포커스 시 테두리 제거 */
+  }
+`;
+const ButtonBase = styled.button`
+  position: relative; /* overflow:hidden 적용을 위해 */
+  overflow: hidden; /* 네이티브 하이라이트가 튀어나오지 않도록 자름 */
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent; /* 모바일 터치 하이라이트 제거 */
+
+  &:focus {
+    outline: none;
   }
 `;
 const Section = styled.div`
@@ -63,7 +92,7 @@ const DocTypeGrid = styled.div`
 `;
 
 // 2) 카드: 그리드 셀 높이를 100%로 채우고, 콘텐츠는 가운데 정렬
-const Card = styled.button<{ active?: boolean }>`
+const Card = styled(ButtonBase)<{ active?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,7 +115,18 @@ const Card = styled.button<{ active?: boolean }>`
     background: #f0f8ff;
   }
 `;
-
+const StatusBadge = styled.div<{ status: string }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px; /* 텍스트 높이에 맞춘 패딩 */
+  border-radius: 8px;
+  font-size: 0.85rem; /* 기존 StatusText 크기와 비슷하게 */
+  font-weight: 600;
+  color: #fff; /* 텍스트는 흰색 고정 */
+  background-color: ${({ status }) =>
+    status === 'APPROVED' ? '#27ae60' : status === 'REJECTED' ? '#e74c3c' : '#f39c12'};
+`;
 const Loading = styled.div`
   text-align: center;
   color: #2980b9;
@@ -148,7 +188,7 @@ const SelectWrapper = styled.div`
   max-width: 300px;
   margin-bottom: 16px;
 `;
-const Selected = styled.button`
+const Selected = styled(ButtonBase)`
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 1rem;
@@ -184,7 +224,7 @@ const CenteredTd = styled(Td)`
   text-align: center;
   vertical-align: middle;
 `;
-const Option = styled.div<{ selected: boolean }>`
+const Option = styled(ButtonBase)<{ selected: boolean }>`
   padding: 0.75rem 1rem;
   background: ${({ selected }) => (selected ? '#ecf6fc' : '#fff')};
   color: ${({ selected }) => (selected ? '#2980b9' : '#2c3e50')};
@@ -242,6 +282,19 @@ const StatusColor = styled.span<{ color: string }>`
   border-radius: 50%;
   background: ${({ color }) => color};
   margin-right: 0.5rem;
+`;
+const SelectedInfo = styled.div`
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  color: #2c3e50;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
 `;
 const StatusBar = styled.div<{ status: string }>`
   width: 100%;
@@ -376,6 +429,31 @@ const InsuranceRequestPage: React.FC = () => {
           <Section>
             {isMobile ? (
               <>
+                {/* 선택된 병원/진료 정보 */}
+                {(selectedHospitalId || selectedAppointmentId) && (
+                  <SelectedInfo>
+                    {selectedHospitalId && (
+                      <span>
+                        <strong>1. 병원:</strong>
+                        {hospitals.find((h) => h.id === selectedHospitalId)?.name}
+                      </span>
+                    )}
+                    {selectedAppointmentId && (
+                      <span>
+                        <strong>2. 진료:</strong>
+                        {(() => {
+                          const a = appointments.find(
+                            (x) => x.appointmentId === selectedAppointmentId,
+                          )!;
+                          return `${new Date(a.appointmentTime).toLocaleString('ko-KR', {
+                            dateStyle: 'short',
+                            timeStyle: 'short',
+                          })} / ${a.doctorName}`;
+                        })()}
+                      </span>
+                    )}
+                  </SelectedInfo>
+                )}
                 {step === 'hospital' && (
                   <>
                     <SectionLabel>1. 병원 선택</SectionLabel>
@@ -606,7 +684,9 @@ const InsuranceRequestPage: React.FC = () => {
                             <Td>{doc.documentId}</Td>
                             <Td>{documentTypeLabels[doc.type] || doc.type}</Td>
                             <Td>
-                              <StatusBar status={doc.status} />
+                              <StatusBadge status={doc.status}>
+                                {statusLabelMap[doc.status]}
+                              </StatusBadge>
                             </Td>
                             <CenteredTd>
                               {doc.status === 'REJECTED' ? (

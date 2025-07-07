@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import MobileSidebarMenu from '~/common/MobileSidebarMenu';
 import { createCsRoom, fetchCsRoomDetail } from '~/features/cs/api/csAPI';
 import ChatModal from '~/features/cs/components/user/ChatModal';
+import { useNavigate } from 'react-router';
 
 const sizes = {
   laptopL: '1600px',
@@ -204,7 +205,7 @@ const MobileNotificationWrapper = styled.div`
 const Header = () => {
   const user = useLoginStore((state) => state.user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const navigate = useNavigate();
   // 채팅 모달용
   const [csRoomId, setCsRoomId] = useState<number | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -215,6 +216,9 @@ const Header = () => {
     if (!user) {
       alert('로그인이 필요합니다.');
       return;
+    }
+    if (user.role === 'SYSTEM_ADMIN') {
+      return navigate('/cs');
     }
     document.body.style.overflow = 'hidden';
     if (!csRoomId) {

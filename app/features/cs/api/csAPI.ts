@@ -20,6 +20,8 @@ export interface PageResponse<T> {
 
 // CsRoom 타입
 export interface CsRoomResponse {
+  lastTime: string;
+  lastMessage: string;
   customerId: number;
   csRoomId: number;
   agentId: number;

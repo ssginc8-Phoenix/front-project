@@ -17,6 +17,14 @@ export default defineConfig({
       },
     },
   },
+  define: {
+    // 브라우저 환경에서 global을 window로 매핑
+    global: 'window',
+  },
+  optimizeDeps: {
+    // sockjs-client를 사전 번들링하여 define 치환이 적용되도록 함
+    include: ['sockjs-client'],
+  },
   ssr: {
     noExternal: ['styled-components', 'react-image-file-resizer'],
   },

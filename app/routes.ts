@@ -51,6 +51,8 @@ export default [
 
     /** CHATBOT 챗봇  */
     route('chatbot', 'routes/chatbot/ChatbotPage.tsx'),
+
+    route('cs', 'routes/cs/adminChat.tsx'),
   ]),
 
   /**ㅡㅡㅡㅡㅡㅡ 에러 페이지 ㅡㅡㅡㅡㅡㅡㅡ*/

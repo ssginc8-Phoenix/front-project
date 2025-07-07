@@ -1,7 +1,9 @@
+// src/features/cs/page/AdminChatPage.tsx
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Client, type Message, type StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import ChatRoomList from '~/features/cs/components/admin/ChatRoomList';
 import ChatWindow from '~/features/cs/components/admin/ChatWindow';
@@ -12,7 +14,6 @@ import type { CsMessageResponse, CsRoomResponse } from '~/features/cs/api/csAPI'
 import {
   fetchAdminCsRooms,
   fetchCsMessagesByCustomer,
-  updateCsRoomStatus,
   assignAgentToRoom,
 } from '~/features/cs/api/csAPI';
 import { showErrorAlert } from '~/components/common/alert';
@@ -36,6 +37,28 @@ const DesktopContainer = styled.div`
   grid-template-columns: 260px 1fr 300px;
   height: 100vh;
 `;
+const ContentWrapper = styled.div`
+  position: relative;
+  grid-column: 2 / span 2; /* 2번 칼럼(채팅)부터 2칸(span 2) */
+  display: grid;
+  grid-template-columns: 1fr 300px; /* 채팅창 1fr, 패널 300px */
+  height: 100%;
+`;
+const OverlayBox = styled.div`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 75vw;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #666;
+  z-index: 10;
+`;
 
 const MobileContainer = styled.div`
   display: flex;
@@ -50,23 +73,6 @@ const MobileContent = styled.div`
   overflow-y: auto;
 `;
 
-const EmptyMessage = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  color: #666;
-  font-size: 1.1rem;
-`;
-
-const BackButton = styled.button`
-  padding: 8px 16px;
-  background: transparent;
-  border: none;
-  font-size: 1rem;
-  cursor: pointer;
-`;
-
 export default function AdminChatPage() {
   const loginUser = useLoginStore((s) => s.user)!;
   const [rooms, setRooms] = useState<CsRoomResponse[]>([]);
@@ -75,12 +81,12 @@ export default function AdminChatPage() {
   const [historyMap, setHistoryMap] = useState<Record<number, { date: string; content: string }[]>>(
     {},
   );
-  const clientRef = useRef<Client>();
-  const subRef = useRef<StompSubscription>();
+  const clientRef = useRef<Client | null>(null);
+  const subRef = useRef<StompSubscription | null>(null);
 
   const isMobile = useMediaQuery('(max-width: 768px)');
 
-  // STOMP 클라이언트
+  // STOMP 클라이언트 설정
   useEffect(() => {
     const client = new Client({
       webSocketFactory: () => new SockJS('http://localhost:8080/ws-chat'),
@@ -89,10 +95,12 @@ export default function AdminChatPage() {
     });
     client.activate();
     clientRef.current = client;
-    return () => client.deactivate();
+    return () => {
+      client.deactivate();
+    };
   }, []);
 
-  // 채팅방 목록
+  // 채팅방 목록 로드
   useEffect(() => {
     fetchAdminCsRooms(0, 50)
       .then(async (p) => {
@@ -118,7 +126,7 @@ export default function AdminChatPage() {
       .catch(console.error);
   }, []);
 
-  // 중복 제거
+  // 중복 제거 (customerId 기준)
   const list = useMemo(() => {
     const map = new Map<number, CsRoomResponse>();
     rooms.forEach((r) => {
@@ -131,10 +139,11 @@ export default function AdminChatPage() {
   const selectedRoom =
     selectedCustomerId != null ? list.find((r) => r.customerId === selectedCustomerId) : null;
 
-  // 방 선택
+  // 방 선택 시 처리
   const handleSelectRoom = async (customerId: number) => {
     const room = list.find((r) => r.customerId === customerId);
     if (!room) return;
+
     if (!room.agentId) {
       if (!window.confirm('상담사로 배정받으시겠습니까?')) return;
       try {
@@ -159,12 +168,15 @@ export default function AdminChatPage() {
         return;
       }
     }
+
     setSelectedCustomerId(customerId);
   };
 
   // 메시지 & 구독 관리
   useEffect(() => {
     if (!selectedRoom) return;
+
+    // REST로 기존 메시지 불러오기
     fetchCsMessagesByCustomer(selectedRoom.customerId).then((data) =>
       setMessages(
         data.map((m) => ({
@@ -173,8 +185,10 @@ export default function AdminChatPage() {
         })),
       ),
     );
+
+    // STOMP 구독 재설정
     subRef.current?.unsubscribe();
-    const doSubscribe = () => {
+    const subscribeFn = () => {
       subRef.current = clientRef.current!.subscribe(
         `/topic/rooms/${selectedRoom.csRoomId}`,
         (msg: Message) => {
@@ -183,12 +197,12 @@ export default function AdminChatPage() {
         },
       );
     };
-    if (clientRef.current!.connected) doSubscribe();
+    if (clientRef.current!.connected) subscribeFn();
     else {
       const prev = clientRef.current!.onConnect;
       clientRef.current!.onConnect = (frame) => {
         prev?.(frame);
-        doSubscribe();
+        subscribeFn();
       };
     }
   }, [selectedRoom]);
@@ -206,7 +220,7 @@ export default function AdminChatPage() {
   };
 
   const handleSaveHistory = (content: string) => {
-    if (!selectedCustomerId) return;
+    if (selectedCustomerId == null) return;
     const entry = { date: new Date().toLocaleString(), content };
     setHistoryMap((h) => ({
       ...h,
@@ -214,7 +228,7 @@ export default function AdminChatPage() {
     }));
   };
 
-  // 렌더링: 모바일 / 데스크탑 분기
+  // **공통 렌더링**: 모바일/데스크탑 분기
   if (isMobile) {
     return (
       <MobileContainer>
@@ -230,7 +244,7 @@ export default function AdminChatPage() {
                 csRoomId: r.csRoomId,
                 status: r.status,
               }))}
-            activeId={selectedCustomerId || -1}
+            activeId={selectedCustomerId ?? -1}
             onSelect={handleSelectRoom}
           />
         ) : (
@@ -259,9 +273,11 @@ export default function AdminChatPage() {
               userName={selectedRoom.customerName}
               userAvatar={selectedRoom.customerAvatarUrl}
               status={selectedRoom.status}
-              onStatusChange={handleStatusChange}
+              onStatusChange={(newStatus: string) =>
+                handleStatusChange(selectedRoom.csRoomId, newStatus)
+              }
               onSave={handleSaveHistory}
-              history={historyMap[selectedCustomerId!] || []}
+              history={historyMap[selectedCustomerId!] ?? []}
             />
           </MobileContent>
         )}
@@ -269,7 +285,7 @@ export default function AdminChatPage() {
     );
   }
 
-  // Desktop View
+  // **데스크탑 뷰**: 항상 채팅창 + 패널 보여주되, 빈 상태 처리
   return (
     <DesktopContainer>
       <ChatRoomList
@@ -283,44 +299,53 @@ export default function AdminChatPage() {
             csRoomId: r.csRoomId,
             status: r.status,
           }))}
-        activeId={selectedCustomerId || -1}
+        activeId={selectedCustomerId ?? -1}
         onSelect={handleSelectRoom}
       />
 
-      {selectedRoom ? (
+      <ContentWrapper>
+        {/* ChatWindow */}
         <ChatWindow
-          roomId={selectedRoom.csRoomId}
-          roomName={selectedRoom.customerName}
+          roomId={selectedRoom?.csRoomId ?? -1}
+          roomName={selectedRoom?.customerName ?? ''}
           myName={loginUser.name}
           userAvatar={loginUser.profileImageUrl}
-          messages={messages.map((m) => ({
-            sender: m.userId === loginUser.userId ? loginUser.name : selectedRoom.customerName,
-            avatar:
-              m.userId === loginUser.userId
-                ? loginUser.profileImageUrl
-                : selectedRoom.customerAvatarUrl,
-            text: m.content,
-            date: new Date(m.createdAt),
-            system: (m as any).system ?? false,
-          }))}
+          messages={
+            selectedRoom
+              ? messages.map((m) => ({
+                  sender:
+                    m.userId === loginUser.userId ? loginUser.name : selectedRoom.customerName,
+                  avatar:
+                    m.userId === loginUser.userId
+                      ? loginUser.profileImageUrl
+                      : selectedRoom.customerAvatarUrl,
+                  text: m.content,
+                  date: new Date(m.createdAt),
+                  system: (m as any).system ?? false,
+                }))
+              : []
+          }
           onSend={handleSend}
-          disabled={selectedRoom.status === 'CLOSED'}
+          disabled={!selectedRoom || selectedRoom.status !== 'OPEN'}
         />
-      ) : (
-        <EmptyMessage>왼쪽 채팅방을 선택해 상담을 시작해보세요!</EmptyMessage>
-      )}
 
-      {selectedRoom && (
+        {/* ConsultationPanel */}
         <ConsultationPanel
-          csRoomId={selectedRoom.csRoomId}
-          userName={selectedRoom.customerName}
-          userAvatar={selectedRoom.customerAvatarUrl}
-          status={selectedRoom.status}
-          onStatusChange={handleStatusChange}
+          csRoomId={selectedRoom?.csRoomId ?? -1}
+          userName={selectedRoom?.customerName ?? ''}
+          userAvatar={selectedRoom?.customerAvatarUrl ?? '/default-avatar.png'}
+          status={selectedRoom?.status ?? 'CLOSED'}
+          onStatusChange={(newStatus: string) =>
+            handleStatusChange(selectedRoom!.csRoomId, newStatus)
+          }
           onSave={handleSaveHistory}
-          history={historyMap[selectedCustomerId!] || []}
+          history={selectedCustomerId != null ? (historyMap[selectedCustomerId] ?? []) : []}
+          disabled={!selectedRoom || selectedRoom.status !== 'OPEN'}
         />
-      )}
+
+        {/* 선택된 방이 없을 때만 보이는 오버레이 */}
+        {!selectedRoom && <OverlayBox>왼쪽 채팅방을 선택하여 상담을 시작해보세요!</OverlayBox>}
+      </ContentWrapper>
     </DesktopContainer>
   );
 }

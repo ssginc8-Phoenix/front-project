@@ -54,6 +54,7 @@ const AppointmentRequestPage = () => {
    */
   const isSuspended = user?.isSuspended;
 
+
   useEffect(() => {
     if (isSuspended) {
       showErrorAlert('예약 불가', '정책 위반으로 인해 예약이 불가능합니다.').then(() => {
@@ -63,6 +64,7 @@ const AppointmentRequestPage = () => {
   }, [isSuspended, navigate]);
 
   if (isSuspended) {
+
     return null;
   }
 

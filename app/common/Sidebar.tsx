@@ -203,6 +203,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose, onCsClick }) => {
                 DOCTOR: '의사',
                 HOSPITAL_ADMIN: '병원 관리자',
                 PATIENT: '환자',
+                SYSTEM_ADMIN: '시스템 관리자',
               }[user.role] || '게스트'}
             </ProfileRole>
           </>

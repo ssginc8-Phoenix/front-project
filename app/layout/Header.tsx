@@ -7,6 +7,7 @@ import NotificationComponent from '~/features/notification/components/Notificati
 import MobileSidebarMenu from '~/common/MobileSidebarMenu';
 import ChatModal from '~/features/cs/components/user/ChatModal';
 import { createCsRoom, fetchCsRoomDetail } from '~/features/cs/api/csAPI';
+import { showErrorAlert } from '~/components/common/alert';
 
 // breakpoint definitions
 const sizes = {
@@ -173,7 +174,7 @@ export default function Header() {
   // 고객센터 버튼 클릭
   const openChat = async () => {
     if (!user) {
-      alert('로그인이 필요합니다.');
+      await showErrorAlert('로그인 필요', '고객센터를 이용하려면 로그인이 필요합니다.');
       return;
     }
     document.body.style.overflow = 'hidden';
@@ -184,7 +185,7 @@ export default function Header() {
         setCsRoomId(newId);
       } catch (err) {
         console.error('채팅방 생성 실패', err);
-        alert('채팅방 생성에 실패했습니다.');
+        await showErrorAlert('오류 발생', '채팅방 생성에 실패했습니다.');
         document.body.style.overflow = 'auto';
         return;
       }

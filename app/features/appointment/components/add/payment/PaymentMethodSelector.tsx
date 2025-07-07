@@ -29,7 +29,7 @@ const PaymentMethodSelector = () => {
     <Wrapper>
       <TitleBox>
         <Title>수납방법 선택</Title>
-        <Description>수납할 수단을 선택해주세요.</Description>
+        <Description>수납할 수단을 선택해주세요. (필수 항목)</Description>
       </TitleBox>
 
       <CardList>

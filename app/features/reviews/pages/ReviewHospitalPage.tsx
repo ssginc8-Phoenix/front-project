@@ -16,6 +16,7 @@ import {
   PaginationWrapper,
 } from '~/components/styled/MyPage.styles';
 import { getMyDoctorInfo } from '~/features/doctor/api/doctorAPI';
+import { showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 export default function ReviewHospitalPage() {
   const [hospitalId, setHospitalId] = useState<number | null>(null);
@@ -56,11 +57,11 @@ export default function ReviewHospitalPage() {
     if (selectedReviewId === null) return;
     try {
       await reportReview(selectedReviewId, reason);
-      alert('신고가 완료되었습니다.');
+      await showSuccessAlert('신고 완료', '리뷰 신고가 성공적으로 접수되었습니다.');
       setIsModalOpen(false);
       setPage(0);
     } catch {
-      alert('신고 처리 중 오류가 발생했습니다.');
+      await showErrorAlert('신고 실패', '리뷰 신고 처리 중 오류가 발생했습니다.');
     }
   };
 

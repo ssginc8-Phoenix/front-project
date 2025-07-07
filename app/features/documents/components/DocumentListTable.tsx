@@ -4,6 +4,7 @@ import type { DocumentResponseDTO } from '~/features/documents/types/insurance';
 import { getMyHospital } from '~/features/hospitals/api/hospitalAPI';
 import { useApprove, useAttachFile } from '../hooks/useDocumentRequests';
 import { useQueryClient } from '@tanstack/react-query';
+import { showErrorAlert, showInfoAlert, showSuccessAlert } from '~/components/common/alert';
 
 interface Props {
   data: DocumentResponseDTO[];
@@ -204,20 +205,31 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
     approveMutation.mutate(
       { id, dto: { approved, reason } },
       {
-        onSuccess: () => alert(approved ? '문서가 승인되었습니다.' : '문서가 반려되었습니다.'),
-        onError: (err: Error) => alert(`처리에 실패했습니다: ${err.message}`),
+        onSuccess: async () => {
+          if (approved) {
+            await showSuccessAlert('처리 완료', '문서가 승인되었습니다.');
+          } else {
+            await showInfoAlert('처리 완료', '문서가 반려되었습니다.');
+          }
+        },
+        onError: async (err: Error) => {
+          await showErrorAlert('처리 실패', `문서 처리 중 오류가 발생했습니다: ${err.message}`);
+        },
       },
     );
   };
 
   const handleUploadClick = (id: number) => {
     const file = selectedFiles[id];
-    if (!file) return alert('먼저 파일을 선택해주세요.');
+    if (!file) {
+      showErrorAlert('파일 선택 필요', '먼저 업로드할 파일을 선택해주세요.');
+      return;
+    }
     attachMutation.mutate(
       { id, file },
       {
-        onSuccess: () => {
-          alert('파일이 업로드되었습니다.');
+        onSuccess: async () => {
+          await showSuccessAlert('업로드 완료', '파일이 성공적으로 업로드되었습니다.');
           qc.invalidateQueries({
             queryKey: ['adminDocs', hospitalId],
           });
@@ -227,7 +239,9 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
             return p;
           });
         },
-        onError: (err: Error) => alert(`업로드에 실패했습니다: ${err.message}`),
+        onError: async (err: Error) => {
+          await showErrorAlert('업로드 실패', `파일 업로드 중 오류가 발생했습니다: ${err.message}`);
+        },
       },
     );
   };

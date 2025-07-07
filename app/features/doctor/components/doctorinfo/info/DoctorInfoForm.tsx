@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { getMyDoctorInfo, updateDoctorProfile } from '~/features/doctor/api/doctorAPI';
 import loginStore from '~/features/user/stores/LoginStore';
 import { media } from '~/features/hospitals/components/common/breakpoints';
+import { showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 const Form = styled.form`
   max-width: 48rem;
@@ -118,6 +119,10 @@ const DoctorInfoForm: React.FC = () => {
         setPreview(data.imageUrl || null);
       } catch (err) {
         console.error(err);
+        showErrorAlert(
+          '정보 로드 실패',
+          '의사 정보를 불러오는 데 실패했습니다. 다시 시도해주세요.',
+        );
       }
     };
     fetchDoctorInfo();
@@ -150,10 +155,10 @@ const DoctorInfoForm: React.FC = () => {
     try {
       await updateDoctorProfile(doctorId, formData);
       await fetchMyInfo();
-      alert('프로필이 수정되었습니다.');
+      await showSuccessAlert('저장 완료', '프로필이 성공적으로 수정되었습니다.');
     } catch (err) {
       console.error(err);
-      alert('수정에 실패했습니다.');
+      await showErrorAlert('수정 실패', '프로필 수정 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 

@@ -13,7 +13,7 @@ const SymptomSelector = () => {
     <Wrapper>
       <TitleBox>
         <Title>증상 선택</Title>
-        <Description>현재 느끼는 증상이나 불편한 점을 입력해주세요.</Description>
+        <Description>현재 느끼는 증상이나 불편한 점을 입력해주세요. (필수 항목)</Description>
       </TitleBox>
 
       <SymptomCheckboxList selected={selectedSymptoms} onChange={setSelectedSymptoms} />

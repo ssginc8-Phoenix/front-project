@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { getMyDoctorInfo, updateDoctorCapacity } from '~/features/doctor/api/doctorAPI';
+import { showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 interface Props {
   onSaved?: () => void;
@@ -19,6 +20,7 @@ const DoctorCapacitySetter: React.FC<Props> = ({ onSaved }) => {
         setCapacity(data.capacityPerHalfHour || 1);
       } catch (e) {
         console.error('의사 정보 불러오기 실패', e);
+        await showErrorAlert('정보 로드 실패', '의사 정보를 불러오는 데 실패했습니다.');
       }
     };
     fetchDoctor();
@@ -33,12 +35,12 @@ const DoctorCapacitySetter: React.FC<Props> = ({ onSaved }) => {
     if (!doctorId) return;
     try {
       await updateDoctorCapacity(doctorId, capacity);
-      alert('진료 인원이 저장되었습니다.');
+      await showSuccessAlert('저장 완료', '진료 인원이 성공적으로 저장되었습니다.');
       setDirty(false);
       onSaved?.(); // 저장 후 모달 닫기
     } catch (e) {
       console.error(e);
-      alert('저장 실패');
+      await showErrorAlert('저장 실패', '진료 인원 저장 중 오류가 발생했습니다.');
     }
   };
 

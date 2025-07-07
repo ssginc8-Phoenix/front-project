@@ -1,3 +1,5 @@
+// src/components/Layout/MobileSidebarMenu.tsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import Sidebar from '~/common/Sidebar';
@@ -57,20 +59,25 @@ const SidebarContainer = styled.div<{ $isOpen: boolean }>`
   }
 `;
 
-interface MobileSidebarMenuProps {
+export interface MobileSidebarMenuProps {
+  /** 사이드바 닫기 */
   onClose: () => void;
+  /** 닫고 난 뒤 채팅 모달 열기 */
+  onOpenChat: () => void;
   user: any;
   scrollToSection: (id: string) => void;
 }
 
 const MobileSidebarMenu: React.FC<MobileSidebarMenuProps> = ({
   onClose,
+  onOpenChat,
   user,
   scrollToSection,
 }) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [isOpenInternal, setIsOpenInternal] = useState(false);
 
+  // 처음 마운트 시 열기 애니메이션
   useEffect(() => {
     setIsOpenInternal(true);
 
@@ -86,6 +93,7 @@ const MobileSidebarMenu: React.FC<MobileSidebarMenuProps> = ({
     };
   }, []);
 
+  // 사이드바 닫기 + 애니메이션
   const handleCloseWithAnimation = () => {
     setIsOpenInternal(false);
     const timer = setTimeout(() => {
@@ -94,11 +102,19 @@ const MobileSidebarMenu: React.FC<MobileSidebarMenuProps> = ({
     return () => clearTimeout(timer);
   };
 
+  // 고객센터 클릭 시: 닫기 → 모달 오픈
+  const handleCsClick = () => {
+    handleCloseWithAnimation();
+    setTimeout(() => {
+      onOpenChat();
+    }, 300);
+  };
+
   return (
     <>
       <Overlay className={isOpenInternal ? 'open' : ''} onClick={handleCloseWithAnimation} />
       <SidebarContainer $isOpen={isOpenInternal} ref={sidebarRef}>
-        <Sidebar />
+        <Sidebar onClose={handleCloseWithAnimation} onCsClick={handleCsClick} />
       </SidebarContainer>
     </>
   );

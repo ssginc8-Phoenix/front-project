@@ -16,6 +16,7 @@ import {
   fetchCsMessagesByCustomer,
   assignAgentToRoom,
 } from '~/features/cs/api/csAPI';
+import { showErrorAlert } from '~/components/common/alert';
 
 // Hook: 간단한 미디어 쿼리
 function useMediaQuery(query: string): boolean {
@@ -163,7 +164,7 @@ export default function AdminChatPage() {
           }),
         });
       } catch {
-        alert('에이전트 할당에 실패했습니다.');
+        await showErrorAlert('상담사 배정 실패', '상담사 배정에 실패했습니다. 다시 시도해주세요.');
         return;
       }
     }

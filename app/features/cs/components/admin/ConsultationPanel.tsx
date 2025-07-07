@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { type CsNoteDto, updateCsRoomStatus } from '~/features/cs/api/csAPI';
 import { useCsNotes, useSaveCsNote } from '~/features/cs/hooks/useCsNotes';
 import useLoginStore from '~/features/user/stores/LoginStore';
+import { showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 const Panel = styled.div`
   display: flex;
@@ -199,8 +200,9 @@ const ConsultationPanel: React.FC<ConsultationPanelProps> = ({
       try {
         await updateCsRoomStatus(csRoomId, newStatus);
         onStatusChange(newStatus);
+        await showSuccessAlert('상태 변경 완료', '상담 상태가 성공적으로 변경되었습니다.');
       } catch {
-        alert('상태 저장에 실패했습니다.');
+        await showErrorAlert('상태 변경 실패', '상담 상태 저장에 실패했습니다.');
         setSaving(false);
         return;
       }
@@ -213,7 +215,7 @@ const ConsultationPanel: React.FC<ConsultationPanelProps> = ({
             setText('');
           },
           onError() {
-            alert('메모 저장에 실패했습니다.');
+            showErrorAlert('메모 저장 실패', '메모 저장에 실패했습니다.');
           },
         },
       );

@@ -23,7 +23,7 @@ const DoctorSelector = ({ hospitalId }: DoctorSelectorProps) => {
     <Wrapper>
       <TitleBox>
         <Title>의사 선택</Title>
-        <Description>진료받으실 의사를 선택해주세요.</Description>
+        <Description>진료받으실 의사를 선택해주세요. (필수 항목)</Description>
       </TitleBox>
 
       {loading && <LoadingIndicator />}

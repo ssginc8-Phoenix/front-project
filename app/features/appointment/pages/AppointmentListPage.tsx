@@ -5,6 +5,7 @@ import { useAppointmentActions } from '~/features/appointment/hooks/useAppointme
 import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 import DateTimeSelectorModal from '../components/detail/DateTimeSelectorModal';
 import dayjs from 'dayjs';
+import { showErrorAlert } from '~/components/common/alert';
 
 const AppointmentListPage = () => {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
@@ -35,7 +36,10 @@ const AppointmentListPage = () => {
   // DateTimeSelectorModal에서 '재예약 확정' 시 호출될 핸들러
   const handleConfirmReschedule = async () => {
     if (!rescheduleAppointmentId || !date || !time) {
-      alert('재예약 정보를 찾을 수 없습니다. 날짜와 시간을 선택했는지 확인해주세요.');
+      await showErrorAlert(
+        '재예약 실패',
+        '재예약 정보를 찾을 수 없습니다. 날짜와 시간을 선택했는지 확인해주세요.',
+      );
       return;
     }
 
@@ -46,7 +50,6 @@ const AppointmentListPage = () => {
 
     const success = await rescheduleAppointment(rescheduleAppointmentId, newDateTime);
     if (success) {
-      alert('재예약이 성공적으로 완료되었습니다.');
       setIsDateTimeSelectorModalOpen(false); // DateTimeSelectorModal 닫기
       setRescheduleAppointmentId(null);
       setRescheduleDoctorId(null);
@@ -54,8 +57,6 @@ const AppointmentListPage = () => {
       handleRefreshList(); // 목록 새로고침
       setDate(null); // 날짜/시간 선택 상태 초기화
       setTime(''); // 날짜/시간 선택 상태 초기화
-    } else {
-      alert('재예약에 실패했습니다. 다시 시도해주세요.');
     }
   };
 

@@ -6,8 +6,12 @@ import NotificationComponent from '~/features/notification/components/Notificati
 import { useEffect, useState } from 'react';
 import MobileSidebarMenu from '~/common/MobileSidebarMenu';
 import { createCsRoom, fetchCsRoomDetail } from '~/features/cs/api/csAPI';
+
 import ChatModal from '~/features/cs/components/user/ChatModal';
 import { useNavigate } from 'react-router';
+
+import { showErrorAlert } from '~/components/common/alert';
+
 
 const sizes = {
   laptopL: '1600px',
@@ -214,7 +218,7 @@ const Header = () => {
   // 3. 고객센터 버튼 핸들러
   const openChat = async () => {
     if (!user) {
-      alert('로그인이 필요합니다.');
+      await showErrorAlert('로그인 필요', '고객센터를 이용하려면 로그인이 필요합니다.');
       return;
     }
     if (user.role === 'SYSTEM_ADMIN') {
@@ -222,8 +226,20 @@ const Header = () => {
     }
     document.body.style.overflow = 'hidden';
     if (!csRoomId) {
+
       const newId = await createCsRoom({ customerId: user.userId });
       setCsRoomId(newId);
+
+      try {
+        const newId = await createCsRoom({ customerId: user.userId });
+        setCsRoomId(newId);
+      } catch (err) {
+        console.error('채팅방 생성 실패', err);
+        await showErrorAlert('오류 발생', '채팅방 생성에 실패했습니다.');
+        document.body.style.overflow = 'auto';
+        return;
+      }
+
     }
     setIsChatOpen(true);
   };

@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { getPatientCalendar } from '~/features/calendar/api/CalendarAPI';
 import { getMedicationSchedule } from '~/features/medication/api/medicationAPI';
 import CommonModal from '~/components/common/CommonModal';
+import { showErrorAlert } from '~/components/common/alert';
 
 // --- 반응형 디자인을 위한 공통 사이즈 및 미디어 쿼리 정의 ---
 const sizes = {
@@ -539,6 +540,7 @@ export default function PatientCalendar() {
         setCalendarData(groupByDate(raw));
       } catch (e) {
         console.error('캘린더 로딩 실패', e);
+        await showErrorAlert('캘린더 로드 오류', '캘린더 정보를 불러오는 데 실패했습니다.');
       }
     })();
   }, [activeDate]);
@@ -566,10 +568,9 @@ export default function PatientCalendar() {
           startDate: detail.startDate,
           endDate: detail.endDate,
           times: detail.times,
-          patientName: detail.patientName,
         });
       } catch {
-        alert('상세 정보를 불러오는 데 실패했습니다.');
+        await showErrorAlert('상세 정보 로드 오류', '복약 상세 정보를 불러오는 데 실패했습니다.');
         return;
       }
     } else {

@@ -10,6 +10,7 @@ import useHospitalStore from '~/features/hospitals/state/hospitalStore';
 import { useNavigate } from 'react-router';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import Resizer from 'react-image-file-resizer';
+import { showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 const dayOfWeekMap: Record<string, CreateScheduleRequest['dayOfWeek']> = {
   월요일: 'MONDAY',
@@ -82,13 +83,13 @@ const HospitalCreateForm: React.FC = () => {
     for (const file of files) {
       // 포맷 검사
       if (!['image/jpeg', 'image/png', 'image/svg+xml'].includes(file.type)) {
-        alert('JPEG, PNG, SVG만 허용됩니다.');
+        await showErrorAlert('파일 형식 오류', 'JPEG, PNG, SVG 파일만 허용됩니다.');
         continue;
       }
 
       // 2MB 제한
       if (file.size / 1024 / 1024 > 2) {
-        alert(`${file.name}은(는) 2MB 이하만 허용됩니다.`);
+        await showErrorAlert('파일 크기 초과', `${file.name}은(는) 2MB 이하만 허용됩니다.`);
         continue;
       }
 
@@ -119,12 +120,15 @@ const HospitalCreateForm: React.FC = () => {
     setPreviewUrls(urls);
   };
 
-  const handleAddSchedule = () => {
+  const handleAddSchedule = async () => {
     const usedDays = businessHours.map((row) => row.dayOfWeek);
     const availableDay = (Object.values(dayOfWeekMap) as CreateScheduleRequest['dayOfWeek'][]).find(
       (day) => !usedDays.includes(day),
     );
-    if (!availableDay) return alert('모든 요일이 이미 등록되었습니다.');
+    if (!availableDay) {
+      await showErrorAlert('모든 요일 등록됨', '모든 요일의 진료시간이 이미 등록되었습니다.');
+      return;
+    }
     setBusinessHours((prev) => [
       ...prev,
       {
@@ -137,12 +141,12 @@ const HospitalCreateForm: React.FC = () => {
     ]);
   };
 
-  const handleScheduleChange = (idx: number, key: keyof HourRow, value: string) => {
+  const handleScheduleChange = async (idx: number, key: keyof HourRow, value: string) => {
     if (
       key === 'dayOfWeek' &&
       businessHours.some((row, i) => row.dayOfWeek === value && i !== idx)
     ) {
-      alert('이미 선택된 요일입니다.');
+      await showErrorAlert('중복 요일', '이미 선택된 요일입니다. 다른 요일을 선택해주세요.');
       return;
     }
     setBusinessHours((prev) => {
@@ -209,7 +213,7 @@ const HospitalCreateForm: React.FC = () => {
 
     const hasValidSchedule = businessHours.some(({ open, close }) => open && close);
     if (!hasValidSchedule) {
-      alert('진료시간을 최소 1개 이상 등록해주세요.');
+      await showErrorAlert('진료시간 필요', '진료시간을 최소 1개 이상 등록해주세요.');
       return;
     }
     for (const { dayOfWeek, open, close, lunchStart, lunchEnd } of businessHours) {
@@ -218,7 +222,10 @@ const HospitalCreateForm: React.FC = () => {
       if (!open && !close && !lunchStart && !lunchEnd) continue;
 
       if (!open || !close) {
-        alert(`${dayLabel}의 진료 시작·종료 시간을 모두 입력해주세요.`);
+        await showErrorAlert(
+          '시간 입력 오류',
+          `${dayLabel}의 진료 시작·종료 시간을 모두 입력해주세요.`,
+        );
         return;
       }
 
@@ -228,27 +235,39 @@ const HospitalCreateForm: React.FC = () => {
       const lunchEndTime = parseTime(lunchEnd);
 
       if (!openTime || !closeTime) {
-        alert(`${dayLabel}의 진료시간이 잘못되었습니다.`);
+        await showErrorAlert('시간 형식 오류', `${dayLabel}의 진료시간 형식이 잘못되었습니다.`);
         return;
       }
 
       if (openTime >= closeTime) {
-        alert(`${dayLabel} 진료 시작시간은 종료시간보다 빨라야 합니다.`);
+        await showErrorAlert(
+          '시간 순서 오류',
+          `${dayLabel} 진료 시작시간은 종료시간보다 빨라야 합니다.`,
+        );
         return;
       }
 
       if (lunchStartTime && (lunchStartTime < openTime || lunchStartTime >= closeTime)) {
-        alert(`${dayLabel} 점심 시작시간은 진료시간 내에 있어야 합니다.`);
+        await showErrorAlert(
+          '점심시간 범위 오류',
+          `${dayLabel} 점심 시작시간은 진료시간 내에 있어야 합니다.`,
+        );
         return;
       }
 
       if (lunchEndTime && (lunchEndTime <= openTime || lunchEndTime > closeTime)) {
-        alert(`${dayLabel} 점심 종료시간은 진료시간 내에 있어야 합니다.`);
+        await showErrorAlert(
+          '점심시간 범위 오류',
+          `${dayLabel} 점심 종료시간은 진료시간 내에 있어야 합니다.`,
+        );
         return;
       }
 
       if (lunchStartTime && lunchEndTime && lunchStartTime >= lunchEndTime) {
-        alert(`${dayLabel} 점심 시작시간은 점심 종료시간보다 빨라야 합니다.`);
+        await showErrorAlert(
+          '점심시간 순서 오류',
+          `${dayLabel} 점심 시작시간은 점심 종료시간보다 빨라야 합니다.`,
+        );
         return;
       }
     }
@@ -277,7 +296,7 @@ const HospitalCreateForm: React.FC = () => {
     }
     if (Object.values(errors).some(Boolean)) return;
     if (!user || user.userId === undefined) {
-      alert('로그인이 필요합니다.');
+      await showErrorAlert('로그인 필요', '병원 등록을 위해 로그인이 필요합니다.');
       return;
     }
     try {
@@ -327,11 +346,11 @@ const HospitalCreateForm: React.FC = () => {
 
       await Promise.all(schedulePayloads.map((s) => createHospitalSchedule(hospitalId, s)));
 
-      alert('병원 등록이 완료되었습니다. 이제 의사를 등록해주세요.');
+      await showSuccessAlert('등록 완료', '병원 등록이 완료되었습니다. 이제 의사를 등록해주세요.');
       navigate('/register-doctors');
     } catch (err) {
       console.error(err);
-      alert('등록 중 오류가 발생했습니다.');
+      await showErrorAlert('등록 실패', '병원 등록 중 오류가 발생했습니다.');
     }
   };
 

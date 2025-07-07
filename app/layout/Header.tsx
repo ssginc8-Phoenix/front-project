@@ -305,7 +305,12 @@ const Header = () => {
         </HeaderContent>
       </HeaderBar>
       {isMenuOpen && (
-        <MobileSidebarMenu onClose={toggleMenu} user={user} scrollToSection={scrollToSection} />
+        <MobileSidebarMenu
+          onClose={toggleMenu}
+          user={user}
+          scrollToSection={scrollToSection}
+          onOpenChat={openChat}
+        />
       )}
       {isChatOpen && user && csRoomId != null && (
         <ChatModal

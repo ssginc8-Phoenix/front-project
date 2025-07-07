@@ -6,6 +6,7 @@ import {
 } from '~/features/medication/api/medicationAPI';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { daysOfWeek } from '~/features/medication/constants/daysOfWeek';
+import { showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 const inputStyles = css`
   width: 100%;
@@ -317,39 +318,42 @@ export default function MedicationRegisterModal({
   const handleSubmit = async () => {
     if (!initialData) {
       if (selectedTarget === 'all' && patients.length === 0) {
-        alert('등록할 환자가 없습니다. 먼저 환자를 등록해주세요.');
+        showErrorAlert('등록 오류', '등록할 환자가 없습니다. 먼저 환자를 등록해주세요.');
         return;
       }
       if (selectedTarget === '') {
-        alert('환자를 선택해주세요.');
+        showErrorAlert('선택 오류', '환자를 선택해주세요.');
         return;
       }
     }
 
     if (!medicationName.trim()) {
-      alert('약 이름을 입력해주세요.');
+      showErrorAlert('입력 오류', '약 이름을 입력해주세요.');
       return;
     }
     if (selectedDays.length === 0) {
-      alert('복약 요일을 하나 이상 선택해주세요.');
+      showErrorAlert('선택 오류', '복약 요일을 하나 이상 선택해주세요.');
       return;
     }
     if (selectedMeals.length === 0) {
-      alert('복용 끼니를 하나 이상 선택해주세요.');
+      showErrorAlert('선택 오류', '복용 끼니를 하나 이상 선택해주세요.');
       return;
     }
 
     // Validate times for selected meals
     for (const meal of selectedMeals) {
       if (!mealTimes[meal]) {
-        alert(`${mealOptions.find((o) => o.value === meal)?.label} 시간을 입력해주세요.`);
+        showErrorAlert(
+          '시간 입력 오류',
+          `${mealOptions.find((o) => o.value === meal)?.label} 시간을 입력해주세요.`,
+        );
         return;
       }
     }
 
     // Validate dates
     if (new Date(startDate) > new Date(endDate)) {
-      alert('시작일은 종료일보다 이전이거나 같아야 합니다.');
+      showErrorAlert('날짜 오류', '시작일은 종료일보다 이전이거나 같아야 합니다.');
       return;
     }
 
@@ -363,7 +367,7 @@ export default function MedicationRegisterModal({
           newStartDate: startDate,
           newEndDate: endDate,
         });
-        alert('약 정보가 수정되었습니다.');
+        showSuccessAlert('수정 완료', '약 정보가 성공적으로 수정되었습니다.');
       } else {
         const targets =
           selectedTarget === 'all'
@@ -380,16 +384,22 @@ export default function MedicationRegisterModal({
             endDate,
           });
         }
-        alert(
+        showSuccessAlert(
+          '등록 완료',
           selectedTarget === 'all'
-            ? '모든 환자에게 약 정보가 등록되었습니다.'
-            : '선택된 환자에게 약 정보가 등록되었습니다.',
+            ? '모든 환자에게 약 정보가 성공적으로 등록되었습니다.'
+            : '선택된 환자에게 약 정보가 성공적으로 등록되었습니다.',
         );
       }
       onClose();
     } catch (error) {
       console.error('Error submitting medication schedule:', error);
-      alert(initialData ? '약 정보 수정에 실패했습니다.' : '약 정보 등록에 실패했습니다.');
+      showErrorAlert(
+        '처리 실패',
+        initialData
+          ? '약 정보 수정에 실패했습니다.'
+          : '약 정보 등록에 실패했습니다. 다시 시도해주세요.',
+      );
     }
   };
 

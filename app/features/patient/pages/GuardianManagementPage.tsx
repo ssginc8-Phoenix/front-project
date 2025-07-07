@@ -14,6 +14,7 @@ import {
 import { getPatientInfo } from '~/features/patient/api/patientAPI';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import ReusableModal from '~/features/patient/components/ReusableModal';
+import { showConfirmAlert, showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 // Media queries for responsive design
 const media = {
@@ -266,6 +267,7 @@ const GuardianManagementPage: React.FC = () => {
       setPendingInvites(pend);
     } catch (error) {
       console.error('Failed to reload guardian data:', error);
+      showErrorAlert('데이터 로딩 실패', '보호자 정보를 불러오는 데 실패했습니다.');
     }
   };
 
@@ -280,43 +282,65 @@ const GuardianManagementPage: React.FC = () => {
         }
       } catch (error) {
         console.error('Failed to fetch initial data:', error);
+        showErrorAlert(
+          '초기 데이터 로딩 실패',
+          '페이지를 표시하는 데 필요한 초기 정보를 불러오는 데 실패했습니다.',
+        );
       }
     })();
   }, [fetchMyInfo]);
 
   const handleDelete = async (g: Guardian) => {
-    if (!confirm(`${g.name} 보호자를 정말 삭제하시겠습니까?`)) return;
+    const result = await showConfirmAlert(
+      '보호자 삭제',
+      `${g.name} 보호자를 정말 삭제하시겠습니까?`,
+      'question',
+    );
+    if (!result.isConfirmed) return;
+
     try {
       await deletePatientGuardian(g.patientGuardianId);
       if (patientInfo) await reloadAll(patientInfo.patientId);
+      showSuccessAlert('삭제 완료', `${g.name} 보호자가 성공적으로 삭제되었습니다.`);
     } catch (error) {
       console.error('Failed to delete guardian:', error);
-      alert('보호자 삭제에 실패했습니다.');
+      showErrorAlert('삭제 실패', '보호자 삭제에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
   const handleCancelInvite = async (inv: PendingInvite) => {
-    if (!confirm(`초대를 취소하시겠습니까? (${inv.name})`)) return;
+    const result = await showConfirmAlert(
+      '초대 취소',
+      `초대를 취소하시겠습니까? (${inv.name})`,
+      'question',
+    );
+    if (!result.isConfirmed) return;
+
     try {
       await deletePatientGuardian(inv.mappingId); // Assuming this API can cancel an invite
       if (patientInfo) await reloadAll(patientInfo.patientId);
+      showSuccessAlert('초대 취소 완료', `${inv.name} 님의 초대가 성공적으로 취소되었습니다.`);
     } catch (error) {
       console.error('Failed to cancel invite:', error);
-      alert('초대 취소에 실패했습니다.');
+      showErrorAlert('초대 취소 실패', '초대 취소에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
   const handleResendInvite = async (inv: PendingInvite) => {
-    if (!patientInfo) return;
+    if (!patientInfo) {
+      showErrorAlert('오류', '환자 정보가 없어 초대를 다시 보낼 수 없습니다.');
+      return;
+    }
+
     try {
       const res = await inviteGuardian(patientInfo.patientId, inv.email);
       setInviteCode(res.inviteCode);
       setShowCodeModal(true);
       await reloadAll(patientInfo.patientId);
-      alert('초대를 다시 보냈습니다.');
+      showSuccessAlert('재초대 완료', `${inv.name} 님에게 초대를 다시 보냈습니다.`);
     } catch (error) {
       console.error('Failed to resend invite:', error);
-      alert('초대 재전송에 실패했습니다.');
+      showErrorAlert('초대 재전송 실패', '초대 재전송에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -327,21 +351,26 @@ const GuardianManagementPage: React.FC = () => {
   };
 
   const handleInvite = async () => {
-    if (!newGuardianEmail || !patientInfo) {
-      alert('이메일을 입력하거나 환자 정보가 없습니다.');
+    if (!newGuardianEmail.trim()) {
+      showErrorAlert('입력 오류', '이메일을 입력해주세요.');
       return;
     }
+    if (!patientInfo) {
+      showErrorAlert('오류', '환자 정보가 없어 초대를 보낼 수 없습니다.');
+      return;
+    }
+
     try {
       const res = await inviteGuardian(patientInfo.patientId, newGuardianEmail);
       setInviteCode(res.inviteCode);
       closeInvite();
       setShowCodeModal(true);
       await reloadAll(patientInfo.patientId);
-      alert('보호자 초대가 성공적으로 전송되었습니다.');
+      showSuccessAlert('초대 성공', '보호자 초대가 성공적으로 전송되었습니다.');
     } catch (error: any) {
       console.error('Failed to send invite:', error);
       const errorMessage = error.response?.data?.message || '초대 전송에 실패했습니다.';
-      alert(errorMessage);
+      showErrorAlert('초대 실패', errorMessage);
     }
   };
 

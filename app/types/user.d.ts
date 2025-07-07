@@ -52,4 +52,4 @@ interface ResetPassword {
   password: string;
 }
 
-export type UserRole = 'PATIENT' | 'GUARDIAN' | 'DOCTOR' | 'HOSPITAL_ADMIN' | 'ADMIN';
+export type UserRole = 'PATIENT' | 'GUARDIAN' | 'DOCTOR' | 'HOSPITAL_ADMIN' | 'SYSTEM_ADMIN';

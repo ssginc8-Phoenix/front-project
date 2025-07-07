@@ -48,6 +48,16 @@ const AppointmentRequestPage = () => {
   const { user } = LoginStore();
   const navigate = useNavigate();
 
+  /**
+   * 예약 정지 여부 체크
+   */
+  const isSuspended = user?.isSuspended;
+  if (isSuspended) {
+    alert('정책 위반으로 인해 예약이 불가능합니다.');
+    navigate('/');
+    return null;
+  }
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const filteredSymptoms = selectedSymptoms.filter((symptom) => symptom !== '직접 입력');

@@ -1,3 +1,6 @@
+// src/common/Sidebar.tsx
+
+import React from 'react';
 import styled from 'styled-components';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import { useNavigate } from 'react-router';
@@ -8,15 +11,6 @@ import {
   hospitalSidebarItems,
   patientSidebarItems,
 } from '~/constants/sidebarItems';
-
-const sizes = {
-  tablet: '768px',
-};
-
-const media = {
-  tablet: `@media (max-width: ${sizes.tablet})`,
-  desktop: `@media (min-width: ${sizes.tablet})`,
-};
 
 const SidebarBox = styled.div`
   width: 260px;
@@ -57,7 +51,7 @@ const ProfileImage = styled.img<{ $hasUser: boolean }>`
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 8px;
-  border: 4px solid ${(props) => (props.$hasUser ? '#007bff' : '#e0e0e0')};
+  border: 4px solid ${(p) => (p.$hasUser ? '#007bff' : '#e0e0e0')};
   max-width: 100%;
 `;
 
@@ -91,7 +85,7 @@ const AuthButtonGroup = styled.div`
   overflow-x: hidden;
   max-width: 100%;
 
-  ${media.desktop} {
+  @media (min-width: 768px) {
     display: none;
   }
 `;
@@ -105,11 +99,7 @@ const AuthButton = styled.button`
   font-size: 1.1rem;
   font-weight: 600;
   text-align: center;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: all 0.2s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -119,11 +109,9 @@ const AuthButton = styled.button`
     background-color: #007bff;
     color: #fff;
     border: 1px solid #007bff;
-
     &:hover {
       background-color: #0069d9;
       border-color: #0062cc;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
     &:active {
       background-color: #005cbf;
@@ -135,108 +123,96 @@ const AuthButton = styled.button`
     background-color: #fff;
     color: #007bff;
     border: 1px solid #007bff;
-
     &:hover {
       background-color: #eaf5ff;
-      border-color: #007bff;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
     &:active {
       background-color: #d8edff;
-      border-color: #0062cc;
     }
   }
 `;
 
-const Sidebar = () => {
+/**
+ * onClose: 사이드바 닫기
+ * onCsClick: 닫기 애니 후 채팅 모달 열기
+ */
+interface SidebarProps {
+  onClose?: () => void;
+  onCsClick?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onClose, onCsClick }) => {
   const { user } = useLoginStore();
   const navigate = useNavigate();
 
-  const getRoleInKorean = (role: string | undefined) => {
-    switch (role) {
-      case 'GUARDIAN':
-        return '보호자';
-      case 'DOCTOR':
-        return '의사';
-      case 'HOSPITAL_ADMIN':
-        return '병원 관리자';
-      case 'PATIENT':
-        return '환자';
-      default:
-        return '게스트';
+  const handleSidebarChange = (key: string) => {
+    if (key === 'cs') {
+      // 1) 사이드바 닫기 트리거
+      onClose?.();
+      // 2) 모달 열기 요청
+      onCsClick?.();
+      return;
     }
+    const routes: Record<string, string> = {
+      guardian: '/mypage/guardian',
+      patient: '/mypage/patient',
+      appointment: '/mypage/appointments',
+      appointmentDashboard: '/appointments',
+      calendar: '/mypage/calendar',
+      review: '/mypage/review',
+      qna: '/mypage/qna',
+      info: '/mypage/info',
+      schedule: '/mypage/schedule',
+      chart: '/mypage/chart',
+    };
+    const path = routes[key];
+    if (path) navigate(path);
+    else console.warn(`키 "${key}" 라우트 없음`);
   };
 
-  const getSidebarItemsByRole = (role: string | undefined) => {
-    switch (role) {
+  const sidebarItems = (() => {
+    switch (user?.role) {
       case 'GUARDIAN':
         return guardianSidebarItems;
       case 'DOCTOR':
         return doctorSidebarItems;
       case 'HOSPITAL_ADMIN':
         return hospitalSidebarItems;
-      case 'PATIENT':
       default:
         return patientSidebarItems;
     }
-  };
+  })();
 
-  const sidebarItems = getSidebarItemsByRole(user?.role);
-
-  const itemRoutes: { [key: string]: string } = {
-    guardian: '/mypage/guardian',
-    patient: '/mypage/patient',
-    appointment: '/mypage/appointments',
-    appointmentDashboard: '/appointments',
-    calendar: '/mypage/calendar',
-    review: '/mypage/review',
-    qna: '/mypage/qna',
-    info: '/mypage/info',
-    schedule: '/mypage/schedule',
-    chart: '/mypage/chart',
-    cs: '/mypage/cs',
-  };
-
-  const handleSidebarChange = (key: string) => {
-    const path = itemRoutes[key];
-    if (path) {
-      navigate(path);
-    } else {
-      console.warn(`사이드바 아이템 키 "${key}"에 대한 라우트가 정의되지 않았습니다.`);
-    }
-  };
-
-  const handleLoginClick = () => {
-    navigate('/login');
-  };
-
-  const handleSignupClick = () => {
-    navigate('/signup');
-  };
+  const handleLogin = () => navigate('/login');
+  const handleSignup = () => navigate('/signup');
 
   return (
     <SidebarBox>
       <ProfileSection>
         <ProfileImage
-          src={
-            user?.profileImageUrl ??
-            'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png'
-          }
-          alt="프로필 사진"
+          src={user?.profileImageUrl ?? 'https://docto-project.../user.png'}
+          alt="프로필"
           $hasUser={!!user}
         />
         {user ? (
           <>
             <ProfileName>{user.name}님</ProfileName>
-            <ProfileRole>{getRoleInKorean(user.role)}</ProfileRole>
+            <ProfileRole>
+              {{
+                GUARDIAN: '보호자',
+                DOCTOR: '의사',
+                HOSPITAL_ADMIN: '병원 관리자',
+                PATIENT: '환자',
+              }[user.role] || '게스트'}
+            </ProfileRole>
           </>
         ) : (
           <AuthButtonGroup>
             <ProfileName>로그인 해주세요</ProfileName>
-            <AuthButton className="login" onClick={handleLoginClick}>
+            <AuthButton className="login" onClick={handleLogin}>
               로그인
             </AuthButton>
-            <AuthButton className="signup" onClick={handleSignupClick}>
+            <AuthButton className="signup" onClick={handleSignup}>
               회원가입
             </AuthButton>
           </AuthButtonGroup>

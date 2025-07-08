@@ -99,7 +99,7 @@ const StyledButton = styled.button<{ bgColor: string; textColor: string }>`
 
 const SocialLoginButtons = () => {
   const handleLogin = (provider: 'kakao' | 'naver') => {
-    window.location.href = `https://beanstalk.docto.click/${provider}`;
+    window.location.href = `https://beanstalk.docto.click/api/v1/auth/login/${provider}`;
   };
 
   return (

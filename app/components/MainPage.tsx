@@ -7,7 +7,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import ChatBotComponent from '~/features/chatbot/components/ChatBotComponent';
 
-const ads = ['new_banner.png', 'new_banner.png', 'new_banner.png'];
+const ads = ['docto_banner.png', 'cardbanner.png', 'new_banner.png'];
 
 const notices = [
   { id: 1, title: '바른이비인후과 진료시간 변경 안내 (07.01부터)', date: '2025.06.23' },
@@ -104,9 +104,12 @@ export default function MainPage() {
     <>
       <AdCarousel>
         <Slider {...sliderSettings}>
-          {ads.map((src) => (
-            <div key={src}>
-              <AdImage src={src} alt="광고 배너" />
+          {ads.map((src, index) => (
+            <div key={index}>
+              <picture>
+                <source media="(max-width: 768px)" srcSet={`mobile_${src}`} />
+                <AdImage src={src} alt={`배너 ${index + 1}`} />
+              </picture>
             </div>
           ))}
         </Slider>

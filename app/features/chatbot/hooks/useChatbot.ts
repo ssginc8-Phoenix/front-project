@@ -6,7 +6,7 @@ import { calculateDistance } from '~/features/chatbot/util/calculateDistance';
 
 let messageId = 0;
 
-const positiveKeywords = ['네', '응'];
+const positiveKeywords = ['네', '응', '추천해줘'];
 
 export const useChatbot = () => {
   const { addMessage } = useChatBotStore();
@@ -61,14 +61,14 @@ export const useChatbot = () => {
         try {
           const hospitals = await getHospitalRecommendations(specialization);
 
-          if (!latitude || !longitude) {
-            addMessage({
-              id: ++messageId,
-              sender: 'bot',
-              message: '📍 위치 정보를 불러올 수 없습니다. 가까운 병원 추천이 어려워요.',
-              timestamp: now(),
-            });
-          }
+          // if (!latitude || !longitude) {
+          //   addMessage({
+          //     id: ++messageId,
+          //     sender: 'bot',
+          //     message: '📍 위치 정보를 불러올 수 없습니다. 가까운 병원 추천이 어려워요.',
+          //     timestamp: now(),
+          //   });
+          // }
 
           const sortedHospitals = hospitals
             .map((h) => ({

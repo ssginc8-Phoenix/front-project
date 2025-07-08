@@ -10,7 +10,7 @@ import ChatBotComponent from '~/features/chatbot/components/ChatBotComponent';
 import { useMyHospitalId } from '~/features/hospitals/hooks/useMyHospitalId';
 import ReviewSummaryCard from '~/features/reviews/component/summary/ReviewSummaryCard';
 
-const ads = ['new_banner.png', 'new_banner.png', 'new_banner.png'];
+const ads = ['docto_banner.png', 'cardbanner.png', 'new_banner.png'];
 
 const notices = [
   { id: 1, title: '바른이비인후과 진료시간 변경 안내 (07.01부터)', date: '2025.06.23' },
@@ -106,9 +106,12 @@ export default function HospitalMainPage() {
     <>
       <AdCarousel>
         <Slider {...sliderSettings}>
-          {ads.map((src) => (
-            <div key={src}>
-              <AdImage src={src} alt="광고 배너" />
+          {ads.map((src, index) => (
+            <div key={index}>
+              <picture>
+                <source media="(max-width: 768px)" srcSet={`mobile_${src}`} />
+                <AdImage src={src} alt={`배너 ${index + 1}`} />
+              </picture>
             </div>
           ))}
         </Slider>
@@ -145,12 +148,12 @@ export default function HospitalMainPage() {
             <strong>AI REVIEW BRIEFING</strong>
           </h5>
           <h3>
-            <strong>AI 리뷰 요약 기능으로</strong>
+            <strong>AI 브리핑 기능으로</strong>
             <br />
-            후기를 한눈에 파악하세요
+            빠르게 요약해보세요
           </h3>
           <p>
-            사용자 리뷰를 분석하여
+            사용자들의 솔직한 리뷰를 분석해
             <br />
             병원의 장점과 개선점을 간단히 요약해드립니다.
           </p>

@@ -155,17 +155,17 @@ const SignUpPage = () => {
 
         <CardGroup>
           <RoleCard
-            imageSrc="emoji_1.png"
+            imageSrc="chair.png"
             label="환자"
             onClick={() => navigate('/signup/form?role=' + 'PATIENT')}
           />
           <RoleCard
-            imageSrc="emoji_2.png"
+            imageSrc="patientsignup.png"
             label="보호자"
             onClick={() => navigate('/signup/form?role=' + 'GUARDIAN')}
           />
           <RoleCard
-            imageSrc="emoji_3.png"
+            imageSrc="hospitalsignup.png"
             label="병원 관리자"
             onClick={() => navigate('/signup/form?role=' + 'HOSPITAL_ADMIN')}
           />

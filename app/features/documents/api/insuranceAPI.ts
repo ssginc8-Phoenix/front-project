@@ -4,6 +4,7 @@ import type {
   DocumentResponseDTO,
   UserDocumentRequestDTO,
 } from '~/features/documents/types/insurance';
+
 const api = axios.create({ baseURL: '/api/v1/insurance/documents' });
 
 // 사용자 요청 생성

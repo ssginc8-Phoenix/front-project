@@ -25,6 +25,7 @@ import {
   PatientName,
   SubmitButton,
 } from '~/features/guardian/pages/PatientManagement.styles';
+import { showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 // --- 컴포넌트 ---
 export const PatientManagementPage = () => {
@@ -45,7 +46,7 @@ export const PatientManagementPage = () => {
       } catch (error) {
         console.error('환자 목록 가져오기 실패', error);
         // Optionally, alert the user or show a more friendly message
-        alert('환자 목록을 불러오는 데 실패했습니다.');
+        await showErrorAlert('로딩 실패', '환자 목록을 불러오는 데 실패했습니다.');
       }
     };
     fetchData();
@@ -57,19 +58,19 @@ export const PatientManagementPage = () => {
   const handleInviteAccept = async () => {
     if (!inviteCode.trim()) {
       // Use .trim() to check for empty or whitespace-only input
-      alert('초대 코드를 입력하세요!');
+      await showErrorAlert('입력 필요', '초대 코드를 입력하세요!');
       return;
     }
     try {
       await acceptGuardianInvite(inviteCode);
-      alert('보호자 수락 성공!');
+      await showSuccessAlert('수락 성공', '보호자 연결이 성공적으로 수락되었습니다.');
       setInviteModalOpen(false);
       setInviteCode(''); // Clear the input after success
       const updated = await getGuardianPatients();
       setPatients(updated);
     } catch (error) {
       console.error('초대 수락 실패', error);
-      alert('초대 코드가 잘못되었거나 이미 사용되었습니다.'); // More specific error message
+      await showErrorAlert('수락 실패', '초대 코드가 잘못되었거나 이미 사용되었습니다.');
     }
   };
 
@@ -78,10 +79,10 @@ export const PatientManagementPage = () => {
     try {
       await deleteGuardianPatient(selectedPatientId);
       setPatients((prev) => prev.filter((p) => p.patientId !== selectedPatientId));
-      alert('환자 연결이 해제되었습니다.'); // Success message
+      await showSuccessAlert('연결 해제 완료', '환자 연결이 성공적으로 해제되었습니다.');
     } catch (error) {
       console.error('삭제 실패', error);
-      alert('환자 연결 해제에 실패했습니다.'); // Failure message
+      await showErrorAlert('연결 해제 실패', '환자 연결 해제에 실패했습니다.');
     } finally {
       setDeleteModalOpen(false);
       setSelectedPatientId(null); // Reset selected patient ID

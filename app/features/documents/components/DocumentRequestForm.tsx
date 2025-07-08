@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { useCreateRequest } from '~/features/documents/hooks/useDocumentRequests';
 import useLoginStore from '~/features/user/stores/LoginStore';
 import type { DocumentResponseDTO } from '~/features/documents/types/insurance';
+import { showErrorAlert } from '~/components/common/alert';
 
 const StyledButton = styled.button`
   display: inline-block;
@@ -56,9 +57,9 @@ const DocumentRequestForm: React.FC<Props> = ({
   const isReady = !!user?.userId && hospitalId !== null && !!appointmentId && !!documentType;
 
   /** 실제 요청 보내기 */
-  const handleRequest = useCallback(() => {
+  const handleRequest = useCallback(async () => {
     if (!isReady) {
-      alert('병원·진료·서류 종류를 모두 선택해주세요.');
+      await showErrorAlert('필수 정보 누락', '병원·진료·서류 종류를 모두 선택해주세요.');
       return;
     }
 
@@ -71,9 +72,9 @@ const DocumentRequestForm: React.FC<Props> = ({
       },
       {
         onSuccess,
-        onError: (err) => {
+        onError: async (err) => {
           console.error(err);
-          alert('서류 요청에 실패했습니다.');
+          await showErrorAlert('요청 실패', '서류 요청에 실패했습니다.');
         },
       },
     );

@@ -5,7 +5,7 @@ import type { pageResponse } from '~/types/pageResponse';
 
 // Axios 인스턴스 생성 및 설정
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8080', // 실제 API 서버 주소
+  baseURL: 'https://beanstalk.docto.click', // 실제 API 서버 주소
   withCredentials: true, // 쿠키 기반 인증 사용 시
 });
 

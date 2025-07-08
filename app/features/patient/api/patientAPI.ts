@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Patient } from '~/features/patient/types/patient';
 
-const HOST = 'http://localhost:8080/api/v1/patients';
+const HOST = 'https://beanstalk.docto.click/api/v1/patients';
 
 export interface Guardian {
   patientGuardianId: number;
@@ -72,7 +72,7 @@ export const deletePatient = async (patientId: number): Promise<void> => {
  */
 export const getGuardians = async (patientId: number): Promise<Guardian[]> => {
   const res = await axios.get<Guardian[]>(
-    `http://localhost:8080/api/v1/patients/${patientId}/guardians`,
+    `https://beanstalk.docto.click/api/v1/patients/${patientId}/guardians`,
     {
       withCredentials: true,
     },

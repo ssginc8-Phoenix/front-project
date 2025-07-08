@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { X } from 'lucide-react';
 import { createWaiting, getWaiting, getMyHospital } from '~/features/hospitals/api/hospitalAPI';
+import { showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 interface WaitModalProps {
   onClose: () => void;
@@ -22,6 +23,7 @@ const WaitModal: React.FC<WaitModalProps> = ({ onClose }) => {
         else if (res.waiting) setCount(res.waiting);
       } catch (error) {
         console.error('병원 또는 대기 정보 불러오기 실패', error);
+        showErrorAlert('데이터 로딩 실패', '병원 또는 대기 정보를 불러오는 데 실패했습니다.');
       }
     };
 
@@ -29,14 +31,18 @@ const WaitModal: React.FC<WaitModalProps> = ({ onClose }) => {
   }, []);
 
   const handleRegisterWaiting = async () => {
-    if (!hospitalId) return;
+    if (!hospitalId) {
+      showErrorAlert('오류', '병원 ID를 찾을 수 없습니다.');
+      return;
+    }
+
     try {
       await createWaiting(hospitalId, count);
-      alert(`대기 인원 ${count}명 등록 완료`);
+      showSuccessAlert('등록 완료', `대기 인원 ${count}명 등록이 완료되었습니다.`);
       onClose(); // 모달 닫기
     } catch (err) {
       console.error('대기 등록 에러', err);
-      alert('대기 등록에 실패했습니다.');
+      showErrorAlert('대기 등록 실패', '대기 인원 등록에 실패했습니다. 다시 시도해주세요.');
     }
   };
 

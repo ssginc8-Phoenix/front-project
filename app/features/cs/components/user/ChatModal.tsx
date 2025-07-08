@@ -6,6 +6,7 @@ import {
   deleteCsRoom,
   fetchCsRoomDetail,
   updateCsRoomStatus,
+  fetchCsMessagesByCustomer,
 } from '~/features/cs/api/csAPI';
 import { Client, type IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
@@ -17,8 +18,8 @@ const Overlay = styled.div`
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5); /* 반투명 검정으로 뒤를 가립니다 */
-  display: flex; /* 자식인 Modal을 중앙정렬 하기 위해 flex */
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
@@ -49,15 +50,9 @@ const Modal = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
-
-  /* 모바일에서 풀스크린 처리 */
   @media (max-width: 768px) {
-    top: 0;
-    left: 0;
     width: 100vw;
     height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
     border-radius: 0;
   }
 `;
@@ -68,7 +63,6 @@ const WindowHeader = styled.div`
   background: #f5f5f5;
   padding: 8px 16px;
   border-bottom: 1px solid #ccc;
-  flex-shrink: 0;
 `;
 const HeaderActions = styled.div`
   display: flex;
@@ -174,7 +168,6 @@ interface ChatMessage {
   system?: boolean;
 }
 
-// --- ChatModal Component ---
 const ChatModal: React.FC<ChatModalProps> = ({
   isOpen,
   onClose,
@@ -191,53 +184,61 @@ const ChatModal: React.FC<ChatModalProps> = ({
   const endRef = useRef<HTMLDivElement>(null);
   const clientRef = useRef<Client | null>(null);
   const [agentName, setAgentName] = useState(initialAgentName);
-  const [agentAvatar, setAgentAvatar] = useState(initialAgentAvatar);
+  const [agentAvatar, setAgentAvatar] = useState<string | null>(initialAgentAvatar || null);
 
-  // 1) 초기 메시지 로드
+  // Load history & refresh agent info on open or csRoomId change
   useEffect(() => {
     if (!isOpen) return;
-    fetchCsMessages(csRoomId)
-      .then((data) =>
+
+    fetchCsMessagesByCustomer(userId)
+      .then((custMsgs) => {
+        const lastRoomId = custMsgs.length > 0 ? custMsgs[0].csRoomId : csRoomId;
+        const nowIso = new Date().toISOString();
+        console.log('[ChatModal] 요청하는 before:', nowIso);
+        return fetchCsMessages(lastRoomId, nowIso, 9999);
+      })
+      .then((msgs) => {
+        // msgs: CsMessageDto[] 배열이 들어옵니다
         setMessages(
-          data.map((m) => ({
-            id: m.csMessageId,
+          msgs.map((m) => ({
+            id: m.csMessageId!,
             text: m.content,
             date: new Date(m.createdAt),
             isMine: m.userId === userId,
             system: (m as any).system ?? m.content === '상담사가 배정되었습니다.',
           })),
-        ),
-      )
+        );
+      })
       .catch(console.error);
+    if (csRoomId) {
+      fetchCsRoomDetail(csRoomId)
+        .then((res) => {
+          setAgentName(res.data.agentName ?? '');
+          setAgentAvatar(res.data.agentAvatarUrl ?? '');
+        })
+        .catch(console.error);
+    }
+    // 상담사 정보 갱신…
   }, [isOpen, csRoomId, userId]);
 
-  // 2) STOMP 구독
+  // STOMP subscription
   useEffect(() => {
     if (!isOpen) return;
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws-chat'),
+      webSocketFactory: () => new SockJS('https://beanstalk.docto.click/ws-chat'),
       reconnectDelay: 5000,
       onConnect: () => {
         client.subscribe(`/topic/rooms/${csRoomId}`, (msg: IMessage) => {
-          const body = JSON.parse(msg.body) as {
-            csMessageId: number;
-            userId: number;
-            content: string;
-            createdAt: string;
-            system?: boolean;
-            agentName?: string;
-            agentAvatarUrl?: string;
-          };
-          if (!body.system && body.userId === userId) {
-            return;
-          }
-          if (body.system || (!body.system && body.userId !== userId)) {
+          const body = JSON.parse(msg.body) as any;
+          if (!body.system && body.userId === userId) return;
+          // Refresh agent on system or other
+          if (body.system || body.userId !== userId) {
             fetchCsRoomDetail(csRoomId)
               .then((res) => {
                 setAgentName(res.data.agentName ?? '');
                 setAgentAvatar(res.data.agentAvatarUrl ?? '');
               })
-              .catch((err) => console.error('상세조회 실패', err));
+              .catch(console.error);
           }
           setMessages((prev) => [
             ...prev,
@@ -246,7 +247,7 @@ const ChatModal: React.FC<ChatModalProps> = ({
               text: body.content,
               date: new Date(body.createdAt),
               isMine: body.userId === userId,
-              system: body.system ?? body.content === '상담사가 배정되었습니다.',
+              system: body.system ?? false,
             },
           ]);
         });
@@ -260,32 +261,33 @@ const ChatModal: React.FC<ChatModalProps> = ({
     };
   }, [isOpen, csRoomId, userId]);
 
-  // 3) 히스토리 REST만 제거 후 날짜 순 정렬
-  const displayMessages = useMemo(() => {
-    return [...messages]
-      .filter((m) => !(m.text === '상담사가 배정되었습니다.' && m.system === false))
+  const displayMessages = useMemo<ChatMessage[]>(() => {
+    return messages
+      .filter(
+        (m: ChatMessage) =>
+          // 시스템 메시지 중 “배정되었습니다”만 남기고 나머지 시스템 메시지는 제거
+          !(m.text === '상담사가 배정되었습니다.' && m.system === false),
+      )
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [messages]);
 
-  // 4) 날짜 구분선 & 메시지 렌더링
   const rendered = useMemo<React.ReactNode[]>(() => {
     const elems: React.ReactNode[] = [];
     let lastDate: string | null = null;
     displayMessages.forEach((msg, idx) => {
       const dateStr = msg.date.toLocaleDateString();
       if (dateStr !== lastDate) {
-        elems.push(<DateSeparator key={`date-${idx}`}>{dateStr}</DateSeparator>);
+        elems.push(<DateSeparator key={`d-${idx}`}>{dateStr}</DateSeparator>);
         lastDate = dateStr;
       }
       if (msg.system) {
-        elems.push(<SystemMessage key={`sys-${idx}`}>{msg.text}</SystemMessage>);
+        elems.push(<SystemMessage key={`s-${idx}`}>{msg.text}</SystemMessage>);
       } else {
-        // 상대방 정보
         const avatar = msg.isMine ? userAvatar : agentAvatar;
         const name = msg.isMine ? userName : agentName;
         elems.push(
-          <MessageItem key={`msg-${idx}`} isMine={msg.isMine}>
-            <MessageAvatarSmall src={avatar || undefined} alt={name} />
+          <MessageItem key={`m-${idx}`} isMine={msg.isMine}>
+            <MessageAvatarSmall src={avatar} alt={name} />
             <MessageContent isMine={msg.isMine}>
               <SenderName>{name}</SenderName>
               <MessageText isMine={msg.isMine}>{msg.text}</MessageText>
@@ -300,12 +302,10 @@ const ChatModal: React.FC<ChatModalProps> = ({
     return elems;
   }, [displayMessages, userAvatar, userName, agentAvatar, agentName]);
 
-  // 5) 자동 스크롤
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [rendered]);
 
-  // 6) 메시지 전송
   const handleSend = () => {
     if (!input.trim()) return;
     const tempId = -Date.now();
@@ -320,23 +320,14 @@ const ChatModal: React.FC<ChatModalProps> = ({
     setInput('');
   };
 
-  // 7) 방 나가기
   const handleExit = async () => {
     if (!window.confirm('이전 대화는 사라집니다. 괜찮으시겠습니까?')) return;
-
-    // 1) 시스템 메시지 발행 (관리자에게 알려주기)
     clientRef.current?.publish({
       destination: '/app/chat.sendMessage',
-      body: JSON.stringify({
-        csRoomId,
-        content: '고객님이 상담을 종료하였습니다.',
-        system: true,
-      }),
+      body: JSON.stringify({ csRoomId, content: '고객님이 상담을 종료하였습니다.', system: true }),
     });
-
     try {
       await updateCsRoomStatus(csRoomId, 'CLOSED');
-
       await deleteCsRoom(csRoomId);
     } catch (e) {
       console.error(e);

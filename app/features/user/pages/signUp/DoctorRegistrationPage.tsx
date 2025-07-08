@@ -7,6 +7,7 @@ import { checkEmailDuplicate, submitDoctorsInfo } from '~/features/user/api/User
 import type { DoctorInfo } from '~/types/user';
 import useHospitalStore from '~/features/hospitals/state/hospitalStore';
 import { getMyHospital } from '~/features/hospitals/api/hospitalAPI';
+import { showErrorAlert } from '~/components/common/alert';
 
 // --- 반응형 디자인을 위한 공통 사이즈 및 미디어 쿼리 정의 ---
 const sizes = {
@@ -150,7 +151,10 @@ const DoctorRegistrationPage = () => {
     if (!hospitalId) {
       getMyHospital()
         .then((res) => setHospitalId(res.hospitalId))
-        .catch((err) => console.error('병원 정보 불러오기 실패', err));
+        .catch(async (err) => {
+          console.error('병원 정보 불러오기 실패', err);
+          await showErrorAlert('병원 정보 오류', '병원 정보를 불러오는 데 실패했습니다.');
+        });
     }
   }, [hospitalId, setHospitalId]);
 
@@ -250,12 +254,15 @@ const DoctorRegistrationPage = () => {
     );
 
     if (unverified) {
-      alert('모든 이메일에 대해 중복 확인을 완료해주세요.');
+      await showErrorAlert('이메일 중복 확인 필요', '모든 의사의 이메일 중복 확인을 완료해주세요.');
       return;
     }
 
     if (!hospitalId) {
-      alert('병원 ID가 없습니다. 병원을 먼저 등록해주세요.');
+      await showErrorAlert(
+        '병원 정보 누락',
+        '병원 ID가 존재하지 않습니다. 먼저 병원을 등록해주세요.',
+      );
       return;
     }
 
@@ -266,7 +273,10 @@ const DoctorRegistrationPage = () => {
       setShowModal(true);
     } catch (err) {
       console.error('의사 등록 실패:', err);
-      alert('의사 등록 중 오류가 발생했습니다.');
+      await showErrorAlert(
+        '의사 등록 실패',
+        '의사 등록 중 오류가 발생했습니다. 다시 시도해주세요.',
+      );
     }
   };
 

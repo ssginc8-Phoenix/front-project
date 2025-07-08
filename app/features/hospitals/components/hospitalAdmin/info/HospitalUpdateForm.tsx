@@ -16,6 +16,7 @@ import type { ScheduleDTO } from '~/features/hospitals/types/hospitalSchedule';
 import { media } from '~/features/hospitals/components/common/breakpoints';
 import { useMediaQuery } from '~/features/hospitals/hooks/useMediaQuery';
 import Textarea from '~/components/styled/Textarea';
+import { showErrorAlert, showInfoAlert, showSuccessAlert } from '~/components/common/alert';
 
 interface HourRow {
   hospitalScheduleId?: number;
@@ -146,6 +147,7 @@ const HospitalUpdateForm: React.FC = () => {
       lunchEnd: '',
     })),
   );
+
   const [openAccordion, setOpenAccordion] = useState<boolean[]>(businessHours.map(() => false));
   const toggleAccordion = (idx: number) => {
     setOpenAccordion((prev) => {
@@ -230,6 +232,7 @@ const HospitalUpdateForm: React.FC = () => {
       detailAddress: detail,
     }));
   };
+
   const buildFormData = () => {
     const fd = new FormData();
     const dataBlob = new Blob(
@@ -255,6 +258,7 @@ const HospitalUpdateForm: React.FC = () => {
     previewItems.filter((i) => i.file).forEach((i) => fd.append('files', i.file!));
     return fd;
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateHours(businessHours)) return;
@@ -271,12 +275,15 @@ const HospitalUpdateForm: React.FC = () => {
         // HospitalDaumPost 내부 input에 ref 전달이 안 돼 있으면,
         // 해당 컴포넌트에 `inputRef={addressRef}` 같은 prop을 추가해 주세요.
         addressRef.current?.focus();
+        showErrorAlert('입력 오류', errs.address);
       } else if (errs.phoneNumber) {
         phoneRef.current?.focus();
+        showErrorAlert('입력 오류', errs.phoneNumber);
       }
 
       return;
     }
+
     const fd = buildFormData();
     try {
       let id = Number(hospitalId);
@@ -292,9 +299,17 @@ const HospitalUpdateForm: React.FC = () => {
       const [up, cr] = splitSchedules(businessHours);
       if (up.length) await updateHospitalSchedules(id, up);
       if (cr.length) await Promise.all(cr.map((c) => createHospitalSchedule(id, c)));
-      alert(isEdit ? '수정 완료' : '등록 완료');
+      showSuccessAlert(
+        isEdit ? '수정 완료' : '등록 완료',
+        isEdit
+          ? '병원 정보가 성공적으로 수정되었습니다.'
+          : '병원 정보가 성공적으로 등록되었습니다.',
+      );
     } catch {
-      alert('저장 중 오류가 발생했습니다.');
+      showErrorAlert(
+        '저장 중 오류 발생',
+        '병원 정보를 저장하는 중 오류가 발생했습니다. 다시 시도해 주세요.',
+      );
     }
 
     console.groupEnd();
@@ -309,7 +324,10 @@ const HospitalUpdateForm: React.FC = () => {
     const available = (Object.values(dayOfWeekMap) as CreateScheduleRequest['dayOfWeek'][]).find(
       (d) => !used.includes(d),
     );
-    if (!available) return alert('모든 요일이 이미 등록되었습니다.');
+    if (!available) {
+      showInfoAlert('모든 요일 등록됨', '모든 요일이 이미 진료시간으로 등록되었습니다.');
+      return;
+    }
     const kor = Object.entries(dayOfWeekMap).find(([, val]) => val === available)?.[0] || '';
     setBusinessHours((prev) => [
       ...prev,
@@ -334,9 +352,9 @@ const HospitalUpdateForm: React.FC = () => {
                 key={idx}
                 onClick={() => {
                   if (item.id != null) {
-                    alert(`File ID: ${item.id}`);
+                    showInfoAlert('파일 정보', `이미 저장된 파일입니다. (ID: ${item.id})`);
                   } else {
-                    alert('새로 업로드된 파일입니다.');
+                    showInfoAlert('파일 정보', '새로 업로드될 파일입니다.');
                   }
                 }}
               >
@@ -685,18 +703,22 @@ function mapSchedules(raw: ScheduleDTO[]): HourRow[] {
     );
   });
 }
-function validateHours(rows: HourRow[]): boolean {
+
+async function validateHours(rows: HourRow[]): Promise<boolean> {
   for (const r of rows) {
     // (1) 전부 빈칸이면 스킵
     if (!r.open && !r.close && !r.lunchStart && !r.lunchEnd) continue;
 
     // (2) 진료시간 필수 검사
     if (!r.open || !r.close) {
-      alert(`${r.day} 진료 시작·종료 시간을 모두 입력해주세요.`);
+      await showErrorAlert('입력 누락', `${r.day} 진료 시작·종료 시간을 모두 입력해주세요.`);
       return false;
     }
     if (r.open >= r.close) {
-      alert(`${r.day} 진료 시작시간은 종료시간보다 빠르게 입력해야 합니다.`);
+      await showErrorAlert(
+        '진료시간 설정 오류',
+        `${r.day} 진료 시작시간은 종료시간보다 과거여야 합니다.`,
+      );
       return false;
     }
 
@@ -704,7 +726,10 @@ function validateHours(rows: HourRow[]): boolean {
     const hasLunchStart = Boolean(r.lunchStart);
     const hasLunchEnd = Boolean(r.lunchEnd);
     if (hasLunchStart !== hasLunchEnd) {
-      alert(`${r.day} 점심 시작·종료 시간을 모두 입력하거나, 모두 비워두세요.`);
+      await showErrorAlert(
+        '점심시간 설정 오류',
+        `${r.day} 점심 시작·종료 시간을 모두 입력하거나, 모두 비워두세요.`,
+      );
       return false;
     }
 
@@ -713,20 +738,30 @@ function validateHours(rows: HourRow[]): boolean {
 
     // (5) 점심시간 순서 및 범위 검사
     if (r.lunchStart < r.open || r.lunchStart >= r.close) {
-      alert(`${r.day} 점심 시작시간은 진료시간(${r.open}~${r.close}) 안에 있어야 합니다.`);
+      await showErrorAlert(
+        '점심시간 설정 오류',
+        `${r.day} 점심 시작시간은 진료시간(${r.open}~${r.close}) 안에 있어야 합니다.`,
+      );
       return false;
     }
     if (r.lunchEnd <= r.open || r.lunchEnd > r.close) {
-      alert(`${r.day} 점심 종료시간은 진료시간(${r.open}~${r.close}) 안에 있어야 합니다.`);
+      await showErrorAlert(
+        '점심시간 설정 오류',
+        `${r.day} 점심 종료시간은 진료시간(${r.open}~${r.close}) 안에 있어야 합니다.`,
+      );
       return false;
     }
     if (r.lunchStart >= r.lunchEnd) {
-      alert(`${r.day} 점심 시작시간은 점심 종료시간보다 빠르게 입력해야 합니다.`);
+      await showErrorAlert(
+        '점심시간 설정 오류',
+        `${r.day} 점심 시작시간은 점심 종료시간보다 빠르게 입력해야 합니다.`,
+      );
       return false;
     }
   }
   return true;
 }
+
 function validateForm(f: HospitalForm) {
   return {
     name: f.name.trim() ? '' : '병원명은 필수입니다.',

@@ -20,7 +20,7 @@ const PatientSelector = () => {
     <Wrapper>
       <TitleBox>
         <Title>진료대상 선택</Title>
-        <Description>실제 진료받으실 환자를 선택해주세요.</Description>
+        <Description>실제 진료받으실 환자를 선택해주세요. (필수 항목)</Description>
       </TitleBox>
 
       {loading && <LoadingIndicator />}

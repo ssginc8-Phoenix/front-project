@@ -19,6 +19,7 @@ import {
   Name,
   SaveButton,
 } from '~/components/styled/Info.styles';
+import { showSuccessAlert } from '~/components/common/alert';
 
 const formatPhoneNumber = (value: string) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -209,9 +210,9 @@ const PatientInfoPage = () => {
       <PasswordModal
         open={showPwModal}
         onClose={() => setShowPwModal(false)}
-        onSuccess={() => {
+        onSuccess={async () => {
           setShowPwModal(false);
-          alert('회원 탈퇴 완료 (가짜)');
+          await showSuccessAlert('성공', '회원 탈퇴에 성공했습니다.');
           setShowByeModal(true);
         }}
       />

@@ -89,13 +89,11 @@ const BackButton = styled.button`
   font-size: 1rem;
   cursor: pointer;
 `;
-
-// 제목 중앙 정렬을 위해 오른쪽에 빈 공간
 const BackPlaceholder = styled.div`
   width: 2rem;
 `;
 const MessageText = styled.span<{ isMine?: boolean }>`
-  background: ${({ isMine }) => (isMine ? '#003f7f' : '#f1f1f1')};
+  background: ${({ isMine }) => (isMine ? '#1890ff' : '#f1f1f1')};
   color: ${({ isMine }) => (isMine ? '#fff' : '#000')};
   padding: 8px 12px;
   border-radius: 16px;
@@ -112,8 +110,9 @@ export interface ChatWindowProps {
   myName: string;
   messages: Array<{ sender: string; avatar: string; text: string; date: Date; system?: boolean }>;
   onSend: (text: string) => void;
+  userAvatar: string;
   disabled?: boolean;
-  roomId: number; // 새 방 식별용
+  roomId: number;
   onBack?: () => void;
 }
 
@@ -127,39 +126,40 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   roomId,
   onBack,
 }) => {
-  // 로컬 메시지 상태, 방 변경 시 초기화
   const [localMessages, setLocalMessages] = useState(messages);
-  useEffect(() => {
-    // 시스템 메시지로 취급할 텍스트 목록
-    const systemTexts = ['상담사가 배정되었습니다.', '고객님이 상담을 종료하였습니다.'];
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { user } = useLoginStore();
+  const isAgent = user?.role === 'SYSTEM_ADMIN';
 
+  // 메시지 state & system 플래그 보정
+  useEffect(() => {
+    const systemTexts = ['상담사가 배정되었습니다.', '고객님이 상담을 종료하였습니다.'];
     setLocalMessages(
       messages.map((m) => ({
         ...m,
-        // 이미 system 플래그가 있으면 그대로, 없으면 텍스트로 판단
         system: m.system ?? systemTexts.includes(m.text),
       })),
     );
   }, [messages, roomId]);
 
-  const [input, setInput] = useState('');
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const { user } = useLoginStore();
-  const isAgent = user?.role === 'SYSTEM_ADMIN';
+  // 필터링 & 정렬
+  const filteredMessages = useMemo(
+    () =>
+      [...localMessages]
+        .filter((m) => !(isAgent && m.system))
+        .sort((a, b) => a.date.getTime() - b.date.getTime()),
+    [localMessages, isAgent],
+  );
 
-  // 메시지 정렬 & 필터링
-  const filteredMessages = useMemo(() => {
-    return [...localMessages]
-      .filter((m) => !(isAgent && m.system))
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [localMessages, isAgent]);
-
-  // 자동 스크롤
+  // 자동 스크롤: “바닥에 붙어있을 때만”
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const c = containerRef.current;
+    if (!c) return;
+
+    c.scrollTo({ top: c.scrollHeight, behavior: 'smooth' });
   }, [filteredMessages]);
 
-  // 렌더링할 JSX
+  // 렌더링
   const rendered = useMemo(() => {
     const elems: React.ReactNode[] = [];
     let lastDate: string | null = null;
@@ -194,7 +194,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     return elems;
   }, [filteredMessages, myName]);
 
-  // 메시지 전송
+  // 전송
+  const [input, setInput] = useState('');
   const handleSend = () => {
     if (disabled || !input.trim()) return;
     onSend(input.trim());
@@ -206,13 +207,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       <ChatHeader>
         {onBack && <BackButton onClick={onBack}>← 뒤로</BackButton>}
         <span>{roomName}</span>
-
         {onBack && <BackPlaceholder />}
       </ChatHeader>
-      <MessagesContainer>
-        {rendered}
-        <div ref={scrollRef} />
-      </MessagesContainer>
+
+      <MessagesContainer ref={containerRef}>{rendered}</MessagesContainer>
+
       <InputWrapper>
         <TextInput
           value={input}

@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { updateCsRoomStatus } from '~/features/cs/api/csAPI';
+import { type CsNoteDto, updateCsRoomStatus } from '~/features/cs/api/csAPI';
 import { useCsNotes, useSaveCsNote } from '~/features/cs/hooks/useCsNotes';
 import useLoginStore from '~/features/user/stores/LoginStore';
+import { showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 const Panel = styled.div`
   display: flex;
@@ -159,6 +160,9 @@ interface ConsultationPanelProps {
   userAvatar: string;
   status: string;
   onStatusChange: (status: string) => void;
+  onSave: (content: string) => void;
+  history: { date: string; content: string }[];
+  disabled?: boolean;
 }
 
 const ConsultationPanel: React.FC<ConsultationPanelProps> = ({
@@ -171,10 +175,20 @@ const ConsultationPanel: React.FC<ConsultationPanelProps> = ({
   const [text, setText] = useState('');
   const [newStatus, setNewStatus] = useState(status);
   const [saving, setSaving] = useState(false);
-  const agentId = useLoginStore((state) => state.user.userId);
+  const user = useLoginStore((state) => state.user);
+
+  if (!user) {
+    // 로그인되지 않은 상태 처리(예: 리다이렉트, 에러 메시지 등)
+    return <div>로그인이 필요합니다.</div>;
+  }
+
+  // 이 시점부터 user는 non-null
+  const agentId = user.userId;
 
   const { data: notesData, isLoading: loadingNotes, error: notesError } = useCsNotes(csRoomId);
-  const { mutate: saveNote, isLoading: savingNote } = useSaveCsNote(csRoomId);
+  const { mutate: saveNote, status: saveNoteStatus } = useSaveCsNote(csRoomId);
+
+  const savingNote = saveNoteStatus === 'pending';
 
   useEffect(() => {
     setNewStatus(status);
@@ -186,8 +200,9 @@ const ConsultationPanel: React.FC<ConsultationPanelProps> = ({
       try {
         await updateCsRoomStatus(csRoomId, newStatus);
         onStatusChange(newStatus);
+        await showSuccessAlert('상태 변경 완료', '상담 상태가 성공적으로 변경되었습니다.');
       } catch {
-        alert('상태 저장에 실패했습니다.');
+        await showErrorAlert('상태 변경 실패', '상담 상태 저장에 실패했습니다.');
         setSaving(false);
         return;
       }
@@ -200,7 +215,7 @@ const ConsultationPanel: React.FC<ConsultationPanelProps> = ({
             setText('');
           },
           onError() {
-            alert('메모 저장에 실패했습니다.');
+            showErrorAlert('메모 저장 실패', '메모 저장에 실패했습니다.');
           },
         },
       );
@@ -244,7 +259,7 @@ const ConsultationPanel: React.FC<ConsultationPanelProps> = ({
           <p>메모를 불러오는 중 오류가 발생했습니다.</p>
         ) : (
           <NotesContainer>
-            {notesData?.content.map((note) => (
+            {notesData?.map((note: CsNoteDto) => (
               <NoteItem key={note.csNoteId}>
                 <NoteTime>{new Date(note.createdAt).toLocaleString()}</NoteTime>
                 <NoteContent>{note.content}</NoteContent>

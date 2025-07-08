@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api/v1',
+  baseURL: 'https://beanstalk.docto.click/api/v1',
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
@@ -20,6 +20,8 @@ export interface PageResponse<T> {
 
 // CsRoom 타입
 export interface CsRoomResponse {
+  lastTime: string;
+  lastMessage: string;
   customerId: number;
   csRoomId: number;
   agentId: number;

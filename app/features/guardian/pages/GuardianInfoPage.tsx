@@ -19,6 +19,7 @@ import {
   SaveButton,
   Footer,
 } from '~/components/styled/Info.styles';
+import { showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 const formatPhoneNumber = (value: string) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -64,7 +65,8 @@ const GuardianInfoPage = () => {
         setDetailAddress(detail);
         setPreviewUrl(myInfo.profileImageUrl || null);
       } catch (error) {
-        console.error('Failed to fetch user info', error);
+        console.error('사용자 정보를 불러오는 데 실패했습니다.', error);
+        await showErrorAlert('정보 로딩 실패', '사용자 정보를 불러오는 데 실패했습니다.');
       }
     };
     fetchUser();
@@ -96,10 +98,10 @@ const GuardianInfoPage = () => {
       if (profileImage) formData.append('profileImage', profileImage);
       await updateUserInfo(formData);
       await fetchMyInfo();
-      alert('정보가 성공적으로 저장되었습니다.');
+      await showSuccessAlert('저장 완료', '정보가 성공적으로 저장되었습니다.');
     } catch (error) {
       console.error('정보 저장 실패', error);
-      alert('정보 저장에 실패했습니다.');
+      await showErrorAlert('저장 실패', '정보 저장에 실패했습니다.');
     }
   };
 
@@ -204,9 +206,9 @@ const GuardianInfoPage = () => {
       <PasswordModal
         open={showPwModal}
         onClose={() => setShowPwModal(false)}
-        onSuccess={() => {
+        onSuccess={async () => {
           setShowPwModal(false);
-          alert('회원 탈퇴 완료 (가짜)');
+          await showSuccessAlert('성공', '회원 탈퇴에 성공했습니다.');
           setShowByeModal(true);
         }}
       />

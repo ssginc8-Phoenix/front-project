@@ -22,6 +22,7 @@ export const showConfirmAlert = async (
     title: title,
     text: text,
     icon: icon,
+    showCancelButton: true,
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
     confirmButtonText: '확인',

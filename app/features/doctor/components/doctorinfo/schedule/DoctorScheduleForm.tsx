@@ -12,6 +12,7 @@ import type { HospitalSchedule } from '~/features/hospitals/types/hospitalSchedu
 import { getHospitalSchedules } from '~/features/hospitals/api/hospitalAPI';
 import type { DoctorSchedule } from '~/types/doctor';
 import { useMediaQuery } from '~/features/hospitals/hooks/useMediaQuery';
+import { showErrorAlert, showSuccessAlert } from '~/components/common/alert';
 
 const dayOfWeekMap: Record<string, string> = {
   월요일: 'MONDAY',
@@ -48,27 +49,32 @@ const DoctorScheduleForm: React.FC = () => {
   // 1) 초기 로딩
   useEffect(() => {
     (async () => {
-      const doc = await getMyDoctorInfo();
-      setDoctorId(doc.doctorId);
+      try {
+        const doc = await getMyDoctorInfo();
+        setDoctorId(doc.doctorId);
 
-      const hospSched = await getHospitalSchedules(doc.hospitalId);
-      setHospitalHours(hospSched);
+        const hospSched = await getHospitalSchedules(doc.hospitalId);
+        setHospitalHours(hospSched);
 
-      const sched: DoctorSchedule[] = await getDoctorSchedules(doc.doctorId);
-      const korDays = Object.keys(dayOfWeekMap) as (keyof typeof dayOfWeekMap)[];
-      const initialRows = korDays.map((kor) => {
-        const eng = dayOfWeekMap[kor];
-        const found = sched.find((s) => s.dayOfWeek === eng);
-        return {
-          scheduleId: found?.scheduleId,
-          day: kor,
-          open: found?.startTime.slice(0, 5) ?? '',
-          close: found?.endTime.slice(0, 5) ?? '',
-          lunchStart: found?.lunchStart?.slice(0, 5) ?? '',
-          lunchEnd: found?.lunchEnd?.slice(0, 5) ?? '',
-        };
-      });
-      setBusinessHours(initialRows);
+        const sched: DoctorSchedule[] = await getDoctorSchedules(doc.doctorId);
+        const korDays = Object.keys(dayOfWeekMap) as (keyof typeof dayOfWeekMap)[];
+        const initialRows = korDays.map((kor) => {
+          const eng = dayOfWeekMap[kor];
+          const found = sched.find((s) => s.dayOfWeek === eng);
+          return {
+            scheduleId: found?.scheduleId,
+            day: kor,
+            open: found?.startTime.slice(0, 5) ?? '',
+            close: found?.endTime.slice(0, 5) ?? '',
+            lunchStart: found?.lunchStart?.slice(0, 5) ?? '',
+            lunchEnd: found?.lunchEnd?.slice(0, 5) ?? '',
+          };
+        });
+        setBusinessHours(initialRows);
+      } catch (error) {
+        console.error('스케줄 정보 로딩 실패:', error);
+        await showErrorAlert('오류 발생', '스케줄 정보를 불러오는 데 실패했습니다.');
+      }
     })();
   }, []);
 
@@ -85,10 +91,13 @@ const DoctorScheduleForm: React.FC = () => {
     });
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     const used = businessHours.map((b) => dayOfWeekMap[b.day]);
     const avail = Object.values(dayOfWeekMap).find((d) => !used.includes(d));
-    if (!avail) return alert('모든 요일이 등록되었습니다.');
+    if (!avail) {
+      await showErrorAlert('추가 불가', '모든 요일이 이미 등록되었습니다.');
+      return;
+    }
     const kor = Object.entries(dayOfWeekMap).find(([, e]) => e === avail)![0];
     setBusinessHours((p) => [
       ...p,
@@ -99,13 +108,18 @@ const DoctorScheduleForm: React.FC = () => {
   const handleRemove = async (idx: number) => {
     const t = businessHours[idx];
     if (t.scheduleId && doctorId) {
-      await deleteDoctorSchedule(doctorId, t.scheduleId).catch(() => alert('삭제 실패'));
+      await deleteDoctorSchedule(doctorId, t.scheduleId).catch(
+        async () => await showErrorAlert('삭제 실패', '스케줄 삭제 중 오류가 발생했습니다.'),
+      );
     }
     setBusinessHours((p) => p.filter((_, i) => i !== idx));
   };
 
   const handleSave = async () => {
-    if (!doctorId) return alert('의사 정보를 불러올 수 없습니다.');
+    if (!doctorId) {
+      await showErrorAlert('오류', '의사 정보를 불러올 수 없습니다. 다시 시도해주세요.');
+      return;
+    }
     const valid = businessHours.filter((b) => b.open && b.close);
     const toCreate = valid.filter((b) => !b.scheduleId);
     const toUpdate = valid.filter((b) => !!b.scheduleId);
@@ -123,7 +137,7 @@ const DoctorScheduleForm: React.FC = () => {
         await createDoctorSchedules(doctorId, payload);
       } catch {
         err = true;
-        alert('생성 실패');
+        await showErrorAlert('생성 실패', '새로운 스케줄 생성에 실패했습니다.');
       }
     }
 
@@ -140,13 +154,15 @@ const DoctorScheduleForm: React.FC = () => {
             });
           } catch {
             err = true;
-            alert('업데이트 실패');
+            await showErrorAlert('업데이트 실패', `일부 스케줄 업데이트에 실패했습니다: ${b.day}`);
           }
         }),
       );
     }
 
-    if (!err) alert('저장 완료');
+    if (!err) {
+      await showSuccessAlert('저장 완료', '진료 스케줄이 성공적으로 저장되었습니다.');
+    }
   };
 
   return (
@@ -422,13 +438,6 @@ const Wrapper = styled.div`
   @media (max-width: 768px) {
     padding: 1.5rem 1rem; /* → 좌우 패딩 절반으로 */
   }
-`;
-
-const Title = styled.h2`
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  text-align: center;
 `;
 
 const BusinessHoursWrapper = styled.div`

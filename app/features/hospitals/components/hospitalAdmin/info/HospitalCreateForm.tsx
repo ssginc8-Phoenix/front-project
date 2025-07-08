@@ -967,6 +967,5 @@ const ButtonRow = styled.div`
 
   @media (min-width: 769px) {
     /* 데스크탑에선 필요 없으니 숨김 */
-    display: none;
   }
 `;

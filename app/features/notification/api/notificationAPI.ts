@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const HOST = 'http://localhost:8080/api/v1/notifications';
+const HOST = 'https://beanstalk.docto.click/api/v1/notifications';
 
 /**
  * 알림 리스트 가져오기

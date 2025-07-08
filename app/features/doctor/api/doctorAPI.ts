@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { DoctorSaveRequest } from '~/types/doctor';
 import type { DoctorScheduleRequest } from '~/features/hospitals/types/doctor';
 
-const HOST = 'http://localhost:8080/api/v1/doctors';
+const HOST = 'https://beanstalk.docto.click/api/v1/doctors';
 
 /**
  * 병원에 속한 의사 조회

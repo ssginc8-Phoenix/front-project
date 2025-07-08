@@ -99,8 +99,7 @@ const StyledButton = styled.button<{ bgColor: string; textColor: string }>`
 
 const SocialLoginButtons = () => {
   const handleLogin = (provider: 'kakao' | 'naver') => {
-    // 실제 배포 시에는 'http://localhost:8080' 부분을 실제 서버 주소로 변경해야 합니다.
-    window.location.href = `http://localhost:8080/api/v1/auth/login/${provider}`;
+    window.location.href = `https://beanstalk.docto.click/${provider}`;
   };
 
   return (

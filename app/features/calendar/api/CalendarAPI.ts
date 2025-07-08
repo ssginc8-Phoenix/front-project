@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const HOST = 'http://localhost:8080/api/v1';
+const HOST = 'https://beanstalk.docto.click/api/v1';
 
 /**
  * 환자 캘린더 조회

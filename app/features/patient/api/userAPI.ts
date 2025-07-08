@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const HOST = 'http://localhost:8080/api/v1/users/me';
+const HOST = 'https://beanstalk.docto.click/api/v1/users/me';
 
 export interface User {
   userId: number;
@@ -16,7 +16,7 @@ export interface User {
  */
 export const verifyPassword = async (password: string) => {
   const response = await axios.post(
-    'http://localhost:8080/api/v1/users/check-password',
+    'https://beanstalk.docto.click/api/v1/users/check-password',
     { password },
     { withCredentials: true },
   );
@@ -61,7 +61,7 @@ export const deleteAccount = async () => {
  * (관리자용) 전체 유저 조회 API
  */
 export const getAllUsers = async () => {
-  const response = await axios.get('http://localhost:8080/api/v1/admin/users', {
+  const response = await axios.get('https://beanstalk.docto.click/api/v1/admin/users', {
     params: {
       page: 0,
       size: 1000,

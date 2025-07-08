@@ -3,7 +3,7 @@ import type { ActionResult } from '~/features/reviews/types/common';
 import type { QaPostResponse } from '~/types/qna';
 import type { Page } from '~/types/page';
 
-const host = 'http://localhost:8080/api/v1/qnas';
+const host = 'https://beanstalk.docto.click/api/v1/qnas';
 
 // Q&A 삭제
 export async function deleteQaPost(qnaId: number): Promise<ActionResult<void>> {

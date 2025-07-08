@@ -12,7 +12,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080', // 백엔드 API 서버
+        target: 'https://beanstalk.docto.click', // 백엔드 API 서버
         changeOrigin: true,
       },
     },

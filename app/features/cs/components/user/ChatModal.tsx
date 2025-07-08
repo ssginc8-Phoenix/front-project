@@ -225,7 +225,7 @@ const ChatModal: React.FC<ChatModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws-chat'),
+      webSocketFactory: () => new SockJS('https://beanstalk.docto.click/ws-chat'),
       reconnectDelay: 5000,
       onConnect: () => {
         client.subscribe(`/topic/rooms/${csRoomId}`, (msg: IMessage) => {

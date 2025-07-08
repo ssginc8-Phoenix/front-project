@@ -9,7 +9,7 @@ import type {
   UserRequest,
 } from '~/types/user';
 
-const HOST = 'http://localhost:8080/api/v1';
+const HOST = 'https://beanstalk.docto.click/api/v1';
 
 /**
  * 로그인 요청

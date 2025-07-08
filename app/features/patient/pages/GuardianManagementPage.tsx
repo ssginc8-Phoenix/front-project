@@ -243,7 +243,7 @@ const InviteCodeDisplay = styled.div`
 `;
 
 // 기본 아바타 URL
-const DEFAULT_AVATAR = 'https://docto-project.s3.ap-southeast-2.amazonaws.com/user/user.png';
+const DEFAULT_AVATAR = 'https://docto-project0701.s3.us-east-2.amazonaws.com/user/user.png';
 
 const GuardianManagementPage: React.FC = () => {
   const [guardians, setGuardians] = useState<Guardian[]>([]);

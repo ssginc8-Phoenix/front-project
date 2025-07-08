@@ -9,17 +9,29 @@ const apiClient = axios.create({
   withCredentials: true, // 쿠키 기반 인증 사용 시
 });
 
-// 요청 인터셉터: 로컬 스토리지에 저장된 JWT 토큰을 Authorization 헤더에 추가
+// 요청 인터셉터
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      // Axios v1 이상에서 AxiosHeaders 사용
       const headers = new AxiosHeaders(config.headers);
       headers.set('Authorization', `Bearer ${token}`);
       config.headers = headers;
     }
     return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+apiClient.interceptors.response.use(
+  (response) => {
+    const contentType = response.headers['content-type'];
+    if (contentType && contentType.includes('text/html')) {
+      return Promise.reject(
+        new Error('서버 오류 또는 인증 만료로 인해 HTML 응답이 반환되었습니다.'),
+      );
+    }
+    return response;
   },
   (error) => Promise.reject(error),
 );

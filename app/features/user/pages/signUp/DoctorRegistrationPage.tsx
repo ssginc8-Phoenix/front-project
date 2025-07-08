@@ -151,7 +151,7 @@ const DoctorRegistrationPage = () => {
     if (!hospitalId) {
       getMyHospital()
         .then((res) => setHospitalId(res.hospitalId))
-        .catch((err) => {
+        .catch(async (err) => {
           console.error('병원 정보 불러오기 실패', err);
           await showErrorAlert('병원 정보 오류', '병원 정보를 불러오는 데 실패했습니다.');
         });
@@ -273,7 +273,10 @@ const DoctorRegistrationPage = () => {
       setShowModal(true);
     } catch (err) {
       console.error('의사 등록 실패:', err);
-      showErrorAlert('의사 등록 실패', '의사 등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+      await showErrorAlert(
+        '의사 등록 실패',
+        '의사 등록 중 오류가 발생했습니다. 다시 시도해주세요.',
+      );
     }
   };
 

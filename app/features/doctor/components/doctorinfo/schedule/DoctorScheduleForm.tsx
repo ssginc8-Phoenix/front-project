@@ -91,7 +91,7 @@ const DoctorScheduleForm: React.FC = () => {
     });
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     const used = businessHours.map((b) => dayOfWeekMap[b.day]);
     const avail = Object.values(dayOfWeekMap).find((d) => !used.includes(d));
     if (!avail) {

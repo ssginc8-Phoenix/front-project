@@ -22,7 +22,7 @@ const AppointmentDashboardPage = () => {
   };
 
   return (
-    <PageWrapper>
+    <>
       <TopSectionContainer>
         <DatePickerSection selectedDate={selectedDate} onChangeDate={setSelectedDate} />
         <StyledButton onClick={() => setShowWaitModal(true)}>대기 인원 설정</StyledButton>
@@ -43,7 +43,7 @@ const AppointmentDashboardPage = () => {
           onClose={handleCloseModal}
         />
       )}
-    </PageWrapper>
+    </>
   );
 };
 

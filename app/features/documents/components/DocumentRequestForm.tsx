@@ -59,7 +59,7 @@ const DocumentRequestForm: React.FC<Props> = ({
   /** 실제 요청 보내기 */
   const handleRequest = useCallback(async () => {
     if (!isReady) {
-      await showErrorAlert('필수 정보 누락', '병원·진료·서류 종류를 모두 선택해주세요.');
+      showErrorAlert('필수 정보 누락', '병원·진료·서류 종류를 모두 선택해주세요.');
       return;
     }
 

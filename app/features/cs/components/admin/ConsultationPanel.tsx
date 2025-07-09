@@ -31,6 +31,7 @@ const ProfileAvatar = styled.img`
   width: 48px;
   height: 48px;
   border-radius: 50%;
+  display: ${({ src }) => (src ? 'block' : 'none')};
   margin-right: 12px;
 `;
 
@@ -189,7 +190,9 @@ const ConsultationPanel: React.FC<ConsultationPanelProps> = ({
   const { mutate: saveNote, status: saveNoteStatus } = useSaveCsNote(csRoomId);
 
   const savingNote = saveNoteStatus === 'pending';
-
+  useEffect(() => {
+    console.log('userAvatar:', userAvatar);
+  }, [userAvatar]);
   useEffect(() => {
     setNewStatus(status);
   }, [status]);

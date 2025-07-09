@@ -9,7 +9,7 @@ declare global {
 
 const MapContainer = styled.div`
   position: relative;
-  height: calc(100vh - 139px);
+  height: calc(100vh - 146px);
   width: 100vw;
   margin-left: calc(-50vw + 50%);
   margin-right: calc(-50vw + 50%);

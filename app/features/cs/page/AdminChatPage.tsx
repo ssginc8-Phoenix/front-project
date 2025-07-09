@@ -89,7 +89,7 @@ export default function AdminChatPage() {
   // STOMP 클라이언트 설정
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS('https://beanstalk.docto.click/ws-chat'),
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws-chat'),
       reconnectDelay: 5000,
       onConnect: () => console.log('STOMP connected'),
     });
@@ -163,6 +163,18 @@ export default function AdminChatPage() {
             agentAvatarUrl: loginUser.profileImageUrl,
           }),
         });
+        // 3) 로컬 메시지에도 즉시 추가
+        setMessages((prev) => [
+          ...prev,
+          {
+            csMessageId: Date.now(),
+            csRoomId: room.csRoomId, // 반드시 방 번호를 넣어주고
+            content: '상담사가 배정되었습니다.',
+            userId: loginUser.userId, // 타입이 number라면 로그인 유저 ID로
+            createdAt: new Date().toISOString(),
+            system: true,
+          },
+        ]);
       } catch {
         await showErrorAlert('상담사 배정 실패', '상담사 배정에 실패했습니다. 다시 시도해주세요.');
         return;

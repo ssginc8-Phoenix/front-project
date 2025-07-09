@@ -198,18 +198,22 @@ const ChatModal: React.FC<ChatModalProps> = ({
         return fetchCsMessages(lastRoomId, nowIso, 9999);
       })
       .then((msgs) => {
-        // msgs: CsMessageDto[] 배열이 들어옵니다
+        const systemPhrases = ['상담사가 배정되었습니다', '고객님이 상담을 종료하였습니다'];
+
         setMessages(
           msgs.map((m) => ({
             id: m.csMessageId!,
             text: m.content,
             date: new Date(m.createdAt),
             isMine: m.userId === userId,
-            system: (m as any).system ?? m.content === '상담사가 배정되었습니다.',
+            system:
+              Boolean((m as any).system) ||
+              systemPhrases.some((phrase) => m.content.includes(phrase)),
           })),
         );
       })
       .catch(console.error);
+
     if (csRoomId) {
       fetchCsRoomDetail(csRoomId)
         .then((res) => {
@@ -218,14 +222,13 @@ const ChatModal: React.FC<ChatModalProps> = ({
         })
         .catch(console.error);
     }
-    // 상담사 정보 갱신…
   }, [isOpen, csRoomId, userId]);
 
   // STOMP subscription
   useEffect(() => {
     if (!isOpen) return;
     const client = new Client({
-      webSocketFactory: () => new SockJS('https://beanstalk.docto.click/ws-chat'),
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws-chat'),
       reconnectDelay: 5000,
       onConnect: () => {
         client.subscribe(`/topic/rooms/${csRoomId}`, (msg: IMessage) => {

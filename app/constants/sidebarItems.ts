@@ -9,10 +9,8 @@ export interface SidebarItem {
 
 export const patientSidebarItems: SidebarItem[] = [
   { label: '보호자 관리', icon: '🧑‍🤝‍🧑', key: 'guardian' },
-  { label: '예약 관리', icon: '📋', key: 'appointment' },
+  { label: '예약 조회', icon: '📋', key: 'appointment' },
   { label: '캘린더', icon: '🗓️', key: 'calendar' },
-  { label: '리뷰 관리', icon: '✏️', key: 'review' },
-  { label: 'Q&A', icon: '💬', key: 'qna' },
   { label: '정보 관리', icon: '⚙️', key: 'info' },
 ];
 

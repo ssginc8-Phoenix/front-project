@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useAppointmentStore from '~/features/appointment/state/useAppointmentStore';
 
+// Breakpoints
+const MOBILE_BREAK = '768px';
+
 const Container = styled.div`
   width: 100%;
   max-width: 1200px;
@@ -13,6 +16,11 @@ const Container = styled.div`
   padding: 2rem;
   background-color: #ffffff;
   border-radius: 1rem;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    margin: 1rem 0;
+    padding: 1rem 0.5rem;
+  }
 `;
 
 const Overlay = styled.div`
@@ -41,17 +49,31 @@ const ModalContent = styled.div`
 
 const Header = styled.div`
   margin: 1.5rem 0;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    margin: 1rem 0;
+  }
 `;
 
 const TitleRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 `;
 
 const HospitalName = styled.h2`
   font-size: 1.8rem;
   font-weight: bold;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    font-size: 1.6rem;
+  }
 `;
 
 const WaitCount = styled.span`
@@ -60,16 +82,34 @@ const WaitCount = styled.span`
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 0.9rem;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    font-size: 0.85rem;
+    padding: 3px 6px;
+  }
 `;
 
 const Address = styled.p`
   color: #374151;
   margin: 0.5rem 0;
+  word-break: break-word;
+  font-size: 1rem;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    font-size: 0.9rem;
+    margin: 0.4rem 0;
+  }
 `;
 
 const InfoRow = styled.div`
   margin-top: 0.5rem;
   color: #6b7280;
+  font-size: 0.95rem;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+  }
 `;
 
 const NoticeBox = styled.div`
@@ -79,9 +119,44 @@ const NoticeBox = styled.div`
   margin-top: 1rem;
   border-radius: 0.5rem;
   white-space: pre-wrap;
+
   p {
-    margin: 0;
+    margin: 0 0 0.5rem;
     color: #1f2937;
+    font-size: 1rem;
+
+    @media (max-width: ${MOBILE_BREAK}) {
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+  }
+`;
+
+const ServiceTags = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    margin-top: 0.8rem;
+  }
+`;
+
+const ServiceTag = styled.span`
+  display: inline-block;
+  background-color: #3b82f6;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  margin-right: 8px;
+  margin-bottom: 8px;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    margin-right: 6px;
+    margin-bottom: 6px;
   }
 `;
 
@@ -89,6 +164,12 @@ const ButtonGroup = styled.div`
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-top: 1.2rem;
+  }
 `;
 
 const ActionButton = styled.button`
@@ -103,24 +184,26 @@ const ActionButton = styled.button`
   &:hover {
     background-color: #2563eb;
   }
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.95rem;
+  }
 `;
-const ServiceTag = styled.span`
-  display: inline-block;
-  background-color: #3b82f6;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  margin-right: 8px;
-  margin-bottom: 8px;
-`;
+
 const SliderContainer = styled.div`
   position: relative;
   width: 100%;
-  height: 400px; /* 원하시는 높이로 설정 */
+  height: 400px;
   margin-bottom: 1.5rem;
   overflow: hidden;
   border-radius: 0.75rem;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    height: 200px;
+    margin: 0 -0.5rem 1.5rem;
+  }
 `;
 
 const SlideImage = styled.img`
@@ -149,17 +232,31 @@ const ArrowButton = styled.button`
   &:hover {
     background: rgba(0, 0, 0, 0.6);
   }
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    padding: 0.4rem;
+  }
 `;
 
 const PrevButton = styled(ArrowButton)`
   left: 1rem;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    left: 0.5rem;
+  }
 `;
+
 const NextButton = styled(ArrowButton)`
   right: 1rem;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    right: 0.5rem;
+  }
 `;
+
 interface HospitalInfoTabProps {
   hospitalId: number;
-  selectedTab: 'location' | 'doctors' | 'reviews';
+  selectedTab?: 'location' | 'doctors' | 'reviews';
 }
 
 const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
@@ -178,11 +275,8 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
     };
   }, [isModalOpen]);
 
-  /**
-   * 진료 접수 버튼 클릭 핸들러
-   */
   const handleAppointmentClick = () => {
-    if (!hospital) return null;
+    if (!hospital) return;
     setHospitalId(hospital.hospitalId);
     setHospitalName(hospital.name);
     navigate(`/appointment`);
@@ -191,6 +285,7 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
   if (loading) return <p style={{ textAlign: 'center' }}>로딩 중...</p>;
   if (error) return <p style={{ textAlign: 'center', color: 'red' }}>{String(error)}</p>;
   if (!hospital) return <p style={{ textAlign: 'center' }}>병원 정보를 찾을 수 없습니다.</p>;
+
   const images = hospital.imageUrls ?? [];
   const dayOfWeekMap: Record<number, string> = {
     0: 'SUNDAY',
@@ -218,17 +313,13 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
       )}
 
       <Container>
-        {/* 전체 뷰용 메인 이미지 */}
         {images.length > 0 && (
           <SliderContainer>
-            {/* 이전 버튼 */}
             {images.length > 1 && (
               <PrevButton onClick={() => setCurrent((current - 1 + images.length) % images.length)}>
                 <ChevronLeft size={24} />
               </PrevButton>
             )}
-
-            {/* 현재 이미지 */}
             <SlideImage
               src={images[current]}
               alt={`병원 사진 ${current + 1}`}
@@ -237,8 +328,6 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
                 setIsModalOpen(true);
               }}
             />
-
-            {/* 다음 버튼 */}
             {images.length > 1 && (
               <NextButton onClick={() => setCurrent((current + 1) % images.length)}>
                 <ChevronRight size={24} />
@@ -259,16 +348,16 @@ const HospitalInfoTab = ({ hospitalId }: HospitalInfoTabProps) => {
         </Header>
 
         {hospital.serviceNames && (
-          <div>
+          <ServiceTags>
             {hospital.serviceNames.map((name, idx) => (
               <ServiceTag key={idx}>{name}</ServiceTag>
             ))}
-          </div>
+          </ServiceTags>
         )}
 
         {hospital.notice && (
           <NoticeBox>
-            <p>📢 공지사항 </p>
+            <p>📢 공지사항</p>
             {hospital.notice}
           </NoticeBox>
         )}

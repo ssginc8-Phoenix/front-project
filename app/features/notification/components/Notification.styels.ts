@@ -65,6 +65,12 @@ export const NotificationBox = styled.div`
   padding: 10px 0; /* 상하 패딩 추가 */
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 768px) {
+    position: fixed;
+    top: 60px;
+    right: 10px;
+  }
 `;
 
 export const NotificationHeader = styled.div`

@@ -93,8 +93,9 @@ export const useAdminDocumentList = (hospitalId?: number) => {
   });
 };
 export const getAdminDocuments = async (hospitalId: number) => {
-  const res = await axios.get('/api/v1/admin/insurance/documents', {
+  const res = await axios.get('http://localhost:8080/api/v1/admin/insurance/documents', {
     params: { hospitalId },
+    withCredentials: true, // ✅ 인증 쿠키 포함
   });
   return res.data;
 };

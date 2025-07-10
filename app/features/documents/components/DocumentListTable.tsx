@@ -19,7 +19,7 @@ const Container = styled.div`
 `;
 const TabBar = styled.div`
   display: flex;
-  justify-content: flex-end; // 오른쪽 정렬
+  justify-content: flex-end;
   gap: 16px;
   margin-bottom: 30px;
 `;
@@ -69,9 +69,8 @@ const Td = styled.td`
   }
 `;
 const FileInput = styled.input`
-  display: none; // 기본 input 숨김
+  display: none;
 `;
-
 const FileLabel = styled.label`
   display: inline-block;
   padding: 6px 12px;
@@ -106,6 +105,11 @@ const Button = styled.button<{ variant?: 'primary' | 'danger' }>`
     cursor: not-allowed;
     box-shadow: none;
   }
+`;
+const FileName = styled.span`
+  margin-left: 8px;
+  font-size: 0.9rem;
+  color: #2c3e50;
 `;
 const ActionContainer = styled.div`
   display: flex;
@@ -160,6 +164,11 @@ const ButtonMobile = styled(Button)`
   width: 100%;
   margin: 0;
 `;
+const FileNameMobile = styled(FileName)`
+  display: block;
+  word-break: break-all;
+  margin-top: 4px;
+`;
 
 // ─── 컴포넌트 ─────────────────────────────────────────────────────────────
 const DocumentListTable: React.FC<Props> = ({ data }) => {
@@ -183,6 +192,13 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
     REQUESTED: '요청',
     APPROVED: '승인',
     REJECTED: '반려',
+  };
+  const typeLabelMap: Record<string, string> = {
+    MEDICAL_REPORT: '진료기록지',
+    LAB_RESULT: '검사 결과지',
+    PRESCRIPTION: '처방전',
+    CLAIM_FORM: '보험 청구서',
+    OTHER: '기타',
   };
 
   const sorted = useMemo(() => {
@@ -230,9 +246,7 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
       {
         onSuccess: async () => {
           await showSuccessAlert('업로드 완료', '파일이 성공적으로 업로드되었습니다.');
-          qc.invalidateQueries({
-            queryKey: ['adminDocs', hospitalId],
-          });
+          qc.invalidateQueries({ queryKey: ['adminDocs', hospitalId] });
           setSelectedFiles((prev) => {
             const p = { ...prev };
             delete p[id];
@@ -267,9 +281,11 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
         <thead>
           <Tr>
             <Th>ID</Th>
+            <Th>문서 종류</Th>
             <Th>상태</Th>
             <Th>사유</Th>
             <Th>첨부</Th>
+            <Th>파일명</Th>
             <Th>업로드</Th>
             <Th>액션</Th>
           </Tr>
@@ -278,6 +294,7 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
           {filtered.map((doc) => (
             <Tr key={doc.documentId}>
               <Td>{doc.documentId}</Td>
+              <Td>{typeLabelMap[doc.type] || '-'}</Td>
               <Td>{statusLabelMap[doc.status] || doc.status}</Td>
               <Td style={{ textAlign: doc.rejectionReason ? 'left' : 'center' }}>
                 {doc.rejectionReason || '-'}
@@ -293,6 +310,11 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
                   }
                   disabled={doc.status !== 'REQUESTED'}
                 />
+              </Td>
+              <Td>
+                {selectedFiles[doc.documentId] && (
+                  <FileName>{selectedFiles[doc.documentId]!.name}</FileName>
+                )}
               </Td>
               <Td>
                 <Button
@@ -333,6 +355,8 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
           <Card key={doc.documentId}>
             <Label>ID</Label>
             <Value>{doc.documentId}</Value>
+            <Label>문서 종류</Label>
+            <Value>{typeLabelMap[doc.type] || '-'}</Value>
             <Label>상태</Label>
             <Value>{statusLabelMap[doc.status] || doc.status}</Value>
             <Label>사유</Label>
@@ -353,6 +377,14 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
                 disabled={doc.status !== 'REQUESTED'}
               />
             </Value>
+            {selectedFiles[doc.documentId] && (
+              <>
+                <Label>파일명</Label>
+                <Value>
+                  <FileNameMobile>{selectedFiles[doc.documentId]!.name}</FileNameMobile>
+                </Value>
+              </>
+            )}
             <Label>업로드</Label>
             <Value>
               <ButtonMobile
@@ -391,5 +423,4 @@ const DocumentListTable: React.FC<Props> = ({ data }) => {
     </Container>
   );
 };
-
 export default DocumentListTable;

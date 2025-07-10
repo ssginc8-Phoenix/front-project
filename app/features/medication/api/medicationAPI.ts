@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { MedicationScheduleResponse } from '~/features/medication/types/types';
 
-const HOST = 'https://beanstalk.docto.click/api/v1';
+const HOST = 'http://localhost:8080/api/v1';
 
 /**
  * 보호자가 약 복용 스케줄을 등록

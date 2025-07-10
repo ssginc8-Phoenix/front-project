@@ -3,7 +3,6 @@ import DatePickerSection from '~/features/appointment/components/update/DatePick
 import React, { useState } from 'react';
 import AppointmentUpdateModal from '~/features/appointment/components/update/UpdateModal';
 import WaitModal from '~/features/hospitals/components/waiting/RegisterWaitModal';
-import { PageWrapper } from '~/components/styled/PageWrapper';
 import {
   StyledButton,
   TopSectionContainer,

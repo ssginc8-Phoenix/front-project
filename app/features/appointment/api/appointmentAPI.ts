@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { AppointmentRequest } from '~/types/appointment';
 
-const HOST = 'https://beanstalk.docto.click/api/v1/appointments';
+const HOST = 'http://localhost:8080/api/v1/appointments';
 
 /**
  * 예약 요청
@@ -31,7 +31,7 @@ export const getAppointment = async (appointmentId: number) => {
  * 예약 리스트 조회 (로그인한 유저의)
  */
 export const getAppointmentList = async (page: number, size: number, date?: string) => {
-  const res = await axios.get(`https://beanstalk.docto.click/api/v1/users/me/appointments`, {
+  const res = await axios.get(`http://localhost:8080/api/v1/users/me/appointments`, {
     withCredentials: true,
     params: { page, size, date },
   });
@@ -43,7 +43,7 @@ export const getAppointmentList = async (page: number, size: number, date?: stri
  * 활성화된 예약 리스트 조회 (로그인한 유저의)
  */
 export const getActiveAppointmentList = async (page: number, size: number, date?: string) => {
-  const res = await axios.get(`https://beanstalk.docto.click/api/v1/users/me/appointments/active`, {
+  const res = await axios.get(`http://localhost:8080/api/v1/users/me/appointments/active`, {
     withCredentials: true,
     params: { page, size, date },
   });
@@ -55,13 +55,10 @@ export const getActiveAppointmentList = async (page: number, size: number, date?
  * 비활성화된 예약 리스트 조회 (로그인한 유저의)
  */
 export const getInactiveAppointmentList = async (page: number, size: number, date?: string) => {
-  const res = await axios.get(
-    `https://beanstalk.docto.click/api/v1/users/me/appointments/inactive`,
-    {
-      withCredentials: true,
-      params: { page, size, date },
-    },
-  );
+  const res = await axios.get(`http://localhost:8080/api/v1/users/me/appointments/inactive`, {
+    withCredentials: true,
+    params: { page, size, date },
+  });
 
   return res.data;
 };

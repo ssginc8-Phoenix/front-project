@@ -89,7 +89,7 @@ export default function AdminChatPage() {
   // STOMP 클라이언트 설정
   useEffect(() => {
     const client = new Client({
-      webSocketFactory: () => new SockJS('https://beanstalk.docto.click/ws-chat'),
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws-chat'),
       reconnectDelay: 5000,
       onConnect: () => console.log('STOMP connected'),
     });

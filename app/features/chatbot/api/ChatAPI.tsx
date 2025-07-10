@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Hospital } from '../../../types/chatbot';
 
-const HOST = 'https://beanstalk.docto.click/api/v1/chatbot';
+const HOST = 'http://localhost:8080/api/v1/chatbot';
 
 export const classifySymptom = async (symptom: string): Promise<string> => {
   const res = await axios.post(

@@ -1,7 +1,7 @@
 import type { RegisterTokenRequest } from '~/types/token';
 import axios from 'axios';
 
-const HOST = 'https://beanstalk.docto.click/api/v1/fcm';
+const HOST = 'http://localhost:8080/api/v1/fcm';
 
 /**
  * 토큰 등록

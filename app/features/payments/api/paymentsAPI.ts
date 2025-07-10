@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const HOST = 'https://beanstalk.docto.click/api/v1';
+const HOST = 'http://localhost:8080/api/v1';
 
 /**
  * 결제 정보 조회 API

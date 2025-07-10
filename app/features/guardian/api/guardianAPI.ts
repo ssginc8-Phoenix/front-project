@@ -22,7 +22,7 @@ export interface PatientSummary {
   address: string;
 }
 
-const HOST = 'https://beanstalk.docto.click/api/v1/guardians';
+const HOST = 'http://localhost:8080/api/v1/guardians';
 
 /**
  * 보호자 초대 API
@@ -52,7 +52,7 @@ export const getPendingGuardianInvites = async (patientId: number): Promise<Pend
  */
 export const getGuardians = async (patientId: number): Promise<Guardian[]> => {
   const response = await axios.get<Guardian[]>(
-    `https://beanstalk.docto.click/api/v1/patients/${patientId}/guardians`,
+    `http://localhost:8080/api/v1/patients/${patientId}/guardians`,
     { withCredentials: true },
   );
   return response.data;
@@ -60,7 +60,7 @@ export const getGuardians = async (patientId: number): Promise<Guardian[]> => {
 
 export const acceptGuardianInvite = async (inviteCode: string) => {
   const response = await axios.patch(
-    `https://beanstalk.docto.click/api/v1/guardians/respond`, // ✅ URL 변경
+    `http://localhost:8080/api/v1/guardians/respond`, // ✅ URL 변경
     {
       inviteCode: inviteCode,
       status: 'ACCEPTED',

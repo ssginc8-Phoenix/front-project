@@ -67,7 +67,6 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
-      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

@@ -133,11 +133,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   // 메시지 state & system 플래그 보정
   useEffect(() => {
-    const systemTexts = ['상담사가 배정되었습니다.', '고객님이 상담을 종료하였습니다.'];
+    const systemPhrases = ['상담사가 배정되었습니다', '고객님이 상담을 종료하였습니다'];
     setLocalMessages(
       messages.map((m) => ({
         ...m,
-        system: m.system ?? systemTexts.includes(m.text),
+        system: m.system || systemPhrases.some((phrase) => m.text.trim().includes(phrase)),
       })),
     );
   }, [messages, roomId]);
@@ -146,11 +146,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const filteredMessages = useMemo(
     () =>
       [...localMessages]
-        .filter((m) => !(isAgent && m.system))
+        .filter((m) => isAgent || !m.system)
         .sort((a, b) => a.date.getTime() - b.date.getTime()),
     [localMessages, isAgent],
   );
-
+  useEffect(() => {
+    console.log('[ChatWindow] incoming messages:', messages);
+  }, [messages]);
   // 자동 스크롤: “바닥에 붙어있을 때만”
   useEffect(() => {
     const c = containerRef.current;

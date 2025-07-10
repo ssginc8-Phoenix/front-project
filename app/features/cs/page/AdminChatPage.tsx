@@ -16,7 +16,7 @@ import {
   fetchCsMessagesByCustomer,
   assignAgentToRoom,
 } from '~/features/cs/api/csAPI';
-import { showErrorAlert } from '~/components/common/alert';
+import { showConfirmAlert, showErrorAlert } from '~/components/common/alert';
 
 // Hook: 간단한 미디어 쿼리
 function useMediaQuery(query: string): boolean {
@@ -145,7 +145,12 @@ export default function AdminChatPage() {
     if (!room) return;
 
     if (!room.agentId) {
-      if (!window.confirm('상담사로 배정받으시겠습니까?')) return;
+      const { isConfirmed } = await showConfirmAlert(
+        '상담사로 배정받으시겠습니까?',
+        '이후 이 방의 상담 상태를 관리하게 됩니다.',
+        'question',
+      );
+      if (!isConfirmed) return;
       try {
         await assignAgentToRoom(room.csRoomId, loginUser.userId);
         setRooms((rs) =>
@@ -163,6 +168,18 @@ export default function AdminChatPage() {
             agentAvatarUrl: loginUser.profileImageUrl,
           }),
         });
+        // 3) 로컬 메시지에도 즉시 추가
+        setMessages((prev) => [
+          ...prev,
+          {
+            csMessageId: Date.now(),
+            csRoomId: room.csRoomId, // 반드시 방 번호를 넣어주고
+            content: '상담사가 배정되었습니다.',
+            userId: loginUser.userId, // 타입이 number라면 로그인 유저 ID로
+            createdAt: new Date().toISOString(),
+            system: true,
+          },
+        ]);
       } catch {
         await showErrorAlert('상담사 배정 실패', '상담사 배정에 실패했습니다. 다시 시도해주세요.');
         return;
@@ -333,7 +350,7 @@ export default function AdminChatPage() {
         <ConsultationPanel
           csRoomId={selectedRoom?.csRoomId ?? -1}
           userName={selectedRoom?.customerName ?? ''}
-          userAvatar={selectedRoom?.customerAvatarUrl ?? '/default-avatar.png'}
+          userAvatar={selectedRoom?.customerAvatarUrl}
           status={selectedRoom?.status ?? 'CLOSED'}
           onStatusChange={(newStatus: string) =>
             handleStatusChange(selectedRoom!.csRoomId, newStatus)

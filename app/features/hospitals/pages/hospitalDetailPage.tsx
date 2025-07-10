@@ -1,5 +1,5 @@
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useHospitalDetail } from '../hooks/useHospitalDetail';
@@ -7,6 +7,9 @@ import HospitalInfoTab from '../components/hospitalDetail/info/HospitalInfoTab';
 import HospitalMap from '../components/hospitalDetail/map/HospitalMap';
 import HospitalReviews from '../components/hospitalDetail/review/HospitalReviews';
 import HospitalDoctor from '../components/hospitalDetail/doctor/HospitalDoctor';
+
+// Breakpoint
+const MOBILE_BREAK = '768px';
 
 const Container = styled.div`
   width: 100%;
@@ -17,21 +20,33 @@ const Container = styled.div`
   border-radius: 1rem;
   min-height: 800px;
   box-sizing: border-box;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    margin: 1rem 0; /* 좌우 마진 제거 */
+    padding: 1rem 0.5rem; /* 좌우 패딩 절반으로 */
+    max-width: none; /* 꽉 채우기 */
+  }
 `;
 
 const TabBar = styled.div`
   display: flex;
+  width: 100%; /* 컨테이너 너비를 꽉 채움 */
   margin-top: 2rem;
   border-bottom: 1px solid #e5e7eb;
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    margin-top: 1rem;
+  }
 `;
 
 const Tab = styled.button.withConfig({
   shouldForwardProp: (prop) => prop !== 'active',
 })<{ active: boolean }>`
-  flex: 1;
+  flex: 1; /* 동일 너비로 균등 분할 */
   padding: 12px 0;
   background: none;
   border: none;
+  text-align: center;
   font-weight: 500;
   font-size: 1rem;
   cursor: pointer;
@@ -41,11 +56,15 @@ const Tab = styled.button.withConfig({
   &:hover {
     color: #2563eb;
   }
+
+  @media (max-width: ${MOBILE_BREAK}) {
+    padding: 8px 0;
+    font-size: 0.9rem;
+  }
 `;
 
-const HospitalDetailPage = () => {
+const HospitalDetailPage: React.FC = () => {
   const { hospitalId } = useParams<{ hospitalId: string }>();
-
   const hospitalIdNum = hospitalId && !isNaN(Number(hospitalId)) ? Number(hospitalId) : undefined;
 
   if (!hospitalIdNum) {
@@ -57,7 +76,6 @@ const HospitalDetailPage = () => {
   }
 
   const { loading, error } = useHospitalDetail(hospitalIdNum);
-
   const [selectedTab, setSelectedTab] = useState<'location' | 'Doctor' | 'reviews'>('location');
 
   if (loading) {
